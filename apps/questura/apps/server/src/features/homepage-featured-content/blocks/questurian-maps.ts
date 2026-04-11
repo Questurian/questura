@@ -1,25 +1,24 @@
 import type { Block } from 'payload'
 
 import { HOMEPAGE_FEATURED_ARTICLES_SECTION_HEADING_MAX } from '../featured-articles-section-heading'
-import { HOMEPAGE_FEATURED_CONTENT_COLLECTIONS } from '../types'
+import { HOMEPAGE_QUESTURIAN_MAPS_SLOT_COUNT } from '../types'
 
-export const FeaturedArticleBlock: Block = {
-  slug: 'featured-article',
+export const QuesturianMapsBlock: Block = {
+  slug: 'questurian-maps',
   labels: {
-    singular: 'Featured Article',
-    plural: 'Featured Article Blocks',
+    singular: 'Questurian Maps',
+    plural: 'Questurian Maps Blocks',
   },
   fields: [
     {
       name: 'slotCount',
       type: 'number',
       required: true,
-      defaultValue: 1,
-      min: 1,
-      max: 1,
+      min: HOMEPAGE_QUESTURIAN_MAPS_SLOT_COUNT,
+      max: HOMEPAGE_QUESTURIAN_MAPS_SLOT_COUNT,
+      defaultValue: HOMEPAGE_QUESTURIAN_MAPS_SLOT_COUNT,
       admin: {
-        readOnly: true,
-        description: 'Single spotlight slot (fixed).',
+        description: 'Always six single-type listicles in a 2×3 grid.',
       },
     },
     {
@@ -34,10 +33,10 @@ export const FeaturedArticleBlock: Block = {
     {
       name: 'items',
       type: 'relationship',
-      relationTo: [...HOMEPAGE_FEATURED_CONTENT_COLLECTIONS],
+      relationTo: 'single-type-listicles',
       hasMany: true,
       admin: {
-        description: 'One article or listicle to highlight in the hero layout.',
+        description: 'Single-type listicles in display order.',
       },
     },
   ],
