@@ -1,26 +1,24 @@
 import type { Block } from 'payload'
 
 import { HOMEPAGE_FEATURED_ARTICLES_SECTION_HEADING_MAX } from '../featured-articles-section-heading'
-import {
-  HOMEPAGE_HOTEL_GRID_MAX_SLOTS,
-  HOMEPAGE_HOTEL_GRID_MIN_SLOTS,
-} from '../types'
+import { HOMEPAGE_QUESTURIAN_MAPS_SLOT_COUNT } from '../types'
 
-export const HotelGridBlock: Block = {
-  slug: 'hotel-grid',
+export const QuesturianMapsBlock: Block = {
+  slug: 'questurian-maps',
   labels: {
-    singular: 'Hotel Grid',
-    plural: 'Hotel Grid Blocks',
+    singular: 'Questurian Maps',
+    plural: 'Questurian Maps Blocks',
   },
   fields: [
     {
       name: 'slotCount',
       type: 'number',
       required: true,
-      min: HOMEPAGE_HOTEL_GRID_MIN_SLOTS,
-      max: HOMEPAGE_HOTEL_GRID_MAX_SLOTS,
+      min: HOMEPAGE_QUESTURIAN_MAPS_SLOT_COUNT,
+      max: HOMEPAGE_QUESTURIAN_MAPS_SLOT_COUNT,
+      defaultValue: HOMEPAGE_QUESTURIAN_MAPS_SLOT_COUNT,
       admin: {
-        description: 'How many hotel cards this block contains.',
+        description: 'Always six single-type listicles in a 2×3 grid.',
       },
     },
     {
@@ -35,10 +33,10 @@ export const HotelGridBlock: Block = {
     {
       name: 'items',
       type: 'relationship',
-      relationTo: 'accommodations',
+      relationTo: 'single-type-listicles',
       hasMany: true,
       admin: {
-        description: 'Hotels in display order.',
+        description: 'Single-type listicles in display order.',
       },
     },
   ],

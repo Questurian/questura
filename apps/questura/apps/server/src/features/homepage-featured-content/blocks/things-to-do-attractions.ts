@@ -2,25 +2,25 @@ import type { Block } from 'payload'
 
 import { HOMEPAGE_FEATURED_ARTICLES_SECTION_HEADING_MAX } from '../featured-articles-section-heading'
 import {
-  HOMEPAGE_HOTEL_GRID_MAX_SLOTS,
-  HOMEPAGE_HOTEL_GRID_MIN_SLOTS,
+  HOMEPAGE_THINGS_TO_DO_ATTRACTIONS_MAX_SLOTS,
+  HOMEPAGE_THINGS_TO_DO_ATTRACTIONS_MIN_SLOTS,
 } from '../types'
 
-export const HotelGridBlock: Block = {
-  slug: 'hotel-grid',
+export const ThingsToDoAttractionsBlock: Block = {
+  slug: 'things-to-do-attractions',
   labels: {
-    singular: 'Hotel Grid',
-    plural: 'Hotel Grid Blocks',
+    singular: 'Things to Do — Places',
+    plural: 'Things to Do — Places Blocks',
   },
   fields: [
     {
       name: 'slotCount',
       type: 'number',
       required: true,
-      min: HOMEPAGE_HOTEL_GRID_MIN_SLOTS,
-      max: HOMEPAGE_HOTEL_GRID_MAX_SLOTS,
+      min: HOMEPAGE_THINGS_TO_DO_ATTRACTIONS_MIN_SLOTS,
+      max: HOMEPAGE_THINGS_TO_DO_ATTRACTIONS_MAX_SLOTS,
       admin: {
-        description: 'How many hotel cards this block contains.',
+        description: 'How many attraction place cards this block contains.',
       },
     },
     {
@@ -35,10 +35,10 @@ export const HotelGridBlock: Block = {
     {
       name: 'items',
       type: 'relationship',
-      relationTo: 'accommodations',
+      relationTo: 'attractions',
       hasMany: true,
       admin: {
-        description: 'Hotels in display order.',
+        description: 'Attraction records in display order.',
       },
     },
   ],
