@@ -7,14 +7,7 @@ import {
   getCorsHeaders,
   handleCorsOptions,
 } from '@/features/auth/lib/auth-middleware'
-import { searchHotelGridCandidates } from '@/features/homepage-featured-content'
-
-type LocationHomepageDoc = {
-  location?: {
-    id?: number
-    locationKey?: string | null
-  } | number | null
-}
+import { searchTourGridCandidates } from '@/features/homepage-featured-content'
 
 function parsePositiveInt(value: string | null): number | undefined {
   if (!value) return undefined
@@ -27,7 +20,7 @@ function getErrorMessage(error: unknown, fallback: string): string {
   return error instanceof Error && error.message ? error.message : fallback
 }
 
-export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(req: NextRequest) {
   const headers = getCorsHeaders(req)
 
   try {
@@ -40,41 +33,18 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
       return NextResponse.json({ message: authResult.error }, { status: authResult.status, headers })
     }
 
-    const { id } = await params
     const payload = await getPayload({ config })
-    const doc = (await payload.findByID({
-      collection: 'location-homepages',
-      id,
-      depth: 1,
-      overrideAccess: true,
-    })) as LocationHomepageDoc
-
-    const rawLocation =
-      typeof doc.location === 'object' && doc.location !== null ? doc.location : null
-    const locationKey =
-      rawLocation && typeof rawLocation.locationKey === 'string' && rawLocation.locationKey.trim()
-        ? rawLocation.locationKey.trim()
-        : null
-
-    if (!locationKey) {
-      return NextResponse.json(
-        { message: 'Location homepage is missing a location with a valid location key.' },
-        { status: 400, headers },
-      )
-    }
-
     const { searchParams } = new URL(req.url)
-    const response = await searchHotelGridCandidates(payload, {
+    const response = await searchTourGridCandidates(payload, {
       query: searchParams.get('q') || undefined,
       page: parsePositiveInt(searchParams.get('page')),
       limit: parsePositiveInt(searchParams.get('limit')),
-      locationKey,
     })
 
     return NextResponse.json(response, { headers })
   } catch (error) {
     return NextResponse.json(
-      { message: getErrorMessage(error, 'Failed to load hotel candidates.') },
+      { message: getErrorMessage(error, 'Failed to load tour candidates.') },
       { status: 500, headers },
     )
   }

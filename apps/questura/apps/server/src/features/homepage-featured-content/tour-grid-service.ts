@@ -2,7 +2,6 @@ import type { Payload } from 'payload'
 
 import { getMediaSetPreviewAsset } from '@/features/media/lib/media-set-preview'
 import { APP_CONFIG } from '@/shared/config'
-import { getLocationScope } from '@/shared/location/server/locationScope'
 
 import {
   HOMEPAGE_FEATURED_CONTENT_SLOTS,
@@ -14,19 +13,18 @@ import {
   type HomepageHotelSelection,
 } from './types'
 
-type AccommodationDocLike = {
+type TourDocLike = {
   id?: unknown
   title?: unknown
-  slug?: unknown
-  type?: unknown
-  priceLevel?: unknown
+  bookingLink?: unknown
+  price?: unknown
   status?: unknown
   updatedAt?: unknown
-  location?: unknown
-  gallery?: unknown
+  locationRef?: unknown
+  img?: unknown
 }
 
-type ParsedHotelSlot = {
+type ParsedTourSlot = {
   slot: number
   ref: HomepageHotelItemRef | null
   reason: HomepageHotelInvalidReason | null
@@ -47,39 +45,34 @@ function normalizeNumericId(value: unknown): number | null {
   return null
 }
 
-function extractImageUrl(doc: AccommodationDocLike): string | null {
-  if (!Array.isArray(doc.gallery) || doc.gallery.length === 0) return null
-  const first = doc.gallery[0]
-  if (!isRecord(first)) return null
-  const image = first.image
-  if (!isRecord(image)) return null
-  // Gallery `image` is a relationship to `media-sets` (variant URLs), not a flat media doc.
-  const fromMediaSet = getMediaSetPreviewAsset(image)
+function extractImageUrl(doc: TourDocLike): string | null {
+  if (!isRecord(doc.img)) return null
+  const fromMediaSet = getMediaSetPreviewAsset(doc.img as Parameters<typeof getMediaSetPreviewAsset>[0])
   if (fromMediaSet?.url && typeof fromMediaSet.url === 'string' && fromMediaSet.url) {
     return fromMediaSet.url
   }
-  const bunnyUrl = image.bunny_original_url
+  const bunnyUrl = doc.img.bunny_original_url
   if (typeof bunnyUrl === 'string' && bunnyUrl) return bunnyUrl
-  const url = image.url
+  const url = doc.img.url
   return typeof url === 'string' && url ? url : null
 }
 
-function extractLocation(doc: AccommodationDocLike): string | null {
-  if (!isRecord(doc.location)) return null
-  const value = doc.location
-  if (typeof value.city === 'string' && value.city.trim()) return value.city
-  if (typeof value.country === 'string' && value.country.trim()) return value.country
-  if (typeof value.value === 'string' && value.value.trim()) return value.value
+function extractLocation(doc: TourDocLike): string | null {
+  if (!isRecord(doc.locationRef)) return null
+  const loc = doc.locationRef
+  if (typeof loc.cityName === 'string' && loc.cityName.trim()) return loc.cityName.trim()
+  if (typeof loc.countryName === 'string' && loc.countryName.trim()) return loc.countryName.trim()
+  if (typeof loc.locationKey === 'string' && loc.locationKey.trim()) return loc.locationKey.trim()
   return null
 }
 
-function normalizeHotelCandidate(doc: AccommodationDocLike): HomepageHotelCandidate {
+function normalizeTourCandidate(doc: TourDocLike): HomepageHotelCandidate {
   return {
     id: normalizeNumericId(doc.id) ?? 0,
     title: typeof doc.title === 'string' && doc.title.trim() ? doc.title.trim() : 'Untitled',
-    slug: typeof doc.slug === 'string' && doc.slug.trim() ? doc.slug : null,
-    type: typeof doc.type === 'string' && doc.type.trim() ? doc.type : null,
-    priceLevel: typeof doc.priceLevel === 'string' && doc.priceLevel.trim() ? doc.priceLevel : null,
+    slug: typeof doc.bookingLink === 'string' && doc.bookingLink.trim() ? doc.bookingLink.trim() : null,
+    type: 'tour',
+    priceLevel: typeof doc.price === 'string' && doc.price.trim() ? doc.price.trim() : null,
     status: typeof doc.status === 'string' && doc.status.trim() ? doc.status : null,
     updatedAt: typeof doc.updatedAt === 'string' && doc.updatedAt.trim() ? doc.updatedAt : null,
     imageUrl: extractImageUrl(doc),
@@ -87,7 +80,7 @@ function normalizeHotelCandidate(doc: AccommodationDocLike): HomepageHotelCandid
   }
 }
 
-export function normalizeHotelGridRef(value: unknown): HomepageHotelItemRef | null {
+function normalizeTourGridRef(value: unknown): HomepageHotelItemRef | null {
   if (typeof value === 'number' || typeof value === 'string') {
     const id = normalizeNumericId(value)
     return id ? { id } : null
@@ -105,42 +98,42 @@ export function normalizeHotelGridRef(value: unknown): HomepageHotelItemRef | nu
   return null
 }
 
-export function normalizeHotelGridInput(rawItems: unknown): HomepageHotelItemRef[] {
+export function normalizeTourGridInput(rawItems: unknown): HomepageHotelItemRef[] {
   if (!Array.isArray(rawItems)) return []
-  const refs = rawItems.map((item) => normalizeHotelGridRef(item))
+  const refs = rawItems.map((item) => normalizeTourGridRef(item))
   if (refs.some((item) => item === null)) {
-    throw new Error('Hotel grid items must use numeric accommodation ids.')
+    throw new Error('Tour grid items must use numeric tour ids.')
   }
   return refs as HomepageHotelItemRef[]
 }
 
-function parseHotelGridSlots(rawItems: unknown): ParsedHotelSlot[] {
+function parseTourGridSlots(rawItems: unknown): ParsedTourSlot[] {
   if (!Array.isArray(rawItems)) return []
   return rawItems.map((rawItem, index) => {
-    const ref = normalizeHotelGridRef(rawItem)
+    const ref = normalizeTourGridRef(rawItem)
     return { slot: index + 1, ref, reason: ref ? null : 'invalid_reference' }
   })
 }
 
-async function findHotelDoc(payload: Payload, ref: HomepageHotelItemRef): Promise<HomepageHotelCandidate | null> {
+async function findTourDoc(payload: Payload, ref: HomepageHotelItemRef): Promise<HomepageHotelCandidate | null> {
   try {
     const doc = await payload.findByID({
-      collection: 'accommodations',
+      collection: 'tours',
       id: ref.id,
       depth: 2,
       overrideAccess: true,
     })
-    return normalizeHotelCandidate(doc as AccommodationDocLike)
+    return normalizeTourCandidate(doc as TourDocLike)
   } catch {
     return null
   }
 }
 
-export function buildHotelGridGlobalData(items: HomepageHotelItemRef[]) {
+export function buildTourGridGlobalData(items: HomepageHotelItemRef[]) {
   return { items: items.map((item) => item.id) }
 }
 
-export async function validateHotelGridItems(
+export async function validateTourGridItems(
   payload: Payload,
   refs: HomepageHotelItemRef[],
   options: { allowDrafts?: boolean; slotCount?: number } = {},
@@ -154,16 +147,16 @@ export async function validateHotelGridItems(
 
   const ids = new Set<number>()
   for (const ref of refs) {
-    if (ids.has(ref.id)) throw new Error('Hotel grid cannot contain duplicate hotels.')
+    if (ids.has(ref.id)) throw new Error('Tour grid cannot contain duplicate tours.')
     ids.add(ref.id)
   }
 
   await Promise.all(
     refs.map(async (ref) => {
-      const candidate = await findHotelDoc(payload, ref)
-      if (!candidate) throw new Error(`Accommodation #${ref.id} could not be found.`)
+      const candidate = await findTourDoc(payload, ref)
+      if (!candidate) throw new Error(`Tour #${ref.id} could not be found.`)
       if (!allowDrafts && candidate.status !== 'published') {
-        throw new Error(`Hotel "${candidate.title}" must be published before it can be featured.`)
+        throw new Error(`Tour "${candidate.title}" must be published before it can be featured.`)
       }
     }),
   )
@@ -171,14 +164,14 @@ export async function validateHotelGridItems(
   return refs
 }
 
-export async function getHotelGridSelectionFromItems(
+export async function getTourGridSelectionFromItems(
   payload: Payload,
   rawItems: unknown,
   options: { allowDrafts?: boolean; totalSlots?: number } = {},
 ): Promise<HomepageHotelSelection> {
   const allowDrafts = options.allowDrafts ?? APP_CONFIG.features.homepageFeaturedAllowDrafts
   const totalSlots = options.totalSlots ?? HOMEPAGE_FEATURED_CONTENT_SLOTS
-  const parsedSlots = parseHotelGridSlots(rawItems)
+  const parsedSlots = parseTourGridSlots(rawItems)
   const items: HomepageHotelCandidate[] = []
   const invalidItems: HomepageHotelInvalidItem[] = []
 
@@ -187,7 +180,7 @@ export async function getHotelGridSelectionFromItems(
       invalidItems.push({ slot: slot.slot, reason: slot.reason || 'invalid_reference' })
       continue
     }
-    const candidate = await findHotelDoc(payload, slot.ref)
+    const candidate = await findTourDoc(payload, slot.ref)
     if (!candidate) {
       invalidItems.push({ slot: slot.slot, id: slot.ref.id, reason: 'not_found' })
       continue
@@ -208,23 +201,16 @@ export async function getHotelGridSelectionFromItems(
   }
 }
 
-function sortHotels(left: HomepageHotelCandidate, right: HomepageHotelCandidate): number {
+function sortTours(left: HomepageHotelCandidate, right: HomepageHotelCandidate): number {
   const leftTimestamp = Date.parse(left.updatedAt || '') || 0
   const rightTimestamp = Date.parse(right.updatedAt || '') || 0
   if (leftTimestamp !== rightTimestamp) return rightTimestamp - leftTimestamp
   return left.title.localeCompare(right.title)
 }
 
-export async function searchHotelGridCandidates(
+export async function searchTourGridCandidates(
   payload: Payload,
-  options: {
-    query?: string
-    page?: number
-    limit?: number
-    allowDrafts?: boolean
-    /** When set, only accommodations in this location scope (see getLocationScope). */
-    locationKey?: string
-  } = {},
+  options: { query?: string; page?: number; limit?: number; allowDrafts?: boolean } = {},
 ): Promise<HomepageHotelCandidatesResponse> {
   const query = options.query?.trim() || ''
   const allowDrafts = options.allowDrafts ?? APP_CONFIG.features.homepageFeaturedAllowDrafts
@@ -235,40 +221,15 @@ export async function searchHotelGridCandidates(
 
   const whereClauses: PayloadFindWhere[] = []
   if (query) {
-    whereClauses.push({
-      or: [{ title: { like: query } }, { slug: { like: query } }],
-    })
+    whereClauses.push({ title: { like: query } })
   }
   if (!allowDrafts) {
     whereClauses.push({ status: { equals: 'published' } })
   }
 
-  const scopedKey = options.locationKey?.trim()
-  if (scopedKey) {
-    const scope = await getLocationScope(payload, scopedKey)
-    const scopeOr: PayloadFindWhere[] = []
-    if (scope.keys.length > 0) {
-      scopeOr.push({ location: { in: scope.keys } })
-    }
-    if (scope.refs.length > 0) {
-      scopeOr.push({ locationRef: { in: scope.refs } })
-    }
-    if (scopeOr.length === 0) {
-      return {
-        docs: [],
-        totalDocs: 0,
-        totalPages: 1,
-        page,
-        limit,
-        allowDrafts,
-      }
-    }
-    whereClauses.push(scopeOr.length === 1 ? scopeOr[0]! : { or: scopeOr })
-  }
-
   const where: PayloadFindWhere | undefined = whereClauses.length > 1 ? { and: whereClauses } : whereClauses[0]
   const response = await payload.find({
-    collection: 'accommodations',
+    collection: 'tours',
     depth: 2,
     limit,
     page,
@@ -277,7 +238,7 @@ export async function searchHotelGridCandidates(
     overrideAccess: true,
   })
 
-  const docs = (response.docs || []).map((doc) => normalizeHotelCandidate(doc as AccommodationDocLike)).sort(sortHotels)
+  const docs = (response.docs || []).map((doc) => normalizeTourCandidate(doc as TourDocLike)).sort(sortTours)
   return {
     docs,
     totalDocs: response.totalDocs || 0,
