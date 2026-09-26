@@ -194,6 +194,8 @@ with nothing to do. Verify rather than assume.
 
 `pnpm reconcile:nightly` has no home on a serverless platform — there is no
 long-lived machine to run the timer. Pick the platform's scheduler.
+Chosen: a Railway cron service, `questura-reconcile`, created by
+`infra/railway/create-reconcile-cron.sh` (`docs/procedures/scheduled-jobs.md`).
 
 It runs with apply on and a blast cap of 25 profiles. Confirm it is scheduled,
 that it holds the same per-customer advisory lock the webhooks take, and that

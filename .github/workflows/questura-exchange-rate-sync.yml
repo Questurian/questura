@@ -1,0 +1,57 @@
+name: Questura exchange-rate sync
+
+# Refreshes the USD exchange rates once a day. The API only syncs on boot when
+# its rates are over 24 hours old, and a Railway container can run for weeks,
+# so without this the rates freeze until the next deploy. The laptop used to
+# get a fresh sync on each of its frequent restarts; Railway does not.
+# Route: apps/questura/apps/server/src/app/api/internal/exchange-rates/sync/route.ts
+# Procedure: apps/questura/docs/procedures/scheduled-jobs.md
+#
+# Dormant until the owner sets the repository variable
+# QUESTURA_SCHEDULE_ENABLED=true, after creating:
+#   secrets   EXCHANGE_RATE_SYNC_SECRET  (the same value as on Railway)
+#
+# The repository is public, so the log is too: only the HTTP status is
+# printed, never the secret or the response body.
+
+on:
+  schedule:
+    - cron: '41 6 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: questura-exchange-rate-sync
+  cancel-in-progress: false
+
+permissions: {}
+
+jobs:
+  sync:
+    name: Questura exchange-rate sync
+    if: vars.QUESTURA_SCHEDULE_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: POST /api/internal/exchange-rates/sync
+        env:
+          EXCHANGE_RATE_SYNC_SECRET: ${{ secrets.EXCHANGE_RATE_SYNC_SECRET }}
+        run: |
+          set -euo pipefail
+          if [ -z "${EXCHANGE_RATE_SYNC_SECRET}" ]; then
+            echo "::error::EXCHANGE_RATE_SYNC_SECRET is not set as a repository secret."
+            exit 1
+          fi
+          # The header goes through a file, not argv, so it never shows up in
+          # a process listing either.
+          header_file=$(mktemp)
+          trap 'rm -f "$header_file"' EXIT
+          printf 'Authorization: Bearer %s\n' "$EXCHANGE_RATE_SYNC_SECRET" > "$header_file"
+          status=$(curl -sS -o /dev/null -w '%{http_code}' \
+            --max-time 120 --retry 2 --retry-delay 20 --retry-all-errors \
+            -X POST -H "@${header_file}" -H 'User-Agent: questura-scheduled-jobs' \
+            https://api.questurian.com/api/internal/exchange-rates/sync) || status=000
+          echo "exchange-rate sync: HTTP ${status}"
+          case "$status" in
+            2??) ;;
+            *) echo "::error::exchange-rate sync answered HTTP ${status}"; exit 1 ;;
+          esac

@@ -1,0 +1,105 @@
+name: Questura uptime check
+
+# Replaces the laptop's 5-minute healthcheck timer. Railway restarts the API on
+# a failed /api/health/ready, but it tells nobody; this job fails instead, and
+# GitHub emails a failed scheduled run to whoever last changed this file's
+# schedule. Procedure: apps/questura/docs/procedures/scheduled-jobs.md
+#
+# Checks, each retried before it counts as down:
+#   1. https://api.questurian.com/api/health/ready answers 200 with ready:true
+#   2. the refresh worker is not stuck (last run failed, or no success in 20 min)
+#   3. https://www.questurian.com/peru/lima answers 200
+#
+# Dormant until the owner sets the repository variable
+# QUESTURA_SCHEDULE_ENABLED=true. No secrets: both URLs are public.
+# GitHub runs schedules best-effort, so "every 15 minutes" can drift later.
+
+on:
+  schedule:
+    - cron: '7,22,37,52 * * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: questura-uptime-check
+  cancel-in-progress: true
+
+permissions: {}
+
+jobs:
+  check:
+    name: Questura uptime check
+    if: vars.QUESTURA_SCHEDULE_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      API_READY_URL: https://api.questurian.com/api/health/ready
+      SITE_URL: https://www.questurian.com/peru/lima
+      # The refresh worker drains every 60 seconds (ADR-0015).
+      REFRESH_STALE_SECONDS: '1200'
+    steps:
+      - name: API ready and refresh worker healthy
+        run: |
+          set -uo pipefail
+          body=$(mktemp)
+          status=000
+          for attempt in 1 2 3; do
+            status=$(curl -sS -o "$body" -w '%{http_code}' --max-time 20 \
+              -H 'User-Agent: questura-uptime-check' "$API_READY_URL") || status=000
+            if [ "$status" = 200 ] && jq -e '.ready == true' "$body" >/dev/null 2>&1; then
+              break
+            fi
+            [ "$attempt" -lt 3 ] && sleep 20
+          done
+          echo "api ready: HTTP ${status}"
+          if [ "$status" != 200 ] || ! jq -e '.ready == true' "$body" >/dev/null 2>&1; then
+            # The body is public (no secrets), but print only the fields that say why.
+            jq -c '{ready, reason, degraded, database: .database.reachable}' "$body" 2>/dev/null || true
+            echo "::error::API is not ready (HTTP ${status})"
+            exit 1
+          fi
+          jq -c '{ready, degraded, releaseSha, refreshWorker: (.refreshWorker | {lastSuccessAt, lastFailureAt, runs})}' "$body"
+
+          # Refresh worker. Publishing is only durable while it drains, and a
+          # stuck worker does not make the API unready. A failure followed by
+          # a success is normal retry behaviour, so only the current state counts.
+          now=$(date -u +%s)
+          ready_since=$(jq -r '.readySince // empty' "$body")
+          last_success=$(jq -r '.refreshWorker.lastSuccessAt // empty' "$body")
+          last_failure=$(jq -r '.refreshWorker.lastFailureAt // empty' "$body")
+          to_epoch() { [ -n "$1" ] && date -u -d "$1" +%s || echo 0; }
+          success_s=$(to_epoch "$last_success")
+          failure_s=$(to_epoch "$last_failure")
+          ready_s=$(to_epoch "$ready_since")
+          if ! jq -e '.refreshWorker' "$body" >/dev/null 2>&1; then
+            echo "refresh worker: not reported, skipped"
+          elif jq -e '.refreshWorker.claiming == false' "$body" >/dev/null 2>&1; then
+            echo "::warning::Refresh worker is not claiming jobs on this instance; staleness not checked"
+          elif [ "$failure_s" -gt "$success_s" ]; then
+            echo "::error::Refresh worker's last run failed at ${last_failure} (last success: ${last_success:-never})"
+            exit 1
+          elif [ "$success_s" -eq 0 ] && [ "$ready_s" -gt 0 ] && [ $((now - ready_s)) -gt "$REFRESH_STALE_SECONDS" ]; then
+            echo "::error::Refresh worker has not succeeded since the API became ready at ${ready_since}"
+            exit 1
+          elif [ "$success_s" -gt 0 ] && [ $((now - success_s)) -gt "$REFRESH_STALE_SECONDS" ]; then
+            echo "::error::Refresh worker's last success was ${last_success}, over ${REFRESH_STALE_SECONDS}s ago"
+            exit 1
+          else
+            echo "refresh worker: ok"
+          fi
+
+      - name: Site answers
+        if: always()
+        run: |
+          set -uo pipefail
+          status=000
+          for attempt in 1 2 3; do
+            status=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 30 \
+              -H 'User-Agent: questura-uptime-check' "$SITE_URL") || status=000
+            [ "$status" = 200 ] && break
+            [ "$attempt" -lt 3 ] && sleep 20
+          done
+          echo "site ${SITE_URL}: HTTP ${status}"
+          if [ "$status" != 200 ]; then
+            echo "::error::Site answered HTTP ${status}"
+            exit 1
+          fi

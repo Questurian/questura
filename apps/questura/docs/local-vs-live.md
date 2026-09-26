@@ -101,6 +101,10 @@ is by hand (Railway API deploy started yourself, Worker built in a worktree and
 shipped with `opennextjs-cloudflare deploy`: `docs/capacity/h01-provisioning-checklist.md`
 steps 19–20). Checkout on live is a real charge.
 
+The laptop's timers are gone too. The nightly Stripe reconcile, exchange-rate
+sync, uptime check and daily database copy now run on Railway cron and GitHub
+Actions: `docs/procedures/scheduled-jobs.md` lists each one and how to check it.
+
 Run everything open in `live-checks/` (top level of `apps/questura`) against
 the live site: that folder collects the checks merged work is still waiting on.
 
