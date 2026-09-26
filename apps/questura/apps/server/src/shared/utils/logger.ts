@@ -7,8 +7,14 @@
  * (`shared/observability/redact.ts`) and carries the request id of the request
  * it was written for, when there is one (`shared/observability/request-id.ts`).
  * Neither is the call site's job any more.
+ *
+ * `error` also reports to Sentry when it is on
+ * (`shared/observability/logged-error-report.ts`); pass `{ report: false }`
+ * only for a line a stranger can produce at will, or one the caller reports
+ * itself.
  */
 
+import { reportLoggedError } from '@/shared/observability/logged-error-report'
 import { redact } from '@/shared/observability/redact'
 import { currentRequestId } from '@/shared/observability/request-id'
 
@@ -67,8 +73,12 @@ class Logger {
     this.output(this.formatLog('warn', message, data))
   }
 
-  error(message: string, data?: Record<string, unknown>) {
-    this.output(this.formatLog('error', message, data))
+  error(message: string, data?: Record<string, unknown>, options?: { report?: boolean }) {
+    const line = this.formatLog('error', message, data)
+    this.output(line)
+    if (options?.report !== false) {
+      reportLoggedError(message, data, line.requestId as string | undefined)
+    }
   }
 
   debug(message: string, data?: Record<string, unknown>) {

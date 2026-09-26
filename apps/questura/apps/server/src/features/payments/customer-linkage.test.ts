@@ -29,7 +29,7 @@ let consoleErrorSpy: ReturnType<typeof vi.spyOn> | null = null
 describe('syncStripeCustomerEmail', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined)
+    consoleErrorSpy = vi.spyOn(console, 'log').mockImplementation(() => undefined)
     mocks.stripeCustomerUpdate.mockResolvedValue({ id: 'cus_123' })
   })
 
@@ -64,7 +64,7 @@ describe('syncStripeCustomerEmail', () => {
     mocks.stripeCustomerUpdate.mockRejectedValue(new Error('stripe is down'))
 
     await expect(syncStripeCustomerEmail('cus_123', 'new@example.com')).resolves.toBe(false)
-    expect(consoleErrorSpy).toHaveBeenCalled()
+    expect(consoleErrorSpy).toHaveBeenCalledWith(expect.stringContaining('"level":"error"'))
   })
 })
 

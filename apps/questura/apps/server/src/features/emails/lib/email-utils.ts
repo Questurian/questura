@@ -4,6 +4,7 @@ import { APP_CONFIG } from '@/shared/config'
 import type { EmailResult } from '../types'
 import { recordEmailLog } from './email-log'
 import { maskEmail } from './mask-email'
+import { logger } from '@/shared/utils/logger'
 
 export { maskEmail }
 
@@ -105,7 +106,8 @@ export async function sendEmail(
     return { success: true }
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error'
-    console.error(`❌ Failed to send ${config.emailType}:`, {
+    logger.error('Failed to send email', {
+      emailType: config.emailType,
       email: maskEmail(config.to),
       error: message
     })

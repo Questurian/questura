@@ -6,6 +6,7 @@ import {
   incrementCounter,
   type CounterResult,
 } from '@/shared/lib/rate-limit-counter'
+import { logger } from '@/shared/utils/logger'
 
 const WINDOW_SECONDS = 60
 const MAX_REQUESTS_PER_IP = 10
@@ -37,7 +38,7 @@ export async function checkAccountCheckRateLimit(
     // Logged because the caller renders this as an ordinary "too many checks"
     // message: without a log line, a counter outage is indistinguishable from
     // real traffic and produces no monitoring signal at all.
-    console.error('[visitor-auth] account-check rate limit unavailable; denying', error)
+    logger.error('[visitor-auth] account-check rate limit unavailable; denying', { error })
     return { allowed: false, retryAfterSeconds: WINDOW_SECONDS }
   }
 

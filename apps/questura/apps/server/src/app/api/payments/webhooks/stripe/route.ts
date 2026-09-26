@@ -148,9 +148,12 @@ export async function POST(req: NextRequest) {
       APP_CONFIG.stripe.webhookSecret
     )
   } catch (err) {
+    // Not reported: anyone can post a forged signature, and each one would
+    // spend the Sentry quota. A misconfigured secret shows up instead as
+    // Stripe's own failed-delivery emails and in `verify:stripe-webhook-events`.
     logger.error('Stripe webhook signature verification failed', {
       error: err instanceof Error ? err.message : String(err),
-    })
+    }, { report: false })
     return NextResponse.json({ error: 'Invalid signature' }, { status: 400 })
   }
 

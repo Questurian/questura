@@ -4,6 +4,7 @@ import {
   incrementCounter,
   type CounterResult,
 } from '@/shared/lib/rate-limit-counter'
+import { logger } from '@/shared/utils/logger'
 
 /**
  * Rate limits for the staff (Payload `users`) credential endpoints.
@@ -78,7 +79,7 @@ export async function checkStaffAuthRateLimit({
     // "Too many attempts" message, which is exactly what an operator — or the
     // Location Manager service identity — would see during a counter outage,
     // so the reason has to be logged or it disappears entirely.
-    console.error(`[staff-auth] ${scope} rate limit unavailable; denying`, error)
+    logger.error('[staff-auth] rate limit unavailable; denying', { scope, error })
     return { allowed: false, retryAfterSeconds: WINDOW_SECONDS }
   }
 

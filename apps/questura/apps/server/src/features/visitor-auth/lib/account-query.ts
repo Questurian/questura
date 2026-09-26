@@ -1,4 +1,5 @@
 import { visitorAuth } from './better-auth'
+import { logger } from '@/shared/utils/logger'
 
 export type AuthProvider = 'local' | 'google' | 'dual' | 'unknown'
 
@@ -58,7 +59,7 @@ export async function getVisitorAuthMethodsForUser(userId: string): Promise<Visi
     const accounts = await internalAdapter.findAccounts(userId)
     return deriveAuthMethods(accounts.map((account) => account.providerId))
   } catch (error) {
-    console.error('Failed to resolve Visitor auth methods:', error)
+    logger.error('Failed to resolve Visitor auth methods', { error })
     return {
       hasLocalPassword: false,
       hasGoogleOAuth: false,
@@ -72,7 +73,7 @@ export async function getVisitorAuthMethods(headers: Headers): Promise<VisitorAu
     const accounts = await visitorAuth.api.listUserAccounts({ headers })
     return deriveAuthMethods(accounts.map((account) => account.providerId))
   } catch (error) {
-    console.error('Failed to resolve Visitor auth methods:', error)
+    logger.error('Failed to resolve Visitor auth methods', { error })
     return {
       hasLocalPassword: false,
       hasGoogleOAuth: false,

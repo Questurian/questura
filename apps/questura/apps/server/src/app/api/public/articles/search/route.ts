@@ -97,7 +97,7 @@ export async function GET(req: NextRequest) {
       })
     })
   } catch (error) {
-    console.error('Error searching articles:', error)
+    logger.error('Error searching articles', { error })
     return NextResponse.json({ message: 'Search failed.' }, { status: 500 })
   }
 }

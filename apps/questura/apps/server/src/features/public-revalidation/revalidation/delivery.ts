@@ -1,6 +1,7 @@
 import { clientBaseUrl, REVALIDATION_TIMEOUT_MS, revalidationDisconnected, revalidationSecret } from './env'
 import { unique } from './cache-tags'
 import type { RevalidationTarget } from './types'
+import { logger } from '@/shared/utils/logger'
 
 /**
  * Tell the frontend to revalidate, and throw if it did not.
@@ -138,6 +139,6 @@ export async function triggerClientRevalidation(
   try {
     await deliverClientRevalidation(target, reason)
   } catch (error) {
-    console.error('[public-revalidation] failed', { reason, error, tags: target.tags, paths: target.paths })
+    logger.error('[public-revalidation] failed', { reason, error, tags: target.tags, paths: target.paths })
   }
 }

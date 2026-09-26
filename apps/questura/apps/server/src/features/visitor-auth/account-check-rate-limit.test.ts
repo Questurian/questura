@@ -55,7 +55,7 @@ describe('when the shared counter backend is unavailable', () => {
     vi.resetModules()
     vi.stubEnv('NODE_ENV', 'production')
     vi.stubEnv('REDIS_URL', '')
-    vi.spyOn(console, 'error').mockImplementation(() => {})
+    vi.spyOn(console, 'log').mockImplementation(() => {})
 
     const module = await import('./lib/account-check-rate-limit')
 
@@ -68,14 +68,16 @@ describe('when the shared counter backend is unavailable', () => {
     vi.resetModules()
     vi.stubEnv('NODE_ENV', 'production')
     vi.stubEnv('REDIS_URL', '')
-    const errorLog = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const errorLog = vi.spyOn(console, 'log').mockImplementation(() => {})
 
     const module = await import('./lib/account-check-rate-limit')
     await module.checkAccountCheckRateLimit(createRequest('198.51.100.21'), 'visitor@example.com')
 
-    expect(errorLog).toHaveBeenCalledWith(
-      expect.stringContaining('rate limit'),
-      expect.any(Error)
-    )
+    const lines = errorLog.mock.calls.map(([line]) => JSON.parse(String(line)))
+    expect(lines).toContainEqual(expect.objectContaining({
+      level: 'error',
+      message: expect.stringContaining('rate limit'),
+      error: expect.objectContaining({ message: expect.any(String) }),
+    }))
   })
 })

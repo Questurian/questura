@@ -8,6 +8,7 @@ import {
 import { maskEmail } from '@/features/emails/lib/mask-email'
 import { normalizeEmail } from '@/shared/lib/normalize-email'
 import { splitDisplayName } from './visitor-profile'
+import { logger } from '@/shared/utils/logger'
 
 /**
  * The three security notices a visitor gets (launch fix plan, decision D4):
@@ -30,9 +31,10 @@ const defaultLoadPayload: LoadPayload = async () => {
 async function bestEffort(label: string, to: string, send: () => Promise<{ success: boolean; error?: string }>) {
   try {
     const result = await send()
-    if (!result.success) console.error(`⚠️ ${label} notice not sent:`, { to: maskEmail(to), error: result.error })
+    if (!result.success) logger.error('Security notice not sent', { notice: label, to: maskEmail(to), error: result.error })
   } catch (error) {
-    console.error(`⚠️ ${label} notice not sent:`, {
+    logger.error('Security notice not sent', {
+      notice: label,
       to: maskEmail(to),
       error: error instanceof Error ? error.message : 'Unknown error',
     })

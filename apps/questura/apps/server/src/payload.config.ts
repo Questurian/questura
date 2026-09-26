@@ -40,6 +40,7 @@ import { applicationName } from './shared/database/fleet-manifest'
 import { poolSizes } from './shared/database/pool-budget'
 import { withHandledInitializing } from './shared/database/handled-initializing'
 import { anonymousApiBoundsPlugin } from './shared/payload/anonymous-api-bounds'
+import { reportPayloadError } from './shared/observability/payload-error-report'
 import { poolTimeoutOptions, servingTimeouts } from './shared/database/timeouts'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -59,6 +60,11 @@ export default buildConfig({
   csrf: APP_CONFIG.CORS_ORIGINS,
   collections: [Users, ServiceAccounts, Authors, EmailLogs, VisitorProfiles, Bookmarks, MediaAsset, MediaSet, Articles, SingleTypeListicles, ListicleItineraries, ArticleRedirects, Locations, Categories, Tags, Accommodations, Dining, Attractions, Tours, Nightlife, KeyLocations, AffiliateProducts, InstagramPosts, PerfectForTags, Currencies, LocationHomepages, StripeWebhookEvents, RefreshJobs],
   globals: [MainHomepage],
+  // Payload answers its own errors, so a 500 from its REST or GraphQL
+  // handlers would otherwise reach the logs and never Sentry.
+  hooks: {
+    afterError: [reportPayloadError],
+  },
   editor: lexicalEditor(),
   secret: APP_CONFIG.payloadSecret,
   typescript: {

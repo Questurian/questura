@@ -3,6 +3,7 @@ import {
   hashIdentifier,
   incrementCounter,
 } from '@/shared/lib/rate-limit-counter'
+import { logger } from '@/shared/utils/logger'
 
 /**
  * Throttle for `POST /api/account/set-password`.
@@ -37,7 +38,7 @@ export async function checkSetPasswordRateLimit(
     // route unbounded. Logged because the route renders this as an ordinary
     // "too many attempts" message, so without a log a counter outage leaves no
     // trace at all.
-    console.error('[visitor-auth] set-password rate limit unavailable; denying', error)
+    logger.error('[visitor-auth] set-password rate limit unavailable; denying', { error })
     return { allowed: false, retryAfterSeconds: WINDOW_SECONDS }
   }
 

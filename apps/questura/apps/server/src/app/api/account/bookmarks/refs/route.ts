@@ -5,6 +5,7 @@ import { listBookmarkRefs } from '@/features/bookmarks/lib/service'
 import { runPrivateWork } from '@/features/visitor-auth/lib/private-route'
 import { hasVisitorSessionCookie } from '@/features/visitor-auth/lib/session-cookie'
 import { forbiddenOriginResponse, getPrivateCorsHeaders, handleCorsOptions } from '@/shared/utils/cors'
+import { logger } from '@/shared/utils/logger'
 
 /**
  * Every bookmark the signed-in Visitor holds, as bare references.
@@ -49,7 +50,7 @@ export async function GET(req: NextRequest) {
         const refs = await listBookmarkRefs(auth.principal.id)
         return NextResponse.json({ authenticated: true, refs }, { headers: corsHeaders })
       } catch (error) {
-        console.error('[bookmarks] failed to list refs', error)
+        logger.error('[bookmarks] failed to list refs', { error })
         return NextResponse.json(
           { error: 'Failed to load bookmarks.' },
           { status: 503, headers: { ...corsHeaders, 'Retry-After': '2' } }

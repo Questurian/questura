@@ -18,7 +18,7 @@ const loadPayload = vi.fn(async () => payload as never)
 beforeEach(() => {
   vi.clearAllMocks()
   for (const send of Object.values(mocks)) send.mockResolvedValue({ success: true })
-  vi.spyOn(console, 'error').mockImplementation(() => {})
+  vi.spyOn(console, 'log').mockImplementation(() => {})
 })
 
 /** Launch fix plan decision D4: the three security notices are sent. */
@@ -54,8 +54,8 @@ describe('email changed', () => {
     await expect(
       noticeEmailChanged({ previousEmail: 'old@example.com', user: { email: 'new@example.com' } }, loadPayload)
     ).resolves.toBeUndefined()
-    expect(console.error).toHaveBeenCalled()
-    expect(JSON.stringify(vi.mocked(console.error).mock.calls)).not.toContain('old@example.com')
+    expect(console.log).toHaveBeenCalledWith(expect.stringContaining('"level":"error"'))
+    expect(JSON.stringify(vi.mocked(console.log).mock.calls)).not.toContain('old@example.com')
   })
 })
 

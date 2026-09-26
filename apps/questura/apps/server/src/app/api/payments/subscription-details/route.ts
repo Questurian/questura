@@ -4,6 +4,7 @@ import { forbiddenOriginResponse, getPrivateCorsHeaders, handleCorsOptions } fro
 import { requireVisitorPrincipal } from '@/features/visitor-auth/lib/current-principal'
 import { findVisitorProfileByAuthUserId } from '@/features/visitor-auth/lib/visitor-profile'
 import { checkPaymentsRateLimit, checkPaymentsVisitorRateLimit, paymentsRateLimitResponse } from '@/payments/lib/payments-rate-limit'
+import { logger } from '@/shared/utils/logger'
 
 export const dynamic = 'force-dynamic'
 
@@ -80,7 +81,7 @@ export async function GET(req: NextRequest) {
     )
 
   } catch (error) {
-    console.error('Error in subscription details endpoint:', error)
+    logger.error('Error in subscription details endpoint', { error })
     return NextResponse.json(
       { error: 'Failed to get subscription details' },
       { status: 500, headers: corsHeaders }

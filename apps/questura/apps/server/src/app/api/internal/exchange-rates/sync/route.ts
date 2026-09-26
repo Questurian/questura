@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getPayload } from 'payload'
 import config from '@/payload.config'
 import { syncCurrencyUsdRates } from '@/features/shared/currencies/exchange-rates'
+import { logger } from '@/shared/utils/logger'
 
 // Hashing both sides first gives equal-length buffers, so the comparison leaks
 // neither content nor length.
@@ -42,7 +43,7 @@ export async function POST(req: NextRequest) {
     const result = await syncCurrencyUsdRates(payload)
     return NextResponse.json(result)
   } catch (error) {
-    console.error('Exchange-rate sync failed:', error)
+    logger.error('Exchange-rate sync failed', { error })
     return NextResponse.json({ message: 'Exchange-rate sync failed.' }, { status: 500 })
   }
 }

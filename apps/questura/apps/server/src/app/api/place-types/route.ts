@@ -13,6 +13,7 @@ import { getPayload } from 'payload'
 import config from '@/payload.config'
 import { corsResponse, handleCorsOptions } from '@/shared/utils/cors'
 import { getSelectFieldOptions } from '@/shared/utils/payload-fields'
+import { logger } from '@/shared/utils/logger'
 
 // Map category to detail collection slug
 const categoryToCollectionMap: Record<string, string> = {
@@ -53,7 +54,7 @@ export async function GET(req: NextRequest) {
 
     return corsResponse({ category, options }, req)
   } catch (error) {
-    console.error('Error loading place types:', error)
+    logger.error('Error loading place types', { error })
     return corsResponse({ error: 'Failed to load place types' }, req, 500)
   }
 }

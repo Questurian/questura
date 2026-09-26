@@ -25,6 +25,7 @@ import {
   updateVisitorProfileByAuthUserId,
 } from './visitor-profile'
 import { rejectStaffEmailForVisitorAuth } from './visitor-staff-email-boundary'
+import { logger } from '@/shared/utils/logger'
 
 const databaseUrl = APP_CONFIG.database.uri
 
@@ -386,7 +387,7 @@ export const visitorAuth = betterAuth({
               await noticeGoogleLinked({ email: user.email, name: user.name })
             }
           } catch (error) {
-            console.error('⚠️ google-linked notice skipped:', error instanceof Error ? error.message : 'Unknown error')
+            logger.error('google-linked notice skipped', { error: error instanceof Error ? error.message : 'Unknown error' })
           }
         },
       },

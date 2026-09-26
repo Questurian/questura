@@ -3,6 +3,7 @@ import { getPayload } from 'payload'
 import config from '@/payload.config'
 import { corsResponse, handleCorsOptions } from '@/shared/utils/cors'
 import { getSelectFieldOptions } from '@/shared/utils/payload-fields'
+import { logger } from '@/shared/utils/logger'
 
 export async function GET(req: NextRequest) {
   try {
@@ -16,7 +17,7 @@ export async function GET(req: NextRequest) {
 
     return corsResponse({ options }, req)
   } catch (error) {
-    console.error('Error loading nightlife types:', error)
+    logger.error('Error loading nightlife types', { error })
     return corsResponse({ error: 'Failed to load nightlife types' }, req, 500)
   }
 }

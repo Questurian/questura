@@ -3,6 +3,7 @@ import { forbiddenOriginResponse, getCorsHeaders, handleCorsOptions } from '@/sh
 import { cancelUserSubscription } from '@/payments/lib/payment-service'
 import { requireVisitorPrincipal } from '@/features/visitor-auth/lib/current-principal'
 import { checkPaymentsRateLimit, checkPaymentsVisitorRateLimit, paymentsRateLimitResponse } from '@/payments/lib/payments-rate-limit'
+import { logger } from '@/shared/utils/logger'
 
 export async function POST(req: NextRequest) {
   const corsHeaders = getCorsHeaders(req)
@@ -50,7 +51,7 @@ export async function POST(req: NextRequest) {
     )
 
   } catch (error) {
-    console.error('Error in cancel subscription endpoint:', error)
+    logger.error('Error in cancel subscription endpoint', { error })
     return NextResponse.json(
       { error: 'Failed to cancel subscription' },
       { status: 500, headers: corsHeaders }

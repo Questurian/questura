@@ -7,6 +7,7 @@ import type { ServiceAccount, User } from '@/payload-types'
 import { isDisabledStaff } from './staff-status'
 import { serviceAccountHasCapability } from './service-account-grants'
 import { staffUser } from './staff-user'
+import { logger } from '@/shared/utils/logger'
 
 function isStaffRole(role: User['role']): role is 'admin' | 'editor' | 'writer' {
   return role === 'admin' || role === 'editor' || role === 'writer'
@@ -87,7 +88,7 @@ export async function authenticateRequest(
       status: 200,
     }
   } catch (error) {
-    console.error('Staff auth middleware error:', error)
+    logger.error('Staff auth middleware error', { error })
     return {
       user: null,
       error: 'Authentication error',

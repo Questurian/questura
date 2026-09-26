@@ -5,6 +5,7 @@ import { logger } from '@/shared/utils/logger'
 import { REDACTED, redact, redactString } from './redact'
 import { releaseSha } from './release'
 import { REQUEST_ID_HEADER, wellFormedRequestId } from './request-id'
+import { type SentryClient, sentrySlot } from './sentry-slot'
 
 /**
  * Where errors go: one log line each, always, and Sentry when it is configured.
@@ -29,30 +30,9 @@ import { REQUEST_ID_HEADER, wellFormedRequestId } from './request-id'
 
 type Env = Record<string, string | undefined>
 
-type SentryModule = typeof import('@sentry/nextjs')
-/** The part of the SDK this module uses, so tests can hand in a fake. */
-export type SentryClient = Pick<
-  SentryModule,
-  'init' | 'withScope' | 'captureRequestError' | 'captureMessage' | 'captureException' | 'flush'
->
+export type { SentryClient }
 
-/**
- * The started SDK lives on `globalThis`, not in this module. Next bundles
- * `instrumentation.ts` (which starts it) separately from each route (which
- * report through it), so each has its own copy of this module; a module-level
- * variable set at boot was still `null` in `/api/client-errors`. Found by
- * running the route against a local ingest, not by a unit test.
- */
-const slot = globalThis as unknown as { __questuraSentry?: SentryClient | null }
-
-const sentryState = {
-  get client(): SentryClient | null {
-    return slot.__questuraSentry ?? null
-  },
-  set client(value: SentryClient | null) {
-    slot.__questuraSentry = value
-  },
-}
+const sentryState = sentrySlot
 
 /** Headers worth keeping on an event. Everything else is dropped, not redacted. */
 const HEADER_ALLOWLIST = new Set([
@@ -106,7 +86,7 @@ export async function initErrorReporting(env: Env = process.env): Promise<boolea
   } catch (error) {
     // Reporting is a watcher. A watcher that fails to start must not take the
     // thing it watches down with it; the log lines still carry every error.
-    logger.error('Error reporting failed to start; errors go to logs only', { error })
+    logger.error('Error reporting failed to start; errors go to logs only', { error }, { report: false })
     return false
   }
 }
@@ -252,7 +232,7 @@ export function reportRequestError(
     ...(typeof digest === 'string' ? { digest } : {}),
     release: releaseSha(),
     error,
-  })
+  }, { report: false })
 
   const client = sentryState.client
   if (!client) return
@@ -304,7 +284,7 @@ export function reportClientError(report: ClientErrorReport, serverRequestId?: s
     clientMessage,
     path: pathOnly(clean.path),
     reportRequestId: serverRequestId,
-  })
+  }, { report: false })
 
   const client = sentryState.client
   if (!client) return

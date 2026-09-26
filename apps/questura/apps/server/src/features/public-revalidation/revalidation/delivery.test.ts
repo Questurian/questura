@@ -38,7 +38,7 @@ beforeEach(() => {
   vi.stubEnv('REVALIDATION_SECRET', '')
   vi.stubEnv('REFRESH_DISCONNECTED', '')
   vi.spyOn(console, 'warn').mockImplementation(() => {})
-  vi.spyOn(console, 'error').mockImplementation(() => {})
+  vi.spyOn(console, 'log').mockImplementation(() => {})
 })
 
 afterEach(() => {
@@ -99,7 +99,7 @@ describe('triggerClientRevalidation', () => {
   // why production has to acknowledge REFRESH_OUTBOX=off by name.
   it('never throws, whatever happened', async () => {
     await expect(triggerClientRevalidation(target, 'x')).resolves.toBeUndefined()
-    expect(console.error).toHaveBeenCalled()
+    expect(console.log).toHaveBeenCalledWith(expect.stringContaining('"level":"error"'))
   })
 })
 

@@ -3,6 +3,7 @@ import { getPayload } from 'payload'
 import config from '@/payload.config'
 import { corsResponse, handleCorsOptions } from '@/shared/utils/cors'
 import { getSelectFieldOptions } from '@/shared/utils/payload-fields'
+import { logger } from '@/shared/utils/logger'
 
 const formatLabel = (value: string): string =>
   value
@@ -48,7 +49,7 @@ export async function GET(req: NextRequest) {
 
     return corsResponse({ options }, req)
   } catch (error) {
-    console.error('Error loading dining types:', error)
+    logger.error('Error loading dining types', { error })
     return corsResponse({ error: 'Failed to load dining types' }, req, 500)
   }
 }

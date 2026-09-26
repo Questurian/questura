@@ -3,6 +3,7 @@ import { getPayload } from 'payload'
 import config from '@/payload.config'
 import { corsResponse, handleCorsOptions } from '@/shared/utils/cors'
 import { getSelectFieldOptions } from '@/shared/utils/payload-fields'
+import { logger } from '@/shared/utils/logger'
 
 export async function GET(req: NextRequest) {
   try {
@@ -16,7 +17,7 @@ export async function GET(req: NextRequest) {
 
     return corsResponse({ options }, req)
   } catch (error) {
-    console.error('Error loading accommodations types:', error)
+    logger.error('Error loading accommodations types', { error })
     return corsResponse({ error: 'Failed to load accommodations types' }, req, 500)
   }
 }

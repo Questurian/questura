@@ -117,7 +117,7 @@ describe('when the shared counter backend is unavailable', () => {
     vi.resetModules()
     vi.stubEnv('NODE_ENV', 'production')
     vi.stubEnv('REDIS_URL', '')
-    vi.spyOn(console, 'error').mockImplementation(() => {})
+    vi.spyOn(console, 'log').mockImplementation(() => {})
 
     const module = await import('./lib/staff-auth-rate-limit')
 
@@ -147,7 +147,7 @@ describe('when the shared counter backend is unavailable', () => {
     vi.resetModules()
     vi.stubEnv('NODE_ENV', 'production')
     vi.stubEnv('REDIS_URL', '')
-    const errorLog = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const errorLog = vi.spyOn(console, 'log').mockImplementation(() => {})
 
     const module = await import('./lib/staff-auth-rate-limit')
     await module.checkStaffAuthRateLimit({
@@ -157,10 +157,12 @@ describe('when the shared counter backend is unavailable', () => {
       limits: module.STAFF_LOGIN_LIMITS,
     })
 
-    expect(errorLog).toHaveBeenCalledWith(
-      expect.stringContaining('rate limit unavailable'),
-      expect.any(Error)
-    )
+    const lines = errorLog.mock.calls.map(([line]) => JSON.parse(String(line)))
+    expect(lines).toContainEqual(expect.objectContaining({
+      level: 'error',
+      message: expect.stringContaining('rate limit unavailable'),
+      error: expect.objectContaining({ message: expect.any(String) }),
+    }))
   })
 })
 

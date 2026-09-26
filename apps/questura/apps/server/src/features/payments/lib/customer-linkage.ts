@@ -3,6 +3,7 @@ import { createHash } from 'node:crypto'
 import type Stripe from 'stripe'
 
 import { stripe } from './stripe'
+import { logger } from '@/shared/utils/logger'
 
 /**
  * How many same-email customers to inspect when hunting for the one this
@@ -60,7 +61,7 @@ export async function syncStripeCustomerEmail(
     await stripe.customers.update(stripeCustomerId, { email })
     return true
   } catch (error) {
-    console.error('Failed to sync visitor email to Stripe customer', {
+    logger.error('Failed to sync visitor email to Stripe customer', {
       stripeCustomerId,
       error: error instanceof Error ? error.message : String(error),
     })

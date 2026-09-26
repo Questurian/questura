@@ -1,4 +1,5 @@
 import { getClientIp, hashIdentifier, incrementCounter } from '@/shared/lib/rate-limit-counter'
+import { logger } from '@/shared/utils/logger'
 
 /**
  * Throttle for bookmark writes.
@@ -34,10 +35,10 @@ export async function checkBookmarkWriteRateLimit(
     // distinguishable from real traffic, and the alternative is an unbounded
     // write endpoint. `getClientIp` is read only for the log line, so an
     // outage is traceable to a caller.
-    console.error(
-      `[bookmarks] write rate limit unavailable; denying (ip=${hashIdentifier(getClientIp(headers))})`,
-      error
-    )
+    logger.error('[bookmarks] write rate limit unavailable; denying', {
+      ipHash: hashIdentifier(getClientIp(headers)),
+      error,
+    })
     // `unavailable` lets the route answer 503 rather than 429: still closed,
     // but not misreported as this reader having written too much.
     return { allowed: false, retryAfterSeconds: 5, unavailable: true }

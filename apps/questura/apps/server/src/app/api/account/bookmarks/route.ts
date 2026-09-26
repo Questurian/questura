@@ -12,6 +12,7 @@ import { isBookmarkTargetType, parseTargetId } from '@/features/bookmarks/lib/ta
 import { forbiddenOriginResponse, getPrivateCorsHeaders, handleCorsOptions } from '@/shared/utils/cors'
 import { runPrivateWork, temporarilyUnavailable, tooManyRequests } from '@/features/visitor-auth/lib/private-route'
 import { hasVisitorSessionCookie } from '@/features/visitor-auth/lib/session-cookie'
+import { logger } from '@/shared/utils/logger'
 
 /**
  * Bookmark read/write for the signed-in Visitor (ADR-0010).
@@ -94,7 +95,7 @@ async function listBookmarks(req: NextRequest, corsHeaders: Record<string, strin
 
     return NextResponse.json(result, { headers: corsHeaders })
   } catch (error) {
-    console.error('[bookmarks] failed to list', error)
+    logger.error('[bookmarks] failed to list', { error })
     return NextResponse.json(
       { error: 'Failed to load bookmarks.' },
       // Temporary, and said so: a list that failed is not an empty list.
@@ -151,7 +152,7 @@ async function saveBookmark(req: NextRequest, corsHeaders: Record<string, string
 
     return NextResponse.json({ bookmarked: true, ...parsed.ref }, { headers: corsHeaders })
   } catch (error) {
-    console.error('[bookmarks] failed to add', error)
+    logger.error('[bookmarks] failed to add', { error })
     return NextResponse.json(
       { error: 'Failed to save bookmark.' },
       { status: 500, headers: corsHeaders }
@@ -197,7 +198,7 @@ async function deleteBookmark(req: NextRequest, corsHeaders: Record<string, stri
 
     return NextResponse.json({ bookmarked: false, ...parsed.ref }, { headers: corsHeaders })
   } catch (error) {
-    console.error('[bookmarks] failed to remove', error)
+    logger.error('[bookmarks] failed to remove', { error })
     return NextResponse.json(
       { error: 'Failed to remove bookmark.' },
       { status: 500, headers: corsHeaders }
