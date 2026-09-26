@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { canonicalRedirect } from '@/lib/routing/canonicalHost'
 import { isSlugSegment, sameSiteLocation } from '@/lib/routing/sameSiteRedirect'
 import { originFromRequest } from '@/lib/seo/requestOrigin'
 import {
@@ -91,6 +92,15 @@ export function middleware(request: NextRequest) {
   const wellKnown = handleWellKnown(pathname)
   if (wellKnown) return wellKnown
 
+  const canonical = canonicalRedirect({
+    appUrl: process.env.NEXT_PUBLIC_APP_URL,
+    host: request.headers.get('host'),
+    proto: request.headers.get('x-forwarded-proto') ?? request.nextUrl.protocol,
+    pathname,
+    search: request.nextUrl.search,
+  })
+  if (canonical) return NextResponse.redirect(canonical, 301)
+
   if (isAssetPath(pathname)) {
     return NextResponse.next()
   }
@@ -110,5 +120,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!api|_next|_static|favicon.ico|robots.txt|sitemap.xml).*)'],
+  matcher: ['/((?!api|_next|_static).*)'],
 }
