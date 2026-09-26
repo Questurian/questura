@@ -293,8 +293,9 @@ every page that needs the API fails to render once the lock is on.
 **18. Gather the site's build settings.**
 `NEXT_PUBLIC_*` values are written into the site's JavaScript when it is
 built. Setting them later (a `wrangler.jsonc` var, the Cloudflare dashboard)
-changes nothing. `vars.NEXT_PUBLIC_BACKEND_URL` in `wrangler.jsonc` is the
-local-preview value and does not choose the API a deployed site calls.
+changes nothing. `vars.NEXT_PUBLIC_BACKEND_URL` in `wrangler.jsonc` holds the
+live API address, but nothing reads it at runtime and it does not choose the
+API a deployed site calls: the build's environment does.
 
 | Variable | Value |
 |---|---|

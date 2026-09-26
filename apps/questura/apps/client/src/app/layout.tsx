@@ -37,7 +37,15 @@ export const metadata: Metadata = {
   // address. Without it they stayed relative, so a copy of the site served
   // from another host (a *.workers.dev URL, say) named itself as canonical.
   metadataBase: new URL(getPublicBaseUrl()),
-  title: "Questura",
+  // The brand is Questurian. Pages without their own title (/purchase/*,
+  // /account*, /subscription/*, /articles, the 404) inherit this one, and it
+  // used to read "Questura" — the codebase's name, not the site's. No
+  // template on purpose: the pages that set a title already end it with
+  // "— Questurian", and a template would print the brand twice.
+  title: "Questurian",
+  applicationName: "Questurian",
+  // favicon.ico, icon.svg, apple-icon.png and manifest.ts sit beside this file
+  // and Next links them from every page by file convention.
   description: "Curated city guides, travel maps, itineraries, and local recommendations.",
 };
 

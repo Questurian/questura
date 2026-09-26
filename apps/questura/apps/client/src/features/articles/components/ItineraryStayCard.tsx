@@ -8,6 +8,7 @@ import {
 import { ListiclePhotoCarousel } from '@/features/articles/components/ListiclePhotoCarousel'
 import { ListicleVenueInfoGrid } from '@/features/articles/components/ListicleVenueInfoGrid'
 import { ListicleVenueTitleRow } from '@/features/articles/components/ListicleVenueTitleRow'
+import { blurbHtml } from '@/features/articles/lib/lexicalHtml'
 import { listicleInstagramEmbedCode } from '@/features/articles/lib/listicleInstagram'
 import {
   listicleItemImagesFromRow,
@@ -59,7 +60,8 @@ function stayPriceLevel(item: ListicleItemRow['item']): number | null {
 export function ItineraryStayCard({ row }: { row: ListicleItemRow }): JSX.Element {
   const { registerEntry } = useListicleMapSync()
   const images = listicleItemImagesFromRow(row)
-  const blurb = row.blurb
+  // Lexical JSON here used to print "[object Object]" (lib/lexicalHtml.ts).
+  const blurb = blurbHtml(row.blurb)
   const instagramCode = listicleInstagramEmbedCode(row)
   const amenitiesCell = buildStayAmenitiesCell(row.item)
   const priceLevel = stayPriceLevel(row.item)

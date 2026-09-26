@@ -60,6 +60,24 @@ test('the curated path does not fetch the content list', () => {
   )
 })
 
+// An enabled homepage with zero blocks rendered a blank city page
+// (/colombia/medellin, /mexico/mexico-city, 2026-09-26). Both the page and its
+// metadata decide "curated" through curatedHomepage, which says no to an empty
+// block list, so the article-list fallback runs.
+test('an empty homepage takes the article-list path', () => {
+  const happyPath = cityPage.slice(cityPage.indexOf('export default async function CityPage'))
+  assert.match(
+    happyPath,
+    /const data = curatedHomepage\(await fetchCityHomepage\(/,
+    'CityPage treats any homepage row as curated again, even one with no blocks',
+  )
+  const metadata = cityPage.slice(
+    cityPage.indexOf('export async function generateMetadata'),
+    cityPage.indexOf('export default async function CityPage'),
+  )
+  assert.match(metadata, /curatedHomepage\(/, 'generateMetadata skips the fallback for an empty homepage')
+})
+
 // A client component's props are serialized into the HTML whether or not its
 // body does anything. The debug logger's NODE_ENV check lives inside a
 // useEffect, so it stopped the console.log and shipped the payload anyway:

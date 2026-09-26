@@ -5,6 +5,7 @@ import type {
   ItineraryVenueBlock,
   ListicleItineraryArticle,
 } from '@/features/articles/types/itineraryListicle'
+import { blurbHtml } from '@/features/articles/lib/lexicalHtml'
 import {
   isListicleVenue,
   type ListicleItemRow,
@@ -43,7 +44,10 @@ export function venueRowFromBlock(
 
   return {
     id: block.id ?? fallbackId,
-    blurb: block.blurb,
+    // Usually the API's HTML; a legacy top-level `whereStaying` blurb arrives
+    // as raw Lexical (lexicalHtml.ts). Normalised here so every consumer —
+    // the stay card, the stops, the map preview excerpt — gets HTML.
+    blurb: blurbHtml(block.blurb) ?? undefined,
     item: block.item,
     blockType: block.blockType,
     mediaMode: block.mediaMode,

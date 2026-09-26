@@ -151,7 +151,7 @@ export default function MenuModal({
           <div className="flex shrink-0 items-center justify-between border-b border-white/10 px-5 py-4 1024:px-10 1024:py-5">
             <div>
               <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-white/40">
-                Questura
+                Questurian
               </p>
               <h2 className="mt-1 font-display text-[1.35rem] leading-none tracking-[0.02em] 1024:text-[1.75rem]">
                 Menu

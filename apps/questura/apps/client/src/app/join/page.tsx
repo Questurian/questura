@@ -14,6 +14,8 @@ export const metadata: Metadata = {
     'One membership unlocks everything our travel experts publish — in-depth articles and day-by-day itineraries for every city we cover. Monthly or annual, cancel anytime.',
 };
 
+// A failed plans read throws on purpose (joinPlans.ts): on revalidation Next
+// keeps the last good /join instead of caching "nothing for sale".
 async function JoinPricing() {
   const { plans, taxAtCheckout } = await readJoinPricing(config.backendUrl, false);
   return <PricingDisplay plans={plans} taxAtCheckout={taxAtCheckout} />;

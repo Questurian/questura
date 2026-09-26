@@ -15,7 +15,7 @@ export function buildOrganizationJsonLd(): Record<string, unknown> {
     '@context': 'https://schema.org',
     '@type': 'Organization',
     '@id': `${base}/#organization`,
-    name: 'Questura',
+    name: 'Questurian',
     url: `${base}/`,
     ...(SOCIAL_PROFILE_URLS.length > 0 ? { sameAs: SOCIAL_PROFILE_URLS } : {}),
   }

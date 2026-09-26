@@ -77,10 +77,16 @@
   },
 
   "vars": {
-    // Local preview only. NEXT_PUBLIC_* values are baked into the site when
-    // it is built, so this runtime var does not choose the API a deployed
-    // site calls: the build's environment does (H01 step 19).
-    "NEXT_PUBLIC_BACKEND_URL": "http://127.0.0.1:4100"
+    // Nothing reads this today. Every use in src/ is the literal
+    // `process.env.NEXT_PUBLIC_BACKEND_URL`, which Next inlines when the site
+    // is built, so the API a deployed site calls is chosen by the build's
+    // environment (H01 step 19), not by this var. The local adapter smoke
+    // (server/scripts/readiness/adapter-smoke.ts) passes its loopback address
+    // through the build and preview environment, not through this file.
+    // It holds the live API only so that a future runtime read (a dynamic
+    // `process.env[name]`, a library) lands on the real API instead of a
+    // loopback address that does not exist inside a deployed Worker.
+    "NEXT_PUBLIC_BACKEND_URL": "https://api.questurian.com"
   }
 
   // --- Secrets, set with `wrangler secret put`, never in this file ---------
