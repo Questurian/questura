@@ -378,11 +378,13 @@ export async function runChecks(target: Target, fetchImpl: Fetch = fetch, edgeIm
     })
 
     // Real Cloudflare refuses a request that arrives already carrying
-    // CF-Connecting-IP (403, "error code: 1000") before it reaches the API.
-    // That is the forgery stopped one step earlier, so it passes as is.
+    // CF-Connecting-IP (403, error 1000) before it reaches the API. The body is
+    // "error code: 1000" for curl but an HTML page ("errorCode: 1000") for
+    // Node's fetch, so both spellings count. That is the forgery stopped one
+    // step earlier, so it passes as is.
     const first = await get(fetchImpl, plans, { headers: forged(0, true) })
     const firstBody = await first.text().catch(() => '')
-    if (first.status === 403 && firstBody.includes('error code: 1000')) {
+    if (first.status === 403 && /error ?code: 1000/i.test(firstBody)) {
       record('rate-limit', 'a forged CF-Connecting-IP buys no fresh plans budget', true, 'HTTP 403 "error code: 1000": Cloudflare refused the forged header at the edge')
     } else {
       let last = first.status

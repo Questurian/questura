@@ -163,7 +163,9 @@ function fakeServer(behaviour: Behaviour = {}): typeof fetch {
         return Response.json({ ready: true, ...(b.loadIdentity === null ? {} : { loadIdentity: b.loadIdentity }) }, { headers: base })
       case '/api/payments/plans':
         if (b.edgeRefusesCfConnectingIp && headers.has('cf-connecting-ip')) {
-          return new Response('error code: 1000', { status: 403 })
+          // What Node's fetch really receives from Cloudflare: an HTML page, not the
+          // plain "error code: 1000" curl gets.
+          return new Response('<html><title>DNS points to prohibited IP</title><script>(function(){ errorCode: 1000 })</script></html>', { status: 403 })
         }
         plansCalls += 1
         if (b.rateLimited && plansCalls > 31) return new Response('', { status: 429 })
