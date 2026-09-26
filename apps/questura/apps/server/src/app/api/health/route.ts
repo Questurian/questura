@@ -18,6 +18,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { sampledDatabaseProbe } from '@/shared/observability/health-probe'
 import { readinessState } from '@/shared/observability/readiness'
+import { releaseSha } from '@/shared/observability/release'
 import { getCorsHeaders, handleCorsOptions } from '@/shared/utils/cors'
 
 export async function GET(req: NextRequest) {
@@ -36,7 +37,7 @@ export async function GET(req: NextRequest) {
       timestamp: new Date().toISOString(),
       uptime: process.uptime(),
       environment: process.env.NODE_ENV || 'development',
-      releaseSha: process.env.QUESTURA_RELEASE_SHA || 'unknown',
+      releaseSha: releaseSha() || 'unknown',
       version: process.env.npm_package_version || 'unknown',
       database: {
         status: 'connected',
@@ -60,7 +61,7 @@ export async function GET(req: NextRequest) {
       probeAgeMs: Date.now() - probe.at,
       timestamp: new Date().toISOString(),
       environment: process.env.NODE_ENV || 'development',
-      releaseSha: process.env.QUESTURA_RELEASE_SHA || 'unknown',
+      releaseSha: releaseSha() || 'unknown',
       error: probe.error ?? 'Unknown error',
       database: {
         status: 'disconnected',

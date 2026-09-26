@@ -99,6 +99,26 @@ describe('serializeArticleByCollection featured image resolution', () => {
   })
 })
 
+describe('serializeArticleByCollection internal itinerary fields', () => {
+  // Itinerary 17 (members-only, locked) served its ~1 KB Autobuild brief to
+  // anonymous readers on 2026-09-26. Every public itinerary read goes through
+  // here, free or locked, member or not.
+  it('drops the Autobuild brief and plan overview from itineraries', async () => {
+    const article: Record<string, unknown> = {
+      title: 'Two days in Lima',
+      generationBrief: 'luxury foodie weekend, rooftop drinks, easy access',
+      planOverview: 'Day 1 anchors Miraflores; day 2 moves to Barranco.',
+      whereStaying: [],
+    }
+
+    await serializeArticleByCollection('listicle-itineraries', article)
+
+    expect(article).not.toHaveProperty('generationBrief')
+    expect(article).not.toHaveProperty('planOverview')
+    expect(article).toMatchObject({ title: 'Two days in Lima', whereStaying: [] })
+  })
+})
+
 const blankSocialLinks = {
   instagram: null,
   twitter: null,

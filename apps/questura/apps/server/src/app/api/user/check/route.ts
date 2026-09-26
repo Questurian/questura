@@ -8,8 +8,15 @@ import {
 import { corsResponse, handleCorsOptions } from '@/shared/utils/cors'
 
 export async function POST(req: NextRequest) {
+  // A body that is not a JSON object is the caller's mistake, not ours: it
+  // used to fall into the 500 branch below and read as a server failure.
+  const body: unknown = await req.json().catch(() => null)
+  if (!body || typeof body !== 'object') {
+    return corsResponse({ success: false, message: 'Request body must be a JSON object' }, req, 400)
+  }
+
   try {
-    const { email } = await req.json()
+    const { email } = body as { email?: unknown }
     const normalizedEmail = assertValidEmail(email)
     const rateLimit = await checkAccountCheckRateLimit(req, normalizedEmail)
 

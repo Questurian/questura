@@ -1,9 +1,12 @@
 import { NextResponse } from 'next/server'
 
 import { workerHealth } from '@/features/refresh-outbox/lifecycle'
+import { APP_CONFIG } from '@/shared/config'
 import { loadIdentityState } from '@/shared/http/load-identity'
+import { redisBreaker } from '@/shared/lib/rate-limit-counter'
 import { sampledDatabaseProbe } from '@/shared/observability/health-probe'
 import { readinessState } from '@/shared/observability/readiness'
+import { releaseSha } from '@/shared/observability/release'
 
 /**
  * Readiness: may this instance be sent traffic right now?
@@ -36,6 +39,12 @@ export async function GET() {
   const readiness = readinessState()
   const probe = readiness.ready ? await sampledDatabaseProbe() : null
   const ready = readiness.ready && probe?.ok === true
+  // Passive: what the rate limiters last saw, not a probe of its own. An
+  // open breaker means the last several Redis calls failed; the limiters are
+  // running on their fallback policy, so it is degraded, not unready.
+  const redisState = redisBreaker.state()
+  const degraded =
+    redisState === 'closed' || readiness.degraded.includes('redis') ? readiness.degraded : [...readiness.degraded, 'redis']
 
   return NextResponse.json(
     {
@@ -43,11 +52,12 @@ export async function GET() {
       reason: readiness.reason ?? (probe && !probe.ok ? 'database unreachable' : null),
       attempts: readiness.attempts,
       readySince: readiness.readySince,
-      degraded: readiness.degraded,
+      degraded,
       database: probe
         ? { reachable: probe.ok, responseTimeMs: probe.responseTimeMs, probeAgeMs: Date.now() - probe.at }
         : null,
-      releaseSha: process.env.QUESTURA_RELEASE_SHA || 'unknown',
+      redis: { configured: Boolean(APP_CONFIG.redis.url), breaker: redisState },
+      releaseSha: releaseSha() || 'unknown',
       refreshWorker: workerHealth(),
       // `off` unless an approved load test's key is set (decision D3).
       // `launch:verify` fails on anything else, so a forgotten key cannot

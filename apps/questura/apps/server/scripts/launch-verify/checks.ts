@@ -366,17 +366,39 @@ export async function runChecks(target: Target, fetchImpl: Fetch = fetch, edgeIm
   if (target.rateLimitProbe) {
     // Plans allows 30 a minute per caller. Through a proxy that overwrites the
     // header, 31 requests with 31 forged addresses are still one caller.
-    let last = 0
-    for (let attempt = 0; attempt <= 30; attempt += 1) {
-      const response = await get(fetchImpl, `${target.api}/api/payments/plans`, {
-        headers: { 'cf-connecting-ip': `203.0.113.${attempt + 1}`, 'x-forwarded-for': `198.51.100.${attempt + 1}`, 'x-real-ip': `192.0.2.${attempt + 1}` },
-      })
-      last = response.status
-    }
     // Only meaningful through the real proxy, which overwrites the header. At
     // an origin reached directly (the readiness sandbox, or an unlocked
     // Railway host) this fails by design: that is the hole ADR-0016 closes.
-    record('rate-limit', 'forged address headers do not buy a fresh plans budget (31st → 429)', last === 429, `last HTTP ${last}; if this is the origin itself, see ADR-0016`)
+    const plans = `${target.api}/api/payments/plans`
+    const forged = (attempt: number, withCfConnectingIp: boolean): Record<string, string> => ({
+      ...(withCfConnectingIp ? { 'cf-connecting-ip': `203.0.113.${attempt + 1}` } : {}),
+      'x-forwarded-for': `198.51.100.${attempt + 1}`,
+      'true-client-ip': `192.0.2.${attempt + 1}`,
+      'x-real-ip': `192.0.2.${attempt + 1}`,
+    })
+
+    // Real Cloudflare refuses a request that arrives already carrying
+    // CF-Connecting-IP (403, "error code: 1000") before it reaches the API.
+    // That is the forgery stopped one step earlier, so it passes as is.
+    const first = await get(fetchImpl, plans, { headers: forged(0, true) })
+    const firstBody = await first.text().catch(() => '')
+    if (first.status === 403 && firstBody.includes('error code: 1000')) {
+      record('rate-limit', 'a forged CF-Connecting-IP buys no fresh plans budget', true, 'HTTP 403 "error code: 1000": Cloudflare refused the forged header at the edge')
+    } else {
+      let last = first.status
+      for (let attempt = 1; attempt <= 30; attempt += 1) {
+        last = (await get(fetchImpl, plans, { headers: forged(attempt, true) })).status
+      }
+      record('rate-limit', 'a forged CF-Connecting-IP buys no fresh plans budget (31st → 429)', last === 429, `last HTTP ${last}; if this is the origin itself, see ADR-0016`)
+    }
+
+    // The headers Cloudflare lets through: these reach the API, and must not
+    // be read as the caller's address.
+    let last = 0
+    for (let attempt = 0; attempt <= 30; attempt += 1) {
+      last = (await get(fetchImpl, plans, { headers: forged(attempt, false) })).status
+    }
+    record('rate-limit', 'forged X-Forwarded-For / True-Client-IP do not buy a fresh plans budget (31st → 429)', last === 429, `last HTTP ${last}; if this is the origin itself, see ADR-0016`)
   }
 
   // --- Signed-in cookie (B6, opt-in: LAUNCH_VERIFY_COOKIE) ------------------------

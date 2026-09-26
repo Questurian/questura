@@ -1,5 +1,6 @@
 import { readBoundedInt } from '@/shared/config/env-int'
 import { GATE_DEFAULTS } from '@/shared/http/admission'
+import { releaseSha } from '@/shared/observability/release'
 
 import { poolSizes, type PoolSizes } from './pool-budget'
 import { looksTransactionPooled } from './pooled-uri'
@@ -423,6 +424,6 @@ export function fleetManifestProblems(env: Env = process.env): FleetProblem[] {
  */
 export function applicationName(pool: keyof PoolSizes | 'startup', env: Env = process.env): string {
   const role = env.APP_ROLE?.trim() || 'serving'
-  const release = (env.QUESTURA_RELEASE_SHA?.trim() || 'dev').slice(0, 7)
+  const release = (releaseSha(env) || 'dev').slice(0, 7)
   return `questura:${role}:${release}:${pool}`
 }

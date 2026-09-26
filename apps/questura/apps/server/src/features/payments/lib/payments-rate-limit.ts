@@ -5,6 +5,7 @@ import {
   hashIdentifier,
   incrementCounter,
 } from '@/shared/lib/rate-limit-counter'
+import { isTrustedRender, renderMultiplier } from '@/shared/http/public-read-rate-limit'
 import { logger } from '@/shared/utils/logger'
 
 /**
@@ -67,6 +68,20 @@ export async function checkPaymentsRateLimit(
   headers: Headers,
   scope: PaymentsRateLimitScope
 ): Promise<PaymentsRateLimitResult> {
+  // The join page reads plans from the frontend's server, so every reader it
+  // renders for shares the frontend's egress IP -- and a 429 there renders
+  // "nothing for sale". A render proven by `QUESTURA_RENDER_TOKEN` gets its own
+  // larger bucket, the same arrangement as the public reads
+  // (`public-read-rate-limit.ts`). Plans only: it is the one public payments
+  // route, and the rest act for a signed-in visitor, never for a render.
+  if (scope === 'plans' && isTrustedRender(headers)) {
+    return checkCounter(
+      `payments:rate-limit:${scope}:render`,
+      PAYMENTS_RATE_LIMITS[scope].ip * renderMultiplier(),
+      scope
+    )
+  }
+
   const ipKey = `payments:rate-limit:${scope}:ip:${hashIdentifier(getClientIp(headers))}`
   return checkCounter(ipKey, PAYMENTS_RATE_LIMITS[scope].ip, scope)
 }

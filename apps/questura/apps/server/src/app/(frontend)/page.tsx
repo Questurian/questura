@@ -1,62 +1,11 @@
-import { staffUser } from '@/features/auth/lib/staff-user'
-import { headers as getHeaders } from 'next/headers.js'
-import Image from 'next/image'
-import { getPayload } from 'payload'
-import React from 'react'
-import { fileURLToPath } from 'url'
+import { redirect } from 'next/navigation'
 
-import config from '@/payload.config'
-import './styles.css'
+import { APP_URLS } from '@/shared/config'
 
-export default async function HomePage() {
-  const headers = await getHeaders()
-  const payloadConfig = await config
-  const payload = await getPayload({ config: payloadConfig })
-  const { user } = await payload.auth({ headers })
-  // Only a human account has an email to greet (ADR-0006).
-  const staff = staffUser(user)
-
-  const fileURL = `vscode://file/${fileURLToPath(import.meta.url)}`
-
-  return (
-    <div className="home">
-      <div className="content">
-        <picture>
-          <source srcSet="https://raw.githubusercontent.com/payloadcms/payload/main/packages/ui/src/assets/payload-favicon.svg" />
-          <Image
-            alt="Payload Logo"
-            height={65}
-            src="https://raw.githubusercontent.com/payloadcms/payload/main/packages/ui/src/assets/payload-favicon.svg"
-            width={65}
-          />
-        </picture>
-        {!staff && <h1>Welcome to your new project.</h1>}
-        {staff && <h1>Welcome back, {staff.email}</h1>}
-        <div className="links">
-          <a
-            className="admin"
-            href={payloadConfig.routes.admin}
-            rel="noopener noreferrer"
-            target="_blank"
-          >
-            Go to admin panel
-          </a>
-          <a
-            className="docs"
-            href="https://payloadcms.com/docs"
-            rel="noopener noreferrer"
-            target="_blank"
-          >
-            Documentation
-          </a>
-        </div>
-      </div>
-      <div className="footer">
-        <p>Update this page by editing</p>
-        <a className="codeLink" href={fileURL}>
-          <code>app/(frontend)/page.tsx</code>
-        </a>
-      </div>
-    </div>
-  )
+// The API host has no home page of its own. This used to be Payload's starter
+// template, which greeted strangers with "Welcome to your new project" and a
+// `vscode://` link carrying the server's build path. Anyone who lands here
+// (a mistyped address, an old bookmark) wants the site.
+export default function HomePage() {
+  redirect(APP_URLS.frontend)
 }

@@ -92,7 +92,8 @@ export function isTrustedRender(headers: Headers): boolean {
   return timingSafeEqual(digest(provided), digest(configured))
 }
 
-function renderMultiplier(): number {
+/** Also sizes the render bucket of the public `/api/payments/plans` read. */
+export function renderMultiplier(): number {
   const value = Number(process.env.PUBLIC_READ_RENDER_MULTIPLIER)
   return Number.isInteger(value) && value > 0 ? value : 20
 }

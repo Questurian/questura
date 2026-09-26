@@ -43,6 +43,8 @@ type Behaviour = Partial<{
   webhookStatus: number
   bypassStatus: number | 'unreachable' | 'dns' | 'tls'
   rateLimited: boolean
+  /** Real Cloudflare: a client-sent CF-Connecting-IP is refused at the edge. */
+  edgeRefusesCfConnectingIp: boolean
   homeRedirectsOff: boolean
   // Host checks
   homeHtmlExtra: string
@@ -88,6 +90,7 @@ function fakeServer(behaviour: Behaviour = {}): typeof fetch {
     webhookStatus: 400,
     bypassStatus: 'unreachable' as number | 'unreachable' | 'dns' | 'tls',
     rateLimited: true,
+    edgeRefusesCfConnectingIp: false,
     homeHtmlExtra: '',
     canonical: `${TARGET.client}/peru/lima` as string | null,
     ogUrl: `${TARGET.client}/peru/lima` as string | null,
@@ -159,6 +162,9 @@ function fakeServer(behaviour: Behaviour = {}): typeof fetch {
       case '/api/health/ready':
         return Response.json({ ready: true, ...(b.loadIdentity === null ? {} : { loadIdentity: b.loadIdentity }) }, { headers: base })
       case '/api/payments/plans':
+        if (b.edgeRefusesCfConnectingIp && headers.has('cf-connecting-ip')) {
+          return new Response('error code: 1000', { status: 403 })
+        }
         plansCalls += 1
         if (b.rateLimited && plansCalls > 31) return new Response('', { status: 429 })
         return Response.json({ plans: b.prices.map((amount) => ({ amount })) }, { headers: { ...base, ...cors } })
@@ -511,7 +517,19 @@ describe('launch-verify checks', () => {
   it('the rate-limit probe fails when forged addresses buy fresh budgets', async () => {
     expect(await failures({ rateLimited: true }, { rateLimitProbe: true })).toEqual([])
     expect(await failures({ rateLimited: false }, { rateLimitProbe: true })).toEqual([
-      'forged address headers do not buy a fresh plans budget (31st → 429)',
+      'a forged CF-Connecting-IP buys no fresh plans budget (31st → 429)',
+      'forged X-Forwarded-For / True-Client-IP do not buy a fresh plans budget (31st → 429)',
+    ])
+  })
+
+  // Live 2026-09-26: Cloudflare answers a client-sent CF-Connecting-IP itself.
+  it('passes the forged CF-Connecting-IP when Cloudflare refuses it at the edge', async () => {
+    expect(await failures({ edgeRefusesCfConnectingIp: true }, { rateLimitProbe: true })).toEqual([])
+  })
+
+  it('still requires a 429 for forged X-Forwarded-For / True-Client-IP behind that edge', async () => {
+    expect(await failures({ edgeRefusesCfConnectingIp: true, rateLimited: false }, { rateLimitProbe: true })).toEqual([
+      'forged X-Forwarded-For / True-Client-IP do not buy a fresh plans budget (31st → 429)',
     ])
   })
 })

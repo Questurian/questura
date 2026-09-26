@@ -71,7 +71,7 @@ cookies.
 | --- | --- | --- |
 | Railway (API) | `SENTRY_DSN` | The project's DSN. **Required** by `env:check`; the server itself boots without it. |
 | Railway (API) | `SENTRY_ENVIRONMENT` | Optional. Defaults to `production` when `NODE_ENV=production`. |
-| Railway (API) | `QUESTURA_RELEASE_SHA` | Already in the template. Becomes the Sentry release. |
+| Railway (API) | `QUESTURA_RELEASE_SHA` | Optional. Becomes the Sentry release; when unset, Railway's own `RAILWAY_GIT_COMMIT_SHA` is used. |
 | Worker build (client) | `NEXT_PUBLIC_QUESTURA_RELEASE_SHA` | Optional. Tags the website's reports with its release. Build-time, not a Worker secret. |
 | Worker | *(none)* | The website has no DSN. Its reports go through the API. |
 

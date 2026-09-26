@@ -100,7 +100,14 @@ export const visitorAuth = betterAuth({
   baseURL: APP_URLS.backend,
   basePath: '/api/visitor-auth',
   trustedOrigins: APP_CONFIG.CORS_ORIGINS,
-  secret: process.env.BETTER_AUTH_SECRET || APP_CONFIG.payloadSecret,
+  // Where an OAuth callback goes when it cannot tell which sign-in it belongs
+  // to (state cookie expired, back button, link opened in another browser), so
+  // it has no per-request error URL. Without this Better Auth fell back to its
+  // own `/error` page on the API host, which bounced to the API root.
+  onAPIError: {
+    errorURL: APP_URLS.frontendUrl('/auth-error'),
+  },
+  secret:process.env.BETTER_AUTH_SECRET || APP_CONFIG.payloadSecret,
   database: visitorAuthPool,
   // Keyed on whether Redis is configured, not on the environment, so a local
   // run with REDIS_URL exercises the same session path production does.

@@ -274,9 +274,11 @@ Write down the time at each step.
     Point the writer tool at the new API (the table above) and sign in to it
     again.
 
-14. **Catch up with Stripe.** Events that happened between step 4 and now are
-    being retried to the new endpoint, some of them hours apart. Don't wait:
-    run the reconcile, dry run first.
+14. **Catch up with Stripe.** Stripe only sends an endpoint the events that
+    happen after the endpoint exists. Anything from before the new endpoint was
+    created in step 2 never reaches it, retried or not, and what came after
+    arrives on Stripe's retry schedule, some of it hours apart. The reconcile
+    is what catches the new database up, so run it now, dry run first.
 
     ```bash
     QUESTURA_RECONCILE_APPLY=0 pnpm --dir apps/questura/apps/server reconcile:nightly

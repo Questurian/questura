@@ -3,6 +3,7 @@ import type { Instrumentation } from 'next'
 
 import { logger } from '@/shared/utils/logger'
 import { REDACTED, redact, redactString } from './redact'
+import { releaseSha } from './release'
 import { REQUEST_ID_HEADER, wellFormedRequestId } from './request-id'
 
 /**
@@ -72,7 +73,7 @@ export function sentryOptions(env: Env = process.env) {
     environment:
       env.SENTRY_ENVIRONMENT?.trim() ||
       (env.NODE_ENV === 'production' ? 'production' : 'development'),
-    release: env.QUESTURA_RELEASE_SHA?.trim() || undefined,
+    release: releaseSha(env),
     // No IP addresses, cookies or request bodies, whatever an integration would like.
     sendDefaultPii: false,
     // Errors only: no `tracesSampleRate`. Even a rate of 0 counts as tracing
@@ -249,7 +250,7 @@ export function reportRequestError(
     routePath: context.routePath,
     routeType: context.routeType,
     ...(typeof digest === 'string' ? { digest } : {}),
-    release: process.env.QUESTURA_RELEASE_SHA || undefined,
+    release: releaseSha(),
     error,
   })
 

@@ -1,5 +1,7 @@
 import { createHash, randomUUID } from 'node:crypto'
 
+import { releaseSha } from './release'
+
 /**
  * Who this process is, stably, for as long as it lives.
  *
@@ -40,7 +42,7 @@ export function instanceIdentity(env: NodeJS.ProcessEnv = process.env): {
     id: self.id,
     pid: process.pid,
     role: env.APP_ROLE?.trim() || 'serving',
-    release: env.QUESTURA_RELEASE_SHA?.trim() || 'dev',
+    release: releaseSha(env) || 'dev',
     startedAt: self.startedAt,
     uptimeS: Math.round(process.uptime()),
   }

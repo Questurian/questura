@@ -55,6 +55,24 @@ describe('GET /api/health/ready', () => {
     }
   })
 
+  // `markDegraded` had no callers, so a Redis outage never showed here.
+  it('reports Redis degraded, not unready, while its breaker is open', async () => {
+    const { redisBreaker } = await import('@/shared/lib/rate-limit-counter')
+    markReady()
+    await expect((await GET()).json()).resolves.toMatchObject({ degraded: [], redis: { breaker: 'closed' } })
+
+    try {
+      for (let i = 0; i < 5; i += 1) {
+        await redisBreaker.run(() => Promise.reject(new Error('ECONNREFUSED'))).catch(() => undefined)
+      }
+      const response = await GET()
+      expect(response.status).toBe(200)
+      await expect(response.json()).resolves.toMatchObject({ ready: true, degraded: ['redis'], redis: { breaker: 'open' } })
+    } finally {
+      redisBreaker.reset()
+    }
+  })
+
   it('asks the database the cheapest question there is, under its own short limit', async () => {
     markReady()
     await GET()

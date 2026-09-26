@@ -10,6 +10,7 @@ import { admissionStats } from '@/shared/http/admission'
 import { redisBreaker } from '@/shared/lib/rate-limit-counter'
 import { configFingerprint, instanceIdentity, throttledSample } from '@/shared/observability/instance'
 import { readinessState } from '@/shared/observability/readiness'
+import { releaseSha } from '@/shared/observability/release'
 import { servingTimeouts, advisoryLockTimeouts } from '@/shared/database/timeouts'
 import { advisoryLockPoolStats } from '@/shared/utils/advisory-lock'
 
@@ -154,7 +155,7 @@ export async function GET(req: NextRequest) {
         // balancer may be ten samples of one instance.
         instance: instanceIdentity(),
         configFingerprint: configFingerprint(),
-        releaseSha: process.env.QUESTURA_RELEASE_SHA || 'unknown',
+        releaseSha: releaseSha() || 'unknown',
         readiness: readinessState(),
         payloadPool: {
           total: pool?.totalCount ?? 0,

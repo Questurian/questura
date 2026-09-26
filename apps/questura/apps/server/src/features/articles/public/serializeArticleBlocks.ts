@@ -157,6 +157,14 @@ async function serializeItineraryBlocks(
   article: Record<string, unknown>,
   payload?: Payload,
 ) {
+  // Autobuild's inputs and working notes: the operator's brief and the plan's
+  // internal rationale. Both are marked internal in the admin, no reader page
+  // renders them, and they went out on every public read -- locked itineraries
+  // included, where the brief describes the plan the reader has not paid for.
+  // Writer tools read them through Payload's own API, not these routes.
+  delete article.generationBrief
+  delete article.planOverview
+
   const header = article.header as Record<string, unknown> | undefined
   if (header?.intro) {
     header.intro = await toLexicalHTML(header.intro)

@@ -93,6 +93,27 @@ describe('legacy user-check route', () => {
     expect(mocks.checkVisitorAccount).not.toHaveBeenCalled()
   })
 
+  it.each([
+    ['not JSON', 'notjson'],
+    ['JSON null', 'null'],
+    ['a JSON string', '"ada@example.com"'],
+  ])('answers 400, not 500, to a body that is %s', async (_label, body) => {
+    const request = new Request('http://localhost:4000/api/user/check', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', origin: 'http://localhost:3000' },
+      body,
+    }) as any
+
+    const response = await POST(request)
+
+    expect(response.status).toBe(400)
+    await expect(response.json()).resolves.toEqual({
+      success: false,
+      message: 'Request body must be a JSON object',
+    })
+    expect(mocks.checkAccountCheckRateLimit).not.toHaveBeenCalled()
+  })
+
   it('does not expose internal rate-limit failures', async () => {
     mocks.checkAccountCheckRateLimit.mockRejectedValue(
       new Error('Redis connection exposed-internal-host:6379 failed')
