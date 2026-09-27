@@ -1,4 +1,3 @@
-import { createHash, timingSafeEqual } from 'node:crypto'
 import { NextRequest, NextResponse } from 'next/server'
 import { getPayload } from 'payload'
 
@@ -7,6 +6,7 @@ import { workerHealth } from '@/features/refresh-outbox/lifecycle'
 import { refreshJobStats } from '@/features/refresh-outbox/worker'
 import { describePoolBudget, poolBudget } from '@/shared/database/pool-budget'
 import { admissionStats } from '@/shared/http/admission'
+import { internalSecretMatches } from '@/shared/http/internal-secret'
 import { redisBreaker } from '@/shared/lib/rate-limit-counter'
 import { configFingerprint, instanceIdentity, throttledSample } from '@/shared/observability/instance'
 import { readinessState } from '@/shared/observability/readiness'
@@ -48,21 +48,6 @@ import { advisoryLockPoolStats } from '@/shared/utils/advisory-lock'
  * overload makes the overload worse.
  */
 
-function secretsMatch(provided: string, configured: string): boolean {
-  const providedDigest = createHash('sha256').update(provided).digest()
-  const configuredDigest = createHash('sha256').update(configured).digest()
-  return timingSafeEqual(providedDigest, configuredDigest)
-}
-
-function providedSecret(req: NextRequest): string {
-  const bearer = req.headers.get('authorization')
-  if (typeof bearer === 'string' && bearer.toLowerCase().startsWith('bearer ')) {
-    return bearer.slice(7).trim()
-  }
-
-  return req.headers.get('x-stats-secret')?.trim() ?? ''
-}
-
 /**
  * How stale a database-wide answer may be. Long enough that per-second
  * polling from a collector cannot turn into per-second `pg_stat_activity`
@@ -88,7 +73,7 @@ export async function GET(req: NextRequest) {
     )
   }
 
-  if (!secretsMatch(providedSecret(req), configured)) {
+  if (!internalSecretMatches(req, configured)) {
     return NextResponse.json(
       { message: 'Unauthorized.' },
       { status: 401, headers: { 'Cache-Control': 'no-store' } },
