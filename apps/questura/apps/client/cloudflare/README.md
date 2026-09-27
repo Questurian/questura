@@ -96,8 +96,9 @@ override builds, starts, serves, and does not purge.
 - `CACHE_PURGE_API_TOKEN` / `CACHE_PURGE_ZONE_ID` — cache purge only. Cache
   Purge permission on this zone and nothing else. The adapter reads exactly
   these names; under any other name the purge logs "No cache zone ID or API
-  token provided" and does nothing. The regional page copies
-  (`open-next.config.ts`) are only correct while this purge works.
+  token provided" and does nothing. The purge clears the regional page
+  copies (`open-next.config.ts`) on a publication; the tag check on every
+  hit keeps them correct even when a purge is late.
 
 ## What a local preview still cannot certify
 

@@ -106,8 +106,8 @@ test('no public page reads cookies or request headers', () => {
 
 // 1.18.1's cache-purge Durable Object handed the tag array to sql.exec as one
 // binding, so every purge alarm threw and retried (fixed upstream in 1.20.x,
-// which needs a newer Next). The regional page copies below are only correct
-// while that purge works, so the patch must stay applied.
+// which needs a newer Next). The purge is what clears the regional page
+// copies on a publication, so the patch must stay applied.
 test('the cache-purge Durable Object patch is applied', () => {
   const root = JSON.parse(readFileSync(resolve(clientRoot, '../../../../package.json'), 'utf8'))
   assert.ok(
@@ -128,4 +128,13 @@ test('only rendered pages use the regional cache', () => {
   assert.match(config, /withRegionalCache\(r2IncrementalCache/)
   assert.match(config, /cacheType === 'fetch' \? r2IncrementalCache\.get/)
   assert.match(config, /cacheType === 'fetch' \? r2IncrementalCache\.set/)
+})
+
+// Skipping the tag check on a regional hit left a revalidated page stuck
+// live (open-next.config.ts has the sequence). Both options are spelled out
+// because the adapter's defaults flip them whenever cache purge is on.
+test('a regional hit still checks the tag cache', () => {
+  const config = read('open-next.config.ts')
+  assert.match(config, /bypassTagCacheOnCacheHit:\s*false/)
+  assert.match(config, /shouldLazilyUpdateOnCacheHit:\s*true/)
 })

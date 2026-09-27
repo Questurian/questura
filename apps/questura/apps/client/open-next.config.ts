@@ -26,18 +26,33 @@ import { purgeCache } from '@opennextjs/cloudflare/overrides/cache-purge/index'
 
 /**
  * Rendered pages get a copy in each data centre's Cache API; data fetched
- * while rendering does not.
+ * while rendering does not. A hit skips the R2 read. It does NOT skip the tag
+ * check (D1), and must not.
  *
- * A hit on the regional copy skips both R2 and the tag cache (D1), which is
- * what makes it fast, and it is correct only because a publication purges
- * the copy by tag. For a page, a hit in the few seconds before the purge
- * lands serves the old page, then the next visit rebuilds it. For fetched
- * data the same window is worse: a rebuild started just after a
- * publication, in a data centre the purge had not reached, would read the
- * old data without asking the tag cache, and write an old page to R2 as if
- * it were new. Fetches therefore stay on R2, where Next checks their tags.
+ * The adapter's default with cache purge on is to skip the tag check on a
+ * regional hit and rely on the purge. Live on 2026-09-27 that left a
+ * revalidated page stuck: a regional miss reads the old entry from R2 and
+ * writes it into the regional cache in the background; the interceptor sees
+ * the tag and hands the request to Next; Next's own read then hits that fresh
+ * regional copy, skips the tags, and serves the old page as a HIT without
+ * rebuilding. Every later purge repeats the same loop. With the tag check on,
+ * an old copy is found stale wherever it sits, and the purge only saves a
+ * rebuild per data centre.
+ *
+ * `shouldLazilyUpdateOnCacheHit` refreshes the regional copy from R2 in the
+ * background after each hit, so a data centre that did not do a time-based
+ * rebuild itself still picks up the new page instead of serving its old copy
+ * until the Cache API expires it.
+ *
+ * Fetched data stays on R2: a rebuild must read it through the normal path,
+ * and the regional cache adds nothing there that is worth another copy to
+ * keep in step.
  */
-const regionalPages = withRegionalCache(r2IncrementalCache, { mode: 'long-lived' })
+const regionalPages = withRegionalCache(r2IncrementalCache, {
+  mode: 'long-lived',
+  bypassTagCacheOnCacheHit: false,
+  shouldLazilyUpdateOnCacheHit: true,
+})
 
 const incrementalCache: Pick<typeof r2IncrementalCache, 'name' | 'get' | 'set' | 'delete'> = {
   name: r2IncrementalCache.name,
