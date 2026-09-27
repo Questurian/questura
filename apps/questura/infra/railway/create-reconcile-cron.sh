@@ -13,7 +13,7 @@
 # copied anywhere new, and rotating one on the server rotates it here too.
 #
 # What it wants (and --check compares against):
-#   service   questura-reconcile, source Questurian/questurian branch main
+#   service   questura-reconcile, source Questurian/questura branch main
 #   settings  builder, build command, root directory and watch patterns copied
 #             from questura-server; start `pnpm --dir apps/questura/apps/server
 #             reconcile:nightly`; cron `20 4 * * *` (UTC); restart NEVER; no
@@ -45,7 +45,7 @@ ENVIRONMENT_ID=e35f0d85-c66d-4f66-b781-d9e456bab8cb
 SERVER_SERVICE_ID=0f920c5a-3d07-4a51-a75a-fd7a29726f86
 SERVER_SERVICE_NAME=questura-server
 CRON_SERVICE_NAME=questura-reconcile
-REPO=Questurian/questurian
+REPO=Questurian/questura
 BRANCH=main
 START_COMMAND='pnpm --dir apps/questura/apps/server reconcile:nightly'
 CRON_SCHEDULE='20 4 * * *'

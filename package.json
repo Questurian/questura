@@ -1,18 +1,14 @@
 {
-  "name": "@questurian/source",
+  "name": "@questura/source",
   "version": "0.0.0",
   "packageManager": "pnpm@10.0.0",
   "license": "MIT",
   "private": true,
   "scripts": {
-    "dashboard": "turbo run dev:tui --concurrency=20 --filter=@questurian/dashboard",
-    "dashboard:web": "turbo run dev --concurrency=20 --filter=@questurian/dashboard",
-    "dashboard:clean": "turbo run dev:clean --concurrency=20 --filter=@questurian/dashboard",
-    "dashboard:autostart": "pnpm --filter @questurian/dashboard autostart",
+    "dev": "turbo run dev --concurrency=20 --filter=@questura/client --filter=@questura/server",
     "questura": "turbo run dev --concurrency=20 --filter=@questura/client --filter=@questura/server",
     "questura:client": "turbo run dev --concurrency=20 --filter=@questura/client",
     "questura:server": "turbo run dev --concurrency=20 --filter=@questura/server",
-    "dev": "turbo run dev --concurrency=20 --filter=!@questurian/abw-converter",
     "build": "turbo run build",
     "lint": "turbo run lint",
     "test": "turbo run test"

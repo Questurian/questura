@@ -27,10 +27,10 @@ command, never onto the screen:
 
 ```bash
 grep '^EXCHANGE_RATE_SYNC_SECRET=' ~/.questura-vault/generated.env | cut -d= -f2- | tr -d '\n' \
-  | gh secret set EXCHANGE_RATE_SYNC_SECRET --repo Questurian/questurian
-gh variable set QUESTURA_SCHEDULE_ENABLED --repo Questurian/questurian --body true
-gh workflow run questura-exchange-rate-sync.yml --repo Questurian/questurian
-gh workflow run questura-uptime-check.yml --repo Questurian/questurian
+  | gh secret set EXCHANGE_RATE_SYNC_SECRET --repo Questurian/questura
+gh variable set QUESTURA_SCHEDULE_ENABLED --repo Questurian/questura --body true
+gh workflow run questura-exchange-rate-sync.yml --repo Questurian/questura
+gh workflow run questura-uptime-check.yml --repo Questurian/questura
 ```
 
 The secret must equal `EXCHANGE_RATE_SYNC_SECRET` on Railway (the vault's

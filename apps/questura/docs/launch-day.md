@@ -159,7 +159,7 @@ loopback TLS forwarder (`scripts/readiness/ci-tls-forward.mjs`).
 
 The `full-ci` label only fires when it is added, so after new commits remove
 it and add it back to run again. `gh pr edit --add-label` fails here; use
-`gh api -X POST repos/Questurian/questurian/issues/<N>/labels -f 'labels[]=full-ci'`
+`gh api -X POST repos/Questurian/questura/issues/<N>/labels -f 'labels[]=full-ci'`
 (and `-X DELETE …/labels/full-ci` to remove it).
 
 Proof that it catches a break: on PR #710 a throwaway commit let `?returnTo=`

@@ -2,11 +2,6 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "abw",
-      "url": "http://localhost:3003",
-      "port": 3003
-    },
-    {
       "name": "questura-client",
       "url": "http://localhost:3000",
       "port": 3000
@@ -29,28 +24,6 @@
         "dev"
       ],
       "port": 3000
-    },
-    {
-      "name": "abw-dev",
-      "runtimeExecutable": "pnpm",
-      "runtimeArgs": [
-        "--filter",
-        "@questurian/ai-blog-writer",
-        "run",
-        "dev"
-      ],
-      "port": 3003
-    },
-    {
-      "name": "dashboard",
-      "runtimeExecutable": "pnpm",
-      "runtimeArgs": [
-        "--filter",
-        "@questurian/dashboard",
-        "run",
-        "dev"
-      ],
-      "port": 4500
     }
   ]
 }
