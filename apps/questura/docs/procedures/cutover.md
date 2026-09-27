@@ -421,9 +421,26 @@ T5. **One real $12.99 purchase, owner only** (`docs/launch-day.md` step 6, the
     access still ends within a minute of it.
 
     Done 2026-09-27 ($12.99, New York address, `managed_payments.enabled:
-    true`, tax liability on Stripe). The owner kept this membership on
-    purpose, as his own member account for testing, so it was not refunded
-    and the "refund removes access" check is still unproven on the new host.
+    true`, tax liability on Stripe). That purchase ran under the old tax code
+    `txcd_10000000`, so later that day the owner refunded it in full and
+    bought again under `txcd_10503005`:
+
+    - **Refund** (`sub_…JwHxtyyf`, 14:05 UTC): 11 seconds after the full
+      refund, the subscription was Canceled in Stripe (not "cancels on"),
+      its metadata read `access_revoked=true`, `access_revoked_reason=refund`,
+      and the row read `cancelled` with `paid_through_at` and
+      `dunning_grace_until` empty. `charge.refunded` and
+      `customer.subscription.deleted` delivered, nothing pending, no new
+      Sentry issue. The refund proof the sandbox gave is now shown on live.
+    - **Re-buy** (`sub_…QoYYdgnW`, 14:06 UTC): $12.99, Managed Payments on,
+      row `active` through 2026-10-27. Tax $0, `taxability_reason:
+      product_exempt`, NY address, with the product already on
+      `txcd_10503005`. Stripe carries the tax liability, so its $0 stands.
+    - **Reconcile dry run** afterwards (Railway cron, `QUESTURA_RECONCILE_APPLY=0`,
+      then removed): `result=ok`, 0 changes.
+
+    The re-bought membership is the owner's own member account for testing.
+    Leave it active.
 
 **To undo:** set `STRIPE_MANAGED_PAYMENTS=off` and deploy. New checkouts are
 unmanaged again and `/join` drops the tax line. Memberships bought while it was

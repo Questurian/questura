@@ -18,7 +18,6 @@ code; confirm it on the live domain".
 | [release.html](release.html) | **Run first.** Deploy `fade0c24` → main: three `server.env` lines, backup, 15 migrations, search backfill, client build, pages | #654 | 2026-09-23 |
 | [visitor-auth.html](visitor-auth.html) | Sign-in cookies, Safari, navbar, Google, password email, sessions in the DB | #646–#650 | 2026-09-23 |
 | [payments.html](payments.html) | Webhook endpoint after a month parked, reconcile of the two live members, member billing pages, plans | #648, #650, #653 | 2026-09-23 |
-| [launch-purchase.html](launch-purchase.html) | **Platform, not the laptop.** The owner's one real purchase on launch day: checkout → cancel → reactivate → cancel → refund, with the expected row, `/api/me` and Stripe state at each step (`docs/launch-day.md` step 6, PL2) | launch fix plan item 6 | 2026-09-25 |
 
 ## How to run a live window
 
@@ -36,7 +35,7 @@ checkout without saying so first. Never flush the live Redis.
 
 | File | Checked | Release |
 |---|---|---|
-| — | | |
+| [launch-purchase.html](launch-purchase.html) — purchase, full refund (access ended and billing cancelled in 11 s), re-buy under `txcd_10503005`, reconcile dry run 0 changes. Kept membership is intended (`docs/procedures/cutover.md` T5) | 2026-09-27 | API `08d5a360`, cron `0d610b5` |
 
 ## Adding a file
 
