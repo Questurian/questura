@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict'
-import { readdirSync, readFileSync } from 'node:fs'
+import { readdirSync, readFileSync, realpathSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import test from 'node:test'
 import { fileURLToPath } from 'node:url'
@@ -102,4 +102,30 @@ test('no public page reads cookies or request headers', () => {
     .filter((file) => /\.(tsx?|jsx?)$/.test(file) && !exempt.test(file))
     .filter((file) => /from\s+['"]next\/headers['"]/.test(readFileSync(resolve(src, file), 'utf8')))
   assert.deepEqual(offenders, [], "cache interception would serve one visitor's version of these pages to everyone")
+})
+
+// 1.18.1's cache-purge Durable Object handed the tag array to sql.exec as one
+// binding, so every purge alarm threw and retried (fixed upstream in 1.20.x,
+// which needs a newer Next). The regional page copies below are only correct
+// while that purge works, so the patch must stay applied.
+test('the cache-purge Durable Object patch is applied', () => {
+  const root = JSON.parse(readFileSync(resolve(clientRoot, '../../../../package.json'), 'utf8'))
+  assert.ok(
+    root.pnpm?.patchedDependencies?.['@opennextjs/cloudflare@1.18.1'],
+    'patches/@opennextjs__cloudflare@1.18.1.patch is not registered in the root package.json',
+  )
+  const purge = readFileSync(
+    resolve(realpathSync(resolve(clientRoot, 'node_modules/@opennextjs/cloudflare')), 'dist/api/durable-objects/bucket-cache-purge.js'),
+    'utf8',
+  )
+  assert.match(purge, /\.\.\.tags\.map\(\(row\) => row\.tag\)/)
+  assert.doesNotMatch(purge, /VALUES \(\?\)`, \[tag\]\)/)
+})
+
+// Fetched data must keep its tag check: see the comment in open-next.config.ts.
+test('only rendered pages use the regional cache', () => {
+  const config = read('open-next.config.ts')
+  assert.match(config, /withRegionalCache\(r2IncrementalCache/)
+  assert.match(config, /cacheType === 'fetch' \? r2IncrementalCache\.get/)
+  assert.match(config, /cacheType === 'fetch' \? r2IncrementalCache\.set/)
 })

@@ -93,8 +93,11 @@ override builds, starts, serves, and does not purge.
   Transform Rule reaches the Worker's own subrequests is a platform unknown.
   Missing while the backend has it: every page that needs the API fails to
   render. Server-only, like the render token.
-- `CLOUDFLARE_API_TOKEN` / `CLOUDFLARE_ZONE_ID` — cache purge only. Cache
-  Purge permission on this zone and nothing else.
+- `CACHE_PURGE_API_TOKEN` / `CACHE_PURGE_ZONE_ID` — cache purge only. Cache
+  Purge permission on this zone and nothing else. The adapter reads exactly
+  these names; under any other name the purge logs "No cache zone ID or API
+  token provided" and does nothing. The regional page copies
+  (`open-next.config.ts`) are only correct while this purge works.
 
 ## What a local preview still cannot certify
 

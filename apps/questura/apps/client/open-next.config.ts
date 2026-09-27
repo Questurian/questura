@@ -10,12 +10,13 @@
  * exactly the failure L01 spent its time removing from the backend, so
  * reintroducing it in the adapter would waste that work.
  *
- * Cache purge is configured by binding (NEXT_CACHE_DO_PURGE) plus a
- * Cloudflare API token and zone id; see wrangler.jsonc.
+ * Cache purge is configured by binding (NEXT_CACHE_DO_PURGE) plus the
+ * CACHE_PURGE_API_TOKEN and CACHE_PURGE_ZONE_ID secrets; see wrangler.jsonc.
  */
 
 import { defineCloudflareConfig } from '@opennextjs/cloudflare'
 import r2IncrementalCache from '@opennextjs/cloudflare/overrides/incremental-cache/r2-incremental-cache'
+import { withRegionalCache } from '@opennextjs/cloudflare/overrides/incremental-cache/regional-cache'
 import d1NextTagCache from '@opennextjs/cloudflare/overrides/tag-cache/d1-next-tag-cache'
 import doQueue from '@opennextjs/cloudflare/overrides/queue/do-queue'
 // `/index` is not a typo. The package's export map is `./*` →
@@ -23,8 +24,33 @@ import doQueue from '@opennextjs/cloudflare/overrides/queue/do-queue'
 // the bare specifier resolves to a path that does not exist.
 import { purgeCache } from '@opennextjs/cloudflare/overrides/cache-purge/index'
 
+/**
+ * Rendered pages get a copy in each data centre's Cache API; data fetched
+ * while rendering does not.
+ *
+ * A hit on the regional copy skips both R2 and the tag cache (D1), which is
+ * what makes it fast, and it is correct only because a publication purges
+ * the copy by tag. For a page, a hit in the few seconds before the purge
+ * lands serves the old page, then the next visit rebuilds it. For fetched
+ * data the same window is worse: a rebuild started just after a
+ * publication, in a data centre the purge had not reached, would read the
+ * old data without asking the tag cache, and write an old page to R2 as if
+ * it were new. Fetches therefore stay on R2, where Next checks their tags.
+ */
+const regionalPages = withRegionalCache(r2IncrementalCache, { mode: 'long-lived' })
+
+const incrementalCache: Pick<typeof r2IncrementalCache, 'name' | 'get' | 'set' | 'delete'> = {
+  name: r2IncrementalCache.name,
+  get: (key, cacheType) =>
+    cacheType === 'fetch' ? r2IncrementalCache.get(key, cacheType) : regionalPages.get(key, cacheType),
+  set: (key, value, cacheType) =>
+    cacheType === 'fetch' ? r2IncrementalCache.set(key, value, cacheType) : regionalPages.set(key, value, cacheType),
+  // The regional delete removes the R2 entry as well as this data centre's copy.
+  delete: (key) => regionalPages.delete(key),
+}
+
 export default defineCloudflareConfig({
-  incrementalCache: r2IncrementalCache,
+  incrementalCache,
   tagCache: d1NextTagCache,
   queue: doQueue,
   // The component that actually evicts the CDN. Declaring the

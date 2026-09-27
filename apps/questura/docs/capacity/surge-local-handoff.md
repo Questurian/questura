@@ -96,6 +96,10 @@ Prerequisites: Node 22+, pnpm, PostgreSQL client tools and a local server
    binding; with more than one tag (every article save has four) it throws
    "Wrong number of parameter bindings" and retries. Patch or upgrade before
    relying on DO purge. (L09)
+   **Patched 2026-09-27** (`patches/@opennextjs__cloudflare@1.18.1.patch`,
+   the upstream 1.20.x fix). The live Worker also had the purge secrets under
+   the wrong names, so no purge had ever run; they are now
+   `CACHE_PURGE_API_TOKEN` / `CACHE_PURGE_ZONE_ID`.
 2. **The Worker renders from the backend URL inlined at build.** Hosted
    builds must inline a backend origin the Worker can reach. (L09)
 3. **Per-address limits are tight for shared networks**: 30 member bodies/min

@@ -103,6 +103,11 @@
   //                                 server-side call. Same value as the
   //                                 backend and the Cloudflare Transform
   //                                 Rule. Server-only: never NEXT_PUBLIC_.
-  //   CLOUDFLARE_API_TOKEN          cache purge only. Cache Purge permission
-  //   CLOUDFLARE_ZONE_ID            on this zone and nothing else.
+  //   CACHE_PURGE_API_TOKEN         cache purge only. Cache Purge permission
+  //   CACHE_PURGE_ZONE_ID           on this zone and nothing else. These
+  //                                 are the names the adapter reads
+  //                                 (overrides/internal.js). Until
+  //                                 2026-09-27 they were set as
+  //                                 CLOUDFLARE_API_TOKEN / _ZONE_ID, which
+  //                                 nothing reads, so no purge ever ran.
 }

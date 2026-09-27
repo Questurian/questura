@@ -1,0 +1,30 @@
+diff --git a/dist/api/durable-objects/bucket-cache-purge.js b/dist/api/durable-objects/bucket-cache-purge.js
+index 9050c4e20cf22e8f3948d6e4925b8633a598a156..b823abec087d3bd526f512efb3c10a11ed13c40e 100644
+--- a/dist/api/durable-objects/bucket-cache-purge.js
++++ b/dist/api/durable-objects/bucket-cache-purge.js
+@@ -25,7 +25,7 @@ export class BucketCachePurge extends DurableObject {
+             // Insert the tag into the sql table
+             this.ctx.storage.sql.exec(`
+         INSERT OR REPLACE INTO cache_purge (tag)
+-        VALUES (?)`, [tag]);
++        VALUES (?)`, tag);
+         }
+         const nextAlarm = await this.ctx.storage.getAlarm();
+         if (!nextAlarm) {
+@@ -57,7 +57,7 @@ export class BucketCachePurge extends DurableObject {
+             this.ctx.storage.sql.exec(`
+         DELETE FROM cache_purge
+         WHERE tag IN (${tags.map(() => "?").join(",")})
+-      `, tags.map((row) => row.tag));
++      `, ...tags.map((row) => row.tag));
+             if (tags.length < MAX_NUMBER_OF_TAGS_PER_PURGE) {
+                 // If we have less than MAX_NUMBER_OF_TAGS_PER_PURGE tags, we can stop
+                 tags = [];
+@@ -70,6 +70,6 @@ export class BucketCachePurge extends DurableObject {
+         `)
+                     .toArray();
+             }
+-        } while (tags.length >= 0);
++        } while (tags.length > 0);
+     }
+ }

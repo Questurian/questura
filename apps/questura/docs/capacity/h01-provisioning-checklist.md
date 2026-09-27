@@ -280,8 +280,8 @@ cd apps/questura/apps/client
 pnpm exec wrangler secret put QUESTURA_REVALIDATION_SECRET   # same value as step 10
 pnpm exec wrangler secret put QUESTURA_RENDER_TOKEN          # same value as step 10
 pnpm exec wrangler secret put ORIGIN_AUTH_SECRET             # same value as step 8
-pnpm exec wrangler secret put CLOUDFLARE_API_TOKEN           # from step 16
-pnpm exec wrangler secret put CLOUDFLARE_ZONE_ID             # from step 12
+pnpm exec wrangler secret put CACHE_PURGE_API_TOKEN          # from step 16
+pnpm exec wrangler secret put CACHE_PURGE_ZONE_ID            # from step 12
 ```
 
 `QUESTURA_RENDER_TOKEN` and `ORIGIN_AUTH_SECRET` are server-only. Neither may
