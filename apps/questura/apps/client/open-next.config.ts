@@ -33,9 +33,19 @@ export default defineCloudflareConfig({
   // revalidateTag updates the incremental cache and the edge keeps serving
   // the old page.
   cachePurge: purgeCache({ type: 'durableObject' }),
-  // Off deliberately: interception serves cached pages before the Next
-  // server runs, which would bypass the navbar/auth-slot work and the
-  // per-request headers the backend's paywall relies on. Revisit only with
-  // hosted evidence.
-  enableCacheInterception: false,
+  // Serves a cached page before the Next server runs. It is on because of
+  // what the live site showed (2026-09-27): Next judges a page's age by the
+  // prerender manifest, and a page missing from it (the index pages, which
+  // have no generateStaticParams, and anything published after the build)
+  // counts as stale one second after it is written. A fresh isolate has no
+  // memory of the real revalidate, so those pages re-rendered on nearly
+  // every visit. The interceptor reads `revalidate` from the cache entry
+  // itself, so they get their hour.
+  //
+  // It serves the same bytes the server would: every public page is
+  // force-static, the navbar's auth slot and member bodies load in the
+  // browser, nothing public reads cookies or headers, and there are no
+  // intercepting or parallel routes (the interceptor ignores Next-Url).
+  // Middleware and next.config headers still run first.
+  enableCacheInterception: true,
 })

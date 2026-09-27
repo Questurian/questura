@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict'
-import { readFileSync } from 'node:fs'
+import { readdirSync, readFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import test from 'node:test'
 import { fileURLToPath } from 'node:url'
@@ -80,4 +80,26 @@ test('local preview secrets are ignored by git', () => {
   for (const entry of ['.dev.vars', '/.open-next/', '/.wrangler/']) {
     assert.ok(ignore.includes(entry), `${entry} is not gitignored`)
   }
+})
+
+// Without interception, a page missing from the prerender manifest (every
+// index page, anything published after the build) is stale one second after
+// it is written, and the live site re-rendered those pages on nearly every
+// visit (open-next.config.ts has the detail).
+test('cache interception stays on', () => {
+  assert.match(read('open-next.config.ts'), /enableCacheInterception:\s*true/)
+})
+
+// Interception hands every visitor the same cached bytes before the Next
+// server runs. That is only right while no public page varies by request, so
+// nothing a public page could import may read cookies or headers. Only the
+// force-dynamic parts of the app (API routes, the private and search groups)
+// are exempt.
+test('no public page reads cookies or request headers', () => {
+  const src = resolve(clientRoot, 'src')
+  const exempt = /^app\/(api\/|\(private\)\/|\(search\)\/)/
+  const offenders = readdirSync(src, { recursive: true })
+    .filter((file) => /\.(tsx?|jsx?)$/.test(file) && !exempt.test(file))
+    .filter((file) => /from\s+['"]next\/headers['"]/.test(readFileSync(resolve(src, file), 'utf8')))
+  assert.deepEqual(offenders, [], "cache interception would serve one visitor's version of these pages to everyone")
 })
