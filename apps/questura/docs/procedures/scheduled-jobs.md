@@ -10,7 +10,8 @@ Stripe reconcile. Exchange rates had no timer there; they synced on each boot.
 | Daily database copy | 03:17 daily | GitHub Actions, `.github/workflows/questura-daily-backup.yml` | see `backup-restore-rollback.md` |
 | Stripe reconcile | 04:20 daily | Railway cron service `questura-reconcile` | live DB + Stripe key (referenced from `questura-server`) |
 | Exchange-rate sync | 06:41 daily | GitHub Actions, `.github/workflows/questura-exchange-rate-sync.yml` | secret `EXCHANGE_RATE_SYNC_SECRET` |
-| Uptime check | every 15 min (:07, :22, :37, :52) | GitHub Actions, `.github/workflows/questura-uptime-check.yml` | nothing (public URLs) |
+| Uptime monitor | every 60 s; down after 3 failures | Sentry uptime monitor "API up (api.questurian.com/api/health/ready)" (project `questura-server`) | nothing; alerts through the Sentry email rule |
+| Uptime check (backup) | every 15 min on paper (:07, :22, :37, :52); 2–3 h apart in practice | GitHub Actions, `.github/workflows/questura-uptime-check.yml` | nothing (public URLs) |
 | Refresh drain | every 60 s | inside `questura-server` itself (ADR-0015) | nothing extra |
 
 The rule for where a job goes: **anything that needs the database or the
@@ -71,13 +72,24 @@ Adding a variable to the server also needs `--apply`: it adds the reference.
 
 ## How to check each one
 
-**Uptime check.** GitHub → Actions → *Questura uptime check*. A failed
+**Uptime monitor (the alarm).** Sentry → Uptime → *API up*. It checks
+`https://api.questurian.com/api/health/ready` every minute and opens a
+"Downtime detected" issue after three failures in a row, which the "Email on
+every new issue" rule sends to the owner; it resolves itself when the API
+answers again. Added 2026-09-26 because the GitHub schedule below ran 96 and
+166 minutes apart on its first day, not every 15. Drill: point the monitor at
+a URL that 404s, wait ~3 minutes for the email, point it back (done
+2026-09-26, the email reached the owner's phone).
+
+**Uptime check (backup).** GitHub → Actions → *Questura uptime check*. A failed
 scheduled run emails the person who last changed the workflow's schedule, so
 keep that the owner. It fails when `/api/health/ready` is not 200 with
 `ready:true`, when the refresh worker's last run failed or it has not
 succeeded for 20 minutes, or when `https://www.questurian.com/peru/lima` is not
 200. Each check is tried three times, 20 s apart, before it counts. GitHub
-runs schedules best-effort, often a few minutes late.
+runs schedules best-effort: on 2026-09-26 the runs were hours apart, so it is
+the backup, not the alarm. It still covers what the Sentry monitor does not:
+the refresh worker and the website page.
 
 **Exchange-rate sync.** GitHub → Actions → *Questura exchange-rate sync*. The
 log is one line, `exchange-rate sync: HTTP 200`. The data check: the newest

@@ -19,6 +19,16 @@ on every new issue (questura-server)" beside Sentry's default high-priority
 one, all over the API. Steps 5 and 7 are go-live. The DSN is in the project's
 Client Keys, never in the repo.
 
+**State, 2026-09-26 (PL4 drills, owner present):** step 7 is proved on the
+live platform. Each of these reached the owner's phone as a Sentry email:
+a website error through `POST /api/client-errors` (tagged
+`service: questura-client` and its request id), a thrown API error and a
+caught-and-logged one through `POST /api/internal/drill-error?kind=thrown|logged`
+(ops secret `DB_STATS_SECRET`; the logged one grouped into the thrown one's
+issue, so no second email, by design), and a "Downtime detected" issue from
+the uptime monitor (`scheduled-jobs.md`). Handled 5xx paths report through
+`logger.error` since #739.
+
 ---
 
 ## How it fits together

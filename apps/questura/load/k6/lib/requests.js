@@ -81,9 +81,19 @@ if (LOAD_TEST_KEY && LOAD_TEST_KEY.length < 32) {
 }
 export const LOAD_IDENTITY_HEADER = 'x-questura-load-identity'
 
+/**
+ * Through real Cloudflare (the live site), a request that carries its own
+ * `CF-Connecting-IP` is refused at the edge with error 1000 before it reaches
+ * the Worker or the API: found on the first live smoke run, 2026-09-26. The
+ * sandbox's edge only overwrote it. So with THROUGH_CLOUDFLARE=1 the header
+ * is left out; Cloudflare sets it, and the signed load identity carries the
+ * synthetic address instead.
+ */
+const THROUGH_CLOUDFLARE = __ENV.THROUGH_CLOUDFLARE === '1'
+
 /** The address headers for one request: the synthetic address, and its signature when a load key is set. */
 export function addressHeaders(address = clientAddress()) {
-  const headers = { 'cf-connecting-ip': address }
+  const headers = THROUGH_CLOUDFLARE ? {} : { 'cf-connecting-ip': address }
   if (LOAD_TEST_KEY) headers[LOAD_IDENTITY_HEADER] = `${address};${crypto.hmac('sha256', LOAD_TEST_KEY, address, 'hex')}`
   return headers
 }
@@ -221,7 +231,12 @@ export function identity(cookie, options = {}) {
     'identity answered 200': (r) => r.status === 200,
     'identity is JSON': () => body !== null,
     // Private by definition. A cached /api/me is one reader seeing another's.
+    // Judged on answers that carry an identity: a failed request (a timeout,
+    // or an edge error page with no reader in it) is an availability failure,
+    // already counted above, not a privacy one. On the first live climb one
+    // failed request stopped the run as a "cache_policy" leak (2026-09-26).
     'identity is never stored': (r) => {
+      if (r.status !== 200) return true
       const ok = /no-store/i.test(r.headers['Cache-Control'] || '')
       if (!ok) fault('cache_policy', { name: 'identity' })
       return ok

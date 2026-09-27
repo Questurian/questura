@@ -27,6 +27,11 @@
 // MAX_VUS (default 200), SIGNED_IN_SHARE (0–1: the share of journeys made by
 // a signed-in reader; unset keeps the weights below, about 29% signed in).
 // Nothing here pays, mails or signs anyone up.
+//
+// Anonymous only (the live site, where no synthetic accounts exist and none
+// may be made): SIGNED_IN_SHARE=0 WRITE_RATE=0 SIGNIN_RATE=0. Then no journey
+// uses a session, the write and sign-in scenarios are left out, and
+// SESSIONS_FILE is not needed.
 
 import http from 'k6/http'
 import { check } from 'k6'
@@ -36,13 +41,34 @@ import { addressHeaders, bookmarkRefs, identity, memberBody, page } from './lib/
 import { WORKLOAD } from './lib/workload.js'
 
 if (!WORKLOAD || WORKLOAD.version !== 2) throw new Error('launch-journeys needs a version 2 workload (node lib/build-launch-workload.mjs)')
-if (!__ENV.SESSIONS_FILE) throw new Error('SESSIONS_FILE is required: run `pnpm readiness:sessions` and pass the path it prints')
+// Writes and sign-ins are rare and belong to people, not to a crowd share:
+// scaled with the crowd, one synthetic account's bookmark writes passed the
+// 60/min per-account limit at 20 journeys/s and the limit refused them —
+// correctly. They run as their own fixed, low-rate scenarios instead.
+const WRITE_RATE = Number(__ENV.WRITE_RATE || 0.4)
+const SIGNIN_RATE = Number(__ENV.SIGNIN_RATE || 0.1)
+if (!(WRITE_RATE >= 0) || !(SIGNIN_RATE >= 0)) throw new Error('WRITE_RATE and SIGNIN_RATE must be 0 or more')
+
+// A realistic launch has far fewer signed-in readers than the default mix
+// (launch fix plan item 9: "a 1–3% signed-in share next to today's ~25%").
+// With SIGNED_IN_SHARE set, a journey is first signed in or not with that
+// probability, then chosen by weight within its side. `gated-reader` has a
+// signed-in half and an anonymous half, so it appears on both sides.
+const SIGNED_IN_SHARE = __ENV.SIGNED_IN_SHARE === undefined || __ENV.SIGNED_IN_SHARE === '' ? null : Number(__ENV.SIGNED_IN_SHARE)
+if (SIGNED_IN_SHARE !== null && !(SIGNED_IN_SHARE >= 0 && SIGNED_IN_SHARE <= 1)) throw new Error(`SIGNED_IN_SHARE=${__ENV.SIGNED_IN_SHARE} must be between 0 and 1`)
+const ANONYMOUS_ONLY = SIGNED_IN_SHARE === 0 && WRITE_RATE === 0 && SIGNIN_RATE === 0
+
+if (!ANONYMOUS_ONLY && !__ENV.SESSIONS_FILE) {
+  throw new Error('SESSIONS_FILE is required: run `pnpm readiness:sessions` and pass the path it prints (or run anonymous only: SIGNED_IN_SHARE=0 WRITE_RATE=0 SIGNIN_RATE=0)')
+}
 
 // `{ label: [cookie, …] }`: several sessions per identity, so the crowd is
 // many readers. Each VU keeps one session per identity for the whole run.
-const POOLS = JSON.parse(open(__ENV.SESSIONS_FILE))
-for (const label of ['member-a', 'member-b', 'nonmember']) {
-  if (!Array.isArray(POOLS[label]) || POOLS[label].length === 0) throw new Error(`SESSIONS_FILE has no sessions for ${label}`)
+const POOLS = ANONYMOUS_ONLY ? {} : JSON.parse(open(__ENV.SESSIONS_FILE))
+if (!ANONYMOUS_ONLY) {
+  for (const label of ['member-a', 'member-b', 'nonmember']) {
+    if (!Array.isArray(POOLS[label]) || POOLS[label].length === 0) throw new Error(`SESSIONS_FILE has no sessions for ${label}`)
+  }
 }
 const SESSIONS = new Proxy(
   {},
@@ -80,18 +106,12 @@ const STAGES = (__ENV.STAGES || '')
     return { target: Number(target), duration }
   })
 
-// Writes and sign-ins are rare and belong to people, not to a crowd share:
-// scaled with the crowd, one synthetic account's bookmark writes passed the
-// 60/min per-account limit at 20 journeys/s and the limit refused them —
-// correctly. They run as their own fixed, low-rate scenarios instead.
-const WRITE_RATE = Number(__ENV.WRITE_RATE || 0.4)
-const SIGNIN_RATE = Number(__ENV.SIGNIN_RATE || 0.1)
 const RATE_DURATION = __ENV.DURATION || (STAGES.length ? STAGES.reduce((sum, stage) => sum + parseInt(stage.duration, 10) * (stage.duration.endsWith('m') ? 60 : 1), 0) + 's' : '60s')
 
 export const options = {
   scenarios: {
-    writes: { executor: 'constant-arrival-rate', rate: Math.max(1, Math.round(WRITE_RATE * 10)), timeUnit: '10s', duration: RATE_DURATION, preAllocatedVUs: 2, maxVUs: 10, exec: 'bookmarkWrite' },
-    signins: { executor: 'constant-arrival-rate', rate: Math.max(1, Math.round(SIGNIN_RATE * 10)), timeUnit: '10s', duration: RATE_DURATION, preAllocatedVUs: 2, maxVUs: 10, exec: 'signIn' },
+    ...(WRITE_RATE > 0 ? { writes: { executor: 'constant-arrival-rate', rate: Math.max(1, Math.round(WRITE_RATE * 10)), timeUnit: '10s', duration: RATE_DURATION, preAllocatedVUs: 2, maxVUs: 10, exec: 'bookmarkWrite' } } : {}),
+    ...(SIGNIN_RATE > 0 ? { signins: { executor: 'constant-arrival-rate', rate: Math.max(1, Math.round(SIGNIN_RATE * 10)), timeUnit: '10s', duration: RATE_DURATION, preAllocatedVUs: 2, maxVUs: 10, exec: 'signIn' } } : {}),
     journeys: STAGES.length
       ? { executor: 'ramping-arrival-rate', startRate: STAGES[0].target, timeUnit: '1s', stages: STAGES, preAllocatedVUs: Math.min(Number(__ENV.PRE_VUS || 50), MAX_VUS), maxVUs: MAX_VUS }
       : { executor: 'constant-arrival-rate', rate: RATE, timeUnit: '1s', duration: __ENV.DURATION || '60s', preAllocatedVUs: Math.min(Number(__ENV.PRE_VUS || 50), MAX_VUS), maxVUs: MAX_VUS },
@@ -109,13 +129,6 @@ const JOURNEYS = [
 ]
 const TOTAL = JOURNEYS.reduce((sum, [, weight]) => sum + weight, 0)
 
-// A realistic launch has far fewer signed-in readers than the default mix
-// (launch fix plan item 9: "a 1–3% signed-in share next to today's ~25%").
-// With SIGNED_IN_SHARE set, a journey is first signed in or not with that
-// probability, then chosen by weight within its side. `gated-reader` has a
-// signed-in half and an anonymous half, so it appears on both sides.
-const SIGNED_IN_SHARE = __ENV.SIGNED_IN_SHARE === undefined || __ENV.SIGNED_IN_SHARE === '' ? null : Number(__ENV.SIGNED_IN_SHARE)
-if (SIGNED_IN_SHARE !== null && !(SIGNED_IN_SHARE >= 0 && SIGNED_IN_SHARE <= 1)) throw new Error(`SIGNED_IN_SHARE=${__ENV.SIGNED_IN_SHARE} must be between 0 and 1`)
 const SIGNED_IN_JOURNEYS = [['gated-member', 12], ['saved-items', 8], ['gated-reader:signed-in', 7]]
 const ANONYMOUS_JOURNEYS = [['free-landing', 40], ['gated-reader:anonymous', 7], ['repeat-visit', 12], ['search', 8]]
 
