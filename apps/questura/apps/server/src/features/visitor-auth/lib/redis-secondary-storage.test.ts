@@ -13,10 +13,12 @@ const fakeRedis = {
   del: vi.fn(),
   getdel: vi.fn(),
   eval: vi.fn(),
+  on: vi.fn(),
 }
 vi.mocked(Redis).mockImplementation(() => fakeRedis as never)
 
-const { redisClientOptions, redisSecondaryStorage } = await import('./redis-secondary-storage')
+const { logger } = await import('@/shared/utils/logger')
+const { redisClientOptions, redisSecondaryStorage, warnConnectionError } = await import('./redis-secondary-storage')
 
 afterEach(() => {
   vi.unstubAllEnvs()
@@ -71,5 +73,29 @@ describe('redisSecondaryStorage', () => {
     fakeRedis.eval.mockResolvedValueOnce([1, 60])
 
     await expect(redisSecondaryStorage.incrementManyWithExpiry(['a', 'b'], 60)).rejects.toThrow(/invalid/)
+  })
+})
+
+describe('connection errors', () => {
+  // Without a listener ioredis printed "Unhandled error event" on every failed
+  // reconnect (PL4 Redis restart drill, 2026-09-27).
+  it('listens for them on the client it creates', async () => {
+    fakeRedis.get.mockResolvedValueOnce(null)
+    await redisSecondaryStorage.get('k')
+    expect(fakeRedis.on).toHaveBeenCalledWith('error', warnConnectionError)
+  })
+
+  it('warns at most once a minute, naming the code', () => {
+    const warn = vi.spyOn(logger, 'warn').mockImplementation(() => {})
+    const refused = Object.assign(new Error('connect'), { code: 'ECONNREFUSED' })
+
+    warnConnectionError(refused, 1_000_000)
+    warnConnectionError(refused, 1_030_000)
+    warnConnectionError(new AggregateError([]), 1_061_000)
+
+    expect(warn).toHaveBeenCalledTimes(2)
+    expect(warn.mock.calls[0][1]).toEqual({ code: 'ECONNREFUSED' })
+    expect(warn.mock.calls[1][1]).toEqual({ code: 'AggregateError' })
+    warn.mockRestore()
   })
 })

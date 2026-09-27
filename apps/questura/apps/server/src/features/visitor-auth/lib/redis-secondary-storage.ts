@@ -2,8 +2,12 @@ import Redis from 'ioredis'
 
 import { APP_CONFIG } from '@/shared/config'
 import { countOnRequest } from '@/shared/observability/request-report'
+import { logger } from '@/shared/utils/logger'
 
 let redis: Redis | null = null
+let lastConnectionWarningAt = 0
+
+const CONNECTION_WARNING_INTERVAL_MS = 60_000
 
 function readMs(name: string, fallback: number): number {
   const value = Number(process.env[name])
@@ -30,6 +34,20 @@ export function redisClientOptions() {
   }
 }
 
+/**
+ * ioredis emits `error` on every failed connect while it reconnects, and with
+ * no listener it prints "Unhandled error event" for each one (seen when Redis
+ * restarted in the PL4 drill, 2026-09-27). The client reconnects on its own and
+ * every command that fails still rejects to its caller, so this is only a
+ * warning, at most one a minute so an outage cannot flood the log.
+ */
+export function warnConnectionError(error: unknown, now = Date.now()): void {
+  if (now - lastConnectionWarningAt < CONNECTION_WARNING_INTERVAL_MS) return
+  lastConnectionWarningAt = now
+  const code = error instanceof Error ? ((error as NodeJS.ErrnoException).code ?? error.name) : String(error)
+  logger.warn('Visitor auth Redis connection error; reconnecting', { code })
+}
+
 function getRedis(): Redis {
   // One call here is one round trip (or one script); counted per request so
   // `/api/me`'s Server-Timing can say what a session lookup cost.
@@ -40,6 +58,7 @@ function getRedis(): Redis {
 
   if (!redis) {
     redis = new Redis(APP_CONFIG.redis.url, redisClientOptions())
+    redis.on('error', warnConnectionError)
   }
 
   return redis
