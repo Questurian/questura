@@ -105,7 +105,7 @@ collects, files and remits sales tax/VAT in 80+ countries, for +3.5% per sale.
   default. Anything else refuses to boot. Code:
   `features/payments/lib/managed-payments.ts`.
 - **Off:** Checkout gets exactly the parameters it always had (a test pins them
-  byte for byte), card and Link only. `/join` says "All prices are in U.S.
+  byte for byte), card only (Link is not available on the account, #729). `/join` says "All prices are in U.S.
   dollars." and nothing about tax.
 - **On:** Checkout sends `managed_payments[enabled]=true` and drops
   `payment_method_types` (Stripe forbids it; it picks the methods per buyer).

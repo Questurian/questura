@@ -174,8 +174,8 @@ async function main(): Promise<void> {
       group,
       managedExpected
         ? 'the Checkout Session is managed (Stripe is merchant of record), with no payment method list'
-        : 'the Checkout Session is unmanaged, card and Link only',
-      created?._managedPayments === managedExpected && methods === (managedExpected ? 'null' : '["card","link"]'),
+        : 'the Checkout Session is unmanaged, card only',
+      created?._managedPayments === managedExpected && methods === (managedExpected ? 'null' : '["card"]'),
       `managed=${String(created?._managedPayments)} payment_method_types=${methods}`,
     )
     const plans = (await (await fetch(`${BACKEND}/api/payments/plans`, { headers: { origin, ...caller() } })).json()) as { taxAtCheckout?: unknown }
