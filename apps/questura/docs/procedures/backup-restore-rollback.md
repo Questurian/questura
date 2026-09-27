@@ -148,7 +148,25 @@ Record:
 
 | Date | Restore point (UTC) | Branch ready | Scratch backend serving | Search rebuilt | Total | RPO met (≤ 5 min)? | RTO met (≤ 1 h)? |
 |---|---|---|---|---|---|---|---|
-| | | | | | | | |
+| 2026-09-27 | 02:30:00 (branch made 02:35:16) | 02:35:25 (9 s) | 02:35:54 (38 s; local `next dev` on the branch, `db:migrate:status` clean, 50 applied) | 02:36:40 (24 rows, 0.7 s) | **84 s** | yes: Neon restores to the second | yes |
+
+2026-09-27 run, how it was checked: the Lima city page
+(`/api/public/location-homepages/peru/lima`) and one article
+(`by-canonical-path`) from the scratch backend were identical to live, after
+dropping timestamps. Search answered on the branch. The branch was deleted
+afterwards. Step 4 (restoring the production branch itself) and step 6 (the
+Stripe reconcile) were not run: nothing needed restoring.
+
+Daily copy, same night: the newest object in R2 (`questura-20260926T135756Z.dump`,
+2.2 MB) passed its `.sha256`, restored into a throwaway Postgres 17.11 in about
+1 s with `pg_restore --exit-on-error --single-transaction`, 114 tables. Against
+live, table by table, no table had fewer rows; 14 tables had the 19 rows
+written in the 12.5 hours since the copy (one article, sign-ins, webhook
+events). On a Mac without docker, a throwaway 17 is
+`initdb -D <dir> -U postgres -A trust` then
+`LC_ALL=en_US.UTF-8 pg_ctl -D <dir> -o "-p <port> -k /tmp/<short dir>" start`
+(the socket path must be under 104 bytes, and Postgres refuses to start
+without a valid locale).
 
 Also restore the newest daily copy into a throwaway Postgres 17
 (`docker run --rm -p 127.0.0.1:<spare port>:5432 -e POSTGRES_HOST_AUTH_METHOD=trust postgres:17`)
