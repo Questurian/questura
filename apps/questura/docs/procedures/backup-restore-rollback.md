@@ -294,6 +294,33 @@ next scheduled refresh, replaces them.
 
 **Softprod laptop** (while it still serves): `infra/softprod/rollback.sh`.
 
+**After an API rollback, health and Sentry say release `unknown`.** Railway
+sets `RAILWAY_GIT_COMMIT_SHA` only on deploys from GitHub, not on a rollback,
+so `releaseSha` has nothing to read. Tell the versions apart by
+`instance.startedAt` in `/api/internal/db-stats`, or by the deployment in
+Railway. The next normal deploy brings the sha back.
+
+### Rollback drill (PL4, 2026-09-27)
+
+| What | Result |
+|---|---|
+| API back, 3420905 → 167b457 (Railway `deploymentRollback`, 03:07:14 UTC) | new instance ready at 03:07:46, **32 s**. No downtime alert. Health checks during the switch were not counted: the drill script waited for sha `167b457` and saw `unknown` (above) |
+| Worker back (`wrangler rollback` to the version before #734) | switched in **3 s**, `/peru/lima` never failed |
+| Worker forward (`wrangler rollback` to the current version) | switched in **1 s**, `/peru/lima` never failed |
+| API forward, normal deploy of `main` (0d610b5) | build and deploy 5 min; `launch:verify` 49/49 after |
+
+No Sentry issue from any of it.
+
+## Restarts (PL4, 2026-09-27)
+
+A restart runs the same image again. Neither kind needs a runbook: both come
+back on their own. These are what to expect.
+
+| What | Result |
+|---|---|
+| Redis restart (Railway `deploymentRestart`, 02:39 UTC) | back in about **1 s**, keys reloaded from disk; API `ready` 200 and the Redis breaker closed throughout; no Sentry issue. It logged one `[ioredis] Unhandled error event`: the visitor auth client had no `error` listener, fixed in #743 |
+| API cold start (Railway `deploymentRestart`, twice, 03:29 and 03:30 UTC) | healthy again **3 s** after the click. Health failed for about 2 s (one 502, then one 503 while booting). The first content call after it took 0.45 s, the same as a warm one. The website page stayed 200 throughout. No Sentry issue; the uptime monitor needs 3 failed minutes, so a restart never alerts |
+
 ## Switches that need no code change
 
 Each is a Railway variable. Changing one restarts the service; it doesn't
