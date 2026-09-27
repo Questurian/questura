@@ -141,7 +141,7 @@ Only when the owner says so. Don't bring it up.
 ### 3F. Sales tax + the one real purchase (cutover.md "Sales tax", T1–T5)
 T1 owner requests Stripe Managed Payments (after content: a finished site is
 a safer review) → T2 wait for approval → T3 product tax code
-`txcd_10303002` → T4 `STRIPE_MANAGED_PAYMENTS=on` on Railway + deploy →
+`txcd_10503005` (news/newsletter articles, not the magazine code) → T4 `STRIPE_MANAGED_PAYMENTS=on` on Railway + deploy →
 T5 **the one real $12.99 purchase + full refund**, which also proves the
 unproven payment path (member unlock, refund removes access within a minute,
 receipt shows tax).

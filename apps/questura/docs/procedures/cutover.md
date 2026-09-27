@@ -386,11 +386,18 @@ T2. **Wait for the approval.** Nothing else changes meanwhile. Leave
 
 T3. **Give the product its tax code (owner, once approved).** Stripe Dashboard
     (live) → Product catalog → *Questurian Membership* → ⋯ → **Edit product**
-    → Product tax code: **`txcd_10303002`** (Digital Magazines/Periodicals –
-    viewable only – subscription – with conditional rights; it is labelled
-    *Eligible for Managed Payments*) → Update product. Do not change the
-    prices: their tax behaviour stays unset, so tax is added on top of $12.99
-    and $79.99.
+    → Product tax code: **`txcd_10503005`** (Digital other news or documents –
+    viewable only – subscription – with conditional rights: "individual
+    digital news articles, newsletters, and other stand-alone documents"; it
+    is labelled *Eligible for Managed Payments*) → Update product. Do not
+    change the prices: their tax behaviour stays unset, so tax is added on top
+    of $12.99 and $79.99.
+
+    Done 2026-09-27. An earlier draft of this step named `txcd_10303002`
+    (Digital Magazines/Periodicals). The owner rejected it because Questurian
+    is not a periodical published at regular intervals, so don't set it back.
+    A New York test purchase under the general code `txcd_10000000` came out
+    as tax $0, "product_exempt".
 
 T4. **Flip the switch (owner).** Railway → the API service → Variables →
     `STRIPE_MANAGED_PAYMENTS=on` → deploy. (`on` or `off` only; any other value
@@ -412,6 +419,11 @@ T5. **One real $12.99 purchase, owner only** (`docs/launch-day.md` step 6, the
     billing address, the receipt comes from Link and **shows the tax**, and the
     card statement reads `LINK.COM* …`. The full refund includes the tax, and
     access still ends within a minute of it.
+
+    Done 2026-09-27 ($12.99, New York address, `managed_payments.enabled:
+    true`, tax liability on Stripe). The owner kept this membership on
+    purpose, as his own member account for testing, so it was not refunded
+    and the "refund removes access" check is still unproven on the new host.
 
 **To undo:** set `STRIPE_MANAGED_PAYMENTS=off` and deploy. New checkouts are
 unmanaged again and `/join` drops the tax line. Memberships bought while it was
