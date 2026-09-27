@@ -8,6 +8,7 @@
     "dashboard": "turbo run dev:tui --concurrency=20 --filter=@questurian/dashboard",
     "dashboard:web": "turbo run dev --concurrency=20 --filter=@questurian/dashboard",
     "dashboard:clean": "turbo run dev:clean --concurrency=20 --filter=@questurian/dashboard",
+    "dashboard:autostart": "pnpm --filter @questurian/dashboard autostart",
     "questura": "turbo run dev --concurrency=20 --filter=@questura/client --filter=@questura/server",
     "questura:client": "turbo run dev --concurrency=20 --filter=@questura/client",
     "questura:server": "turbo run dev --concurrency=20 --filter=@questura/server",
