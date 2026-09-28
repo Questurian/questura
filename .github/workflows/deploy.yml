@@ -1,0 +1,250 @@
+name: Deploy
+
+# Merge to main → CI → this. When CI on a main commit is green, the API
+# (Railway `questura-server`, plus the `questura-reconcile` cron at the same
+# commit) goes first, because its pre-deploy step runs the migrations the new
+# website may depend on. The website (Cloudflare Worker `questura-client`) goes
+# second, only after the API reports the new commit. Last, both live health
+# endpoints must name the commit.
+#
+# Each half deploys only when its own code changed since what is live (read
+# from `releaseSha` on the live health endpoints), so a client-only merge does
+# not restart the API and a server-only merge does not rebuild the website.
+# "Run workflow" (workflow_dispatch) with `force` deploys both regardless.
+#
+# Setup, rollback and the manual fallback: apps/questura/docs/procedures/deploy.md.
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      force:
+        description: Deploy both halves even if nothing changed
+        type: boolean
+        default: false
+
+# One deploy at a time, never cancelled halfway. A newer run waits.
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  NODE_VERSION: '22'
+  API_URL: https://api.questurian.com
+  SITE_URL: https://www.questurian.com
+  RAILWAY_ENVIRONMENT_ID: e35f0d85-c66d-4f66-b781-d9e456bab8cb
+  RAILWAY_SERVER_SERVICE_ID: 0f920c5a-3d07-4a51-a75a-fd7a29726f86
+  RAILWAY_CRON_SERVICE_ID: 03a0e968-27ca-46cb-8989-2d0ec04c8446
+  # Anything that changes what gets built for each half.
+  API_PATHS: apps/questura/apps/server apps/questura/contracts package.json pnpm-lock.yaml pnpm-workspace.yaml patches
+  WEB_PATHS: apps/questura/apps/client apps/questura/contracts package.json pnpm-lock.yaml pnpm-workspace.yaml patches
+
+jobs:
+  plan:
+    name: What changed
+    # A push to main whose CI passed, or a manual run. Never a PR's CI run.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      sha: ${{ steps.plan.outputs.sha }}
+      api: ${{ steps.plan.outputs.api }}
+      web: ${{ steps.plan.outputs.web }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          fetch-depth: 0
+
+      - id: plan
+        env:
+          FORCE: ${{ inputs.force || 'false' }}
+        run: |
+          set -euo pipefail
+          SHA=$(git rev-parse HEAD)
+          echo "sha=$SHA" >> "$GITHUB_OUTPUT"
+
+          live_sha() { curl -fsS --max-time 20 "$1" | jq -r '.releaseSha // "unknown"' || echo unknown; }
+
+          # decide NAME LIVE_SHA PATHS...
+          decide() {
+            local name=$1 live=$2; shift 2
+            if [ "$FORCE" = true ]; then echo "$name: forced" >&2; echo true; return; fi
+            if [ "$live" = "$SHA" ]; then echo "$name: already live at $SHA" >&2; echo false; return; fi
+            if ! git cat-file -e "$live^{commit}" 2>/dev/null; then echo "$name: live is '$live' (not a known commit), deploying" >&2; echo true; return; fi
+            if git merge-base --is-ancestor "$SHA" "$live"; then echo "$name: $SHA is older than live $live, skipping" >&2; echo false; return; fi
+            if git diff --quiet "$live" "$SHA" -- "$@"; then echo "$name: no changes since live $live" >&2; echo false; return; fi
+            echo "$name: changed since live $live" >&2; echo true
+          }
+
+          # shellcheck disable=SC2086
+          API=$(decide api "$(live_sha "$API_URL/api/health/ready")" $API_PATHS)
+          # shellcheck disable=SC2086
+          WEB=$(decide web "$(live_sha "$SITE_URL/api/health")" $WEB_PATHS)
+          echo "api=$API" >> "$GITHUB_OUTPUT"
+          echo "web=$WEB" >> "$GITHUB_OUTPUT"
+          echo "### Deploy plan for \`${SHA:0:12}\`: API **$API**, website **$WEB**" >> "$GITHUB_STEP_SUMMARY"
+
+  api:
+    name: API (Railway)
+    needs: plan
+    if: needs.plan.outputs.api == 'true'
+    runs-on: ubuntu-latest
+    environment: production
+    timeout-minutes: 50
+    env:
+      SHA: ${{ needs.plan.outputs.sha }}
+      RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+    steps:
+      - name: Deploy questura-server and questura-reconcile at this commit
+        run: |
+          set -euo pipefail
+          [ -n "$RAILWAY_TOKEN" ] || { echo "::error::RAILWAY_TOKEN secret is missing (see docs/procedures/deploy.md)"; exit 1; }
+
+          # gql QUERY VARIABLES_JSON — Railway's GraphQL API with the project token.
+          gql() {
+            local out
+            out=$(curl -sS --max-time 60 https://backboard.railway.com/graphql/v2 \
+              -H "Project-Access-Token: $RAILWAY_TOKEN" -H 'Content-Type: application/json' \
+              --data-binary "$(jq -n --arg q "$1" --argjson v "$2" '{query: $q, variables: $v}')")
+            if jq -e '.errors' <<<"$out" >/dev/null; then echo "Railway: $(jq -c '[.errors[].message]' <<<"$out")" >&2; return 1; fi
+            printf '%s' "$out"
+          }
+          # GraphQL variables ($c, $id, ...) live in single-quoted strings on purpose.
+          # shellcheck disable=SC2016
+          deploy() {
+            gql 'mutation($c:String!,$e:String!,$s:String!){ serviceInstanceDeployV2(commitSha:$c, environmentId:$e, serviceId:$s) }' \
+              "$(jq -n --arg c "$SHA" --arg e "$RAILWAY_ENVIRONMENT_ID" --arg s "$1" '{c:$c,e:$e,s:$s}')" \
+              | jq -r '.data.serviceInstanceDeployV2'
+          }
+          # follow ID LABEL — waits for a terminal status; fails unless SUCCESS.
+          # shellcheck disable=SC2016
+          follow() {
+            local id=$1 label=$2 status last="" deadline=$(( $(date +%s) + 45*60 ))
+            while :; do
+              status=$(gql 'query($id:String!){ deployment(id:$id){ status } }' "$(jq -n --arg id "$id" '{id:$id}')" | jq -r '.data.deployment.status')
+              [ "$status" != "$last" ] && echo "$(date -u +%H:%M:%S) $label: $status" && last=$status
+              case "$status" in
+                SUCCESS) return 0 ;;
+                FAILED|CRASHED|REMOVED|SKIPPED) echo "::error::$label deployment $id ended $status. Railway kept the previous deployment serving."; return 1 ;;
+              esac
+              [ "$(date +%s)" -lt "$deadline" ] || { echo "::error::$label still $status after 45 min"; return 1; }
+              sleep 15
+            done
+          }
+
+          server=$(deploy "$RAILWAY_SERVER_SERVICE_ID")
+          echo "questura-server deployment: $server"
+          follow "$server" questura-server
+
+          # The nightly Stripe reconcile runs the server's code; keep it on the
+          # same commit. A cron deploy only builds; it runs on its schedule.
+          cron=$(deploy "$RAILWAY_CRON_SERVICE_ID")
+          echo "questura-reconcile deployment: $cron"
+          follow "$cron" questura-reconcile
+
+      - name: Live API reports this commit
+        run: |
+          for _ in $(seq 1 30); do
+            live=$(curl -fsS --max-time 15 "$API_URL/api/health/ready" | jq -r '.releaseSha // empty' || true)
+            [ "$live" = "$SHA" ] && { echo "API live at $SHA"; exit 0; }
+            sleep 10
+          done
+          echo "::error::$API_URL still reports '${live:-nothing}', expected $SHA"; exit 1
+
+  web:
+    name: Website (Cloudflare)
+    needs: [plan, api]
+    # After the API, or when the API had nothing to deploy. Never after an API failure.
+    if: >-
+      always() && needs.plan.result == 'success' && needs.plan.outputs.web == 'true' &&
+      (needs.api.result == 'success' || needs.api.result == 'skipped')
+    runs-on: ubuntu-latest
+    environment: production
+    timeout-minutes: 40
+    env:
+      SHA: ${{ needs.plan.outputs.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.plan.outputs.sha }}
+
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --filter @questura/client...
+
+      # Everything the site bakes in is here and nowhere else (no .env files in
+      # a checkout). All of it is public: it ends up in the browser bundle.
+      - name: Build
+        working-directory: apps/questura/apps/client
+        env:
+          NEXT_PUBLIC_BACKEND_URL: ${{ env.API_URL }}
+          NEXT_PUBLIC_APP_URL: ${{ env.SITE_URL }}
+          NEXT_PUBLIC_FRONTEND_URL: ${{ env.SITE_URL }}
+          NEXT_PUBLIC_QUESTURA_RELEASE_SHA: ${{ needs.plan.outputs.sha }}
+          NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${{ vars.STRIPE_PUBLISHABLE_KEY }}
+          NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: ${{ vars.GOOGLE_MAPS_API_KEY }}
+          NEXT_PUBLIC_ENDORSELY_ENABLED: ${{ vars.ENDORSELY_ENABLED }}
+          NEXT_PUBLIC_ENDORSELY_ORG_ID: ${{ vars.ENDORSELY_ORG_ID }}
+          NEXT_PUBLIC_IMAGE_CDN_ORIGIN: ${{ vars.IMAGE_CDN_ORIGIN }}
+        run: |
+          set -euo pipefail
+          [[ "$NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY" == pk_live_* ]] || { echo "::error::vars.STRIPE_PUBLISHABLE_KEY must be the pk_live_ key"; exit 1; }
+          [ -n "$NEXT_PUBLIC_GOOGLE_MAPS_API_KEY" ] || { echo "::error::vars.GOOGLE_MAPS_API_KEY is empty"; exit 1; }
+          pnpm exec opennextjs-cloudflare build
+
+      # The build scans .next/static itself; this scans what gets uploaded.
+      - name: Bundle scan (no localhost addresses)
+        working-directory: apps/questura/apps/client
+        run: pnpm scan:bundle
+
+      - name: Deploy
+        working-directory: apps/questura/apps/client
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: pnpm exec opennextjs-cloudflare deploy --var "QUESTURA_RELEASE_SHA:$SHA"
+
+      - name: Live website reports this commit
+        run: |
+          for _ in $(seq 1 30); do
+            live=$(curl -fsS --max-time 15 "$SITE_URL/api/health" | jq -r '.releaseSha // empty' || true)
+            [ "$live" = "$SHA" ] && { echo "Website live at $SHA"; exit 0; }
+            sleep 10
+          done
+          echo "::error::$SITE_URL still reports '${live:-nothing}', expected $SHA"; exit 1
+
+  smoke:
+    name: Live smoke check
+    needs: [plan, api, web]
+    if: always() && needs.plan.result == 'success' && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Pages and APIs answer
+        run: |
+          set -euo pipefail
+          check() {
+            code=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 30 -L "$1")
+            echo "$code $1"
+            [[ "$code" =~ ^2 ]] || { echo "::error::$1 answered $code"; exit 1; }
+          }
+          check "$SITE_URL/"
+          check "$SITE_URL/peru/lima"
+          check "$SITE_URL/join"
+          check "$SITE_URL/api/health"
+          check "$API_URL/api/health/ready"
+          curl -fsS --max-time 15 "$API_URL/api/health/ready" | jq -e '.ready == true' >/dev/null || { echo "::error::API not ready"; exit 1; }

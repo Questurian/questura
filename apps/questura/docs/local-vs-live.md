@@ -36,6 +36,32 @@ Client: `http://localhost:3000`. Server / Payload admin: `http://localhost:4000`
 Env files already point here (`apps/server/.env`, `apps/client/.env.local`).
 Stripe keys on the Mac are empty on purpose — do not paste live keys into them.
 
+The client must talk to the **local** API for sign-in to work. The
+`questura-client-live-api` launch config points the client at
+`api.questurian.com`, which refuses `localhost` by design (CORS): pages load,
+but the navbar always reads signed out.
+
+If the server's start-up banner says **LOCAL DATABASE IS BEHIND THE CODE**,
+run `pnpm db:migrate` from `apps/server` (AGENTS.md migration rules). Until
+you do, any query naming a newer column fails — sign-up and sign-in were the
+first casualties (2026-09-28, three migrations behind).
+
+### Members on localhost
+
+Nobody can pay on the Mac, so nobody is a member unless you say so. Sign up
+on `http://localhost:3000`, then:
+
+```bash
+pnpm --dir apps/server dev:member you@example.com member
+```
+
+States: `member`, `yearly`, `cancelling`, `grace` (failed renewal, still has
+access), `paused`, `expired`, `none`. `pnpm --dir apps/server dev:member --list`
+shows local accounts. It writes the same `visitor_profiles` columns the Stripe
+webhook writes, so `/api/me`, the paywall and the navbar all agree — unlike the
+user menu's "DEV: member" toggle, which only fools the client. It refuses any
+database that is not on this machine.
+
 ### Redis (optional)
 
 With `REDIS_URL` set, the server keeps visitor sessions and Better Auth's rate
@@ -96,10 +122,9 @@ check. Test users stay in the scratch database.
 
 The laptop's `pause-live.sh`, `resume-live.sh` and `~/questura/deploy.sh` no
 longer apply. Do **not** run `resume-live.sh`: it would start a second copy of
-the site against an out-of-date database. Live is not parked any more; deploy
-is by hand (Railway API deploy started yourself, Worker built in a worktree and
-shipped with `opennextjs-cloudflare deploy`: `docs/capacity/h01-provisioning-checklist.md`
-steps 19–20). Checkout on live is a real charge.
+the site against an out-of-date database. Live is not parked any more; a merge
+to `main` deploys it (`docs/procedures/deploy.md`). Checkout on live is a real
+charge.
 
 The laptop's timers are gone too. The nightly Stripe reconcile, exchange-rate
 sync, uptime check and daily database copy now run on Railway cron and GitHub
@@ -110,5 +135,6 @@ the live site: that folder collects the checks merged work is still waiting on.
 
 ## Git
 
-Local preview is not “skip GitHub.” Still branch / PR / CI. Difference: do not
-deploy for every CSS tweak. Batch, merge, and deploy a grouped release.
+Local preview is not “skip GitHub.” Still branch / PR / CI. Merging to `main`
+ships: CI, then `.github/workflows/deploy.yml` (`docs/procedures/deploy.md`).
+Batch small tweaks into one PR rather than merging each.

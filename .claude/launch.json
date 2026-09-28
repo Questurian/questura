@@ -17,6 +17,19 @@
       "port": 4000
     },
     {
+      "name": "questura-server-offline",
+      "runtimeExecutable": "env",
+      "runtimeArgs": [
+        "RESEND_API_KEY=",
+        "STRIPE_SECRET_KEY=",
+        "pnpm",
+        "--dir",
+        "apps/questura/apps/server",
+        "dev"
+      ],
+      "port": 4000
+    },
+    {
       "name": "questura-client-live-api",
       "runtimeExecutable": "env",
       "runtimeArgs": [
