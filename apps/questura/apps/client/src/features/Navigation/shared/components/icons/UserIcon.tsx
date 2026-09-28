@@ -2,6 +2,7 @@
 
 import { User, ChevronDown } from "lucide-react";
 import { useUserModalStore } from "@/lib/stores/userModalStore";
+import GlobeMark from "./GlobeMark";
 
 interface UserIconProps {
   buttonClassName?: string;
@@ -20,18 +21,11 @@ export default function UserIcon({ buttonClassName = "", isMember = false }: Use
       <span className="flex h-8 items-center gap-2 rounded-full bg-nav-pill pl-[5px] pr-3.5 transition-colors duration-150 group-hover:bg-nav-pill-hover 480:h-10 480:pl-[6px] 480:pr-4">
         {isMember ? (
           <span
-            className="relative flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-full 480:h-[28px] 480:w-[28px]"
-            style={{
-              background: 'linear-gradient(160deg, #1e3599 0%, #05092e 100%)',
-              boxShadow: '0 0 0 1px rgba(172,128,32,0.8)',
-            }}
+            className="relative flex h-[22px] w-[22px] shrink-0 rounded-full 480:h-[28px] 480:w-[28px]"
+            // Dark behind the globe so its anti-aliased edge never shows a light hairline.
+            style={{ background: '#04101E', boxShadow: '0 0 0 1px rgba(172,128,32,0.8)' }}
           >
-            <span
-              className="font-display text-[8px] font-semibold text-white/90 480:text-[10px]"
-              style={{ lineHeight: 1 }}
-            >
-              Q
-            </span>
+            <GlobeMark className="block h-full w-full" />
             <span
               aria-hidden
               className="absolute -right-[2px] -top-[2px] text-[5px] leading-none 480:-right-[3px] 480:-top-[3px] 480:text-[6px]"
