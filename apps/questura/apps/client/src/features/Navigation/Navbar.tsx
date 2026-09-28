@@ -2,7 +2,8 @@
 
 import DesktopNavbar from "./Desktop/DesktopNavbar";
 import MobileNavbar from "./Mobile/MobileNavbar";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { usePathname } from "next/navigation";
 import { primeIdentity } from "@/lib/user/currentIdentity";
 import { applyNavTheme, NAV_THEME_KEY, readNavTheme } from "./lib/navTheme";
 
@@ -15,20 +16,30 @@ primeIdentity();
 // animate itself, so the page moves at full speed from the first flick (#589).
 const COLLAPSE_PX = 120;
 
-// Lerp factor: how fast the rendered value chases the target each frame.
-// Lower = smoother / more lag. 0.09 gives a nice trailing feel.
-const LERP = 0.09;
+// Lerp factor: the share of the remaining distance the rendered value closes
+// per 60Hz frame (scaled by real frame time, so 120Hz screens run at the same
+// speed). Lower = smoother / more lag. The lab's 0.09 took ~0.6s to lock, so a
+// quick flick left the page far down before the bar finished; 0.25 locks in
+// ~0.2s and settles in ~0.3s while still easing in.
+const LERP = 0.25;
+const FRAME_MS = 1000 / 60;
 
-// The lerp's last few percent is invisible but slow (~0.5s from 0.97 to 1 at
-// LERP 0.09), so the bar counts as locked once it is this close to fully
-// collapsed and still headed there. Locked is when the section links show in
-// the thin bar (DesktopNavbar).
+// The lerp's last few percent is invisible but slow, so the bar counts as
+// locked once it is this close to fully collapsed and still headed there.
+// Locked is when the section links show in the thin bar (DesktopNavbar).
 const LOCK_AT = 0.97;
+
+// Pages where the navbar starts, and stays, as the thin bar instead of the
+// big masthead: a city's itineraries list and each itinerary.
+const PINNED_THIN = /^\/[^/]+\/[^/]+\/itineraries(?:\/|$)/;
 
 export default function Navbar() {
   const navRef = useRef<HTMLElement>(null);
   // True once the rendered collapse has settled at 1.
   const [locked, setLocked] = useState(false);
+  // Known during the server render too, so a pinned page paints the thin bar
+  // on its first frame rather than shrinking into it.
+  const pinnedThin = PINNED_THIN.test(usePathname() ?? "");
 
   // The navbar is in flow and changes height as it collapses. With the
   // browser's scroll anchoring on, every height change nudges scrollY to keep
@@ -55,10 +66,13 @@ export default function Navbar() {
   }, []);
 
   useEffect(() => {
+    // Pinned pages report fully collapsed to the whole page too: the itinerary
+    // map column sizes itself off --navbar-collapse on <html>.
     const collapseFromScroll = () =>
-      Math.min(1, Math.max(0, window.scrollY / COLLAPSE_PX));
+      pinnedThin ? 1 : Math.min(1, Math.max(0, window.scrollY / COLLAPSE_PX));
 
     let rafId = 0;
+    let lastFrame = 0; // timestamp of the previous tick; 0 = loop just woke
     let targetVal = collapseFromScroll(); // where the collapse should end up
     let currentVal = targetVal; // lerp-smoothed value written to CSS
 
@@ -66,8 +80,11 @@ export default function Navbar() {
     // target; once it has snapped to an endpoint there is nothing left to
     // write, so it stops instead of burning a frame forever. `wake` restarts
     // it whenever a scroll moves the target.
-    const tick = () => {
-      currentVal += (targetVal - currentVal) * LERP;
+    const tick = (now: number) => {
+      // Clamp the gap so a tab coming back from the background doesn't jump.
+      const frames = lastFrame ? Math.min((now - lastFrame) / FRAME_MS, 4) : 1;
+      lastFrame = now;
+      currentVal += (targetVal - currentVal) * (1 - (1 - LERP) ** frames);
       if (targetVal === 1 && currentVal > 0.995) currentVal = 1;
       if (targetVal === 0 && currentVal < 0.005) currentVal = 0;
 
@@ -91,7 +108,9 @@ export default function Navbar() {
 
     // Idempotent: a loop that is already running is left alone.
     const wake = () => {
-      if (rafId === 0) rafId = requestAnimationFrame(tick);
+      if (rafId !== 0) return;
+      lastFrame = 0;
+      rafId = requestAnimationFrame(tick);
     };
 
     wake();
@@ -110,7 +129,7 @@ export default function Navbar() {
       window.removeEventListener("scroll", handleScroll);
       cancelAnimationFrame(rafId);
     };
-  }, []);
+  }, [pinnedThin]);
 
   // Keep --navbar-height in sync with the real nav height at every animation frame
   // so that consumers (e.g. the maps page sticky panel) can track it smoothly.
@@ -135,9 +154,15 @@ export default function Navbar() {
   return (
     // `site-nav` scopes the navbar palette: the dark theme recolours this
     // subtree and nothing else (foundations.css, "Navbar theme").
-    <nav ref={navRef} className="site-nav sticky top-0 z-40">
+    // A pinned page sets the collapse on the navbar itself, which wins over
+    // the scroll-driven value on <html> for everything inside it.
+    <nav
+      ref={navRef}
+      className="site-nav sticky top-0 z-40"
+      style={pinnedThin ? ({ "--navbar-collapse": 1 } as CSSProperties) : undefined}
+    >
       <div className="hidden 1024:block">
-        <DesktopNavbar locked={locked} />
+        <DesktopNavbar locked={pinnedThin || locked} />
       </div>
       <div className="h-[55px] 1024:hidden">
         <MobileNavbar />
