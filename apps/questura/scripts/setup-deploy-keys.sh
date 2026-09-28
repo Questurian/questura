@@ -246,7 +246,7 @@ else
   SKIPPED+=("GitHub environment $GH_ENV")
   warn "could not create the environment (do you have admin on $REPO?)"
 fi
-pause "Press Enter for the next stage"
+sleep 1
 
 # ── 2 ─────────────────────────────────────────────────────────────────────
 stage "GitHub: the website's public settings"
@@ -263,76 +263,106 @@ set_var ENDORSELY_ENABLED "${END_ON:-true}"
 [[ -n "$END_ORG" ]] && set_var ENDORSELY_ORG_ID "$END_ORG"
 set_var IMAGE_CDN_ORIGIN "https://questurian-cdn.b-cdn.net"
 set_env_secret CLOUDFLARE_ACCOUNT_ID "$(vault_value generated.env CLOUDFLARE_ACCOUNT_ID)"
-pause "Press Enter for the next stage"
+sleep 1
 
-# ── 3 ─────────────────────────────────────────────────────────────────────
-stage "Railway: a deploy-only token"
-say "Lets GitHub start a deploy of the API. Scoped to this one project."
-open_url "https://railway.com/project/$RAILWAY_PROJECT_ID/settings/tokens"
-step "You are on Project Settings → Tokens (project 'questura')."
-step "Token name: github-deploy"
-step "Environment: production"
-step "Click Create, then copy the token it shows (it is shown once)."
-note "Not your account token, and not the dashboard's token: a new one."
-while :; do
-  ask_secret RAILWAY_DEPLOY_TOKEN "Paste the Railway token:"
-  [[ -n "$RAILWAY_DEPLOY_TOKEN" ]] || { warn "empty; paste the token"; continue; }
-  # Read-only check: which project and environment is this token for?
-  # (Query built outside $(...): macOS bash 3.2 misparses braces inside it.)
+# railway_ok TOKEN: does Railway accept it for questura / production? (read-only)
+# The query is built outside $(...): macOS bash 3.2 misparses braces inside it.
+railway_ok() {
+  local body got
   body=$(jq -nc --arg q "$RAILWAY_TOKEN_QUERY" '{query: $q}')
   got=$(curl -sS --max-time 30 https://backboard.railway.com/graphql/v2 \
-    -H "Project-Access-Token: $RAILWAY_DEPLOY_TOKEN" -H 'Content-Type: application/json' \
-    --data-binary "$body" || true)
-  if [[ "$(jq -r '.data.projectToken.projectId // empty' <<<"$got" 2>/dev/null)" == "$RAILWAY_PROJECT_ID" ]] &&
-     [[ "$(jq -r '.data.projectToken.environmentId // empty' <<<"$got" 2>/dev/null)" == "$RAILWAY_ENVIRONMENT_ID" ]]; then
-    printf '  %s✓%s token works for project questura, environment production\n' "$GREEN" "$RESET"
-    break
-  fi
-  warn "Railway did not accept it for questura/production: $(jq -c '[.errors[]?.message]' <<<"$got" 2>/dev/null || echo 'no answer')"
-  note "Check it was made under this project with Environment = production, then paste again."
-  RAILWAY_DEPLOY_TOKEN=""; write_env RAILWAY_DEPLOY_TOKEN ""
-done
-write_env RAILWAY_DEPLOY_TOKEN "$RAILWAY_DEPLOY_TOKEN"
-set_env_secret RAILWAY_TOKEN "$RAILWAY_DEPLOY_TOKEN"
-pause "Press Enter for the next stage"
+    -H "Project-Access-Token: $1" -H 'Content-Type: application/json' \
+    --data-binary "$body" 2>/dev/null || true)
+  [[ "$(jq -r '.data.projectToken.projectId // empty' <<<"$got" 2>/dev/null)" == "$RAILWAY_PROJECT_ID" ]] &&
+  [[ "$(jq -r '.data.projectToken.environmentId // empty' <<<"$got" 2>/dev/null)" == "$RAILWAY_ENVIRONMENT_ID" ]]
+}
 
-# ── 4 ─────────────────────────────────────────────────────────────────────
-stage "Cloudflare: a deploy-only token"
-say "Lets GitHub upload the website. Nothing else."
-CF_ACCOUNT_ID=$(vault_value generated.env CLOUDFLARE_ACCOUNT_ID)
-open_url "https://dash.cloudflare.com/profile/api-tokens"
-step "Click 'Create Token', scroll down, 'Create Custom Token' → Get started."
-step "Token name: github-deploy"
-step "Permissions: 3 rows (use '+ Add more' for rows 2 and 3):"
-say  "     Account | Workers Scripts    | Edit"
-say  "     Account | Workers R2 Storage | Edit"
-say  "     Account | D1                 | Edit"
-step "Account Resources: Include | (your account)"
-note "No Zone rows and no Zone Resources: the deploy never touches the domain."
-step "Leave the rest. 'Continue to summary' → 'Create Token' → copy it (shown once)."
-while :; do
-  ask_secret CLOUDFLARE_DEPLOY_TOKEN "Paste the Cloudflare token:"
-  [[ -n "$CLOUDFLARE_DEPLOY_TOKEN" ]] || { warn "empty; paste the token"; continue; }
-  ok=true
-  # Read-only checks, one per thing the deploy touches.
+# cloudflare_ok TOKEN [loud]: can it reach everything a deploy touches? (read-only)
+cloudflare_ok() {
+  local token=$1 loud=${2:-} ok=0 check path label
   for check in "user/tokens/verify:token is active" \
                "accounts/$CF_ACCOUNT_ID/workers/scripts:Workers" \
                "accounts/$CF_ACCOUNT_ID/r2/buckets:R2 storage" \
                "accounts/$CF_ACCOUNT_ID/d1/database:D1"; do
     path=${check%%:*}; label=${check#*:}
-    if [[ "$(curl -sS --max-time 30 -H "Authorization: Bearer $CLOUDFLARE_DEPLOY_TOKEN" \
-          "https://api.cloudflare.com/client/v4/$path" | jq -r '.success' 2>/dev/null)" == true ]]; then
-      printf '  %s✓%s %s\n' "$GREEN" "$RESET" "$label"
+    if [[ "$(curl -sS --max-time 30 -H "Authorization: Bearer $token" \
+          "https://api.cloudflare.com/client/v4/$path" 2>/dev/null | jq -r '.success' 2>/dev/null)" == true ]]; then
+      [[ -n "$loud" ]] && printf '  %s✓%s %s\n' "$GREEN" "$RESET" "$label"
     else
-      warn "no access: $label"; ok=false
+      [[ -n "$loud" ]] && warn "no access: $label"
+      ok=1
     fi
   done
-  $ok && break
-  note "Edit the token in Cloudflare (… → Edit) to add what is missing, then paste it again."
-  CLOUDFLARE_DEPLOY_TOKEN=""; write_env CLOUDFLARE_DEPLOY_TOKEN ""
-done
-write_env CLOUDFLARE_DEPLOY_TOKEN "$CLOUDFLARE_DEPLOY_TOKEN"
-set_env_secret CLOUDFLARE_API_TOKEN "$CLOUDFLARE_DEPLOY_TOKEN"
+  return $ok
+}
+
+# github_has_secret NAME: is it already on the production environment?
+github_has_secret() { gh secret list --env "$GH_ENV" -R "$REPO" 2>/dev/null | awk '{print $1}' | grep -qx "$1"; }
+
+# already_done: say so and move on, without opening anything.
+already_done() {
+  printf '  %s✓ Already done:%s %s\n' "$GREEN" "$RESET" "$1"
+  note "Skipping. (To replace it, empty its line in $ENV_FILE and re-run.)"
+  sleep 2
+}
+
+# ── 3 ─────────────────────────────────────────────────────────────────────
+stage "Railway: a deploy-only token"
+RAILWAY_DEPLOY_TOKEN=$(_existing RAILWAY_DEPLOY_TOKEN || true)
+if [[ -n "$RAILWAY_DEPLOY_TOKEN" ]] && railway_ok "$RAILWAY_DEPLOY_TOKEN" && github_has_secret RAILWAY_TOKEN; then
+  already_done "saved token works, and GitHub has it."
+else
+  say "Lets GitHub start a deploy of the API. Scoped to this one project."
+  open_url "https://railway.com/project/$RAILWAY_PROJECT_ID/settings/tokens"
+  step "You are on Project Settings → Tokens (project 'questura')."
+  step "Token name: github-deploy"
+  step "Environment: production"
+  step "Click Create, then copy the token it shows (it is shown once)."
+  note "Not your account token, and not the dashboard's token: a new one."
+  while :; do
+    ask_secret RAILWAY_DEPLOY_TOKEN "Paste the Railway token:"
+    [[ -n "$RAILWAY_DEPLOY_TOKEN" ]] || { warn "empty; paste the token"; continue; }
+    if railway_ok "$RAILWAY_DEPLOY_TOKEN"; then
+      printf '  %s✓%s token works for project questura, environment production\n' "$GREEN" "$RESET"
+      break
+    fi
+    warn "Railway did not accept it for questura / production."
+    note "Check it was made under this project with Environment = production, then paste again."
+    RAILWAY_DEPLOY_TOKEN=""; write_env RAILWAY_DEPLOY_TOKEN ""
+  done
+  write_env RAILWAY_DEPLOY_TOKEN "$RAILWAY_DEPLOY_TOKEN"
+  set_env_secret RAILWAY_TOKEN "$RAILWAY_DEPLOY_TOKEN"
+  pause "Press Enter for the next stage"
+fi
+
+# ── 4 ─────────────────────────────────────────────────────────────────────
+stage "Cloudflare: a deploy-only token"
+CF_ACCOUNT_ID=$(vault_value generated.env CLOUDFLARE_ACCOUNT_ID)
+CLOUDFLARE_DEPLOY_TOKEN=$(_existing CLOUDFLARE_DEPLOY_TOKEN || true)
+if [[ -n "$CLOUDFLARE_DEPLOY_TOKEN" ]] && cloudflare_ok "$CLOUDFLARE_DEPLOY_TOKEN" && github_has_secret CLOUDFLARE_API_TOKEN; then
+  already_done "saved token works, and GitHub has it."
+else
+  say "Lets GitHub upload the website. Nothing else."
+  open_url "https://dash.cloudflare.com/profile/api-tokens"
+  step "Click 'Create Token', scroll down, 'Create Custom Token' → Get started."
+  step "Token name: github-deploy"
+  step "Permissions: 3 rows (use '+ Add more' for rows 2 and 3):"
+  say  "     Account | Workers Scripts    | Edit"
+  say  "     Account | Workers R2 Storage | Edit"
+  say  "     Account | D1                 | Edit"
+  step "Account Resources: Include | (your account)"
+  note "No Zone rows and no Zone Resources: the deploy never touches the domain."
+  step "Leave the rest. 'Continue to summary' → 'Create Token' → copy it (shown once)."
+  while :; do
+    ask_secret CLOUDFLARE_DEPLOY_TOKEN "Paste the Cloudflare token:"
+    [[ -n "$CLOUDFLARE_DEPLOY_TOKEN" ]] || { warn "empty; paste the token"; continue; }
+    cloudflare_ok "$CLOUDFLARE_DEPLOY_TOKEN" loud && break
+    note "Edit the token in Cloudflare (… → Edit) to add what is missing, then paste it again."
+    CLOUDFLARE_DEPLOY_TOKEN=""; write_env CLOUDFLARE_DEPLOY_TOKEN ""
+  done
+  write_env CLOUDFLARE_DEPLOY_TOKEN "$CLOUDFLARE_DEPLOY_TOKEN"
+  set_env_secret CLOUDFLARE_API_TOKEN "$CLOUDFLARE_DEPLOY_TOKEN"
+fi
 
 finish
 say "Next: merge the PR. Watch it go live at https://github.com/$REPO/actions/workflows/deploy.yml"
