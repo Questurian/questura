@@ -4,7 +4,7 @@
  * Display available project scripts and system info on server startup
  */
 
-const { execSync } = require('child_process')
+const { execSync, spawnSync } = require('child_process')
 const fs = require('fs')
 const net = require('net')
 const os = require('os')
@@ -96,6 +96,25 @@ function checkPortReachable(host, port) {
   })
 }
 
+// A local database that is behind the code breaks quietly: every query that
+// names a newer column fails, and visitor sign-in was the first thing to go
+// (2026-09-28, three migrations behind). Warn, never block: the check needs
+// the database, and a dev server should still start without one.
+function warnIfMigrationsPending() {
+  const result = spawnSync(process.execPath, ['scripts/deploy/check-pending-migrations.mjs'], {
+    encoding: 'utf-8',
+    env: process.env,
+    timeout: 15000,
+  })
+  const output = `${result.stdout || ''}${result.stderr || ''}`
+  if (!output.includes('Pending migrations:')) return
+
+  console.log('')
+  console.log('    ⚠️  LOCAL DATABASE IS BEHIND THE CODE. Sign-in and other queries will fail.')
+  for (const line of output.split('\n').filter((l) => l.startsWith('  '))) console.log(`    ${line}`)
+  console.log('    Fix:                pnpm db:migrate   (read AGENTS.md migration rules first)')
+}
+
 async function printStartupInfo() {
   loadEnvFiles()
 
@@ -131,6 +150,7 @@ async function printStartupInfo() {
 
     if (databaseReachability?.status === 'reachable') {
       console.log('    Reachability:       Postgres socket reachable')
+      warnIfMigrationsPending()
     } else {
       const failureReason = databaseReachability?.error || 'Unknown connection failure'
       console.log('    Reachability:       Postgres not reachable')
@@ -162,6 +182,9 @@ async function printStartupInfo() {
   console.log('    pnpm clear:payload:except-users')
   console.log('                      Preserves users and currencies')
   console.log('    pnpm clear:test       Clear test collections (preserves users)')
+  console.log('    pnpm dev:member <email> <state>')
+  console.log('                          Make a local account a member (member, yearly,')
+  console.log('                          cancelling, grace, paused, expired, none)')
   console.log('    pnpm test             Run integration tests')
   console.log('')
   console.log('  Code Generation:')
