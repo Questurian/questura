@@ -51,8 +51,10 @@ Re-run it to rotate a key. What it sets up, GitHub → repo Settings:
     `questura`, environment `production` (Railway → project → Settings →
     Tokens). Not an account token.
   - Secret `CLOUDFLARE_API_TOKEN`: Cloudflare → My Profile → API Tokens →
-    template "Edit Cloudflare Workers", plus **D1: Edit** (the tag cache),
-    scoped to the one account and the `questurian.com` zone.
+    Create Custom Token with three Account rows: Workers Scripts Edit,
+    Workers R2 Storage Edit, D1 Edit (the tag cache); Account Resources: the
+    one account. No zone permissions: the Worker's domains are set in the
+    dashboard, not in `wrangler.jsonc`, so a deploy never touches them.
   - Secret `CLOUDFLARE_ACCOUNT_ID`.
 - **Repository variables** (public values, they end up in the browser
   bundle): `STRIPE_PUBLISHABLE_KEY` (`pk_live_…`), `GOOGLE_MAPS_API_KEY`,

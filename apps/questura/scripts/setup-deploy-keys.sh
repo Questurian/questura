@@ -298,16 +298,18 @@ pause "Press Enter for the next stage"
 
 # ── 4 ─────────────────────────────────────────────────────────────────────
 stage "Cloudflare: a deploy-only token"
-say "Lets GitHub upload the website. Workers, its storage and its cache only."
+say "Lets GitHub upload the website. Nothing else."
 CF_ACCOUNT_ID=$(vault_value generated.env CLOUDFLARE_ACCOUNT_ID)
 open_url "https://dash.cloudflare.com/profile/api-tokens"
-step "Create Token → template 'Edit Cloudflare Workers' → Use template."
-step "Rename it (pencil at the top): github-deploy"
-step "Permissions: make sure 'Account · Workers R2 Storage · Edit' is there."
-step "Add one row: Account · D1 · Edit   (the website's cache index lives in D1)."
-step "Account Resources: Include → your account."
-step "Zone Resources: Include → Specific zone → questurian.com"
-step "Continue to summary → Create Token → copy the token (shown once)."
+step "Click 'Create Token', scroll down, 'Create Custom Token' → Get started."
+step "Token name: github-deploy"
+step "Permissions: 3 rows (use '+ Add more' for rows 2 and 3):"
+say  "     Account | Workers Scripts    | Edit"
+say  "     Account | Workers R2 Storage | Edit"
+say  "     Account | D1                 | Edit"
+step "Account Resources: Include | (your account)"
+note "No Zone rows and no Zone Resources: the deploy never touches the domain."
+step "Leave the rest. 'Continue to summary' → 'Create Token' → copy it (shown once)."
 while :; do
   ask_secret CLOUDFLARE_DEPLOY_TOKEN "Paste the Cloudflare token:"
   [[ -n "$CLOUDFLARE_DEPLOY_TOKEN" ]] || { warn "empty; paste the token"; continue; }
