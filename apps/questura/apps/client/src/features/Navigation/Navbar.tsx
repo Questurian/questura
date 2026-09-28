@@ -2,7 +2,8 @@
 
 import DesktopNavbar from "./Desktop/DesktopNavbar";
 import MobileNavbar from "./Mobile/MobileNavbar";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { usePathname } from "next/navigation";
 import { primeIdentity } from "@/lib/user/currentIdentity";
 import { applyNavTheme, NAV_THEME_KEY, readNavTheme } from "./lib/navTheme";
 
@@ -28,10 +29,17 @@ const FRAME_MS = 1000 / 60;
 // Locked is when the section links show in the thin bar (DesktopNavbar).
 const LOCK_AT = 0.97;
 
+// Pages where the navbar starts, and stays, as the thin bar instead of the
+// big masthead: a city's itineraries list and each itinerary.
+const PINNED_THIN = /^\/[^/]+\/[^/]+\/itineraries(?:\/|$)/;
+
 export default function Navbar() {
   const navRef = useRef<HTMLElement>(null);
   // True once the rendered collapse has settled at 1.
   const [locked, setLocked] = useState(false);
+  // Known during the server render too, so a pinned page paints the thin bar
+  // on its first frame rather than shrinking into it.
+  const pinnedThin = PINNED_THIN.test(usePathname() ?? "");
 
   // The navbar is in flow and changes height as it collapses. With the
   // browser's scroll anchoring on, every height change nudges scrollY to keep
@@ -58,8 +66,10 @@ export default function Navbar() {
   }, []);
 
   useEffect(() => {
+    // Pinned pages report fully collapsed to the whole page too: the itinerary
+    // map column sizes itself off --navbar-collapse on <html>.
     const collapseFromScroll = () =>
-      Math.min(1, Math.max(0, window.scrollY / COLLAPSE_PX));
+      pinnedThin ? 1 : Math.min(1, Math.max(0, window.scrollY / COLLAPSE_PX));
 
     let rafId = 0;
     let lastFrame = 0; // timestamp of the previous tick; 0 = loop just woke
@@ -119,7 +129,7 @@ export default function Navbar() {
       window.removeEventListener("scroll", handleScroll);
       cancelAnimationFrame(rafId);
     };
-  }, []);
+  }, [pinnedThin]);
 
   // Keep --navbar-height in sync with the real nav height at every animation frame
   // so that consumers (e.g. the maps page sticky panel) can track it smoothly.
@@ -144,9 +154,15 @@ export default function Navbar() {
   return (
     // `site-nav` scopes the navbar palette: the dark theme recolours this
     // subtree and nothing else (foundations.css, "Navbar theme").
-    <nav ref={navRef} className="site-nav sticky top-0 z-40">
+    // A pinned page sets the collapse on the navbar itself, which wins over
+    // the scroll-driven value on <html> for everything inside it.
+    <nav
+      ref={navRef}
+      className="site-nav sticky top-0 z-40"
+      style={pinnedThin ? ({ "--navbar-collapse": 1 } as CSSProperties) : undefined}
+    >
       <div className="hidden 1024:block">
-        <DesktopNavbar locked={locked} />
+        <DesktopNavbar locked={pinnedThin || locked} />
       </div>
       <div className="h-[55px] 1024:hidden">
         <MobileNavbar />
