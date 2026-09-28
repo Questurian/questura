@@ -15,14 +15,17 @@ primeIdentity();
 // animate itself, so the page moves at full speed from the first flick (#589).
 const COLLAPSE_PX = 120;
 
-// Lerp factor: how fast the rendered value chases the target each frame.
-// Lower = smoother / more lag. 0.09 gives a nice trailing feel.
-const LERP = 0.09;
+// Lerp factor: the share of the remaining distance the rendered value closes
+// per 60Hz frame (scaled by real frame time, so 120Hz screens run at the same
+// speed). Lower = smoother / more lag. The lab's 0.09 took ~0.6s to lock, so a
+// quick flick left the page far down before the bar finished; 0.25 locks in
+// ~0.2s and settles in ~0.3s while still easing in.
+const LERP = 0.25;
+const FRAME_MS = 1000 / 60;
 
-// The lerp's last few percent is invisible but slow (~0.5s from 0.97 to 1 at
-// LERP 0.09), so the bar counts as locked once it is this close to fully
-// collapsed and still headed there. Locked is when the section links show in
-// the thin bar (DesktopNavbar).
+// The lerp's last few percent is invisible but slow, so the bar counts as
+// locked once it is this close to fully collapsed and still headed there.
+// Locked is when the section links show in the thin bar (DesktopNavbar).
 const LOCK_AT = 0.97;
 
 export default function Navbar() {
@@ -59,6 +62,7 @@ export default function Navbar() {
       Math.min(1, Math.max(0, window.scrollY / COLLAPSE_PX));
 
     let rafId = 0;
+    let lastFrame = 0; // timestamp of the previous tick; 0 = loop just woke
     let targetVal = collapseFromScroll(); // where the collapse should end up
     let currentVal = targetVal; // lerp-smoothed value written to CSS
 
@@ -66,8 +70,11 @@ export default function Navbar() {
     // target; once it has snapped to an endpoint there is nothing left to
     // write, so it stops instead of burning a frame forever. `wake` restarts
     // it whenever a scroll moves the target.
-    const tick = () => {
-      currentVal += (targetVal - currentVal) * LERP;
+    const tick = (now: number) => {
+      // Clamp the gap so a tab coming back from the background doesn't jump.
+      const frames = lastFrame ? Math.min((now - lastFrame) / FRAME_MS, 4) : 1;
+      lastFrame = now;
+      currentVal += (targetVal - currentVal) * (1 - (1 - LERP) ** frames);
       if (targetVal === 1 && currentVal > 0.995) currentVal = 1;
       if (targetVal === 0 && currentVal < 0.005) currentVal = 0;
 
@@ -91,7 +98,9 @@ export default function Navbar() {
 
     // Idempotent: a loop that is already running is left alone.
     const wake = () => {
-      if (rafId === 0) rafId = requestAnimationFrame(tick);
+      if (rafId !== 0) return;
+      lastFrame = 0;
+      rafId = requestAnimationFrame(tick);
     };
 
     wake();
