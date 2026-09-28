@@ -34,9 +34,16 @@ edit on the Mac → pnpm dev → check localhost → branch + PR → CI green �
 
 Batch work by batching merges: each merge that touches code ships.
 
-## One-time setup (done once, already in place when this section says so)
+## One-time setup
 
-GitHub → repo Settings:
+Run the wizard. It opens each page, says what to click, checks each key
+works, and saves it to the vault (`~/.questura-vault/deploy.env`) and GitHub:
+
+```bash
+bash apps/questura/scripts/setup-deploy-keys.sh
+```
+
+Re-run it to rotate a key. What it sets up, GitHub → repo Settings:
 
 - **Environment `production`**, deployment branches: `main` only. Its
   secrets are therefore never available to a pull request or a fork.
