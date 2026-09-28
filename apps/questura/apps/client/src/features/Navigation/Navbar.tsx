@@ -13,16 +13,14 @@ primeIdentity();
 // Scroll distance over which the navbar goes from expanded to collapsed. It is
 // read off the real scroll position: the navbar never consumes input to
 // animate itself, so the page moves at full speed from the first flick (#589).
-// 80px, not the lab's 120: on a slow scroll the bar spent many wheel ticks
-// half-collapsed with nothing in it to click.
-const COLLAPSE_PX = 80;
+const COLLAPSE_PX = 120;
 
 // Lerp factor: the share of the remaining distance the rendered value closes
 // per 60Hz frame (scaled by real frame time, so 120Hz screens run at the same
 // speed). Lower = smoother / more lag. The lab's 0.09 took ~0.6s to lock, so a
-// quick flick left the page far down before the bar finished; 0.35 locks in
-// ~0.14s and settles in ~0.2s while still easing in.
-const LERP = 0.35;
+// quick flick left the page far down before the bar finished; 0.25 locks in
+// ~0.2s and settles in ~0.3s while still easing in.
+const LERP = 0.25;
 const FRAME_MS = 1000 / 60;
 
 // The lerp's last few percent is invisible but slow, so the bar counts as
