@@ -11,6 +11,7 @@ import { IMAGE_CDN_ORIGIN } from "@/lib/media/imageCdnOrigin";
 import { NavigationFeedback } from "@/components/navigation/NavigationFeedback";
 import { WebVitals } from "@/components/observability/WebVitals";
 import { IDENTITY_HINT_SCRIPT } from "@/lib/user/identityHint";
+import { NAV_THEME_SCRIPT } from "@/features/Navigation/lib/navTheme";
 import { getBackendUrl } from "@/lib/api/api-config";
 import { getPublicBaseUrl } from "@/lib/seo/publicBaseUrl";
 
@@ -55,12 +56,16 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    // The pre-paint hint below sets `data-identity` before React hydrates.
+    // The pre-paint scripts below set `data-identity` and `data-nav-theme`
+    // before React hydrates.
     <html lang={DEFAULT_LOCALE} style={{ colorScheme: 'light' }} suppressHydrationWarning>
       <head>
         {/* Before first paint: which navbar controls this reader will get
             (lib/user/identityHint.ts). Must run ahead of the body. */}
         <script dangerouslySetInnerHTML={{ __html: IDENTITY_HINT_SCRIPT }} />
+        {/* Before first paint: the reader's navbar colour
+            (features/Navigation/lib/navTheme.ts). */}
+        <script dangerouslySetInnerHTML={{ __html: NAV_THEME_SCRIPT }} />
       </head>
       {/* Every photo on the site is served from the image CDN, so a cold visit
           otherwise pays DNS + TLS against a second origin before the first

@@ -78,6 +78,25 @@ html {
   --color-paper: var(--paper);
   --color-paper-accent: var(--paper-accent);
 
+  /* Navbar palette (see "Navbar theme" below). Registered here so the navbar
+     can say `bg-nav-bg` / `text-nav-link`; the values switch with the theme. */
+  --color-nav-bg: var(--nav-bg);
+  --color-nav-ink: var(--nav-ink);
+  --color-nav-wordmark: var(--nav-wordmark);
+  --color-nav-subtitle: var(--nav-subtitle);
+  --color-nav-link: var(--nav-link);
+  --color-nav-link-hover: var(--nav-link-hover);
+  --color-nav-rule: var(--nav-rule);
+  --color-nav-rule-soft: var(--nav-rule-soft);
+  --color-nav-pill: var(--nav-pill);
+  --color-nav-pill-hover: var(--nav-pill-hover);
+  --color-nav-chevron: var(--nav-chevron);
+  --color-nav-focus: var(--nav-focus);
+  --color-nav-avatar-from: var(--nav-avatar-from);
+  --color-nav-avatar-to: var(--nav-avatar-to);
+  --color-nav-avatar-ring: var(--nav-avatar-ring);
+  --color-nav-avatar-glyph: var(--nav-avatar-glyph);
+
   /* Custom Breakpoints */
   --breakpoint-280: 280px;
   --breakpoint-320: 320px;
@@ -217,4 +236,55 @@ html[data-identity="user"] .nav-signin[data-pending],
 html[data-identity="member"] .nav-signin[data-pending],
 html[data-identity="member"] .nav-subscribe[data-pending] {
   visibility: hidden;
+}
+
+/* Navbar theme (features/Navigation/lib/navTheme.ts). One navbar, two
+   palettes: light is the lab's Atlantic 100, dark is Atlantic 150. The reader
+   picks one in the menu; an inline <head> script sets `html[data-nav-theme]`
+   from their last choice before first paint, so a dark reader never sees the
+   light bar flash in.
+
+   Light lives on :root so anything outside the navbar that borrows its pieces
+   (the footer renders the navbar's Logo) always gets the light values. Dark is
+   scoped to `.site-nav`, the navbar's own root: it recolours the bar and
+   nothing else on the page. Every token must appear in both blocks
+   (navThemeTokens.test.mjs checks). */
+:root {
+  --nav-bg: #F5F0E8;
+  --nav-ink: #000000;
+  --nav-wordmark: #16181b;
+  --nav-subtitle: #6b6a68;
+  --nav-link: #25292d;
+  --nav-link-hover: var(--accent);
+  --nav-rule: rgb(0 0 0 / 0.14);
+  --nav-rule-soft: rgb(0 0 0 / 0.1);
+  --nav-shadow-strength: 0.06;
+  --nav-pill: #e2ded8;
+  --nav-pill-hover: #d8d4cd;
+  --nav-chevron: rgb(121 113 107 / 0.7);
+  --nav-focus: rgb(0 0 0 / 0.2);
+  --nav-avatar-from: #f5f3ef;
+  --nav-avatar-to: #e0dcd6;
+  --nav-avatar-ring: rgb(0 0 0 / 0.04);
+  --nav-avatar-glyph: #1c1917;
+}
+
+html[data-nav-theme="dark"] .site-nav {
+  --nav-bg: #16181b;
+  --nav-ink: #F5F0E8;
+  --nav-wordmark: #F5F0E8;
+  --nav-subtitle: #a8a49c;
+  --nav-link: #e8e3da;
+  --nav-link-hover: var(--accent-soft);
+  --nav-rule: rgb(255 255 255 / 0.14);
+  --nav-rule-soft: rgb(255 255 255 / 0.1);
+  --nav-shadow-strength: 0.35;
+  --nav-pill: rgb(255 255 255 / 0.1);
+  --nav-pill-hover: rgb(255 255 255 / 0.15);
+  --nav-chevron: rgb(255 255 255 / 0.6);
+  --nav-focus: rgb(255 255 255 / 0.3);
+  --nav-avatar-from: #4a4d52;
+  --nav-avatar-to: #383b40;
+  --nav-avatar-ring: rgb(255 255 255 / 0.08);
+  --nav-avatar-glyph: #e8e3da;
 }
