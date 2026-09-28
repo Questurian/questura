@@ -2,8 +2,9 @@
 
 import DesktopNavbar from "./Desktop/DesktopNavbar";
 import MobileNavbar from "./Mobile/MobileNavbar";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { primeIdentity } from "@/lib/user/currentIdentity";
+import { applyNavTheme, NAV_THEME_KEY, readNavTheme } from "./lib/navTheme";
 
 // Ask who is reading while the page is still hydrating, not after. The
 // navbar's query joins this request (currentIdentity.ts).
@@ -18,8 +19,40 @@ const COLLAPSE_PX = 120;
 // Lower = smoother / more lag. 0.09 gives a nice trailing feel.
 const LERP = 0.09;
 
+// The lerp's last few percent is invisible but slow (~0.5s from 0.97 to 1 at
+// LERP 0.09), so the bar counts as locked once it is this close to fully
+// collapsed and still headed there. Locked is when the section links show in
+// the thin bar (DesktopNavbar).
+const LOCK_AT = 0.97;
+
 export default function Navbar() {
   const navRef = useRef<HTMLElement>(null);
+  // True once the rendered collapse has settled at 1.
+  const [locked, setLocked] = useState(false);
+
+  // The navbar is in flow and changes height as it collapses. With the
+  // browser's scroll anchoring on, every height change nudges scrollY to keep
+  // the content still, which changes the collapse target, which changes the
+  // height again: on a slow scroll back up the bar bounced a few px per frame
+  // (and the rules flickered with it). The collapse already accounts for the
+  // height change, so anchoring is switched off while this navbar is mounted.
+  useEffect(() => {
+    const root = document.documentElement.style;
+    const prev = root.overflowAnchor;
+    root.overflowAnchor = "none";
+    return () => {
+      root.overflowAnchor = prev;
+    };
+  }, []);
+
+  // A navbar colour picked in another tab repaints this one too.
+  useEffect(() => {
+    const onStorage = (event: StorageEvent) => {
+      if (event.key === NAV_THEME_KEY) applyNavTheme(readNavTheme());
+    };
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, []);
 
   useEffect(() => {
     const collapseFromScroll = () =>
@@ -38,6 +71,7 @@ export default function Navbar() {
       if (targetVal === 1 && currentVal > 0.995) currentVal = 1;
       if (targetVal === 0 && currentVal < 0.005) currentVal = 0;
 
+      setLocked(targetVal === 1 && currentVal >= LOCK_AT);
       const borderAlpha = currentVal === 0 || currentVal === 1 ? 0.1 : 0;
       document.documentElement.style.setProperty(
         "--navbar-collapse",
@@ -99,9 +133,11 @@ export default function Navbar() {
   }, []);
 
   return (
-    <nav ref={navRef} className="sticky top-0 z-40">
+    // `site-nav` scopes the navbar palette: the dark theme recolours this
+    // subtree and nothing else (foundations.css, "Navbar theme").
+    <nav ref={navRef} className="site-nav sticky top-0 z-40">
       <div className="hidden 1024:block">
-        <DesktopNavbar />
+        <DesktopNavbar locked={locked} />
       </div>
       <div className="h-[55px] 1024:hidden">
         <MobileNavbar />

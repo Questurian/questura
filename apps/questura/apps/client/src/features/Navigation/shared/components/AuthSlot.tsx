@@ -9,6 +9,8 @@ interface AuthSlotProps {
   isMember: boolean;
   signInClassName?: string;
   userIconClassName?: string;
+  /** Which side of the reserved box the control sits on. "start" hugs whatever is to its left. */
+  align?: "start" | "end";
 }
 
 /**
@@ -42,11 +44,14 @@ export default function AuthSlot({
   isMember,
   signInClassName = "",
   userIconClassName = "",
+  align = "end",
 }: AuthSlotProps) {
   return (
     <span
       // Keep these two widths in step with UserIcon's own sizing.
-      className="inline-flex h-8 min-w-[58px] shrink-0 items-center justify-end 480:h-10 480:min-w-[68px]"
+      className={`inline-flex h-8 min-w-[58px] shrink-0 items-center 480:h-10 480:min-w-[68px] ${
+        align === "start" ? "justify-start" : "justify-end"
+      }`}
     >
       {loading ? (
         <SignInButton className={`nav-signin ${signInClassName}`} pending />

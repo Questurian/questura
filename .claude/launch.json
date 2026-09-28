@@ -17,6 +17,18 @@
       "port": 4000
     },
     {
+      "name": "questura-client-live-api",
+      "runtimeExecutable": "env",
+      "runtimeArgs": [
+        "NEXT_PUBLIC_BACKEND_URL=https://api.questurian.com",
+        "pnpm",
+        "--dir",
+        "apps/questura/apps/client",
+        "dev"
+      ],
+      "port": 3000
+    },
+    {
       "name": "dev",
       "runtimeExecutable": "pnpm",
       "runtimeArgs": [

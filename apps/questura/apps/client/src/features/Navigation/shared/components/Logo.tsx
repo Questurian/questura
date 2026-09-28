@@ -25,7 +25,7 @@ export default function Logo({
           page gets its single <h1> from its own content. */}
       <span
         className={`
-          block font-display text-[#25292d] uppercase font-semibold leading-none m-0 p-0
+          block font-display text-nav-wordmark font-bold leading-none m-0 p-0
           ${isInline ? "text-left" : ""}
           ${className}
         `}
@@ -33,13 +33,14 @@ export default function Logo({
           isInline
             ? undefined
             : {
-                // font-size: 2.9rem (full) → 1.5rem (compact), delta = 1.4rem
-                // letter-spacing: 0.12em (full) → 0.08em (compact), delta = 0.04em
+                // Atlantic-style title-case wordmark, tight tracking.
+                // font-size: 3.4rem (masthead) → 1.55rem (thin bar), delta = 1.85rem
+                // letter-spacing: -0.02em (full) → 0em (compact), delta = 0.02em
                 // --navbar-collapse is 0 at top, 1 when fully scrolled.
                 // No CSS transition — the variable itself is frame-accurate.
-                fontSize: "calc(2.9rem - var(--navbar-collapse, 0) * 1.4rem)",
+                fontSize: "calc(3.4rem - var(--navbar-collapse, 0) * 1.85rem)",
                 letterSpacing:
-                  "calc(0.12em - var(--navbar-collapse, 0) * 0.04em)",
+                  "calc(-0.02em + var(--navbar-collapse, 0) * 0.02em)",
               }
         }
       >
@@ -48,7 +49,7 @@ export default function Logo({
       {subtitle ? (
         <p
           className={`
-            font-display italic text-[#6b6a68] mt-1
+            font-display italic text-nav-subtitle mt-1
             text-[0.82rem]
             550:text-[0.95rem]
             1024:text-[1.4rem]
