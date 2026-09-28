@@ -202,7 +202,7 @@ VAULT="$HOME/.questura-vault"
 ENV_FILE="$VAULT/deploy.env"
 RAILWAY_PROJECT_ID=aa5759b2-a793-4f16-8e8b-8633cdc41cac
 RAILWAY_ENVIRONMENT_ID=e35f0d85-c66d-4f66-b781-d9e456bab8cb
-RAILWAY_SERVER_SERVICE_ID=0f920c5a-3d07-4a51-a75a-fd7a29726f86
+RAILWAY_TOKEN_QUERY='query { projectToken { projectId environmentId } }'
 
 for tool in gh curl jq; do
   command -v "$tool" >/dev/null || { echo "missing tool: $tool" >&2; exit 2; }
@@ -277,11 +277,12 @@ note "Not your account token, and not the dashboard's token: a new one."
 while :; do
   ask_secret RAILWAY_DEPLOY_TOKEN "Paste the Railway token:"
   [[ -n "$RAILWAY_DEPLOY_TOKEN" ]] || { warn "empty; paste the token"; continue; }
-  # Read-only check: can it see this project's server deployments?
+  # Read-only check: which project and environment is this token for?
+  # (Query built outside $(...): macOS bash 3.2 misparses braces inside it.)
+  body=$(jq -nc --arg q "$RAILWAY_TOKEN_QUERY" '{query: $q}')
   got=$(curl -sS --max-time 30 https://backboard.railway.com/graphql/v2 \
     -H "Project-Access-Token: $RAILWAY_DEPLOY_TOKEN" -H 'Content-Type: application/json' \
-    --data-binary "$(jq -n --arg p "$RAILWAY_PROJECT_ID" --arg e "$RAILWAY_ENVIRONMENT_ID" --arg s "$RAILWAY_SERVER_SERVICE_ID" \
-      '{query:"query($p:String!,$e:String!,$s:String!){ projectToken { projectId environmentId } deployments(first:1, input:{projectId:$p, environmentId:$e, serviceId:$s}){ edges { node { status } } } }", variables:{p:$p,e:$e,s:$s}}')" || true)
+    --data-binary "$body" || true)
   if [[ "$(jq -r '.data.projectToken.projectId // empty' <<<"$got" 2>/dev/null)" == "$RAILWAY_PROJECT_ID" ]] &&
      [[ "$(jq -r '.data.projectToken.environmentId // empty' <<<"$got" 2>/dev/null)" == "$RAILWAY_ENVIRONMENT_ID" ]]; then
     printf '  %s✓%s token works for project questura, environment production\n' "$GREEN" "$RESET"
