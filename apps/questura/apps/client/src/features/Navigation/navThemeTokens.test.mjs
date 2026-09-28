@@ -43,8 +43,8 @@ test('the themed navbar files take every colour from the palette', () => {
     './shared/components/icons/UserIcon.tsx',
   ]
   const literal = /\b(?:bg|text|border|ring|from|to|via)-(?:\[#|black\b|white\b|(?:stone|gray|neutral|zinc|slate)-\d)/
-  // The member badge is its own navy disc with a gold edge, the same on either
-  // bar, so its white "Q" is not a navbar colour.
+  // The member badge is its own globe disc with a gold edge, the same on either
+  // bar, so its colours are not navbar colours.
   const withoutMemberBadge = (source) => source.replace(/\{isMember \? \([\s\S]*?\) : \(/, '')
   for (const path of THEMED) {
     const source = withoutMemberBadge(read(path))
