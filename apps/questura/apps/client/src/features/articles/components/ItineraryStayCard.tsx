@@ -58,7 +58,7 @@ function stayPriceLevel(item: ListicleItemRow['item']): number | null {
  * passing it highlights that pin.
  */
 export function ItineraryStayCard({ row }: { row: ListicleItemRow }): JSX.Element {
-  const { registerEntry } = useListicleMapSync()
+  const { registerEntry, activeId } = useListicleMapSync()
   const images = listicleItemImagesFromRow(row)
   // Lexical JSON here used to print "[object Object]" (lib/lexicalHtml.ts).
   const blurb = blurbHtml(row.blurb)
@@ -82,7 +82,7 @@ export function ItineraryStayCard({ row }: { row: ListicleItemRow }): JSX.Elemen
         </span>
       </div>
 
-      <ListiclePhotoCarousel images={images} />
+      <ListiclePhotoCarousel images={images} autoAdvance={activeId === row.id} />
 
       <ListicleVenueTitleRow
         title={row.item.title}

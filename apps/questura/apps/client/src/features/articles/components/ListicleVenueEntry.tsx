@@ -37,13 +37,16 @@ export function ListicleVenueEntry({
   index,
   moment,
   momentLabel,
+  autoAdvancePhotos = false,
 }: {
   row: ListicleItemRow;
   index: number;
   moment?: string | null;
   momentLabel?: string | null;
+  /** Cycle this stop's photos while the map is showing it (itineraries). */
+  autoAdvancePhotos?: boolean;
 }): JSX.Element {
-  const { registerEntry } = useListicleMapSync();
+  const { registerEntry, activeId } = useListicleMapSync();
   const images = listicleItemImagesFromRow(row);
   const price = priceLevelLabel(row.item.priceLevel);
   const idealFor = stringArray(row.item.idealFor);
@@ -83,7 +86,10 @@ export function ListicleVenueEntry({
       <div className="min-w-0 space-y-3 380:space-y-3.5 480:space-y-4 sm:space-y-5">
         <ItineraryMomentBadge moment={moment} label={momentLabel} />
 
-        <ListiclePhotoCarousel images={images} />
+        <ListiclePhotoCarousel
+          images={images}
+          autoAdvance={autoAdvancePhotos && activeId === row.id}
+        />
 
         <div className="space-y-2 480:space-y-2.5 sm:space-y-3">
           <ListicleVenueTitleRow

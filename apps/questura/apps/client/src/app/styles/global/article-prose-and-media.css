@@ -370,6 +370,16 @@
   color: var(--maps-listicle-accent);
 }
 
+/* ListiclePhotoCarousel's auto-advance bar; its end moves to the next photo. */
+@keyframes listicle-photo-progress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
 .maps-listicle-info-list .maps-listicle-info-label:focus-visible {
   text-decoration-line: underline;
   text-decoration-color: currentColor;

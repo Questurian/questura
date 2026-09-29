@@ -3,6 +3,7 @@
 import type { JSX, ReactNode } from "react";
 import { Clock, ExternalLink, MapPin, Route } from "lucide-react";
 import { ShimmerImage } from "@/components/media/ShimmerImage";
+import { ArticleAuthorBanner } from "@/features/articles/components/ArticleAuthorBanner";
 import { ArticlePageHeader } from "@/features/articles/components/ArticlePageHeader";
 import { InstagramEmbedBlock } from "@/features/articles/components/InstagramEmbedBlock";
 import { ItineraryStayCard } from "@/features/articles/components/ItineraryStayCard";
@@ -245,6 +246,7 @@ function StopList({
             index={index}
             moment={block.moment}
             momentLabel={block.momentLabel}
+            autoAdvancePhotos
           />
         );
       })}
@@ -269,7 +271,7 @@ export function ItineraryListicleArticlePage({
   const description = article.seoSection?.metaDescription;
 
   return (
-    <article className="maps-listicle-article min-h-screen bg-background sm:max-w-[600px] sm:mx-auto 1024:max-w-none 1024:mx-0">
+    <article className="maps-listicle-article itinerary-article min-h-screen bg-background sm:max-w-[600px] sm:mx-auto 1024:max-w-none 1024:mx-0">
       <ArticlePageHeader
         title={article.title}
         description={description}
@@ -282,6 +284,7 @@ export function ItineraryListicleArticlePage({
         updatedAt={article.updatedAt}
         author={article.author}
         bookmark={{ targetType: "itineraries", targetId: article.id }}
+        bylineVariant="plain"
       />
 
       {introHtml ? (
@@ -343,6 +346,14 @@ export function ItineraryListicleArticlePage({
         </ListicleMapRegion>
 
         {lockedSlot}
+
+        {/* The header keeps the byline to name and date; the author's photo
+            and links sit here, after the plan, as on a standard article. */}
+        {article.author ? (
+          <div className="mt-14 480:mt-16 sm:mt-20">
+            <ArticleAuthorBanner author={article.author} />
+          </div>
+        ) : null}
       </div>
     </article>
   );
