@@ -132,9 +132,13 @@ export default function DesktopNavbar({ locked }: DesktopNavbarProps) {
           opacity: "calc(1 - var(--navbar-collapse, 0) * 1.5)",
         }}
       >
+        {/* A border, not a 1px-tall fill, so it is drawn exactly like the
+            bar's bottom rule. Browsers snap a border to whole device pixels
+            but stretch a filled box, so at a zoom or display scale that isn't
+            a whole number the fill came out a pixel thicker than the border. */}
         <div
           aria-hidden
-          className="absolute inset-x-0 top-0 h-px bg-nav-rule"
+          className="absolute inset-x-0 top-0 h-0 border-t border-nav-rule"
           style={{ opacity: "calc(1 - var(--navbar-collapse, 0) * 8)" }}
         />
         <ul className="flex h-[44px] items-center justify-center gap-8 px-6 font-[family-name:var(--font-dm-sans)] text-[0.74rem] font-semibold uppercase tracking-[0.14em] text-nav-link">

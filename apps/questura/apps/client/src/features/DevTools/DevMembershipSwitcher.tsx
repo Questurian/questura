@@ -3,19 +3,31 @@
 import { useCallback, useEffect, useState } from "react";
 
 import { getBackendUrl } from "@/lib/api";
+import { useDevStore } from "@/lib/stores/devStore";
 import { useLoginModalStore } from "@/lib/stores/loginModalStore";
 import { identityStore } from "@/lib/user/currentIdentity";
 import { writeHint } from "@/lib/user/identityHint";
 
 /**
- * Localhost-only corner switcher: pick the signed-in reader's membership state
- * (member, cancelling, payment failed, ...) and the page reloads as that reader.
+ * Localhost-only corner switcher: view the signed-in reader as a member or as
+ * not a member, and the page reloads as that reader. It also holds the maps
+ * switch for listicle articles.
  *
  * It writes the local database through `/api/dev/membership`, the same write
  * `pnpm dev:member` makes, so the server, the paywall and the navbar all agree.
  * Nothing reaches Stripe. The live build never contains this file (see
  * `DevTools.tsx`), and the route answers 404 on anything but a Mac.
+ *
+ * The route knows more states (cancelling, payment failed, paused, ...) and
+ * `pnpm dev:member` can still set them; this panel offers only the two that
+ * matter day to day.
  */
+
+/** The two states the panel offers, by the route's state names. */
+const CHOICES = [
+  { name: "member", label: "Member" },
+  { name: "none", label: "Not a member" },
+] as const;
 
 type StateOption = { name: string; label: string; about: string; active: boolean };
 type Status =
@@ -34,6 +46,7 @@ export default function DevMembershipSwitcher() {
   const [status, setStatus] = useState<Status>({ kind: "loading" });
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const { mapsEnabled, toggleMapsEnabled } = useDevStore();
 
   useEffect(() => {
     setOnLocalhost(LOCAL_HOSTS.has(window.location.hostname));
@@ -80,15 +93,15 @@ export default function DevMembershipSwitcher() {
     window.location.reload();
   };
 
-  const choose = async (option: StateOption) => {
-    setBusy(option.name);
+  const choose = async (name: string) => {
+    setBusy(name);
     setError(null);
     try {
       const response = await fetch(endpoint(), {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ state: option.name }),
+        body: JSON.stringify({ state: name }),
       });
       const body = await response.json().catch(() => ({}));
       if (!response.ok) {
@@ -124,7 +137,11 @@ export default function DevMembershipSwitcher() {
 
   if (!onLocalhost) return null;
 
-  const current = status.kind === "signed-in" ? status.states.find((s) => s.name === status.state) : undefined;
+  // Whether the reader currently has paid access, whichever named state they
+  // are in (yearly and cancelling count as members). Undefined for a row no
+  // named state wrote, so neither choice shows as selected.
+  const currentActive =
+    status.kind === "signed-in" ? status.states.find((s) => s.name === status.state)?.active : undefined;
 
   return (
     <div className="fixed bottom-5 left-[64px] z-[2147483000] font-mono text-[12px] leading-snug text-[#E9E6DF]">
@@ -155,22 +172,19 @@ export default function DevMembershipSwitcher() {
 
           {status.kind === "signed-in" && (
             <ul className="py-1">
-              {status.states.map((option) => {
-                const selected = option.name === status.state;
+              {CHOICES.map(({ name, label }) => {
+                const selected = currentActive === (name === "member");
                 return (
-                  <li key={option.name}>
+                  <li key={name}>
                     <button
                       type="button"
-                      onClick={() => choose(option)}
+                      onClick={() => choose(name)}
                       disabled={busy !== null}
                       aria-pressed={selected}
-                      title={option.about}
                       className={`flex w-full items-center justify-between gap-3 px-3 py-[7px] text-left transition-colors hover:bg-white/[0.06] disabled:cursor-wait ${selected ? "bg-white/[0.08] text-white" : "text-white/75"}`}
                     >
-                      <span>{busy === option.name ? "Switching…" : option.label}</span>
-                      <span className={`text-[10px] ${option.active ? "text-[#8FD3A6]" : "text-white/35"}`}>
-                        {option.active ? "access" : "no access"}
-                      </span>
+                      <span>{busy === name ? "Switching…" : label}</span>
+                      {selected && <span aria-hidden className="text-[#8FD3A6]">●</span>}
                     </button>
                   </li>
                 );
@@ -179,6 +193,23 @@ export default function DevMembershipSwitcher() {
           )}
 
           {error && <div className="border-t border-white/10 px-3 py-2 text-[#F2B8A8]">{error}</div>}
+
+          <div className="flex items-center justify-between gap-3 border-t border-white/10 px-3 py-2">
+            <span className="text-white/75">Maps on articles</span>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={mapsEnabled}
+              onClick={toggleMapsEnabled}
+              className={`rounded-full border px-2.5 py-0.5 text-[10px] font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#3B5BDB] ${
+                mapsEnabled
+                  ? "border-[#3B5BDB] bg-[#3B5BDB] text-white"
+                  : "border-white/20 text-white/55 hover:border-white/40 hover:text-white/80"
+              }`}
+            >
+              {mapsEnabled ? "ON" : "OFF"}
+            </button>
+          </div>
 
           <div className="flex items-center justify-between gap-2 border-t border-white/10 px-3 py-2 text-[10px] text-white/40">
             <span>Local database only · no Stripe</span>
@@ -198,8 +229,11 @@ export default function DevMembershipSwitcher() {
         className="flex h-9 items-center gap-2 rounded-full border border-white/15 bg-[#15171C] px-3.5 font-semibold shadow-[0_4px_14px_rgba(0,0,0,0.3)] hover:border-white/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#3B5BDB]"
       >
         <span>DEV</span>
-        {current && <span className="font-normal text-white/60">{current.label}</span>}
+        {currentActive !== undefined && (
+          <span className="font-normal text-white/60">{currentActive ? "Member" : "Not a member"}</span>
+        )}
         {status.kind === "signed-in" && status.state === "other" && <span className="font-normal text-white/60">custom state</span>}
+        {!mapsEnabled && <span className="font-normal text-white/60">maps off</span>}
       </button>
     </div>
   );

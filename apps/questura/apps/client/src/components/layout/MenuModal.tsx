@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "@/components/navigation/PublicLink";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
@@ -44,6 +44,25 @@ export default function MenuModal({
   useEffect(() => {
     if (!isOpen) setQuery("");
   }, [isOpen]);
+
+  const closeRef = useRef<HTMLButtonElement>(null);
+  const searchRef = useRef<HTMLInputElement>(null);
+
+  // Escape closes, focus lands inside on open and goes back to the navbar
+  // button on close.
+  useEffect(() => {
+    if (!isOpen) return;
+    const opener = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    closeRef.current?.focus();
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onClose();
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      opener?.focus();
+    };
+  }, [isOpen, onClose]);
 
   const submitSearch = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -140,10 +159,16 @@ export default function MenuModal({
         }
       `}</style>
 
-      <div className="fixed inset-0 z-50">
+      <div
+        className="fixed inset-0 z-50"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="menu-modal-title"
+      >
         <button
           type="button"
           aria-label="Close menu"
+          tabIndex={-1}
           className="menu-overlay-enter absolute inset-0 bg-black/60"
           onClick={onClose}
         />
@@ -154,34 +179,70 @@ export default function MenuModal({
               <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-white/40">
                 Questurian
               </p>
-              <h2 className="mt-1 font-display text-[1.35rem] leading-none tracking-[0.02em] 1024:text-[1.75rem]">
+              <h2
+                id="menu-modal-title"
+                className="mt-1 font-display text-[1.35rem] leading-none tracking-[0.02em] 1024:text-[1.75rem]"
+              >
                 Menu
               </h2>
             </div>
             <button
+              ref={closeRef}
+              type="button"
               onClick={onClose}
               className="rounded-full border border-white/10 p-2 transition-colors hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/45"
               aria-label="Close modal"
             >
-              <X className="h-5 w-5 text-white" />
+              <X aria-hidden className="h-5 w-5 text-white" />
             </button>
           </div>
 
           <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5 1024:px-10 1024:py-7">
-            <form onSubmit={submitSearch} className="mb-6 1024:mb-8 1024:max-w-[520px]">
-              <div className="flex items-center gap-2.5 border-b border-white/25 py-3 transition-colors focus-within:border-white/70">
-                <Search className="h-4 w-4 shrink-0 text-white/55" strokeWidth={1.5} aria-hidden />
+            <form
+              onSubmit={submitSearch}
+              role="search"
+              className="mb-8 1024:mb-10 1024:max-w-[560px]"
+            >
+              <div className="flex h-12 items-center gap-2.5 rounded-xl border border-white/15 bg-white/[0.04] pl-3.5 pr-1.5 transition-colors hover:border-white/25 focus-within:border-white/45 focus-within:bg-white/[0.07] focus-within:ring-2 focus-within:ring-white/10">
+                <Search className="h-4 w-4 shrink-0 text-white/55" strokeWidth={1.75} aria-hidden />
                 <input
+                  ref={searchRef}
                   type="search"
                   value={query}
                   onChange={(event) => setQuery(event.target.value)}
                   placeholder="Search articles, guides, maps, and itineraries..."
-                  className="w-full bg-transparent text-sm font-semibold text-white outline-none placeholder:text-white/45"
+                  className="min-w-0 flex-1 truncate bg-transparent text-sm font-semibold text-white outline-none placeholder:text-white/45 [&::-webkit-search-cancel-button]:hidden [&::-webkit-search-decoration]:hidden"
                   autoComplete="off"
                   aria-label="Search articles"
                 />
+                {query ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setQuery("");
+                      searchRef.current?.focus();
+                    }}
+                    className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-white/50 transition-colors hover:bg-white/10 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white/45"
+                    aria-label="Clear search"
+                  >
+                    <X aria-hidden className="h-4 w-4" strokeWidth={2} />
+                  </button>
+                ) : null}
+                <button
+                  type="submit"
+                  disabled={!query.trim()}
+                  className="inline-flex h-9 shrink-0 cursor-pointer items-center justify-center gap-1.5 rounded-lg bg-accent px-3 text-sm font-semibold text-white transition-colors hover:bg-[#3451C7] active:bg-[#2F44B0] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/45 disabled:cursor-default disabled:bg-white/10 disabled:text-white/35 1024:px-4"
+                  aria-label="Search"
+                >
+                  <span className="hidden 1024:inline">Search</span>
+                  <ArrowRight aria-hidden className="h-4 w-4" strokeWidth={2} />
+                </button>
               </div>
             </form>
+
+            <p className="mb-6 text-[10px] font-bold uppercase tracking-[0.24em] text-white/40 1024:mb-7">
+              Destinations
+            </p>
 
             <nav className="menu-reveal grid gap-8 1024:grid-cols-3 1024:gap-0" aria-label="Locations">
               {locationMenuQuery.isPending ? (

@@ -36,6 +36,7 @@ import { default as default_ea3c86191e6591892c46d34d0d8e1556 } from 'src/feature
 import { default as default_c633d405ce31378e38cad4d5550baee0 } from 'src/features/data/instagram/components/InstagramPostPreview.tsx'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 
+/** @type import('payload').ImportMap */
 export const importMap = {
   "src/shared/location/LocationPickerField.tsx#default": default_e59457fc37a0f292448054b7f4fc838c,
   "src/features/media/components/FocalPointPickerField.tsx#default": default_5e539c916ba19f330f597f07549c983d,
