@@ -40,7 +40,7 @@ export function GatedArticleBody({ articleId, gate, path, lang }: GatedArticleBo
   // so the two agree and hydration is stable. A member sees it briefly before
   // the swap; that is the correct trade, because the alternative puts a
   // loading placeholder in the cached HTML where a crawler and any reader
-  // without JS would find the call to action -- and `[data-paywalled]`, which
+  // without JS would find the call to action -- and the paywall class, which
   // the page's paywall JSON-LD points at, lives on this notice.
   if (phase === 'identifying' || phase === 'anonymous') {
     return <PaywallNotice gate={gate} returnTo={path} />

@@ -1,6 +1,7 @@
 import Link from '@/components/navigation/PublicLink'
 import { Lock } from 'lucide-react'
 
+import { PAYWALL_CLASS } from '@/features/articles/lib/articleJsonLd'
 import { describeLock, type GateState } from '@/features/articles/lib/gate'
 
 type PaywallNoticeProps = {
@@ -12,9 +13,11 @@ type PaywallNoticeProps = {
 /**
  * Stands in for the withheld body of a Gated item.
  *
- * Carries `data-paywalled`, which is what the page's paywall JSON-LD points at
- * with `cssSelector`. Renaming or removing that attribute silently breaks the
- * structured data, so the two live and change together (ADR-0009).
+ * Carries the `PAYWALL_CLASS` class, which is what the page's paywall JSON-LD
+ * points at with `cssSelector` (Google wants a class selector), and
+ * `data-paywalled`, which is how `scripts/check-structured-data.mjs` knows the
+ * page is paid. Removing either silently breaks the structured data or its
+ * check, so they live and change together (ADR-0009).
  *
  * Server-rendered inside the cached public shell, so it must not depend on who
  * is reading. A member sees this too, until the client swaps the full body in.
@@ -27,7 +30,7 @@ export function PaywallNotice({ gate, returnTo }: PaywallNoticeProps) {
     <aside
       data-paywalled
       aria-label="Members-only content"
-      className="rounded-lg border border-foreground/12 bg-foreground/[0.03] px-6 py-10 text-center sm:px-10"
+      className={`${PAYWALL_CLASS} rounded-lg border border-foreground/12 bg-foreground/[0.03] px-6 py-10 text-center sm:px-10`}
     >
       <span className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-wider text-foreground/50">
         <Lock aria-hidden="true" className="h-3.5 w-3.5" />

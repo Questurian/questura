@@ -17,6 +17,9 @@ export function buildOrganizationJsonLd(): Record<string, unknown> {
     '@id': `${base}/#organization`,
     name: 'Questurian',
     url: `${base}/`,
+    // app/apple-icon.png, served at this path: raster, 180x180, over
+    // Google's 112px minimum for a logo.
+    logo: `${base}/apple-icon.png`,
     ...(SOCIAL_PROFILE_URLS.length > 0 ? { sameAs: SOCIAL_PROFILE_URLS } : {}),
   }
 }
