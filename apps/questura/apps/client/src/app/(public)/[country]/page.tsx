@@ -12,6 +12,9 @@ import { publicUrlIndex } from '@/lib/routing/publicStaticParams'
 
 const CONTENT_PAGE_SIZE = 50
 
+const SECTION_LABEL =
+  'mb-4 text-[11px] font-semibold uppercase tracking-[0.18em] text-foreground/55'
+
 // Pre-rendered at build time so a first visitor — often the crawler — is
 // served a cached page instead of paying a live render. dynamicParams stays at
 // its default, so a country published after the last deploy still renders on
@@ -68,56 +71,54 @@ export default async function CountryHubPage({ params }: Props) {
 
   return (
     <section className="min-h-[70vh] bg-background px-5 py-16 text-foreground 768:px-10 1024:px-16">
-      <div className="mx-auto max-w-6xl">
-        <div className="grid gap-12 1024:grid-cols-[minmax(0,0.82fr)_minmax(320px,0.68fr)] 1024:items-start">
-          <div className="max-w-3xl">
-            <h1 className="font-display text-[48px] font-medium leading-[0.95] text-foreground 480:text-[64px] 768:text-[84px]">
-              {countryName}
-            </h1>
-            {!content?.items.length && (
-              <div className="mt-10">
-                <LocationComingSoon place={countryName} />
-              </div>
-            )}
-          </div>
+      <div className="mx-auto max-w-3xl">
+        <h1 className="font-display text-[48px] font-medium leading-[0.95] text-foreground 480:text-[64px] 768:text-[84px]">
+          {countryName}
+        </h1>
 
-          {cities.length > 0 && (
-            <div className="border-y border-foreground/18">
-              {cities.map((city, index) => (
-                <Link
-                  key={city.slug}
-                  href={city.href}
-                  className="group flex min-h-20 items-center justify-between gap-4 border-b border-foreground/14 py-5 outline-none last:border-b-0 focus-visible:bg-foreground/5"
-                >
-                  <span className="flex min-w-0 items-baseline gap-4">
-                    <span className="w-8 shrink-0 text-[11px] font-semibold text-foreground/38">
-                      {String(index + 1).padStart(2, '0')}
-                    </span>
-                    <span className="break-words font-display text-[27px] leading-tight text-foreground 480:text-[34px]">
+        {/* One column, cities first: a grid of city cards reads the same with
+            one city as with several, where the old right-hand list left a
+            lone row floating beside the heading. */}
+        {cities.length > 0 && (
+          <nav aria-label={`Cities in ${countryName}`} className="mt-12">
+            <p className={SECTION_LABEL}>{cities.length === 1 ? 'City' : 'Cities'}</p>
+            <ul className="grid gap-3 480:grid-cols-2 768:grid-cols-3">
+              {cities.map((city) => (
+                <li key={city.slug}>
+                  <Link
+                    href={city.href}
+                    className="group flex h-full items-center justify-between gap-4 rounded-lg border border-foreground/15 px-5 py-4 outline-none transition-colors hover:border-foreground/35 hover:bg-foreground/[0.03] focus-visible:border-foreground/50"
+                  >
+                    <span className="min-w-0 break-words font-display text-[24px] leading-tight text-foreground">
                       {city.name ?? city.slug}
                     </span>
-                  </span>
-                  <ArrowUpRight
-                    className="size-5 shrink-0 text-foreground/45 transition group-hover:translate-x-1 group-hover:-translate-y-1 group-hover:text-foreground"
-                    strokeWidth={1.5}
-                    aria-hidden
-                  />
-                </Link>
+                    <ArrowUpRight
+                      className="size-5 shrink-0 text-foreground/45 transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-foreground"
+                      strokeWidth={1.5}
+                      aria-hidden
+                    />
+                  </Link>
+                </li>
               ))}
-            </div>
+            </ul>
+          </nav>
+        )}
+
+        <div className="mt-14">
+          {content && content.items.length > 0 ? (
+            <>
+              <p className={SECTION_LABEL}>Latest from {countryName}</p>
+              <LocationContentList
+                content={content}
+                pageHref={(page) =>
+                  `/search?location=${encodeURIComponent(content.location.locationKey)}&page=${page}`
+                }
+              />
+            </>
+          ) : (
+            <LocationComingSoon place={countryName} />
           )}
         </div>
-
-        {content && content.items.length > 0 && (
-          <div className="mt-16 max-w-3xl">
-            <LocationContentList
-              content={content}
-              pageHref={(page) =>
-                `/search?location=${encodeURIComponent(content.location.locationKey)}&page=${page}`
-              }
-            />
-          </div>
-        )}
       </div>
     </section>
   )
