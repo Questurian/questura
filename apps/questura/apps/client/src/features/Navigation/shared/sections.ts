@@ -2,9 +2,7 @@
  * The desktop navbar's section links. They show twice: in the row under the
  * masthead, and in the thin bar once it has fully collapsed.
  *
- * None of these pages exists yet, so none has an `href`: each shows as plain
- * text in the navbar, with nothing to click. When a page is ready, give its
- * entry an `href` and it becomes a link in both places.
+ * An entry without an `href` shows as plain text, with nothing to click.
  */
 export interface NavSection {
   label: string;
@@ -14,8 +12,8 @@ export interface NavSection {
 }
 
 export const NAV_SECTIONS: NavSection[] = [
-  { label: "Eat" },
-  { label: "Stay" },
-  { label: "Itineraries" },
-  { label: "Newsletters", wideOnly: true },
+  { label: "Eat", href: "/eat" },
+  { label: "Stay", href: "/stay" },
+  { label: "Itineraries", href: "/itineraries" },
+  { label: "Newsletters", href: "/newsletters", wideOnly: true },
 ];
