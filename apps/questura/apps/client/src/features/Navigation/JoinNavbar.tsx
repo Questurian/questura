@@ -12,11 +12,11 @@ export default function JoinNavbar() {
         href="/"
         data-no-hover-underline
         aria-label="Questurian home"
-        className="cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#78C7E8]"
+        className="flex cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#78C7E8]"
       >
         <Logo
           variant="inline"
-          className="whitespace-nowrap !text-[#F4F0E7] text-[1.35rem] tracking-[0.08em] 1024:text-[1.6rem]"
+          className="whitespace-nowrap !text-[#F4F0E7] text-[1.35rem] [--wordmark-tracking:0.08em] 1024:text-[1.6rem]"
         />
       </Link>
     </nav>

@@ -30,7 +30,7 @@ export default function MobileNavbar() {
           >
             <Logo
               variant="inline"
-              className="whitespace-nowrap font-bold leading-none text-[1.3rem] tracking-[-0.01em] 380:text-[1.4rem] 480:text-[1.6rem] 768:text-[1.75rem]"
+              className="whitespace-nowrap font-bold leading-none text-[1.3rem] [--wordmark-tracking:-0.01em] 380:text-[1.4rem] 480:text-[1.6rem] 768:text-[1.75rem]"
             />
           </Link>
         </div>
