@@ -203,15 +203,17 @@ export default function MenuModal({
               role="search"
               className="mb-8 1024:mb-10 1024:max-w-[560px]"
             >
-              <div className="flex h-12 items-center gap-2.5 rounded-xl border border-white/15 bg-white/[0.04] pl-3.5 pr-1.5 transition-colors hover:border-white/25 focus-within:border-white/45 focus-within:bg-white/[0.07] focus-within:ring-2 focus-within:ring-white/10">
-                <Search className="h-4 w-4 shrink-0 text-white/55" strokeWidth={1.75} aria-hidden />
+              {/* Same underline field as the search results page, in the
+                  panel's white-on-dark, so the two read as one search. */}
+              <div className="flex items-center gap-3 border-b border-white/25 pb-3 transition-colors focus-within:border-white/70">
+                <Search className="size-5 shrink-0 text-white/45" strokeWidth={1.5} aria-hidden />
                 <input
                   ref={searchRef}
                   type="search"
                   value={query}
                   onChange={(event) => setQuery(event.target.value)}
-                  placeholder="Search articles, guides, maps, and itineraries..."
-                  className="min-w-0 flex-1 truncate bg-transparent text-sm font-semibold text-white outline-none placeholder:text-white/45 [&::-webkit-search-cancel-button]:hidden [&::-webkit-search-decoration]:hidden"
+                  placeholder="Search articles, guides, maps, and itineraries…"
+                  className="min-w-0 flex-1 truncate bg-transparent text-[16px] leading-7 text-white outline-none placeholder:text-white/40 1024:text-[18px] [&::-webkit-search-cancel-button]:hidden [&::-webkit-search-decoration]:hidden"
                   autoComplete="off"
                   aria-label="Search articles"
                 />
@@ -222,21 +224,12 @@ export default function MenuModal({
                       setQuery("");
                       searchRef.current?.focus();
                     }}
-                    className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-white/50 transition-colors hover:bg-white/10 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white/45"
+                    className="flex size-7 shrink-0 items-center justify-center rounded-full text-white/45 transition-colors hover:bg-white/10 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white/45"
                     aria-label="Clear search"
                   >
-                    <X aria-hidden className="h-4 w-4" strokeWidth={2} />
+                    <X aria-hidden className="size-4" strokeWidth={1.75} />
                   </button>
                 ) : null}
-                <button
-                  type="submit"
-                  disabled={!query.trim()}
-                  className="inline-flex h-9 shrink-0 cursor-pointer items-center justify-center gap-1.5 rounded-lg bg-accent px-3 text-sm font-semibold text-white transition-colors hover:bg-[#3451C7] active:bg-[#2F44B0] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/45 disabled:cursor-default disabled:bg-white/10 disabled:text-white/35 1024:px-4"
-                  aria-label="Search"
-                >
-                  <span className="hidden 1024:inline">Search</span>
-                  <ArrowRight aria-hidden className="h-4 w-4" strokeWidth={2} />
-                </button>
               </div>
             </form>
 
