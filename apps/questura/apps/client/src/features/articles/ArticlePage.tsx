@@ -9,6 +9,7 @@ import {
   StreamedArticleRail,
 } from '@/features/articles/components/ArticleSidebar'
 import { planArticleAds } from '@/features/articles/lib/adPlacement'
+import { ADS_ENABLED } from '@/features/articles/lib/ads'
 import { readGate } from '@/features/articles/lib/gate'
 import { articleCrumbsFromPath } from '@/features/articles/lib/articleCrumbs'
 import { fetchStandardArticleSidebar } from '@/features/articles/lib/fetchArticleSidebar'
@@ -104,6 +105,7 @@ export function ArticlePage({ article, path }: { article: Article; path?: string
   const featuredImage = headerSection?.featuredImage
   const gate = readGate(article)
   const adPlan = planArticleAds(contentBlocks ?? [], {
+    enabled: ADS_ENABLED,
     gateAt: gate?.locked ? gate.shown : null,
   })
   // Started here, awaited only inside the rail and footer boundaries.

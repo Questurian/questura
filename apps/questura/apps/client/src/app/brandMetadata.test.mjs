@@ -32,3 +32,17 @@ test('the middleware passes icon and manifest paths straight through', () => {
   const middleware = readFileSync(here('../middleware.ts'), 'utf8')
   assert.match(middleware, /\/\\\.\[a-zA-Z0-9\]\+\$\/\.test\(pathname\)/)
 })
+
+// 2026-09-27 live check (#7): /join sent only a title and description, so the
+// subscribe link pasted into a text or post showed no card and no picture.
+test('/join carries a full link preview and still no price', () => {
+  const join = readFileSync(here('./join/page.tsx'), 'utf8')
+  const metadata = join.slice(join.indexOf('const title'), join.indexOf('async function JoinPricing'))
+  assert.match(metadata, /canonical: '\/join'/)
+  assert.match(metadata, /openGraph: \{[\s\S]*images: \[shareImage\]/)
+  assert.match(metadata, /card: 'summary_large_image'/)
+  assert.doesNotMatch(metadata, /\$\d|\d\.\d\d/, 'a price in static metadata drifts from Stripe')
+  const image = metadata.match(/url: '(\/images\/join\/[^']+\.jpg)'/)
+  assert.ok(image, 'expected a JPEG share image under /images/join')
+  assert.ok(existsSync(here(`../../public${image[1]}`)), `public${image[1]} is missing`)
+})

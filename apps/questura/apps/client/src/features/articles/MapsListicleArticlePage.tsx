@@ -6,6 +6,7 @@ import { ListicleAd } from '@/features/articles/components/ListicleAd'
 import { ListicleVenueEntry } from '@/features/articles/components/ListicleVenueEntry'
 import { InArticleAd } from '@/features/articles/components/InArticleAd'
 import { planListicleAds } from '@/features/articles/lib/listicleAdPlacement'
+import { ADS_ENABLED } from '@/features/articles/lib/ads'
 import type { MapsListicleArticle } from '@/features/articles/types/mapsListicle'
 
 type MapsListicleArticlePageProps = {
@@ -21,7 +22,10 @@ export function MapsListicleArticlePage({
   const description = article.seoSection?.metaDescription
 
   const items = article.items ?? []
-  const ads = planListicleAds(items.length, { hasIntro: Boolean(introHtml) })
+  const ads = planListicleAds(items.length, {
+    enabled: ADS_ENABLED,
+    hasIntro: Boolean(introHtml),
+  })
 
   return (
     <article className="maps-listicle-article min-h-screen bg-background sm:max-w-[600px] sm:mx-auto 1024:max-w-none 1024:mx-0">

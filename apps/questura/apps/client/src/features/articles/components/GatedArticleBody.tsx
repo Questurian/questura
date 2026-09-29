@@ -4,6 +4,7 @@ import { ArticleBlockStream } from '@/features/articles/components/ArticleBlockS
 import { GatedBodySkeleton, GatedLoadError } from '@/features/articles/components/GatedStates'
 import { PaywallNotice } from '@/features/articles/components/PaywallNotice'
 import { planArticleAds } from '@/features/articles/lib/adPlacement'
+import { ADS_ENABLED } from '@/features/articles/lib/ads'
 import type { GateState } from '@/features/articles/lib/gate'
 import { useGatedFullArticle } from '@/features/articles/lib/useGatedFullArticle'
 import type { ContentBlock } from '@/features/articles/types'
@@ -62,7 +63,7 @@ export function GatedArticleBody({ articleId, gate, path, lang }: GatedArticleBo
   // Ads are planned over the whole body for the same reason the sample is: the
   // server already placed the slots for the prefix, and the plan has to agree
   // with it or the two halves double-place an ad across the seam.
-  const adPlan = planArticleAds(data.contentBlocks, { gateAt: gate.shown })
+  const adPlan = planArticleAds(data.contentBlocks, { enabled: ADS_ENABLED, gateAt: gate.shown })
   const remaining = data.contentBlocks.slice(gate.shown)
 
   return (
