@@ -2,7 +2,6 @@ import { useState } from 'react';
 
 import { isServiceUnavailableError } from '@/lib/api';
 import type { User } from '@/lib/user/types';
-import { useDevStore } from '@/lib/stores/devStore';
 
 import {
   useCancelSubscriptionMutation,
@@ -31,25 +30,12 @@ function getMutationErrorMessage(error: unknown): string | null {
 
 export function useMembershipSection(user: User | null) {
   const { isActive } = useMembership(user);
-  const membershipOverride = useDevStore((s) => s.membershipOverride);
-
-  const effectiveUser = (() => {
-    if (process.env.NODE_ENV !== 'development' || !membershipOverride || !user) return user;
-    const fakeRenewal = new Date();
-    fakeRenewal.setDate(fakeRenewal.getDate() + 30);
-    return {
-      ...user,
-      subscriptionStatus: 'active' as const,
-      cancelAtPeriodEnd: false,
-      subscriptionRenewsAt: fakeRenewal.toISOString(),
-    };
-  })();
 
   // One entitlement read for the whole card. `isActive` is `membership.active`
-  // from the server (dev override included), which is what actually gates paid
+  // from the server, which is what actually gates paid
   // articles -- so the card cannot claim a membership the paywall denies.
-  const membershipState = getMembershipState(effectiveUser, isActive);
-  const billingInfo = getBillingInfo(effectiveUser, isActive);
+  const membershipState = getMembershipState(user, isActive);
+  const billingInfo = getBillingInfo(user, isActive);
   // Dunning, paused and access-paused cards have no billing summary, and they
   // are the ones that need the portal most.
   const links = getMembershipLinks(membershipState, billingInfo, isActive);

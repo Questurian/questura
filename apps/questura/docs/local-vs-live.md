@@ -48,8 +48,17 @@ first casualties (2026-09-28, three migrations behind).
 
 ### Members on localhost
 
-Nobody can pay on the Mac, so nobody is a member unless you say so. Sign up
-on `http://localhost:3000`, then:
+Nobody can pay on the Mac, so nobody is a member unless you say so. Sign in
+on `http://localhost:3000` with a local account, then use the **DEV** chip in
+the bottom-left corner: pick Never paid, Member, Member yearly, Cancelling,
+Payment failed, Paused or Expired and the page reloads as that reader. It also
+signs you out.
+
+The chip exists only under `pnpm dev` on localhost (it is not in the live
+build), and its route (`/api/dev/membership`) answers 404 in production mode or
+against any database that is not on this machine. Nothing reaches Stripe.
+
+The same states from a terminal, for scripts:
 
 ```bash
 pnpm --dir apps/server dev:member you@example.com member
@@ -57,10 +66,8 @@ pnpm --dir apps/server dev:member you@example.com member
 
 States: `member`, `yearly`, `cancelling`, `grace` (failed renewal, still has
 access), `paused`, `expired`, `none`. `pnpm --dir apps/server dev:member --list`
-shows local accounts. It writes the same `visitor_profiles` columns the Stripe
-webhook writes, so `/api/me`, the paywall and the navbar all agree — unlike the
-user menu's "DEV: member" toggle, which only fools the client. It refuses any
-database that is not on this machine.
+shows local accounts. Both write the same `visitor_profiles` columns the Stripe
+webhook writes, so `/api/me`, the paywall and the navbar all agree.
 
 ### Redis (optional)
 
