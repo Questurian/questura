@@ -6,6 +6,7 @@ import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { usePathname } from "next/navigation";
 import { primeIdentity } from "@/lib/user/currentIdentity";
 import { applyNavTheme, NAV_THEME_KEY, readNavTheme } from "./lib/navTheme";
+import { showsMasthead } from "./lib/navbarMasthead";
 
 // Ask who is reading while the page is still hydrating, not after. The
 // navbar's query joins this request (currentIdentity.ts).
@@ -29,17 +30,14 @@ const FRAME_MS = 1000 / 60;
 // Locked is when the section links show in the thin bar (DesktopNavbar).
 const LOCK_AT = 0.97;
 
-// Pages where the navbar starts, and stays, as the thin bar instead of the
-// big masthead: a city's itineraries list and each itinerary.
-const PINNED_THIN = /^\/[^/]+\/[^/]+\/itineraries(?:\/|$)/;
-
 export default function Navbar() {
   const navRef = useRef<HTMLElement>(null);
   // True once the rendered collapse has settled at 1.
   const [locked, setLocked] = useState(false);
   // Known during the server render too, so a pinned page paints the thin bar
   // on its first frame rather than shrinking into it.
-  const pinnedThin = PINNED_THIN.test(usePathname() ?? "");
+  // Only home, country and city pages get the big masthead (navbarMasthead.ts).
+  const pinnedThin = !showsMasthead(usePathname() ?? "/");
 
   // The navbar is in flow and changes height as it collapses. With the
   // browser's scroll anchoring on, every height change nudges scrollY to keep
