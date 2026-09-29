@@ -12,9 +12,6 @@ export type GateState = {
   total: number
 }
 
-/** Marks the element standing in for the withheld content, for `cssSelector`. */
-export const PAYWALL_SELECTOR = '[data-paywalled]'
-
 export function readGate(article: unknown): GateState | null {
   if (!article || typeof article !== 'object') return null
   const gate = (article as { gate?: unknown }).gate

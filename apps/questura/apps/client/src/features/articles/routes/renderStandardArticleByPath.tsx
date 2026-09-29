@@ -2,8 +2,7 @@ import { notFound, permanentRedirect } from 'next/navigation'
 import { JsonLd } from '@/components/seo/JsonLd'
 import { ArticlePage } from '@/features/articles/ArticlePage'
 import { isStandardArticle } from '@/features/articles/lib/articleGuards'
-import { buildArticleBreadcrumbJsonLd } from '@/features/articles/lib/articleBreadcrumbJsonLd'
-import { articleJsonLdNodes } from '@/features/articles/lib/paywallJsonLd'
+import { buildArticlePageJsonLd } from '@/features/articles/lib/articlePageJsonLd'
 import { isLocked } from '@/features/articles/lib/gate'
 import {
   fetchArticleByCanonicalPath,
@@ -21,14 +20,7 @@ export async function renderStandardArticleByPath({ path, lang }: Params) {
   if (article && isStandardArticle(article)) {
     return (
       <>
-        {articleJsonLdNodes({
-          locked: isLocked(article),
-          headline: article.title,
-          existing: article.seoSection?.structuredData,
-        }).map((node, index) => (
-          <JsonLd key={index} data={node} />
-        ))}
-        <JsonLd data={buildArticleBreadcrumbJsonLd({ path, articleTitle: article.title })} />
+        <JsonLd data={buildArticlePageJsonLd({ article, path, locked: isLocked(article) })} />
         <ArticlePage article={article} path={path} />
       </>
     )

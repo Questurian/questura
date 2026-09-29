@@ -1,7 +1,6 @@
 import { notFound } from 'next/navigation'
 import { JsonLd } from '@/components/seo/JsonLd'
-import { buildArticleBreadcrumbJsonLd } from '@/features/articles/lib/articleBreadcrumbJsonLd'
-import { articleJsonLdNodes } from '@/features/articles/lib/paywallJsonLd'
+import { buildArticlePageJsonLd } from '@/features/articles/lib/articlePageJsonLd'
 import { isLocked } from '@/features/articles/lib/gate'
 import { articleHrefForScope } from '@/features/articles/lib/articleScope'
 import { fetchArticle } from '@/features/articles/lib/fetchArticle'
@@ -42,14 +41,7 @@ export async function renderItineraryArticleRoute({
 
   return (
     <>
-      {articleJsonLdNodes({
-        locked: isLocked(article),
-        headline: article.title,
-        existing: article.seoSection?.structuredData,
-      }).map((node, index) => (
-        <JsonLd key={index} data={node} />
-      ))}
-      <JsonLd data={buildArticleBreadcrumbJsonLd({ path, articleTitle: article.title })} />
+      <JsonLd data={buildArticlePageJsonLd({ article, path, locked: isLocked(article) })} />
       <ItineraryArticleLayout
         article={article}
         relatedArticles={relatedArticles}
