@@ -2,9 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "@/components/navigation/PublicLink";
+import { NAV_SECTIONS } from "@/features/Navigation/shared/sections";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowRight, Building2, Search, X } from "lucide-react";
+import { ArrowRight, Building2, ChevronRight, Search, X } from "lucide-react";
 import {
   fetchLocationMenu,
   type LocationMenuResponse,
@@ -232,11 +233,39 @@ export default function MenuModal({
               </div>
             </form>
 
-            <p className="mb-6 text-[10px] font-bold uppercase tracking-[0.24em] text-white/40 1024:mb-7">
+            {/* Below 1024px the navbar has no section row, so the sections
+                live here, above the destinations. The desktop navbar shows
+                them itself. */}
+            <nav aria-label="Sections" className="mb-9 1024:hidden">
+              <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.24em] text-white/40">
+                Explore
+              </p>
+              <ul className="border-t border-white/10">
+                {NAV_SECTIONS.filter((section) => section.href).map((section) => (
+                  <li key={section.label} className="border-b border-white/10">
+                    <Link
+                      href={section.href!}
+                      keepFeedbackAfterUnmount
+                      onClick={onClose}
+                      className="group flex min-h-[52px] items-center justify-between text-[1.05rem] font-semibold text-white transition-colors hover:text-accent-soft focus:outline-none focus-visible:text-accent-soft"
+                    >
+                      {section.label}
+                      <ChevronRight
+                        aria-hidden
+                        className="size-[18px] text-white/40 transition-transform group-hover:translate-x-0.5"
+                        strokeWidth={1.75}
+                      />
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+
+            <p className="mb-5 text-[10px] font-bold uppercase tracking-[0.24em] text-white/40 1024:mb-7">
               Destinations
             </p>
 
-            <nav className="menu-reveal grid gap-8 1024:grid-cols-3 1024:gap-0" aria-label="Locations">
+            <nav className="menu-reveal grid gap-6 1024:grid-cols-3 1024:gap-0" aria-label="Locations">
               {locationMenuQuery.isPending ? (
                 <p className="text-sm font-semibold text-white/55">Loading locations...</p>
               ) : locationMenuQuery.isError ? (
@@ -247,7 +276,7 @@ export default function MenuModal({
                 countries.map((country, index) => (
                   <section
                     key={country.locationKey}
-                    className={`border-t border-white/10 pt-7 first:border-t-0 first:pt-0 1024:border-t-0 1024:pt-0 ${
+                    className={`border-t border-white/10 pt-6 first:border-t-0 first:pt-0 1024:border-t-0 1024:pt-0 ${
                       index % 3 === 0
                         ? "1024:pr-9"
                         : index % 3 === 1
@@ -259,7 +288,7 @@ export default function MenuModal({
                       href={country.href}
                       keepFeedbackAfterUnmount
                       onClick={onClose}
-                      className="group inline-flex items-center gap-2.5 font-display text-[1.75rem] font-semibold leading-none text-white transition-colors hover:text-white/78 focus:outline-none focus-visible:text-white/78 1024:text-[2rem]"
+                      className="group inline-flex items-center gap-2.5 font-display text-[1.5rem] font-semibold leading-none text-white transition-colors hover:text-white/78 focus:outline-none focus-visible:text-white/78 1024:text-[2rem]"
                     >
                       <CountryFlag
                         code={country.countryCode}
@@ -269,7 +298,7 @@ export default function MenuModal({
                       <ArrowRight className="mt-1 h-5 w-5 transition-transform group-hover:translate-x-1" aria-hidden />
                     </Link>
 
-                    <div className="mt-7 space-y-4">
+                    <div className="mt-3 1024:mt-7 1024:space-y-4">
                       {country.cities.length > 0 ? (
                         country.cities.map((city) => (
                           <Link
@@ -277,7 +306,7 @@ export default function MenuModal({
                             href={city.href}
                             keepFeedbackAfterUnmount
                             onClick={onClose}
-                            className="flex items-center gap-2.5 text-[1.05rem] font-bold text-white/88 transition-colors hover:text-white focus:outline-none focus-visible:text-white"
+                            className="flex min-h-11 items-center gap-2.5 text-[1rem] font-semibold text-white/85 transition-colors 1024:min-h-0 1024:text-[1.05rem] 1024:font-bold hover:text-white focus:outline-none focus-visible:text-white"
                           >
                             <Building2 className="h-4 w-4 shrink-0" strokeWidth={1.5} aria-hidden />
                             {city.label}
@@ -288,7 +317,7 @@ export default function MenuModal({
                           href={country.href}
                           keepFeedbackAfterUnmount
                           onClick={onClose}
-                          className="flex items-center gap-2.5 text-[1.05rem] font-bold text-white/88 transition-colors hover:text-white focus:outline-none focus-visible:text-white"
+                          className="flex min-h-11 items-center gap-2.5 text-[1rem] font-semibold text-white/85 transition-colors 1024:min-h-0 1024:text-[1.05rem] 1024:font-bold hover:text-white focus:outline-none focus-visible:text-white"
                         >
                           <Building2 className="h-4 w-4 shrink-0" strokeWidth={1.5} aria-hidden />
                           View all {country.label} guides
