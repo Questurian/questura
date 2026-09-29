@@ -290,8 +290,9 @@ async function main(): Promise<void> {
     // --- Redirects never leave the site (launch fix plan item 17) ---------
     // Next answers the trailing-slash spellings with its own same-site 308
     // before middleware runs; middleware's sameSiteLocation is the backstop.
-    // The geo-redirect cookie did reach middleware: a country of /evil.com
-    // sent / to http://evil.com/x until item 17.
+    // The geo-redirect cookie used to reach middleware: a country of /evil.com
+    // sent / to http://evil.com/x until item 17. The redirect is gone now; the
+    // checks below keep it from coming back, on-site or off.
     for (const path of ['//evil.com/', '/\\evil.com/', '/%2F%2Fevil.com/']) {
       const chain = await redirectChain(CLIENT, path)
       record('redirect', `${path} stays on the site`, !chain.offSite, chain.hops.join(' → ') || `HTTP ${chain.status}`)
@@ -301,15 +302,14 @@ async function main(): Promise<void> {
       const [country, city] = manifest.cities[0].path.split('/').filter(Boolean)
       const hostile = await redirectChain(CLIENT, '/', geo({ cityId: 'x', country: '/evil.com' }))
       record('redirect', 'a geo cookie naming another host does not redirect off the site', !hostile.offSite && !hostile.hops.some((hop) => hop.includes('evil.com')), hostile.hops.join(' → ') || `HTTP ${hostile.status}`)
+      // / is its own page now. The middleware no longer reads this cookie, so
+      // even one naming a real city must not send the visitor anywhere.
       const home = await rawGet(CLIENT, '/', geo({ cityId: city, country }))
-      // `next start` reports its own host as localhost, so compare the path
-      // and port: the point is that a slug cookie still works.
-      const target = home.location ? new URL(home.location, CLIENT) : null
       record(
         'redirect',
-        'a real geo cookie still sends / to its city',
-        home.status === 307 && target?.pathname === `/${country}/${city}` && ['127.0.0.1', 'localhost'].includes(target.hostname) && target.port === String(STACK_PORTS.client),
-        `HTTP ${home.status} → ${home.location}`,
+        'a leftover geo cookie no longer sends / to its city',
+        home.status === 200 && !home.location,
+        `HTTP ${home.status}${home.location ? ` → ${home.location}` : ''}`,
       )
     }
 
