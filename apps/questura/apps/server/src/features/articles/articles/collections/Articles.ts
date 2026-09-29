@@ -20,7 +20,7 @@ import {
 } from '../../shared/lib/referenceLocks'
 import { handleCanonicalPathChange } from '../lib/handleCanonicalPathChange'
 import { gateExternalApiRead } from '@/features/articles/public/gateExternalApiRead'
-import { ensureAuthorIdForUser, findAuthorIdForUser } from '@/features/authors/lib/author-for-user'
+import { bylineOnCreate, findAuthorIdForUser } from '@/features/authors/lib/author-for-user'
 import {
   step1Complete,
   inUpdateMode,
@@ -175,7 +175,7 @@ export const Articles: CollectionConfig = {
         // Set author on creation. The byline is an Author record, not the
         // account that typed it (ADR-0007).
         if (operation === 'create' && req.user?.id) {
-          data.author = await ensureAuthorIdForUser(req, req.user.id)
+          data.author = await bylineOnCreate(req, data.author)
         }
 
         // Set publishedAt when publishing

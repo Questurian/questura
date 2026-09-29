@@ -1,4 +1,6 @@
-import type { PayloadRequest } from 'payload'
+import { APIError, type PayloadRequest } from 'payload'
+
+import { staffUser } from '@/features/auth/lib/staff-user'
 
 /**
  * Resolves the Author record that a staff account writes as (ADR-0007).
@@ -63,4 +65,48 @@ export async function ensureAuthorIdForUser(
   })
 
   return created.id as number
+}
+
+function requestedAuthorId(requested: unknown): number | string | null {
+  if (typeof requested === 'number' || (typeof requested === 'string' && requested !== '')) {
+    return requested
+  }
+  if (requested && typeof requested === 'object' && 'id' in requested) {
+    return requestedAuthorId((requested as { id: unknown }).id)
+  }
+  return null
+}
+
+/**
+ * The byline for a new item.
+ *
+ * An admin or editor may name the Author up front -- the same roles the
+ * `author` field lets change a byline later -- so a tool that signs in with
+ * one account (the studio) can publish under the real writer's name instead
+ * of its own. Everyone else, and anyone who names nobody, gets their own
+ * Author record, as before. A named Author that does not exist is refused
+ * rather than quietly replaced by the caller.
+ */
+export async function bylineOnCreate(
+  req: PayloadRequest,
+  requested: unknown,
+): Promise<number | null> {
+  const user = staffUser(req.user)
+  if (!user) return null
+
+  const wanted = requestedAuthorId(requested)
+  const mayChoose = user.role === 'admin' || user.role === 'editor'
+  if (wanted === null || !mayChoose) return ensureAuthorIdForUser(req, user.id)
+
+  const found = await req.payload.find({
+    collection: 'authors',
+    where: { id: { equals: wanted } },
+    limit: 1,
+    depth: 0,
+    overrideAccess: true,
+    req,
+  })
+  const author = found.docs[0]
+  if (!author) throw new APIError(`Author ${String(wanted)} does not exist.`, 400, undefined, true)
+  return author.id as number
 }
