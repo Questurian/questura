@@ -10,7 +10,6 @@ import {
   type LocationMenuResponse,
 } from "@/features/Navigation/lib/fetchLocationMenu";
 import CountryFlag from "@/components/shared/ui/CountryFlag";
-import NavThemeToggle from "@/features/Navigation/shared/components/NavThemeToggle";
 import { navigateWithFeedback } from "@/components/navigation/navigationFeedbackStore";
 
 interface MenuModalProps {
@@ -302,14 +301,6 @@ export default function MenuModal({
             </nav>
           </div>
 
-          {/* Pinned under the scrolling list so it is in view on the phone
-              sheet and the desktop drop-down alike. */}
-          <div className="flex shrink-0 items-center justify-between gap-4 border-t border-white/10 px-5 py-3 1024:px-10 1024:py-4">
-            <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-white/40">
-              Navbar
-            </p>
-            <NavThemeToggle />
-          </div>
         </aside>
       </div>
     </>

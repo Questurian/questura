@@ -45,10 +45,10 @@ function MenuRow({ href, icon: Icon, title, hint, onClose }: MenuRowProps) {
 }
 
 /**
- * Light / dark navbar as a switch, laid out like a MenuRow. Same setting as the
- * toggle at the foot of the menu (lib/navTheme.ts), so it recolours the navbar
- * only. This modal is loaded in the browser only (UserModalRenderer, ssr:
- * false), so reading the saved choice during the first render is safe.
+ * Light / dark navbar as a switch, laid out like a MenuRow. It saves the
+ * navbar theme (lib/navTheme.ts), so it recolours the navbar only. This modal
+ * is loaded in the browser only (UserModalRenderer, ssr: false), so reading
+ * the saved choice during the first render is safe.
  */
 function ThemeRow() {
   const [theme, setTheme] = useState<NavTheme>(() => readNavTheme());
