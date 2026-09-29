@@ -7,6 +7,7 @@ import { AuthorFeatureBlock } from '../author-feature/block'
 import {
   HOMEPAGE_HOTEL_GRID_MAX_SLOTS,
   HOMEPAGE_HOTEL_GRID_MIN_SLOTS,
+  HOMEPAGE_QUESTURIAN_MAPS_DARK_SLOT_COUNT,
   HOMEPAGE_QUESTURIAN_MAPS_SLOT_COUNT,
   HOMEPAGE_THINGS_TO_DO_ATTRACTIONS_MAX_SLOTS,
   HOMEPAGE_THINGS_TO_DO_ATTRACTIONS_MIN_SLOTS,
@@ -26,7 +27,9 @@ import { HotelGridBlock } from '../hotel-grid/block'
 import { LOCATION_GRID_MAX_SLOTS, LOCATION_GRID_MIN_SLOTS } from '../location-grid/constants'
 import { LocationGridBlock } from '../location-grid/block'
 import { NewsletterSignupBlock } from '../newsletter-signup/block'
+import { PageHeroBlock } from '../page-hero/block'
 import { QuesturianMapsBlock } from '../questurian-maps/block'
+import { QuesturianMapsDarkBlock } from '../questurian-maps-dark/block'
 import { ThingsToDoAttractionsBlock } from '../things-to-do-attractions/block'
 import { ThingsToDoListiclesBlock } from '../things-to-do-listicles/block'
 import { TourGridBlock } from '../tour-grid/block'
@@ -169,6 +172,16 @@ const CURATED_BLOCK_DEFINITIONS: readonly CuratedBlockDefinition[] = [
     publicPayloadKind: ARTICLE_PUBLIC_PAYLOAD,
   }),
   defineCuratedBlock({
+    block: QuesturianMapsDarkBlock,
+    slotCounts: {
+      min: HOMEPAGE_QUESTURIAN_MAPS_DARK_SLOT_COUNT,
+      max: HOMEPAGE_QUESTURIAN_MAPS_DARK_SLOT_COUNT,
+      default: HOMEPAGE_QUESTURIAN_MAPS_DARK_SLOT_COUNT,
+    },
+    convertibleWhenEmpty: true,
+    publicPayloadKind: ARTICLE_PUBLIC_PAYLOAD,
+  }),
+  defineCuratedBlock({
     block: HotelGridBlock,
     slotCounts: {
       min: HOMEPAGE_HOTEL_GRID_MIN_SLOTS,
@@ -229,6 +242,12 @@ const CURATED_BLOCK_DEFINITIONS: readonly CuratedBlockDefinition[] = [
     slotCounts: { min: 5, max: 25, default: 5 },
     convertibleWhenEmpty: false,
     publicPayloadKind: ARTICLE_PUBLIC_PAYLOAD,
+  }),
+  defineCuratedBlock({
+    block: PageHeroBlock,
+    slotCounts: { min: 0, max: 0, default: 0 },
+    convertibleWhenEmpty: false,
+    publicPayloadKind: REFERENCE_PUBLIC_PAYLOAD,
   }),
 ]
 

@@ -90,6 +90,9 @@ export function applyBlockFieldUpdates(block: RawBlock, fields: ParsedBlockUpdat
   for (const [key, field] of Object.entries(fields.editorialFeature)) {
     if (!field.omit) next = { ...next, [key]: field.value }
   }
+  for (const [key, field] of Object.entries(fields.pageHero)) {
+    if (!field.omit) next = { ...next, [key]: field.value }
+  }
   for (const [key, field] of Object.entries(fields.authorFeature)) {
     if (!field.omit) next = { ...next, [key]: field.value }
   }

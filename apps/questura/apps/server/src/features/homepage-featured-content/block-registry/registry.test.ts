@@ -18,6 +18,7 @@ const EXPECTED_KEYS = [
   'article-grid',
   'location-grid',
   'questurian-maps',
+  'questurian-maps-dark',
   'hotel-grid',
   'tour-grid',
   'where-to-eat-drink',
@@ -25,6 +26,7 @@ const EXPECTED_KEYS = [
   'things-to-do-attractions',
   'newsletter-signup',
   'article-list',
+  'page-hero',
 ] as const
 
 describe('curatedBlockRegistry', () => {
@@ -92,14 +94,16 @@ describe('curatedBlockRegistry', () => {
         'author-feature',
         'article-grid',
         'questurian-maps',
+        'questurian-maps-dark',
         'where-to-eat-drink',
         'things-to-do-listicles',
         'article-list',
       ])
     })
 
-    it('reference blocks build stored items; newsletter-signup clears them instead', () => {
+    it('reference blocks build stored items; newsletter-signup and page-hero clear them instead', () => {
       expect(curatedBlockRegistry.get('newsletter-signup')?.behavior.clearsItems).toBe(true)
+      expect(curatedBlockRegistry.get('page-hero')?.behavior.clearsItems).toBe(true)
       expect(
         curatedBlockRegistry.get('newsletter-signup')?.behavior.buildStoredItems,
       ).toBeUndefined()
@@ -161,6 +165,7 @@ describe('curatedBlockRegistry', () => {
         'article-grid': { min: 3, max: 8, default: 4 },
         'location-grid': { min: 4, max: 8, default: 4 },
         'questurian-maps': { min: 6, max: 6, default: 6 },
+        'questurian-maps-dark': { min: 6, max: 6, default: 6 },
         'hotel-grid': { min: 4, max: 20, default: 4 },
         'tour-grid': { min: 4, max: 20, default: 4 },
         'where-to-eat-drink': { min: 3, max: 12, default: 4 },
@@ -168,6 +173,7 @@ describe('curatedBlockRegistry', () => {
         'things-to-do-attractions': { min: 3, max: 12, default: 4 },
         'newsletter-signup': { min: 0, max: 0, default: 0 },
         'article-list': { min: 5, max: 25, default: 5 },
+        'page-hero': { min: 0, max: 0, default: 0 },
       })
       expect(curatedBlockRegistry.get('article-grid')?.slotCounts.validCounts).toEqual([3, 4, 8])
       expect(curatedBlockRegistry.get('featured-articles')?.slotCounts.validCounts).toEqual([
@@ -192,6 +198,7 @@ describe('curatedBlockRegistry', () => {
         'article-grid',
         'location-grid',
         'questurian-maps',
+        'questurian-maps-dark',
         'hotel-grid',
         'tour-grid',
         'where-to-eat-drink',
@@ -210,6 +217,7 @@ describe('curatedBlockRegistry', () => {
         'author-feature',
         'article-grid',
         'questurian-maps',
+        'questurian-maps-dark',
         'where-to-eat-drink',
         'things-to-do-listicles',
         'article-list',

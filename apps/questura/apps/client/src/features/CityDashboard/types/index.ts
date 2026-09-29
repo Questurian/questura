@@ -54,6 +54,7 @@ export type ArticleBackedHomepageBlockType =
   | "author-feature"
   | "article-grid"
   | "questurian-maps"
+  | "questurian-maps-dark"
   | "where-to-eat-drink"
   | "things-to-do-listicles"
   | "article-list";
@@ -282,6 +283,18 @@ export type ThingsToDoAttractionsBlock = {
   selection: ThingsToDoAttractionsSelection;
 };
 
+export type PageHeroBlock = {
+  id: string;
+  blockType: "page-hero";
+  sectionHeading: string | null;
+  sectionSubheading: string | null;
+  heroImage: EditorialFeatureImage | null;
+  selection?: {
+    items: unknown[];
+    totalSlots: number;
+  };
+};
+
 export type NewsletterSignupBlock = {
   id: string;
   blockType: "newsletter-signup";
@@ -302,6 +315,7 @@ export type CityHomepageBlock<TItem = unknown> =
   | LocationGridBlock
   | ThingsToDoAttractionsBlock
   | NewsletterSignupBlock
+  | PageHeroBlock
   | CityHomepageLegacyBlock<TItem>;
 
 export type FeaturedArticlesSlot3Layout = "hero-left" | "featured-center";

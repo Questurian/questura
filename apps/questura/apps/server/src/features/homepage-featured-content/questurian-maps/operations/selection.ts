@@ -14,7 +14,8 @@ export async function getQuesturianMapsSelectionFromItems(
   rawItems: unknown,
   options: { allowDrafts?: boolean; totalSlots?: number } = {},
 ): Promise<HomepageFeaturedSelection> {
-  const totalSlots = HOMEPAGE_QUESTURIAN_MAPS_SLOT_COUNT
+  // The dark variant shares this resolver with four slots instead of six.
+  const totalSlots = options.totalSlots ?? HOMEPAGE_QUESTURIAN_MAPS_SLOT_COUNT
   const base = await getHomepageFeaturedSelectionFromItems(payload, rawItems, {
     ...options,
     totalSlots,

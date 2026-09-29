@@ -34,6 +34,7 @@ import {
   validateLocationGridItems,
 } from '../location-grid/service'
 import type { LocationGridScope } from '../location-grid/types'
+import { getPageHeroPublishBlockers, resolvePageHeroFields } from '../page-hero/service'
 import {
   buildQuesturianMapsGlobalData,
   getQuesturianMapsSelectionFromItems,
@@ -237,6 +238,24 @@ const locationGridBehavior: CuratedBlockBehavior = {
   },
 }
 
+const questurianMapsBehavior = gridBehavior({
+  normalize: normalizeQuesturianMapsInput,
+  validate: validateQuesturianMapsItems,
+  build: buildQuesturianMapsGlobalData,
+  resolveSelection: getQuesturianMapsSelectionFromItems,
+  isArticleBlock: true,
+})
+
+const pageHeroBehavior: CuratedBlockBehavior = {
+  isArticleBlock: false,
+  clearsItems: true,
+  resolveSelection() {
+    return getNewsletterSignupPlaceholderSelection()
+  },
+  resolveFields: (block, ctx) => resolvePageHeroFields(ctx.payload, block),
+  getPublishBlockers: getPageHeroPublishBlockers,
+}
+
 const newsletterSignupBehavior: CuratedBlockBehavior = {
   isArticleBlock: false,
   clearsItems: true,
@@ -292,13 +311,8 @@ export const CURATED_BLOCK_BEHAVIORS: Record<string, CuratedBlockBehavior> = {
     requiredImageField: articleGridImageField,
   },
   'location-grid': locationGridBehavior,
-  'questurian-maps': gridBehavior({
-    normalize: normalizeQuesturianMapsInput,
-    validate: validateQuesturianMapsItems,
-    build: buildQuesturianMapsGlobalData,
-    resolveSelection: getQuesturianMapsSelectionFromItems,
-    isArticleBlock: true,
-  }),
+  'questurian-maps': questurianMapsBehavior,
+  'questurian-maps-dark': questurianMapsBehavior,
   'hotel-grid': gridBehavior({
     normalize: normalizeHotelGridInput,
     validate: validateHotelGridItems,
@@ -332,5 +346,6 @@ export const CURATED_BLOCK_BEHAVIORS: Record<string, CuratedBlockBehavior> = {
     resolveSelection: getThingsToDoAttractionsSelectionFromItems,
   }),
   'newsletter-signup': newsletterSignupBehavior,
+  'page-hero': pageHeroBehavior,
   'article-list': featuredBehavior,
 }

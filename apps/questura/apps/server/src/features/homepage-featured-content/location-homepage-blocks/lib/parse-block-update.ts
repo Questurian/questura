@@ -19,6 +19,7 @@ import {
   hasEditorialFeatureFieldUpdates,
   parseEditorialFeatureFields,
 } from '../../editorial-feature/service'
+import { hasPageHeroFieldUpdates, parsePageHeroFields } from '../../page-hero/service'
 import {
   homepageBlockSupportsSectionHeading,
   parseSectionHeadingBodyField,
@@ -36,6 +37,7 @@ type MediaAspectParse = ReturnType<typeof parseLocationGridMediaAspectBodyField>
 type ArticleGridFourLayoutParse = ReturnType<typeof parseArticleGridFourLayoutBodyField>
 type CreatorKickerParse = ReturnType<typeof parseCreatorKickerBodyField>
 type EditorialFeatureFieldsParse = ReturnType<typeof parseEditorialFeatureFields>
+type PageHeroFieldsParse = ReturnType<typeof parsePageHeroFields>
 type AuthorFeatureCardsParse = ReturnType<typeof parseAuthorFeatureCardsBodyField>
 type AuthorFeatureDescriptionModeParse = ReturnType<
   typeof parseAuthorFeatureDescriptionModeBodyField
@@ -58,6 +60,9 @@ export type ParsedBlockUpdateFields = {
   creatorKicker: Extract<CreatorKickerParse, { ok: true }>
   editorialFeature: {
     [K in keyof EditorialFeatureFieldsParse]: Extract<EditorialFeatureFieldsParse[K], { ok: true }>
+  }
+  pageHero: {
+    [K in keyof PageHeroFieldsParse]: Extract<PageHeroFieldsParse[K], { ok: true }>
   }
   authorFeature: {
     authorCards: Extract<AuthorFeatureCardsParse, { ok: true }>
@@ -133,6 +138,11 @@ export function parseBlockUpdateBody(body: unknown): ParseBlockUpdateResult {
     if (!field.ok) return { ok: false, status: 400, message: field.message }
   }
 
+  const pageHero = parsePageHeroFields(bodyRecord)
+  for (const field of Object.values(pageHero)) {
+    if (!field.ok) return { ok: false, status: 400, message: field.message }
+  }
+
   const authorFeature = {
     authorCards: parseAuthorFeatureCardsBodyField(bodyRecord),
     descriptionMode: parseAuthorFeatureDescriptionModeBodyField(bodyRecord),
@@ -155,6 +165,7 @@ export function parseBlockUpdateBody(body: unknown): ParseBlockUpdateResult {
     articleGridFourLayout,
     creatorKicker,
     editorialFeature: editorialFeature as ParsedBlockUpdateFields['editorialFeature'],
+    pageHero: pageHero as ParsedBlockUpdateFields['pageHero'],
     authorFeature: authorFeature as ParsedBlockUpdateFields['authorFeature'],
   }
   const rawItems = bodyRecord.items
@@ -199,6 +210,7 @@ export function hasBlockFieldUpdates(fields: ParsedBlockUpdateFields): boolean {
     !fields.articleGridFourLayout.omit ||
     !fields.creatorKicker.omit ||
     hasEditorialFeatureFieldUpdates(fields.editorialFeature) ||
+    hasPageHeroFieldUpdates(fields.pageHero) ||
     hasAuthorFeatureFieldUpdates(fields.authorFeature)
   )
 }
@@ -259,6 +271,10 @@ export function validateBlockUpdateFields(
     block.blockType !== 'editorial-feature'
   ) {
     return { message: 'Editorial feature fields are only supported for editorial-feature blocks.' }
+  }
+
+  if (hasPageHeroFieldUpdates(fields.pageHero) && block.blockType !== 'page-hero') {
+    return { message: 'Page hero fields are only supported for page-hero blocks.' }
   }
 
   if (hasAuthorFeatureFieldUpdates(fields.authorFeature) && block.blockType !== 'author-feature') {
