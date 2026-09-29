@@ -45,18 +45,22 @@ function MenuRow({ href, icon: Icon, title, hint, onClose }: MenuRowProps) {
 }
 
 /**
- * Light / dark navbar as a switch, laid out like a MenuRow. It saves the
- * navbar theme (lib/navTheme.ts), so it recolours the navbar only. This modal
- * is loaded in the browser only (UserModalRenderer, ssr: false), so reading
- * the saved choice during the first render is safe.
+ * Light / dark navbar, laid out exactly like a MenuRow. The title names the
+ * current mode; hovering (or keyboard focus) swaps the hint and the trailing
+ * icon to say what a click does. It saves the navbar theme (lib/navTheme.ts),
+ * so it recolours the navbar only. This modal is loaded in the browser only
+ * (UserModalRenderer, ssr: false), so reading the saved choice during the
+ * first render is safe.
  */
 function ThemeRow() {
   const [theme, setTheme] = useState<NavTheme>(() => readNavTheme());
   const dark = theme === "dark";
+  const next: NavTheme = dark ? "light" : "dark";
   const Icon = dark ? Moon : Sun;
+  const NextIcon = dark ? Sun : Moon;
+  const action = `Switch to ${next} mode`;
 
   const toggle = () => {
-    const next: NavTheme = dark ? "light" : "dark";
     setNavTheme(next);
     setTheme(next);
   };
@@ -64,32 +68,31 @@ function ThemeRow() {
   return (
     <button
       type="button"
-      role="switch"
-      aria-checked={dark}
       onClick={toggle}
+      aria-label={action}
       className="group flex w-full cursor-pointer items-center gap-3.5 rounded-xl border border-transparent px-3 py-3 text-left transition-colors hover:border-white/10 hover:bg-white/[0.05] focus:outline-none focus-visible:border-white/25 focus-visible:bg-white/[0.05]"
     >
       <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/[0.06] text-white/80 transition-colors group-hover:text-white">
         <Icon aria-hidden className="h-[18px] w-[18px]" strokeWidth={1.6} />
       </span>
       <span className="min-w-0 flex-1">
-        <span className="block text-[0.95rem] font-semibold leading-tight text-white">Dark mode</span>
-        <span className="mt-1 block truncate text-[13px] leading-tight text-white/50">
-          Switches the navbar colours
+        <span className="block text-[0.95rem] font-semibold leading-tight text-white">
+          {dark ? "Dark mode" : "Light mode"}
+        </span>
+        <span className="relative mt-1 block text-[13px] leading-tight">
+          <span className="block truncate text-white/50 transition-opacity group-hover:opacity-0 group-focus-visible:opacity-0 motion-reduce:transition-none">
+            Navbar colours
+          </span>
+          <span className="absolute inset-0 block truncate text-white/80 opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100 motion-reduce:transition-none">
+            {action}
+          </span>
         </span>
       </span>
-      <span
+      <NextIcon
         aria-hidden
-        className={`relative h-6 w-10 shrink-0 rounded-full transition-colors duration-200 motion-reduce:transition-none ${
-          dark ? "bg-accent" : "bg-white/20"
-        }`}
-      >
-        <span
-          className={`absolute left-[3px] top-[3px] h-[18px] w-[18px] rounded-full bg-white shadow-sm transition-transform duration-200 motion-reduce:transition-none ${
-            dark ? "translate-x-4" : ""
-          }`}
-        />
-      </span>
+        className="h-4 w-4 shrink-0 text-white/35 transition-colors group-hover:text-white/70"
+        strokeWidth={2}
+      />
     </button>
   );
 }
