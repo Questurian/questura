@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { ArrowUpRight } from 'lucide-react'
 import { fetchCountryCities } from '@/features/CountryHub/lib/fetchCountryCities'
+import { LocationComingSoon } from '@/features/search/components/LocationComingSoon'
 import { LocationContentList } from '@/features/search/components/LocationContentList'
 import { fetchLocationContent } from '@/features/search/lib/fetchSearch'
 import { isLocationSlug } from '@/lib/routing/locationSlug'
@@ -73,6 +74,11 @@ export default async function CountryHubPage({ params }: Props) {
             <h1 className="font-display text-[48px] font-medium leading-[0.95] text-foreground 480:text-[64px] 768:text-[84px]">
               {countryName}
             </h1>
+            {!content?.items.length && (
+              <div className="mt-10">
+                <LocationComingSoon place={countryName} />
+              </div>
+            )}
           </div>
 
           {cities.length > 0 && (

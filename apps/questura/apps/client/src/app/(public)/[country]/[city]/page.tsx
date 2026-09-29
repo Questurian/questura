@@ -7,6 +7,7 @@ import {
   curatedHomepage,
   fetchCityHomepage,
 } from '@/features/CityDashboard';
+import { LocationComingSoon } from '@/features/search/components/LocationComingSoon';
 import { LocationContentList } from '@/features/search/components/LocationContentList';
 import { fetchLocationContent } from '@/features/search/lib/fetchSearch';
 import { cityParams } from '@/lib/routing/publicRouteParams';
@@ -106,7 +107,10 @@ export default async function CityPage({ params }: Props) {
                 `/search?location=${encodeURIComponent(content.location.locationKey)}&page=${page}`
               }
             />
-          ) : null}
+          ) : (
+            // The label reads "Rio De Janeiro, Brazil"; the sentence wants the city.
+            <LocationComingSoon place={content.location.label.split(',')[0].trim()} />
+          )}
         </div>
       </section>
     );
