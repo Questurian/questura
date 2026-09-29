@@ -6,9 +6,10 @@ import { useMenuModalStore } from '@/lib/stores/menuModalStore';
 interface MenuIconProps {
   buttonClassName?: string;
   iconClassName?: string;
+  strokeWidth?: number;
 }
 
-export default function MenuIcon({ buttonClassName = '', iconClassName = '' }: MenuIconProps) {
+export default function MenuIcon({ buttonClassName = '', iconClassName = '', strokeWidth = 1.5 }: MenuIconProps) {
   const { openMenuModal } = useMenuModalStore();
 
   return (
@@ -19,7 +20,7 @@ export default function MenuIcon({ buttonClassName = '', iconClassName = '' }: M
     >
       <TextSearch
         aria-hidden
-        strokeWidth={1.5}
+        strokeWidth={strokeWidth}
         className={`shrink-0 text-white cursor-pointer ${iconClassName}`}
       />
     </button>

@@ -11,14 +11,17 @@ export default function MobileNavbar() {
   const shouldShowSubscribe = !isAuthenticated || !isActive;
 
   return (
-    // 64px tall, with 40px tap targets and a wordmark sized to read as the
-    // masthead.
+    // 64px tall, with 40px tap targets. The menu glyph is drawn about as tall
+    // as the wordmark's capitals and at a matching weight, so the two read as
+    // one lockup. Sign in fills the width AuthSlot reserves, text centred,
+    // instead of hugging the right edge and leaving a gap after Subscribe.
     <nav className="h-16 min-h-16 w-full border-b border-nav-rule-soft bg-nav-bg pl-2 pr-4 py-0 480:pl-3 480:pr-5 768:pl-5 768:pr-8">
       <div className="flex h-16 min-h-16 items-center justify-between gap-3">
-        <div className="flex min-h-10 min-w-0 flex-1 items-center gap-1.5 480:gap-2.5">
+        <div className="flex min-h-10 min-w-0 flex-1 items-center gap-0.5 480:gap-1.5">
           <MenuIcon
             buttonClassName="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full"
-            iconClassName="!text-nav-ink block h-[22px] w-[22px] translate-y-px"
+            iconClassName="!text-nav-ink block h-[28px] w-[28px]"
+            strokeWidth={1.75}
           />
           <Link
             href="/"
@@ -48,7 +51,7 @@ export default function MobileNavbar() {
             loading={loading}
             isAuthenticated={isAuthenticated}
             isMember={isActive}
-            signInClassName="!text-nav-ink h-10 inline-flex items-center leading-none text-[0.8rem] font-medium 480:text-[0.85rem]"
+            signInClassName="!text-nav-ink !h-[30px] w-full px-2.5 !text-[0.8rem] !font-medium 480:!h-10 480:!text-[0.85rem]"
             userIconClassName="shrink-0"
           />
         </div>
