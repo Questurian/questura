@@ -25,49 +25,9 @@
 import 'dotenv/config'
 import { Pool } from 'pg'
 
-const DAY = 24 * 60 * 60 * 1000
+import { DEV_MEMBERSHIP_STATES, devToolsRefusal, isDevMembershipStateName, writeDevMembershipState } from '../src/features/dev-tools/membership-states'
 
-type Row = {
-  subscription_status: 'none' | 'active' | 'cancelled' | 'past_due' | null
-  paid_through_at: Date | null
-  dunning_grace_until: Date | null
-  cancel_at_period_end: boolean
-  billing_interval: 'month' | 'year' | null
-  subscription_paused: boolean
-}
-
-const STATES: Record<string, { about: string; row: (now: number) => Row }> = {
-  member: {
-    about: 'active, monthly, renews in 30 days',
-    row: (now) => ({ subscription_status: 'active', paid_through_at: new Date(now + 30 * DAY), dunning_grace_until: null, cancel_at_period_end: false, billing_interval: 'month', subscription_paused: false }),
-  },
-  yearly: {
-    about: 'active, yearly, renews in 365 days',
-    row: (now) => ({ subscription_status: 'active', paid_through_at: new Date(now + 365 * DAY), dunning_grace_until: null, cancel_at_period_end: false, billing_interval: 'year', subscription_paused: false }),
-  },
-  cancelling: {
-    about: 'active until the period ends in 30 days, then stops',
-    row: (now) => ({ subscription_status: 'active', paid_through_at: new Date(now + 30 * DAY), dunning_grace_until: null, cancel_at_period_end: true, billing_interval: 'month', subscription_paused: false }),
-  },
-  grace: {
-    about: 'renewal charge failed yesterday; still has access for 7 days',
-    row: (now) => ({ subscription_status: 'past_due', paid_through_at: new Date(now - DAY), dunning_grace_until: new Date(now + 7 * DAY), cancel_at_period_end: false, billing_interval: 'month', subscription_paused: false }),
-  },
-  paused: {
-    about: 'paused; no access',
-    row: (now) => ({ subscription_status: 'past_due', paid_through_at: new Date(now - DAY), dunning_grace_until: null, cancel_at_period_end: false, billing_interval: 'month', subscription_paused: true }),
-  },
-  expired: {
-    about: 'was a member, ended yesterday; no access',
-    row: (now) => ({ subscription_status: 'cancelled', paid_through_at: new Date(now - DAY), dunning_grace_until: null, cancel_at_period_end: false, billing_interval: 'month', subscription_paused: false }),
-  },
-  none: {
-    about: 'never a member',
-    row: () => ({ subscription_status: 'none', paid_through_at: null, dunning_grace_until: null, cancel_at_period_end: false, billing_interval: null, subscription_paused: false }),
-  },
-}
-
-const LOCAL_HOSTS = new Set(['localhost', '127.0.0.1', '::1', '[::1]'])
+const STATES = DEV_MEMBERSHIP_STATES
 
 function usage(): never {
   console.error('usage: pnpm dev:member --list')
@@ -83,9 +43,9 @@ function localConnectionString(): string {
     console.error('DATABASE_URI is not set.')
     process.exit(2)
   }
-  const host = new URL(uri).hostname
-  if (!LOCAL_HOSTS.has(host) || process.env.NODE_ENV === 'production') {
-    console.error(`Refusing: DATABASE_URI points at ${host}, not this machine. This script only edits the local database.`)
+  const refusal = devToolsRefusal({ NODE_ENV: process.env.NODE_ENV, databaseUri: uri })
+  if (refusal) {
+    console.error(`Refusing: ${refusal}. This script only edits the local database.`)
     process.exit(2)
   }
   return uri
@@ -113,8 +73,8 @@ async function main() {
       return
     }
 
-    const state = stateName ? STATES[stateName] : undefined
-    if (!state) usage()
+    if (!isDevMembershipStateName(stateName)) usage()
+    const state = STATES[stateName]
 
     const email = first.trim().toLowerCase()
     const user = await pool.query<{ id: string }>('select id from visitor_auth_users where lower(email) = $1', [email])
@@ -123,15 +83,8 @@ async function main() {
       process.exit(1)
     }
 
-    const row = state.row(Date.now())
-    const updated = await pool.query(
-      `update visitor_profiles
-          set subscription_status = $2, paid_through_at = $3, dunning_grace_until = $4,
-              cancel_at_period_end = $5, billing_interval = $6, subscription_paused = $7, updated_at = now()
-        where auth_user_id = $1`,
-      [user.rows[0].id, row.subscription_status, row.paid_through_at, row.dunning_grace_until, row.cancel_at_period_end, row.billing_interval, row.subscription_paused],
-    )
-    if (updated.rowCount === 0) {
+    const updated = await writeDevMembershipState(pool, user.rows[0].id, stateName, Date.now())
+    if (!updated) {
       console.error(`${email} has no visitor profile yet. Sign in once on http://localhost:3000, then run this again.`)
       process.exit(1)
     }

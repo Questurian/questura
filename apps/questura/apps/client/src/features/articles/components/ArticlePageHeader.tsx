@@ -17,6 +17,11 @@ type ArticlePageHeaderProps = {
   author?: ArticleAuthor | null
   /** Bookmark target for this page. Omitted only where there is nothing to bookmark. */
   bookmark?: { targetType: BookmarkTargetType; targetId: number } | null
+  /**
+   * `plain` keeps the byline to name and date; the page then shows the
+   * author's photo and links at its foot (ArticleAuthorBanner).
+   */
+  bylineVariant?: 'framed' | 'plain'
 }
 function DoubleRuleRail(): JSX.Element {
   return (
@@ -54,6 +59,7 @@ export function ArticlePageHeader({
   updatedAt,
   author,
   bookmark,
+  bylineVariant = 'framed',
 }: ArticlePageHeaderProps): JSX.Element {
   const publishedLine = (() => {
     const formatted = formatArticleDate(publishedAt ?? updatedAt, 'short')
@@ -103,7 +109,7 @@ export function ArticlePageHeader({
       {(author || publishedLine) ? (
         <div className="mt-4 flex flex-col gap-5 380:mt-5 380:gap-6 480:mt-6 sm:mt-7 768:mt-8">
           {author ? (
-            <ArticleByline author={author} dateLine={publishedLine} variant="framed" />
+            <ArticleByline author={author} dateLine={publishedLine} variant={bylineVariant} />
           ) : (
             <span className="mx-auto max-w-[44ch] text-center font-display text-[11px] font-normal leading-snug tracking-[0.02em] text-foreground/50 480:text-[12px]">
               {publishedLine}

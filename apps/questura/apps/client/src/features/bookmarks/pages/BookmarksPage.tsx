@@ -122,7 +122,9 @@ function BookmarkRow({ item }: { item: BookmarkListItem }) {
 
 function EmptyState({ filtered }: { filtered: boolean }) {
   return (
-    <div className="border-t border-foreground/12 px-2 py-16 text-center">
+    // No rule of its own: the tab bar's rule already opens the list, and a
+    // second one here drew two lines around nothing.
+    <div className="px-2 py-16 text-center">
       <BookmarkIcon
         className="mx-auto mb-4 size-6 text-foreground/35"
         strokeWidth={1.5}

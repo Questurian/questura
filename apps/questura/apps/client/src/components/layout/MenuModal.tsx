@@ -1,16 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "@/components/navigation/PublicLink";
+import { NAV_SECTIONS } from "@/features/Navigation/shared/sections";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowRight, Building2, Search, X } from "lucide-react";
+import { ArrowRight, Building2, ChevronRight, Search, X } from "lucide-react";
 import {
   fetchLocationMenu,
   type LocationMenuResponse,
 } from "@/features/Navigation/lib/fetchLocationMenu";
 import CountryFlag from "@/components/shared/ui/CountryFlag";
-import NavThemeToggle from "@/features/Navigation/shared/components/NavThemeToggle";
 import { navigateWithFeedback } from "@/components/navigation/navigationFeedbackStore";
 
 interface MenuModalProps {
@@ -44,6 +44,25 @@ export default function MenuModal({
   useEffect(() => {
     if (!isOpen) setQuery("");
   }, [isOpen]);
+
+  const closeRef = useRef<HTMLButtonElement>(null);
+  const searchRef = useRef<HTMLInputElement>(null);
+
+  // Escape closes, focus lands inside on open and goes back to the navbar
+  // button on close.
+  useEffect(() => {
+    if (!isOpen) return;
+    const opener = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    closeRef.current?.focus();
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onClose();
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      opener?.focus();
+    };
+  }, [isOpen, onClose]);
 
   const submitSearch = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -140,10 +159,16 @@ export default function MenuModal({
         }
       `}</style>
 
-      <div className="fixed inset-0 z-50">
+      <div
+        className="fixed inset-0 z-50"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="menu-modal-title"
+      >
         <button
           type="button"
           aria-label="Close menu"
+          tabIndex={-1}
           className="menu-overlay-enter absolute inset-0 bg-black/60"
           onClick={onClose}
         />
@@ -154,36 +179,93 @@ export default function MenuModal({
               <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-white/40">
                 Questurian
               </p>
-              <h2 className="mt-1 font-display text-[1.35rem] leading-none tracking-[0.02em] 1024:text-[1.75rem]">
+              <h2
+                id="menu-modal-title"
+                className="mt-1 font-display text-[1.35rem] leading-none tracking-[0.02em] 1024:text-[1.75rem]"
+              >
                 Menu
               </h2>
             </div>
             <button
+              ref={closeRef}
+              type="button"
               onClick={onClose}
               className="rounded-full border border-white/10 p-2 transition-colors hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/45"
               aria-label="Close modal"
             >
-              <X className="h-5 w-5 text-white" />
+              <X aria-hidden className="h-5 w-5 text-white" />
             </button>
           </div>
 
           <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5 1024:px-10 1024:py-7">
-            <form onSubmit={submitSearch} className="mb-6 1024:mb-8 1024:max-w-[520px]">
-              <div className="flex items-center gap-2.5 border-b border-white/25 py-3 transition-colors focus-within:border-white/70">
-                <Search className="h-4 w-4 shrink-0 text-white/55" strokeWidth={1.5} aria-hidden />
+            <form
+              onSubmit={submitSearch}
+              role="search"
+              className="mb-8 1024:mb-10 1024:max-w-[560px]"
+            >
+              {/* Same underline field as the search results page, in the
+                  panel's white-on-dark, so the two read as one search. */}
+              <div className="flex items-center gap-3 border-b border-white/25 pb-3 transition-colors focus-within:border-white/70">
+                <Search className="size-5 shrink-0 text-white/45" strokeWidth={1.5} aria-hidden />
                 <input
+                  ref={searchRef}
                   type="search"
                   value={query}
                   onChange={(event) => setQuery(event.target.value)}
-                  placeholder="Search articles, guides, maps, and itineraries..."
-                  className="w-full bg-transparent text-sm font-semibold text-white outline-none placeholder:text-white/45"
+                  placeholder="Search articles, guides, maps, and itineraries…"
+                  className="min-w-0 flex-1 truncate bg-transparent text-[16px] leading-7 text-white outline-none placeholder:text-white/40 1024:text-[18px] [&::-webkit-search-cancel-button]:hidden [&::-webkit-search-decoration]:hidden"
                   autoComplete="off"
                   aria-label="Search articles"
                 />
+                {query ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setQuery("");
+                      searchRef.current?.focus();
+                    }}
+                    className="flex size-7 shrink-0 items-center justify-center rounded-full text-white/45 transition-colors hover:bg-white/10 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white/45"
+                    aria-label="Clear search"
+                  >
+                    <X aria-hidden className="size-4" strokeWidth={1.75} />
+                  </button>
+                ) : null}
               </div>
             </form>
 
-            <nav className="menu-reveal grid gap-8 1024:grid-cols-3 1024:gap-0" aria-label="Locations">
+            {/* Below 1024px the navbar has no section row, so the sections
+                live here, above the destinations. The desktop navbar shows
+                them itself. */}
+            <nav aria-label="Sections" className="mb-9 1024:hidden">
+              <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.24em] text-white/40">
+                Explore
+              </p>
+              <ul className="border-t border-white/10">
+                {NAV_SECTIONS.filter((section) => section.href).map((section) => (
+                  <li key={section.label} className="border-b border-white/10">
+                    <Link
+                      href={section.href!}
+                      keepFeedbackAfterUnmount
+                      onClick={onClose}
+                      className="group flex min-h-[52px] items-center justify-between text-[1.05rem] font-semibold text-white transition-colors hover:text-accent-soft focus:outline-none focus-visible:text-accent-soft"
+                    >
+                      {section.label}
+                      <ChevronRight
+                        aria-hidden
+                        className="size-[18px] text-white/40 transition-transform group-hover:translate-x-0.5"
+                        strokeWidth={1.75}
+                      />
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+
+            <p className="mb-5 text-[10px] font-bold uppercase tracking-[0.24em] text-white/40 1024:mb-7">
+              Destinations
+            </p>
+
+            <nav className="menu-reveal grid gap-6 1024:grid-cols-3 1024:gap-0" aria-label="Locations">
               {locationMenuQuery.isPending ? (
                 <p className="text-sm font-semibold text-white/55">Loading locations...</p>
               ) : locationMenuQuery.isError ? (
@@ -194,7 +276,7 @@ export default function MenuModal({
                 countries.map((country, index) => (
                   <section
                     key={country.locationKey}
-                    className={`border-t border-white/10 pt-7 first:border-t-0 first:pt-0 1024:border-t-0 1024:pt-0 ${
+                    className={`border-t border-white/10 pt-6 first:border-t-0 first:pt-0 1024:border-t-0 1024:pt-0 ${
                       index % 3 === 0
                         ? "1024:pr-9"
                         : index % 3 === 1
@@ -206,7 +288,7 @@ export default function MenuModal({
                       href={country.href}
                       keepFeedbackAfterUnmount
                       onClick={onClose}
-                      className="group inline-flex items-center gap-2.5 font-display text-[1.75rem] font-semibold leading-none text-white transition-colors hover:text-white/78 focus:outline-none focus-visible:text-white/78 1024:text-[2rem]"
+                      className="group inline-flex items-center gap-2.5 font-display text-[1.5rem] font-semibold leading-none text-white transition-colors hover:text-white/78 focus:outline-none focus-visible:text-white/78 1024:text-[2rem]"
                     >
                       <CountryFlag
                         code={country.countryCode}
@@ -216,7 +298,7 @@ export default function MenuModal({
                       <ArrowRight className="mt-1 h-5 w-5 transition-transform group-hover:translate-x-1" aria-hidden />
                     </Link>
 
-                    <div className="mt-7 space-y-4">
+                    <div className="mt-3 1024:mt-7 1024:space-y-4">
                       {country.cities.length > 0 ? (
                         country.cities.map((city) => (
                           <Link
@@ -224,7 +306,7 @@ export default function MenuModal({
                             href={city.href}
                             keepFeedbackAfterUnmount
                             onClick={onClose}
-                            className="flex items-center gap-2.5 text-[1.05rem] font-bold text-white/88 transition-colors hover:text-white focus:outline-none focus-visible:text-white"
+                            className="flex min-h-11 items-center gap-2.5 text-[1rem] font-semibold text-white/85 transition-colors 1024:min-h-0 1024:text-[1.05rem] 1024:font-bold hover:text-white focus:outline-none focus-visible:text-white"
                           >
                             <Building2 className="h-4 w-4 shrink-0" strokeWidth={1.5} aria-hidden />
                             {city.label}
@@ -235,7 +317,7 @@ export default function MenuModal({
                           href={country.href}
                           keepFeedbackAfterUnmount
                           onClick={onClose}
-                          className="flex items-center gap-2.5 text-[1.05rem] font-bold text-white/88 transition-colors hover:text-white focus:outline-none focus-visible:text-white"
+                          className="flex min-h-11 items-center gap-2.5 text-[1rem] font-semibold text-white/85 transition-colors 1024:min-h-0 1024:text-[1.05rem] 1024:font-bold hover:text-white focus:outline-none focus-visible:text-white"
                         >
                           <Building2 className="h-4 w-4 shrink-0" strokeWidth={1.5} aria-hidden />
                           View all {country.label} guides
@@ -248,14 +330,6 @@ export default function MenuModal({
             </nav>
           </div>
 
-          {/* Pinned under the scrolling list so it is in view on the phone
-              sheet and the desktop drop-down alike. */}
-          <div className="flex shrink-0 items-center justify-between gap-4 border-t border-white/10 px-5 py-3 1024:px-10 1024:py-4">
-            <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-white/40">
-              Navbar
-            </p>
-            <NavThemeToggle />
-          </div>
         </aside>
       </div>
     </>

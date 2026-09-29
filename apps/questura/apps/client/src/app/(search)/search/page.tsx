@@ -2,7 +2,7 @@ import Link from '@/components/navigation/PublicLink'
 import type { Metadata } from 'next'
 import { ArrowUpRight, Search } from 'lucide-react'
 
-import { LocationContentList } from '@/features/search/components/LocationContentList'
+import { InfiniteResultList } from '@/features/search/components/InfiniteResultList'
 import {
   fetchLocationContent,
   isSearchUnavailable,
@@ -23,13 +23,6 @@ export const metadata: Metadata = {
   title: 'Search — Questurian',
   description: 'Find Questurian articles, guides, maps, and itineraries.',
   robots: { index: false },
-}
-
-function locationHref(key: string, page: number): string {
-  const params = new URLSearchParams()
-  params.set('location', key)
-  if (page > 1) params.set('page', String(page))
-  return `/search?${params.toString()}`
 }
 
 function searchHref(q: string, page: number): string {
@@ -109,23 +102,34 @@ export default async function SearchPage({ searchParams }: Props) {
                 content.location.label
               )}
             </h1>
-            <LocationContentList
-              content={content}
-              pageHref={(nextPage) => locationHref(content.location.locationKey, nextPage)}
-            />
+            {content.items.length === 0 ? (
+              <p className="text-[15px] leading-7 text-foreground/60">
+                No published content for {content.location.label} yet.
+              </p>
+            ) : (
+              <InfiniteResultList
+                key={`location:${content.location.locationKey}`}
+                source={{ kind: 'location', key: content.location.locationKey }}
+                initialItems={content.items}
+                initialPage={content.page}
+                initialHasNext={content.hasNext}
+              />
+            )}
           </>
         ) : articleResults && articleResults.totalDocs > 0 ? (
           <>
             <h1 className="mb-3 font-display text-[36px] font-medium leading-[1] text-foreground 480:text-[48px]">
               Search results for “{articleResults.q}”
             </h1>
-            <p className="mb-8 text-[14px] leading-6 text-foreground/60">
+            <p className="mb-2 text-[14px] leading-6 text-foreground/60">
               {articleResults.totalDocs} {articleResults.totalDocs === 1 ? 'result' : 'results'}
             </p>
-            <LocationContentList
-              content={articleResults}
-              pageHref={(nextPage) => searchHref(articleResults.q, nextPage)}
-              emptyMessage={`No results for "${articleResults.q}".`}
+            <InfiniteResultList
+              key={`query:${articleResults.q}`}
+              source={{ kind: 'query', q: articleResults.q }}
+              initialItems={articleResults.items}
+              initialPage={articleResults.page}
+              initialHasNext={articleResults.hasNext}
             />
           </>
         ) : unavailable ? (

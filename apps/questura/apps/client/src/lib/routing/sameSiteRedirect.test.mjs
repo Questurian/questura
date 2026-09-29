@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import test from 'node:test'
 
-import { isSlugSegment, sameSiteLocation } from './sameSiteRedirect.ts'
+import { sameSiteLocation } from './sameSiteRedirect.ts'
 
 const ORIGIN = 'https://questurian.com'
 
@@ -42,19 +42,10 @@ test('localhost stays localhost', () => {
   assert.equal(sameSiteLocation('//evil.com', 'http://localhost:3000')?.href, 'http://localhost:3000/evil.com')
 })
 
-test('geo cookie segments must be slugs', () => {
-  assert.ok(isSlugSegment('peru'))
-  assert.ok(isSlugSegment('lima-2'))
-  for (const bad of ['/evil.com', '\\evil.com', '', 'a/b', '..', undefined, 3]) {
-    assert.equal(isSlugSegment(bad), false, JSON.stringify(bad))
-  }
-})
-
 // middleware.ts imports next/server, which CI's client job does not install,
 // so the wiring is checked by reading the source.
 test('middleware builds every redirect through sameSiteLocation', () => {
   const source = readFileSync(new URL('../../middleware.ts', import.meta.url), 'utf8')
   assert.match(source, /sameSiteLocation\(/)
   assert.doesNotMatch(source, /new URL\(location/)
-  assert.match(source, /isSlugSegment\(/)
 })

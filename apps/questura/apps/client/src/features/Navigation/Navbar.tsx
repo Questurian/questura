@@ -164,7 +164,7 @@ export default function Navbar() {
       <div className="hidden 1024:block">
         <DesktopNavbar locked={pinnedThin || locked} />
       </div>
-      <div className="h-[55px] 1024:hidden">
+      <div className="h-16 1024:hidden">
         <MobileNavbar />
       </div>
     </nav>

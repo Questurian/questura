@@ -257,7 +257,7 @@ export async function expectCacheCopyKept(context: BrowserContext) {
 /** Signs out through the user menu and waits for the signed-out header. */
 export async function signOut(page: Page) {
   await page.getByRole('button', { name: 'Open user menu' }).locator('visible=true').first().click()
-  await page.getByRole('button', { name: 'Logout' }).or(page.getByRole('link', { name: 'Logout' })).first().click()
+  await page.getByRole('button', { name: 'Sign out' }).or(page.getByRole('link', { name: 'Sign out' })).first().click()
   await expect(page.getByRole('button', { name: 'Open user menu' }).locator('visible=true')).toHaveCount(0)
 }
 

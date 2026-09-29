@@ -11,7 +11,8 @@ import type { ArticleAuthor } from '@/features/articles/types'
 type ArticleBylineProps = {
   author: ArticleAuthor
   dateLine?: string | null
-  variant: 'framed' | 'standard'
+  /** `plain` is the framed header's text-only byline, with no avatar or links. */
+  variant: 'framed' | 'plain' | 'standard'
 }
 
 export function hasFeaturedArticleByline(author: ArticleAuthor): boolean {
@@ -90,7 +91,7 @@ export function ArticleByline({ author, dateLine, variant }: ArticleBylineProps)
     )
   }
 
-  if (!isFeatured) {
+  if (!isFeatured || variant === 'plain') {
     return (
       <div className="mx-auto flex w-full min-w-0 max-w-[44ch] flex-col items-center gap-1.5 text-center">
         <span className="break-words text-balance font-display text-[13px] font-semibold leading-snug text-foreground 480:text-[14px] sm:text-[15px]">
