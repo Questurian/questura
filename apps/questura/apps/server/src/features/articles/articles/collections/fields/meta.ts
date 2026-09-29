@@ -56,7 +56,7 @@ export const author: Field = {
     },
   },
   admin: {
-    description: 'Article author (auto-set to current user on creation)',
+    description: 'Article author. On creation, an admin or editor may name one (the studio does); otherwise it is the current user.',
     position: 'sidebar',
   },
 }

@@ -1,0 +1,41 @@
+name: Questura structured data check
+
+# Once a day, opens every article page in the live sitemap and checks its
+# Google label (JSON-LD): one article entry, the real address, a real author
+# with an author page, dates, a picture, and the paid flag on that same entry.
+# Rules: apps/questura/apps/client/src/lib/seo/structuredDataCheck.mjs.
+# A failing page fails this job, and GitHub emails a failed scheduled run to
+# whoever last changed this file's schedule. The log names each page and why.
+#
+# Dormant until the owner sets the repository variable
+# QUESTURA_SCHEDULE_ENABLED=true (shared with the uptime check). No secrets:
+# it reads public pages only. Run it by hand from Actions at any time.
+
+on:
+  schedule:
+    - cron: '41 9 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: questura-structured-data-check
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Structured data on live articles
+    if: vars.QUESTURA_SCHEDULE_ENABLED == 'true' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: apps/questura/apps/client
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check every live article
+        working-directory: apps/questura/apps/client
+        run: node scripts/check-structured-data.mjs --site https://www.questurian.com

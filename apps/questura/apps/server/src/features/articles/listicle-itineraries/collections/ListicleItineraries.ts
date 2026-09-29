@@ -40,7 +40,7 @@ import {
   articleType,
 } from './fields'
 import { sanitizeListicleItineraryIncomingIds } from './sanitizeListicleClientIds'
-import { ensureAuthorIdForUser, findAuthorIdForUser } from '@/features/authors/lib/author-for-user'
+import { bylineOnCreate, findAuthorIdForUser } from '@/features/authors/lib/author-for-user'
 import {
   type ComputedItineraryBlock,
   validateListicleItineraryBlockRows,
@@ -173,7 +173,7 @@ export const ListicleItineraries: CollectionConfig = {
       async ({ data, req, operation }) => {
         if (operation === 'create' && req.user?.id) {
           // The byline is an Author, not the account that typed it (ADR-0007).
-          data.author = await ensureAuthorIdForUser(req, req.user.id)
+          data.author = await bylineOnCreate(req, data.author)
         }
 
         if (data?.status === 'published' && !data?.publishedAt) {

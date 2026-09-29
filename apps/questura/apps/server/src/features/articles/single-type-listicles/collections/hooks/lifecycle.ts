@@ -6,7 +6,7 @@ import {
   assertCanDeleteHomepageFeaturedContent,
   assertCanUnpublishHomepageFeaturedContent,
 } from '../../../shared/lib/referenceLocks'
-import { ensureAuthorIdForUser } from '@/features/authors/lib/author-for-user'
+import { bylineOnCreate } from '@/features/authors/lib/author-for-user'
 
 export const preventSingleTypeListicleUnpublish: CollectionBeforeChangeHook = async ({
   data,
@@ -36,7 +36,7 @@ export const applySingleTypeListicleMetadata: CollectionBeforeChangeHook = async
 }) => {
   if (operation === 'create' && req.user?.id) {
     // The byline is an Author, not the account that typed it (ADR-0007).
-    data.author = await ensureAuthorIdForUser(req, req.user.id)
+    data.author = await bylineOnCreate(req, data.author)
   }
 
   if (data?.status === 'published' && !data?.publishedAt) {
