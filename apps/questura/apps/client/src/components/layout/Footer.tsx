@@ -7,7 +7,7 @@ export default function Footer() {
       <div className="mx-auto max-w-6xl px-4 py-8 1024:py-12">
         {/* Logo */}
         <div className="mb-6 flex justify-center 1024:justify-start">
-          <Link href="/">
+          <Link href="/" className="flex">
             <Logo variant="inline" className="text-[1.25rem] 1024:text-[1.6rem]" />
           </Link>
         </div>
