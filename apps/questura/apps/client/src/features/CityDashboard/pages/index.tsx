@@ -1,23 +1,15 @@
 'use client'
 
-import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { SuspenseBoundary } from '@/components/shared/SuspenseBoundary'
 import { useProtectedRoute } from '@/lib/routing'
 import { useLoginModalStore } from '@/lib/stores/loginModalStore'
-import { useLocationStore } from '@/lib/stores/locationStore'
 import { useOAuthErrorModal } from '../hooks/useOAuthErrorModal'
 import type { CityDashboardProps } from '../types'
 
 function CityDashboardContent({ citySlug, countrySlug }: CityDashboardProps) {
   const router = useRouter()
   const openLoginModal = useLoginModalStore((state) => state.openLoginModal)
-  const setLastVisited = useLocationStore((state) => state.setLastVisited)
-
-  useEffect(() => {
-    setLastVisited({ cityId: citySlug, country: countrySlug })
-  }, [citySlug, countrySlug, setLastVisited])
-
   useProtectedRoute({
     onLoginRequired: (redirectPath) => {
       openLoginModal({

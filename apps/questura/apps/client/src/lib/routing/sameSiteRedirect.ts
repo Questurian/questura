@@ -40,8 +40,3 @@ export function sameSiteLocation(location: string, origin: string): URL | null {
   }
   return target.origin === base.origin ? target : null
 }
-
-/** A URL slug segment: what a country or city id in the geo cookie must be. */
-export function isSlugSegment(value: unknown): value is string {
-  return typeof value === 'string' && /^[a-z0-9][a-z0-9-]*$/i.test(value)
-}

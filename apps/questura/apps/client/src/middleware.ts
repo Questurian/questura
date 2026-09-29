@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { canonicalRedirect } from '@/lib/routing/canonicalHost'
-import { isSlugSegment, sameSiteLocation } from '@/lib/routing/sameSiteRedirect'
+import { sameSiteLocation } from '@/lib/routing/sameSiteRedirect'
 import { originFromRequest } from '@/lib/seo/requestOrigin'
 import {
   APPLE_PAY_DOMAIN_ASSOCIATION_BODY,
@@ -36,29 +36,6 @@ function redirectToPublicLocation(request: NextRequest, location: string, status
 function stripTrailingSlash(url: URL): string | null {
   if (url.pathname === '/' || !url.pathname.endsWith('/')) return null
   return `${url.pathname.replace(/\/+$/, '')}${url.search}`
-}
-
-function handleHomeGeoRedirect(request: NextRequest): NextResponse | null {
-  if (request.nextUrl.pathname !== '/') return null
-  if (request.nextUrl.searchParams.has('browse')) return null
-
-  const locationCookie = request.cookies.get('questura-location-redirect')?.value
-  if (!locationCookie) return null
-
-  try {
-    const parsed = JSON.parse(decodeURIComponent(locationCookie)) as {
-      cityId?: string
-      country?: string
-    }
-    const cityId = parsed.cityId
-    const country = parsed.country
-    if (isSlugSegment(cityId) && isSlugSegment(country)) {
-      return redirectToPublicLocation(request, `/${country}/${cityId}`)
-    }
-  } catch {
-    // Invalid cookie, fall through
-  }
-  return null
 }
 
 /**
@@ -112,9 +89,6 @@ export function middleware(request: NextRequest) {
     const redirect = redirectToPublicLocation(request, stripped, 301)
     if (redirect) return redirect
   }
-
-  const homeRedirect = handleHomeGeoRedirect(request)
-  if (homeRedirect) return homeRedirect
 
   return NextResponse.next()
 }
