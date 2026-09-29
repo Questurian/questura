@@ -4,6 +4,7 @@ import { readPublicResponse } from '@/lib/cache/readPublicResponse'
 import { config } from '@/lib/config'
 import { DEFAULT_LOCALE } from '@/lib/i18n/locales'
 import { getPublicBaseUrl } from '@/lib/seo/publicBaseUrl'
+import { SITEMAP_PRIORITY } from '@/lib/seo/sitemapPriority.mjs'
 
 type SitemapEntry = {
   url: string
@@ -32,7 +33,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const home: MetadataRoute.Sitemap[number] = {
     url: `${base}/`,
     changeFrequency: 'daily',
-    priority: 1.0,
+    priority: SITEMAP_PRIORITY.home,
   }
 
   if (!data) return [home]
@@ -48,8 +49,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   return [
     home,
-    ...data.hubs.map((entry) => toEntry(entry, 0.8)),
-    ...data.indexes.map((entry) => toEntry(entry, 0.5)),
-    ...data.content.map((entry) => toEntry(entry, 0.7)),
+    ...data.hubs.map((entry) => toEntry(entry, SITEMAP_PRIORITY.hub)),
+    ...data.indexes.map((entry) => toEntry(entry, SITEMAP_PRIORITY.index)),
+    ...data.content.map((entry) => toEntry(entry, SITEMAP_PRIORITY.content)),
   ]
 }

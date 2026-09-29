@@ -9,6 +9,7 @@
     "scan:bundle": "node scripts/scan-client-bundle.mjs",
     "check:first-load-js": "node scripts/check-first-load-js.mjs",
     "check:global-css": "node scripts/check-global-css-boundaries.mjs",
+    "check:structured-data": "node scripts/check-structured-data.mjs",
     "start": "next start",
     "lint": "eslint src",
     "test": "node --experimental-strip-types --test \"src/**/*.test.mjs\"",
