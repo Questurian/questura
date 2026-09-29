@@ -12,14 +12,16 @@ type MenuModalRendererProps = {
 };
 
 export default function MenuModalRenderer({ locationMenu = null }: MenuModalRendererProps) {
-  const { isOpen, closeMenuModal } = useMenuModalStore();
+  const { isOpen, isWarm, closeMenuModal } = useMenuModalStore();
 
   // With the menu data already in hand we know exactly which flags the modal
-  // will ask for, so warm them at hydration instead of on the click. React
-  // hoists these into <head>. A handful of ~1KB SVGs.
+  // will ask for, so fetch them once the reader reaches for the menu button
+  // (hover, focus or touch) rather than on the click. React hoists these into
+  // <head>. A handful of ~1KB SVGs.
   //
-  // These stay outside the open gate on purpose: they are the cheap half. The
-  // modal's own code is the expensive half and waits for the click.
+  // Not at hydration: every page then downloaded five flags it never showed
+  // (Questurian/questura#9). And `prefetch`, not `preload`: a reader who hovers
+  // and moves on would otherwise get a "preloaded but not used" warning.
   const flagCodes = [
     ...new Set(
       (locationMenu?.countries ?? [])
@@ -30,9 +32,11 @@ export default function MenuModalRenderer({ locationMenu = null }: MenuModalRend
 
   return (
     <>
-      {flagCodes.map((code) => (
-        <link key={code} rel="preload" as="image" href={`/flags/${code}.svg`} />
-      ))}
+      {isWarm
+        ? flagCodes.map((code) => (
+            <link key={code} rel="prefetch" as="image" href={`/flags/${code}.svg`} />
+          ))
+        : null}
       {isOpen ? (
         <MenuModal isOpen onClose={closeMenuModal} initialLocationMenu={locationMenu} />
       ) : null}

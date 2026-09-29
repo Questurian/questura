@@ -4,6 +4,7 @@ import { PublicImage } from '@/components/media/PublicImage'
 import { AdLabel, AdMockSurface } from '@/features/articles/components/AdMock'
 import type { ArticleIndexItem } from '@/features/articles/lib/fetchArticleIndex'
 import type { ArticleSidebarLists } from '@/features/articles/lib/fetchArticleSidebar'
+import { ADS_ENABLED } from '@/features/articles/lib/ads'
 
 function AdSlot({ size }: { size: 'half-page' | 'square' }) {
   const height = size === 'half-page' ? 'h-[250px] 1024:h-[600px]' : 'h-[300px]'
@@ -37,6 +38,18 @@ function SectionHeading({ id, children }: { id: string; children: string }) {
  * overlapping it.
  */
 export function ArticleRail({ trending }: { trending: ArticleIndexItem[] }) {
+  // With ads off, trending takes the pinned spot instead of hanging at the
+  // bottom of an empty column.
+  if (!ADS_ENABLED) {
+    return (
+      <div data-article-sidebar className="1024:h-full">
+        <div className="1024:sticky 1024:top-24">
+          <ArticleTrending trending={trending} />
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div data-article-sidebar className="1024:flex 1024:h-full 1024:flex-col">
       <div className="1024:flex-1">
@@ -92,7 +105,7 @@ export function ArticlePartners({ partners }: { partners: ArticleIndexItem[] }) 
 
   return (
     <section aria-labelledby="article-partners-heading" className="pt-12 pb-16 1024:pt-16 1024:pb-20">
-      <SectionHeading id="article-partners-heading">From Our Partners</SectionHeading>
+      <SectionHeading id="article-partners-heading">More from Questurian</SectionHeading>
       <ul className="mt-6 grid grid-cols-2 gap-x-5 gap-y-8 sm:grid-cols-3 1024:grid-cols-5">
         {partners.map((item) => (
           <li key={item.id}>
@@ -131,7 +144,7 @@ async function ResolvedRail({ sidebar }: { sidebar: Promise<ArticleSidebarLists>
   return <ArticleRail trending={trending} />
 }
 
-/** The ads hold the rail's column while trending loads; no placeholder list. */
+/** The rail holds its column while trending loads; no placeholder list. */
 export function StreamedArticleRail({ sidebar }: { sidebar: Promise<ArticleSidebarLists> }) {
   return (
     <Suspense fallback={<ArticleRail trending={[]} />}>

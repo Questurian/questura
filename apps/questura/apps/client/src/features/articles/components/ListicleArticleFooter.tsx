@@ -5,6 +5,7 @@ import { ArrowRight } from 'lucide-react'
 import { ShimmerImage } from '@/components/media/ShimmerImage'
 import { editorialKickerClass } from '@/features/articles/components/EditorialRule'
 import { InArticleAd } from '@/features/articles/components/InArticleAd'
+import { ADS_ENABLED } from '@/features/articles/lib/ads'
 import { ListicleSeparator } from '@/features/articles/components/ListicleSeparator'
 import type {
   ListicleFooterLink,
@@ -129,7 +130,7 @@ export function ListicleArticleFooter({
             already expects to stop, so the deeper unit sits here and the thin
             one closes the page. Both are exact IAB boxes reserved before
             load, so nothing shifts under the reader. */}
-        <InArticleAd slotId="listicle-foot-top" variant="rectangle" />
+        {ADS_ENABLED ? <InArticleAd slotId="listicle-foot-top" variant="rectangle" /> : null}
 
         <div className="pt-8 480:pt-10 sm:pt-12 1024:pt-14 1024:grid 1024:grid-cols-[minmax(0,1fr)_320px] 1024:gap-x-10 1280:grid-cols-[minmax(0,1fr)_360px] 1280:gap-x-14">
           <div className="min-w-0">
@@ -190,9 +191,11 @@ export function ListicleArticleFooter({
           ) : null}
         </div>
 
-        <div className="pt-10 480:pt-12 1024:pt-14">
-          <InArticleAd slotId="listicle-foot-banner" variant="banner" />
-        </div>
+        {ADS_ENABLED ? (
+          <div className="pt-10 480:pt-12 1024:pt-14">
+            <InArticleAd slotId="listicle-foot-banner" variant="banner" />
+          </div>
+        ) : null}
       </div>
     </section>
   )

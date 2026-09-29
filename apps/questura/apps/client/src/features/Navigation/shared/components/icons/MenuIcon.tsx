@@ -10,11 +10,14 @@ interface MenuIconProps {
 }
 
 export default function MenuIcon({ buttonClassName = '', iconClassName = '', strokeWidth = 1.5 }: MenuIconProps) {
-  const { openMenuModal } = useMenuModalStore();
+  const { openMenuModal, warmMenuModal } = useMenuModalStore();
 
   return (
     <button
       onClick={openMenuModal}
+      onPointerEnter={warmMenuModal}
+      onFocus={warmMenuModal}
+      onTouchStart={warmMenuModal}
       className={`inline-flex items-center justify-center p-0 leading-none bg-transparent border-0 cursor-pointer focus:outline-none ${buttonClassName}`}
       aria-label="Open menu modal"
     >

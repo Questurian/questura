@@ -227,10 +227,10 @@ test('article heading and body stream before recommendations resolve', { skip },
   assert.ok(body.at < HOLD_MS / 2, `body waited ${body.at.toFixed(0)} ms for recommendations`)
   assert.ok(trending.at >= HOLD_MS - 5, 'recommendations were not actually held')
 
-  // The ad rail keeps its place while recommendations are pending.
+  // The rail keeps its place while recommendations are pending.
   const shell = chunks.filter((chunk) => chunk.at < HOLD_MS / 2).map((chunk) => chunk.html).join('')
-  assert.match(shell, /data-article-sidebar/, 'ad rail missing before recommendations arrive')
-  assert.doesNotMatch(shell, /Trending News|From Our Partners/, 'recommendations rendered before they loaded')
+  assert.match(shell, /data-article-sidebar/, 'rail missing before recommendations arrive')
+  assert.doesNotMatch(shell, /Trending News|More from Questurian/, 'recommendations rendered before they loaded')
 
   // Local and global lookups start together rather than one after the other.
   assert.deepEqual([...requests].sort(), ['city', 'global'])
@@ -238,7 +238,9 @@ test('article heading and body stream before recommendations resolve', { skip },
 
   // One lookup feeds both placements: trending is local, partners are global
   // and never repeat a trending item.
-  assert.match(html, /From Our Partners/)
+  assert.match(html, /More from Questurian/)
+  // No mock ad slots on a live article (#6): not in the rail, not in the body.
+  assert.doesNotMatch(html, /Ad space|Advertisement|data-in-article-ad/)
   assert.match(html, /Recommendation 100</)
   assert.equal((html.match(/Recommendation 1</g) ?? []).length, 1)
 })

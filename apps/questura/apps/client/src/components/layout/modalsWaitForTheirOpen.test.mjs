@@ -51,15 +51,24 @@ test('each renderer still subscribes to its store while closed', () => {
   }
 })
 
-// The flags are ~1KB SVGs the menu is certain to ask for, and React hoists the
-// preloads into <head>. They are the cheap half and belong outside the gate;
-// the modal's own code is the expensive half and belongs inside it.
-test('menu flag preloads stay outside the open gate', () => {
+// The flags are ~1KB SVGs the menu is certain to ask for. They wait for the
+// reader to reach for the menu button, not the click and not hydration: every
+// page used to download five flags it never showed (#9).
+test('menu flags are fetched on intent, not on every page', () => {
   const source = read('MenuModalRenderer.tsx')
-  const preloadAt = source.indexOf('rel="preload"')
+  const warmAt = source.indexOf('{isWarm')
+  const prefetchAt = source.indexOf('rel="prefetch"')
   const gateAt = source.indexOf('{isOpen ?')
-  assert.ok(preloadAt > 0 && gateAt > 0, 'expected both a flag preload and an open gate')
-  assert.ok(preloadAt < gateAt, 'flag preloads must not wait for the menu to open')
+  assert.doesNotMatch(source, /rel="preload"/, 'flags must not preload on every page')
+  assert.ok(warmAt > 0 && prefetchAt > warmAt, 'flag prefetch must wait for the warm signal')
+  assert.ok(prefetchAt < gateAt, 'flag prefetch must not wait for the menu to open')
+  const icon = readFileSync(
+    new URL('../../features/Navigation/shared/components/icons/MenuIcon.tsx', import.meta.url),
+    'utf8',
+  )
+  for (const event of ['onPointerEnter', 'onFocus', 'onTouchStart']) {
+    assert.match(icon, new RegExp(`${event}=\\{warmMenuModal\\}`), `menu button stopped warming on ${event}`)
+  }
 })
 
 // Server-rendered menu data is the whole reason opening the nav costs no
