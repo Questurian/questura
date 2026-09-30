@@ -18,6 +18,9 @@ export const BLOCK_IMAGE_SIZES = {
   /** Edge to edge at every breakpoint. */
   fullBleed: '100vw',
 
+  /** The page hero: the whole content column, 1400px less the two 24px gutters. */
+  pageHero: '(min-width: 1448px) 1352px, calc(100vw - 48px)',
+
   /** The lead card of a block: 1.5fr of a 1.5fr/1fr split. Measured at 762px. */
   hero: '(min-width: 1024px) 780px, 100vw',
 

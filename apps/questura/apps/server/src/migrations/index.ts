@@ -48,6 +48,7 @@ import * as migration_20260921_214514_refresh_jobs_outbox from './20260921_21451
 import * as migration_20260922_063804_refresh_jobs_fencing from './20260922_063804_refresh_jobs_fencing'
 import * as migration_20260924_145915_payload_3_90_upgrade from './20260924_145915_payload_3_90_upgrade'
 import * as migration_20260925_034038_visitor_billing_interval_and_paused_flag from './20260925_034038_visitor_billing_interval_and_paused_flag'
+import * as migration_20260929_222646_page_hero_and_questurian_maps_dark_blocks from './20260929_222646_page_hero_and_questurian_maps_dark_blocks'
 
 export const migrations = [
   {
@@ -299,5 +300,10 @@ export const migrations = [
     up: migration_20260925_034038_visitor_billing_interval_and_paused_flag.up,
     down: migration_20260925_034038_visitor_billing_interval_and_paused_flag.down,
     name: '20260925_034038_visitor_billing_interval_and_paused_flag',
+  },
+  {
+    up: migration_20260929_222646_page_hero_and_questurian_maps_dark_blocks.up,
+    down: migration_20260929_222646_page_hero_and_questurian_maps_dark_blocks.down,
+    name: '20260929_222646_page_hero_and_questurian_maps_dark_blocks',
   },
 ]

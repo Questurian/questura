@@ -11,6 +11,7 @@ import type {
   TourGridBlock,
   LocationGridBlock,
   NewsletterSignupBlock,
+  PageHeroBlock,
   ThingsToDoAttractionsBlock,
   HomepageBlockLayoutDefinition,
   HomepageBlockLayoutFallbackDefinition,
@@ -32,6 +33,8 @@ import { ThingsToDoAttractionsPreview } from "../components/blocks/things-to-do-
 import { TourGridPreview } from "../components/blocks/tour-grid/TourGridPreview";
 import { LocationGridPreview } from "../components/blocks/location-grid/LocationGridPreview";
 import { QuestUrianMapsPreview } from "../components/blocks/questurian-maps/QuestUrianMapsPreview";
+import { QuesturianMapsDarkPreview } from "../components/blocks/questurian-maps-dark/QuesturianMapsDarkPreview";
+import { PageHeroPreview } from "../components/blocks/page-hero/PageHeroPreview";
 import { ArticleListPreview } from "../components/blocks/article-list/ArticleListPreview";
 import { NewsletterSignupPreview } from "../components/blocks/newsletter-signup/NewsletterSignupPreview";
 import { EditorialFeaturePreview } from "../components/blocks/editorial-feature/EditorialFeaturePreview";
@@ -178,6 +181,14 @@ const homepageBlockFallbackLayouts: HomepageBlockLayoutFallbackDefinition[] = [
   defineHomepageBlockLayoutAnySlots<CityHomepageArticleBlock>({
     blockType: "questurian-maps",
     Component: QuestUrianMapsPreview,
+  }),
+  defineHomepageBlockLayoutAnySlots<CityHomepageArticleBlock>({
+    blockType: "questurian-maps-dark",
+    Component: QuesturianMapsDarkPreview,
+  }),
+  defineHomepageBlockLayoutAnySlots<PageHeroBlock>({
+    blockType: "page-hero",
+    Component: PageHeroPreview,
   }),
   defineHomepageBlockLayoutAnySlots<CityHomepageArticleBlock>({
     blockType: "article-list",

@@ -13,3 +13,4 @@ export const HOMEPAGE_TOUR_GRID_MIN_SLOTS = 4
 export const HOMEPAGE_TOUR_GRID_MAX_SLOTS = 20
 /** Questurian Maps: fixed six single-type listicle slots. */
 export const HOMEPAGE_QUESTURIAN_MAPS_SLOT_COUNT = 6
+export const HOMEPAGE_QUESTURIAN_MAPS_DARK_SLOT_COUNT = 6

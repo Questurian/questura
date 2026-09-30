@@ -25,6 +25,7 @@ import {
   HOMEPAGE_HOTEL_GRID_MIN_SLOTS,
   HOMEPAGE_TOUR_GRID_MAX_SLOTS,
   HOMEPAGE_TOUR_GRID_MIN_SLOTS,
+  HOMEPAGE_QUESTURIAN_MAPS_DARK_SLOT_COUNT,
   HOMEPAGE_QUESTURIAN_MAPS_SLOT_COUNT,
   HOMEPAGE_THINGS_TO_DO_ATTRACTIONS_MAX_SLOTS,
   HOMEPAGE_THINGS_TO_DO_ATTRACTIONS_MIN_SLOTS,
@@ -51,6 +52,7 @@ const SUPPORTED_BLOCK_TYPES = [
   'article-grid',
   'location-grid',
   'questurian-maps',
+  'questurian-maps-dark',
   'hotel-grid',
   'tour-grid',
   'where-to-eat-drink',
@@ -70,6 +72,10 @@ const BLOCK_SLOT_LIMITS: Record<SupportedBlockType, { min: number; max: number }
   'questurian-maps': {
     min: HOMEPAGE_QUESTURIAN_MAPS_SLOT_COUNT,
     max: HOMEPAGE_QUESTURIAN_MAPS_SLOT_COUNT,
+  },
+  'questurian-maps-dark': {
+    min: HOMEPAGE_QUESTURIAN_MAPS_DARK_SLOT_COUNT,
+    max: HOMEPAGE_QUESTURIAN_MAPS_DARK_SLOT_COUNT,
   },
   'hotel-grid': { min: HOMEPAGE_HOTEL_GRID_MIN_SLOTS, max: HOMEPAGE_HOTEL_GRID_MAX_SLOTS },
   'tour-grid': { min: HOMEPAGE_TOUR_GRID_MIN_SLOTS, max: HOMEPAGE_TOUR_GRID_MAX_SLOTS },
@@ -130,7 +136,7 @@ async function resolvePageBlocks(
               totalSlots: slotCount,
               scope: locationGridScope,
             })
-          : block.blockType === 'questurian-maps'
+          : block.blockType === 'questurian-maps' || block.blockType === 'questurian-maps-dark'
             ? await getQuesturianMapsSelectionFromItems(payload, block.items, {
                 totalSlots: slotCount,
               })
