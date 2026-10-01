@@ -8,10 +8,10 @@ import type { Access } from 'payload'
 
 /**
  * Standard read access for places
- * Anonymous users see published only, authenticated users see all
+ * Staff see all; anonymous readers use /api/public/* (see signed-in-read.ts)
  */
 export const placesReadAccess: Access = ({ req }) => {
-  if (!req.user) return { status: { equals: 'published' } }
+  if (!req.user) return false
   return Boolean(staffUser(req.user))
 }
 

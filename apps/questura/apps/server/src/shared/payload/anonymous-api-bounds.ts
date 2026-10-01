@@ -22,9 +22,10 @@ import { checkPublicReadRateLimit } from '@/shared/http/public-read-rate-limit'
  * and they use `limit` up to 200 and `depth` up to 2 today. The Local API
  * (`payloadAPI: 'local'`) is untouched.
  *
- * Whether these collections should be anonymously readable at all is a
- * separate access decision per collection; this only makes the current
- * access affordable.
+ * Since then the access decision was made: no collection or global is
+ * anonymously readable (`features/auth/lib/signed-in-read.ts`, guarded by
+ * `anonymous-read-access.test.ts`). These bounds stay as defence in depth, so
+ * a collection that is opened by mistake is still not a 271 MB response.
  */
 
 export const ANONYMOUS_MAX_LIMIT = 100

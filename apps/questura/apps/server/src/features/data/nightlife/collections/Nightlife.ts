@@ -20,7 +20,7 @@ export const Nightlife: CollectionConfig = {
   },
   access: {
     read: ({ req }) => {
-      if (!req.user) return { status: { equals: 'published' } }
+      if (!req.user) return false
       return (
         serviceAccountHasCollectionGrant(req.user, 'nightlife', 'read') ||
         Boolean(staffUser(req.user))

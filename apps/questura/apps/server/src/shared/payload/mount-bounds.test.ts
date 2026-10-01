@@ -409,6 +409,55 @@ describe('boundedRestRead', () => {
   })
 })
 
+// Payload's permission map listed every collection and field to anyone.
+describe('the permission map', () => {
+  it.each([
+    '/api/access',
+    '/api/access/',
+    '/api/access?locale=en',
+    '/api/media-assets/access',
+    '/api/media-assets/access/12',
+    '/api/globals/main-homepage/access',
+  ])('refuses %s to an anonymous caller, before Payload runs', async (path) => {
+    const handler = vi.fn(async () => new Response('{}'))
+    const res = await boundedRestRead(handler, opts)(request(`http://x${path}`), undefined)
+
+    expect(res.status).toBe(401)
+    expect(handler).not.toHaveBeenCalled()
+  })
+
+  it('refuses it to a credential that proved nobody', async () => {
+    const handler = vi.fn(async () => new Response('{}'))
+    const res = await boundedRestRead(handler, opts)(
+      request('http://x/api/access', { headers: { authorization: 'Bearer forged' } }),
+      undefined,
+    )
+
+    expect(res.status).toBe(401)
+    expect(handler).not.toHaveBeenCalled()
+  })
+
+  it.each([
+    ['staff', { authorization: 'Bearer staff-jwt' }],
+    ['the writer app (staff cookie)', { cookie: 'payload-token=staff-cookie' }],
+    ['Location Manager', { authorization: 'service-accounts API-Key good-key' }],
+  ])('still answers %s', async (_label, headers) => {
+    const handler = vi.fn(async () => new Response('{}'))
+    const res = await boundedRestRead(handler, opts)(request('http://x/api/access', { headers }), undefined)
+
+    expect(res.status).toBe(200)
+    expect(handler).toHaveBeenCalled()
+  })
+
+  it('leaves ordinary reads to collection access', async () => {
+    const handler = vi.fn(async () => new Response('{}'))
+    await boundedRestRead(handler, opts)(request('http://x/api/locations'), undefined)
+    await boundedRestRead(handler, opts)(request('http://x/api/users/me'), undefined)
+
+    expect(handler).toHaveBeenCalledTimes(2)
+  })
+})
+
 describe('authenticatedGraphQLOnly', () => {
   it('closes the mount to anonymous callers', async () => {
     const handler = vi.fn(async () => new Response('ok'))

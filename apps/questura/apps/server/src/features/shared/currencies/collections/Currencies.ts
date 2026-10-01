@@ -1,5 +1,6 @@
 import { staffUser } from '@/features/auth/lib/staff-user'
 import type { CollectionConfig } from 'payload'
+import { signedInRead } from '@/features/auth/lib/signed-in-read'
 
 const REGION_OPTIONS = [
   { label: 'North America', value: 'north-america' },
@@ -105,7 +106,7 @@ export const Currencies: CollectionConfig = {
     description: 'Reusable currency references for location money formatting and display.',
   },
   access: {
-    read: () => true,
+    read: signedInRead,
     create: ({ req }) => {
       const role = staffUser(req.user)?.role
       return role === 'editor' || role === 'admin'
