@@ -1,0 +1,5 @@
+# Found a security problem on questurian.com? Thank you. Please email us.
+Contact: mailto:hello@questurian.com
+Expires: 2027-09-30T00:00:00.000Z
+Preferred-Languages: en, es
+Canonical: https://www.questurian.com/.well-known/security.txt

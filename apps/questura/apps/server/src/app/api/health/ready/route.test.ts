@@ -1,4 +1,6 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+
+import type { NextRequest } from 'next/server'
 
 const { query } = vi.hoisted(() => ({ query: vi.fn() }))
 
@@ -11,6 +13,7 @@ vi.mock('@/features/refresh-outbox/lifecycle', () => ({
 }))
 
 const { GET } = await import('./route')
+const request = { headers: new Headers() } as NextRequest
 const { markDegraded, markNotReady, markReady, resetReadiness } = await import('@/shared/observability/readiness')
 const { PROBE_TIMEOUT_MS, resetHealthProbe } = await import('@/shared/observability/health-probe')
 
@@ -24,7 +27,7 @@ beforeEach(() => {
 describe('GET /api/health/ready', () => {
   it('refuses traffic until initialisation has succeeded, without asking the database', async () => {
     markNotReady('database unavailable')
-    const response = await GET()
+    const response = await GET(request)
 
     expect(response.status).toBe(503)
     await expect(response.json()).resolves.toMatchObject({ ready: false, reason: 'database unavailable', database: null })
@@ -33,7 +36,7 @@ describe('GET /api/health/ready', () => {
 
   it('accepts traffic once the process is ready and the database answers', async () => {
     markReady()
-    const response = await GET()
+    const response = await GET(request)
 
     expect(response.status).toBe(200)
     await expect(response.json()).resolves.toMatchObject({ ready: true, reason: null, database: { reachable: true } })
@@ -42,14 +45,14 @@ describe('GET /api/health/ready', () => {
   // Decision D3: launch:verify reads this and fails on anything but `off`.
   it('reports the load identity as off unless a load-test key is set', async () => {
     markReady()
-    await expect((await GET()).json()).resolves.toMatchObject({ loadIdentity: 'off' })
+    await expect((await GET(request)).json()).resolves.toMatchObject({ loadIdentity: 'off' })
 
     vi.stubEnv('LOAD_TEST_KEY', 'load-test-key-for-unit-tests-0123456789abcdef')
     vi.stubEnv('LOAD_TEST_UNTIL', new Date(Date.now() + 3_600_000).toISOString())
     try {
-      await expect((await GET()).json()).resolves.toMatchObject({ loadIdentity: 'on' })
+      await expect((await GET(request)).json()).resolves.toMatchObject({ loadIdentity: 'on' })
       vi.stubEnv('LOAD_TEST_UNTIL', new Date(Date.now() - 1_000).toISOString())
-      await expect((await GET()).json()).resolves.toMatchObject({ loadIdentity: 'expired' })
+      await expect((await GET(request)).json()).resolves.toMatchObject({ loadIdentity: 'expired' })
     } finally {
       vi.unstubAllEnvs()
     }
@@ -59,13 +62,13 @@ describe('GET /api/health/ready', () => {
   it('reports Redis degraded, not unready, while its breaker is open', async () => {
     const { redisBreaker } = await import('@/shared/lib/rate-limit-counter')
     markReady()
-    await expect((await GET()).json()).resolves.toMatchObject({ degraded: [], redis: { breaker: 'closed' } })
+    await expect((await GET(request)).json()).resolves.toMatchObject({ degraded: [], redis: { breaker: 'closed' } })
 
     try {
       for (let i = 0; i < 5; i += 1) {
         await redisBreaker.run(() => Promise.reject(new Error('ECONNREFUSED'))).catch(() => undefined)
       }
-      const response = await GET()
+      const response = await GET(request)
       expect(response.status).toBe(200)
       await expect(response.json()).resolves.toMatchObject({ ready: true, degraded: ['redis'], redis: { breaker: 'open' } })
     } finally {
@@ -75,7 +78,7 @@ describe('GET /api/health/ready', () => {
 
   it('asks the database the cheapest question there is, under its own short limit', async () => {
     markReady()
-    await GET()
+    await GET(request)
     expect(query).toHaveBeenCalledWith({ text: 'select 1', query_timeout: PROBE_TIMEOUT_MS })
   })
 
@@ -84,7 +87,7 @@ describe('GET /api/health/ready', () => {
   it('stops saying ready when the database does not answer', async () => {
     markReady()
     query.mockRejectedValue(new Error('Query read timeout'))
-    const response = await GET()
+    const response = await GET(request)
 
     expect(response.status).toBe(503)
     await expect(response.json()).resolves.toMatchObject({
@@ -100,7 +103,7 @@ describe('GET /api/health/ready', () => {
     try {
       markReady()
       query.mockReturnValue(new Promise(() => {}))
-      const pending = GET()
+      const pending = GET(request)
       await vi.advanceTimersByTimeAsync(PROBE_TIMEOUT_MS + 1)
       expect((await pending).status).toBe(503)
     } finally {
@@ -111,7 +114,7 @@ describe('GET /api/health/ready', () => {
   // Polled as hard as a platform likes, the database still sees one probe.
   it('does not query the database once per request', async () => {
     markReady()
-    await Promise.all([GET(), GET(), GET(), GET()])
+    await Promise.all([GET(request), GET(request), GET(request), GET(request)])
     expect(query).toHaveBeenCalledTimes(1)
   })
 
@@ -120,7 +123,7 @@ describe('GET /api/health/ready', () => {
   it('stays ready while reporting a degraded capability', async () => {
     markReady()
     markDegraded('redis')
-    const response = await GET()
+    const response = await GET(request)
 
     expect(response.status).toBe(200)
     await expect(response.json()).resolves.toMatchObject({ ready: true, degraded: ['redis'] })
@@ -128,11 +131,52 @@ describe('GET /api/health/ready', () => {
 
   it('reports the refresh worker, so a backlog can be told from a stopped worker', async () => {
     markReady()
-    await expect((await GET()).json()).resolves.toMatchObject({ refreshWorker: { runs: 3, claiming: true } })
+    await expect((await GET(request)).json()).resolves.toMatchObject({ refreshWorker: { runs: 3, claiming: true } })
   })
 
   it('is never stored', async () => {
     markReady()
-    expect((await GET()).headers.get('Cache-Control')).toBe('no-store')
+    expect((await GET(request)).headers.get('Cache-Control')).toBe('no-store')
+  })
+
+  describe('in production', () => {
+    beforeEach(() => {
+      vi.stubEnv('NODE_ENV', 'production')
+      vi.stubEnv('DB_STATS_SECRET', 'ops-secret')
+      vi.stubEnv('QUESTURA_RELEASE_SHA', 'abc123')
+    })
+    afterEach(() => {
+      vi.unstubAllEnvs()
+    })
+
+    // What the deploy workflow, the uptime check and launch:verify read.
+    it('answers the public with readiness, release, worker times and load identity only', async () => {
+      markReady()
+      markDegraded('redis')
+      const body = await (await GET(request)).json()
+
+      expect(body).toEqual({
+        ready: true,
+        reason: null,
+        readySince: expect.any(String),
+        releaseSha: 'abc123',
+        refreshWorker: { claiming: true, lastSuccessAt: '2026-09-22T00:00:00.000Z', lastFailureAt: undefined },
+        loadIdentity: 'off',
+      })
+    })
+
+    it('does not repeat a raw initialisation error to the public', async () => {
+      markNotReady('connect ECONNREFUSED db.internal:5432')
+      const response = await GET(request)
+
+      expect(response.status).toBe(503)
+      await expect(response.json()).resolves.toMatchObject({ ready: false, reason: 'initialisation failed' })
+    })
+
+    it('gives the full detail to a caller holding the ops secret', async () => {
+      markReady()
+      const authed = { headers: new Headers({ authorization: 'Bearer ops-secret' }) } as NextRequest
+      await expect((await GET(authed)).json()).resolves.toMatchObject({ refreshWorker: { runs: 3 }, redis: { breaker: 'closed' } })
+    })
   })
 })

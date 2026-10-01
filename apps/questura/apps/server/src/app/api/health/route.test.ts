@@ -85,4 +85,35 @@ describe('GET /api/health', () => {
     const response = await GET(request)
     expect(response.headers.get('Cache-Control')).toBe('no-store')
   })
+
+  describe('in production', () => {
+    beforeEach(() => {
+      vi.stubEnv('NODE_ENV', 'production')
+      vi.stubEnv('DB_STATS_SECRET', 'ops-secret')
+      vi.stubEnv('QUESTURA_RELEASE_SHA', 'abc123')
+    })
+
+    it('answers the public with status and release only', async () => {
+      const body = await (await GET(request)).json()
+      expect(body).toEqual({ status: 'healthy', ready: expect.any(Boolean), releaseSha: 'abc123' })
+    })
+
+    it('still fails closed for the public when the database is down', async () => {
+      query.mockRejectedValue(new Error('database unavailable'))
+      const response = await GET(request)
+
+      expect(response.status).toBe(503)
+      await expect(response.json()).resolves.toEqual({ status: 'unhealthy', ready: expect.any(Boolean), releaseSha: 'abc123' })
+    })
+
+    it('gives the full detail to a caller holding the ops secret', async () => {
+      const authed = { headers: new Headers({ 'x-stats-secret': 'ops-secret' }) } as NextRequest
+      await expect((await GET(authed)).json()).resolves.toMatchObject({ system: { nodeVersion: process.version } })
+    })
+
+    it('treats a wrong secret as public', async () => {
+      const wrong = { headers: new Headers({ authorization: 'Bearer nope' }) } as NextRequest
+      expect((await (await GET(wrong)).json()).system).toBeUndefined()
+    })
+  })
 })

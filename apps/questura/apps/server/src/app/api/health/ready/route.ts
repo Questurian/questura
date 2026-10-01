@@ -1,9 +1,10 @@
-import { NextResponse } from 'next/server'
+import { NextResponse, type NextRequest } from 'next/server'
 
 import { workerHealth } from '@/features/refresh-outbox/lifecycle'
 import { APP_CONFIG } from '@/shared/config'
 import { loadIdentityState } from '@/shared/http/load-identity'
 import { redisBreaker } from '@/shared/lib/rate-limit-counter'
+import { healthDetailAllowed } from '@/shared/observability/health-detail'
 import { sampledDatabaseProbe } from '@/shared/observability/health-probe'
 import { readinessState } from '@/shared/observability/readiness'
 import { releaseSha } from '@/shared/observability/release'
@@ -30,12 +31,25 @@ import { releaseSha } from '@/shared/observability/release'
  * there: public reads still work under local limits, so taking the instance
  * out of rotation would trade a degraded site for no site. A database that
  * does not answer is different: nothing this instance serves works without it.
+ *
+ * In production the public answer carries only what its readers need
+ * (`healthDetailAllowed`): readiness and a coarse reason for Railway and the
+ * uptime check, the release SHA for the deploy workflow, the refresh worker's
+ * last success and failure times for the uptime check, and `loadIdentity` for
+ * `launch:verify`. Timings, the Redis breaker, worker counters and raw error
+ * text need the ops secret.
  */
 
 export const dynamic = 'force-dynamic'
 const NO_STORE = { 'Cache-Control': 'no-store' }
 
-export async function GET() {
+/** Public reasons are fixed words; a raw initialisation error can name hosts. */
+function publicReason(reason: string | null): string | null {
+  if (reason === null) return null
+  return reason === 'initialising' || reason === 'database unreachable' ? reason : 'initialisation failed'
+}
+
+export async function GET(req: NextRequest) {
   const readiness = readinessState()
   const probe = readiness.ready ? await sampledDatabaseProbe() : null
   const ready = readiness.ready && probe?.ok === true
@@ -46,10 +60,31 @@ export async function GET() {
   const degraded =
     redisState === 'closed' || readiness.degraded.includes('redis') ? readiness.degraded : [...readiness.degraded, 'redis']
 
+  const reason = readiness.reason ?? (probe && !probe.ok ? 'database unreachable' : null)
+
+  if (!healthDetailAllowed(req)) {
+    const worker = workerHealth()
+    return NextResponse.json(
+      {
+        ready,
+        reason: publicReason(reason),
+        readySince: readiness.readySince,
+        releaseSha: releaseSha() || 'unknown',
+        refreshWorker: {
+          claiming: worker.claiming,
+          lastSuccessAt: worker.lastSuccessAt,
+          lastFailureAt: worker.lastFailureAt,
+        },
+        loadIdentity: loadIdentityState(),
+      },
+      { status: ready ? 200 : 503, headers: NO_STORE },
+    )
+  }
+
   return NextResponse.json(
     {
       ready,
-      reason: readiness.reason ?? (probe && !probe.ok ? 'database unreachable' : null),
+      reason,
       attempts: readiness.attempts,
       readySince: readiness.readySince,
       degraded,
