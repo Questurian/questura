@@ -22,7 +22,7 @@ export const InstagramPosts: CollectionConfig = {
   },
   access: {
     read: ({ req }) => {
-      if (!req.user) return { status: { equals: 'published' } }
+      if (!req.user) return false
       return (
         serviceAccountHasCollectionGrant(req.user, 'instagram-posts', 'read') ||
         Boolean(staffUser(req.user))

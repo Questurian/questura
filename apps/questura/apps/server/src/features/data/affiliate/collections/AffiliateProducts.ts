@@ -17,7 +17,7 @@ export const AffiliateProducts: CollectionConfig = {
   },
   access: {
     read: ({ req }) => {
-      if (!req.user) return { status: { equals: 'published' } }
+      if (!req.user) return false
       return (
         serviceAccountHasCollectionGrant(req.user, 'affiliate-products', 'read') ||
         Boolean(staffUser(req.user))

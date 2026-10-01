@@ -4,8 +4,10 @@ import type { CollectionConfig } from 'payload'
 
 export const mediaAssetAccess: CollectionConfig['access'] = {
   read: ({ req }) => {
-    // Public access required for website to display images
-    if (!req.user) return true
+    // No anonymous reads. Images are served from the CDN by URL
+    // (`disablePayloadAccessControl` in payload.config.ts), and pages get
+    // their media through /api/public/* -- see signed-in-read.ts.
+    if (!req.user) return false
 
     // Admins, Editors, and Writers can see everything
     const role = staffUser(req.user)?.role

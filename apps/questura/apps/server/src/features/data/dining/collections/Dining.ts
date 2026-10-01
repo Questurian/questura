@@ -49,7 +49,7 @@ export const Dining: CollectionConfig = {
   },
   access: {
     read: ({ req }) => {
-      if (!req.user) return { status: { equals: 'published' } }
+      if (!req.user) return false
       return (
         serviceAccountHasCollectionGrant(req.user, 'dining', 'read') ||
         Boolean(staffUser(req.user))

@@ -15,6 +15,7 @@ import {
   revalidateLocationAfterDelete,
 } from '@/features/public-revalidation/revalidate-client'
 import { locationFields } from './fields'
+import { signedInRead } from '@/features/auth/lib/signed-in-read'
 
 export const Locations: CollectionConfig = {
   slug: 'locations',
@@ -30,7 +31,7 @@ export const Locations: CollectionConfig = {
   },
 
   access: {
-    read: () => true,
+    read: signedInRead,
     create: ({ req }) =>
       serviceAccountHasCollectionGrant(req.user, 'locations', 'create') ||
       staffUser(req.user)?.role === 'admin',

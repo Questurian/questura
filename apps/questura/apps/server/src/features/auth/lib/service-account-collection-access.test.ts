@@ -71,7 +71,7 @@ describe('Location Manager collection access', () => {
 
     for (const [collection, operations] of allowed) {
       for (const operation of operations) {
-        // Locations is public by design; only its create grant is private.
+        // Any signed-in caller may read Locations; only its create grant is private.
         if (collection === Locations && operation === 'read') continue
 
         await expect(

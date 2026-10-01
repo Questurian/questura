@@ -5,13 +5,9 @@ import { findAuthorIdForUser } from '@/features/authors/lib/author-for-user'
 
 export const singleTypeListicleAccess: CollectionConfig['access'] = {
   read: ({ req }) => {
-    if (!req.user) {
-      return {
-        status: {
-          equals: 'published',
-        },
-      }
-    }
+    // No anonymous reads: readers get /maps/[slug] through /api/public/*
+    // (see signed-in-read.ts).
+    if (!req.user) return false
 
     if (
       staffUser(req.user)?.role === 'admin'

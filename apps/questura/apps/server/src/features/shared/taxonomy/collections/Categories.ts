@@ -7,6 +7,7 @@ import { staffUser } from '@/features/auth/lib/staff-user'
 import { CollectionConfig } from 'payload'
 import { validateSlugAgainstReserved, RESERVED_SLUGS } from '@/shared/lib/reservedSlugs'
 import { validateCategorySlugAgainstLocations } from '@/shared/lib/categoryLocationCollision'
+import { signedInRead } from '@/features/auth/lib/signed-in-read'
 
 export const Categories: CollectionConfig = {
   slug: 'article-categories',
@@ -21,7 +22,7 @@ export const Categories: CollectionConfig = {
     description: 'Main categories for organizing articles',
   },
   access: {
-    read: () => true, // Public read access
+    read: signedInRead,
     create: ({ req }) => {
       const role = staffUser(req.user)?.role
       return role === 'editor' || role === 'admin'

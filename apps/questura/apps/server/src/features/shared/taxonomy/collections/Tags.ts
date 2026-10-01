@@ -5,6 +5,7 @@
 
 import { staffUser } from '@/features/auth/lib/staff-user'
 import { CollectionConfig } from 'payload'
+import { signedInRead } from '@/features/auth/lib/signed-in-read'
 
 export const Tags: CollectionConfig = {
   slug: 'article-tags',
@@ -19,7 +20,7 @@ export const Tags: CollectionConfig = {
     description: 'Tags for detailed article classification (travel themes, topics, etc.)',
   },
   access: {
-    read: () => true, // Public read access
+    read: signedInRead,
     create: ({ req }) => {
       const role = staffUser(req.user)?.role
       return role === 'editor' || role === 'admin'

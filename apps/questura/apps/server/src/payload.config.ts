@@ -136,8 +136,10 @@ export default buildConfig({
            * redirect at app/api/media-assets/file/[filename] covers cached HTML
            * that still asks for it.
            *
-           * Nothing is lost by bypassing Payload's access control here:
-           * `mediaAssetAccess.read` already opens with `if (!req.user) return true`.
+           * Bypassing Payload's access control here is deliberate: a photo's
+           * file is public by URL, like any image on the site. Its record
+           * (storage key, uploader, original URL) is not -- `mediaAssetAccess.read`
+           * refuses anonymous callers on the REST mount.
            */
           disablePayloadAccessControl: true,
           // Readiness sandbox only: its fixture media server stands in for

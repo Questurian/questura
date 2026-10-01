@@ -5,6 +5,7 @@
 
 import { staffUser } from '@/features/auth/lib/staff-user'
 import { CollectionConfig } from 'payload'
+import { signedInRead } from '@/features/auth/lib/signed-in-read'
 
 export const attractionTypeOptions = [
   { label: 'Museum', value: 'museum' },
@@ -64,7 +65,7 @@ export const AttractionDetails: CollectionConfig = {
     hidden: true, // Hide from main nav - managed via Places
   },
   access: {
-    read: () => true,
+    read: signedInRead,
     create: ({ req }) => {
       const role = staffUser(req.user)?.role
       return role === 'editor' || role === 'admin'

@@ -412,12 +412,19 @@ async function main(): Promise<void> {
         record('credentials', `${credential.label}: GraphQL reaches Payload`, graphql.status === 200, `HTTP ${graphql.status}`)
         record('credentials', `${credential.label}: runs in the finite staff gate`, moved('staff') >= 3, `staff gate +${moved('staff')}`)
       } else {
-        record('credentials', `${credential.label}: REST read clamped to 100`, collection.status === 200 && collectionBody?.limit === 100 && (collectionBody?.docs?.length ?? 0) <= 100, `HTTP ${collection.status}, limit ${collectionBody?.limit}`)
+        // No raw collection is anonymously readable (signed-in-read.ts); the
+        // clamp stays as defence in depth behind that refusal.
+        record('credentials', `${credential.label}: REST read refused`, collection.status === 403, `HTTP ${collection.status}`)
         record('credentials', `${credential.label}: disguised POST read refused`, override.status === 401, `HTTP ${override.status}`)
         record('credentials', `${credential.label}: GraphQL refused before it runs`, graphql.status === 401, `HTTP ${graphql.status}`)
         record('credentials', `${credential.label}: never enters the staff gate`, moved('staff') === 0, `staff gate +${moved('staff')}`)
       }
-      record('credentials', `${credential.label}: global answers`, global.status === 200, `HTTP ${global.status}`)
+      record(
+        'credentials',
+        `${credential.label}: global ${credential.verified ? 'answers' : 'refused'}`,
+        credential.verified ? global.status === 200 : global.status === 403,
+        `HTTP ${global.status}`,
+      )
       const presented = Object.keys(credential.headers).some((name) => name === 'authorization') || /payload-token=/.test(credential.headers.cookie ?? '')
       record(
         'credentials',

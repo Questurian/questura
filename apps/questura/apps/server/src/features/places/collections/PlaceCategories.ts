@@ -5,6 +5,7 @@
 
 import { staffUser } from '@/features/auth/lib/staff-user'
 import { CollectionConfig } from 'payload'
+import { signedInRead } from '@/features/auth/lib/signed-in-read'
 
 export const PlaceCategories: CollectionConfig = {
   slug: 'place-categories',
@@ -15,7 +16,7 @@ export const PlaceCategories: CollectionConfig = {
     group: 'Tags',
   },
   access: {
-    read: () => true,
+    read: signedInRead,
     create: ({ req }) => staffUser(req.user)?.role === 'admin',
     update: ({ req }) => staffUser(req.user)?.role === 'admin',
     delete: ({ req }) => staffUser(req.user)?.role === 'admin',
