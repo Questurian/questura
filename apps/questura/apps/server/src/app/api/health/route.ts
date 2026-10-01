@@ -13,9 +13,13 @@
  *
  * `/api/health/ready` shares the same sampled probe, so polling both costs
  * the database no more than polling one.
+ *
+ * In production the public answer is only the status and the release SHA;
+ * the rest needs the ops secret (`healthDetailAllowed`).
  */
 
 import { NextRequest, NextResponse } from 'next/server'
+import { healthDetailAllowed } from '@/shared/observability/health-detail'
 import { sampledDatabaseProbe } from '@/shared/observability/health-probe'
 import { readinessState } from '@/shared/observability/readiness'
 import { releaseSha } from '@/shared/observability/release'
@@ -25,6 +29,18 @@ export async function GET(req: NextRequest) {
   const corsHeaders = getCorsHeaders(req)
   const probe = await sampledDatabaseProbe()
   const readiness = readinessState()
+  const headers = { ...corsHeaders, 'Cache-Control': 'no-store' }
+
+  if (!healthDetailAllowed(req)) {
+    return NextResponse.json(
+      {
+        status: probe.ok ? 'healthy' : 'unhealthy',
+        ready: readiness.ready,
+        releaseSha: releaseSha() || 'unknown',
+      },
+      { status: probe.ok ? 200 : 503, headers },
+    )
+  }
 
   if (probe.ok) {
     const responseTime = probe.responseTimeMs
@@ -51,7 +67,7 @@ export async function GET(req: NextRequest) {
           total: `${Math.round(process.memoryUsage().heapTotal / 1024 / 1024)}MB`,
         },
       },
-    }, { headers: { ...corsHeaders, 'Cache-Control': 'no-store' } })
+    }, { headers })
   }
 
   return NextResponse.json(
@@ -68,7 +84,7 @@ export async function GET(req: NextRequest) {
         responseTime: `${probe.responseTimeMs}ms`,
       },
     },
-    { status: 503, headers: { ...corsHeaders, 'Cache-Control': 'no-store' } }
+    { status: 503, headers }
   )
 }
 

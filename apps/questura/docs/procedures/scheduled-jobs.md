@@ -92,6 +92,13 @@ runs schedules best-effort: on 2026-09-26 the runs were hours apart, so it is
 the backup, not the alarm. It still covers what the Sentry monitor does not:
 the refresh worker and the website page.
 
+**Health detail.** Since 2026-10-01 the public `/api/health` and
+`/api/health/ready` say only what monitors need: readiness, a fixed-word
+reason, the release SHA, the refresh worker's last success and failure times,
+and the load-test state. Timings, memory, Node version, the Redis breaker,
+worker counters and raw errors need the ops secret the internal routes use:
+`curl -H "Authorization: Bearer $DB_STATS_SECRET" https://api.questurian.com/api/health/ready`.
+
 **Exchange-rate sync.** GitHub → Actions → *Questura exchange-rate sync*. The
 log is one line, `exchange-rate sync: HTTP 200`. The data check: the newest
 `latest_usd_rate_fetched_at` in `currencies` is less than a day old.

@@ -8,6 +8,8 @@ import { SECURITY_HEADERS } from "./src/lib/http/securityHeaders";
 const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
 
 const nextConfig: NextConfig = {
+  // No `X-Powered-By: Next.js`: it tells a scanner what to try (2026-10-01 audit).
+  poweredByHeader: false,
   // Lets a production build for measurement live beside a running `pnpm dev`
   // without clobbering its `.next` (apps/questura/docs/capacity/README.md).
   distDir: process.env.NEXT_DIST_DIR || ".next",
