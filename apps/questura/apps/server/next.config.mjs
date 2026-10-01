@@ -16,6 +16,10 @@ const SECURITY_HEADERS = [
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // No `X-Powered-By: Next.js, Payload`: it tells a scanner what to try
+  // (2026-10-01 audit). `withPayload` adds that header only when this is not
+  // false, and Next's own is off either way.
+  poweredByHeader: false,
   async headers() {
     return [{ source: '/:path*', headers: SECURITY_HEADERS }]
   },

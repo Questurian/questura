@@ -32,7 +32,13 @@ describe('server security headers', () => {
     expect(rules.filter((rule) => !rule.source.startsWith('/admin')).flatMap(hintKeys)).toEqual([])
     const admin = rules.filter((rule) => rule.source === '/admin/:path*').flatMap(hintKeys)
     expect(admin).toEqual(expect.arrayContaining(['accept-ch', 'critical-ch']))
-    // What it still sends everywhere is untouched.
-    expect(rules.some((rule) => rule.source === '/:path*' && rule.headers.some(({ key }) => key === 'X-Powered-By'))).toBe(true)
+  })
+
+  // 2026-10-01 audit: the stack is nobody's business.
+  it('does not advertise Next.js or Payload', async () => {
+    type Rule = { source: string; headers: Array<{ key: string; value: string }> }
+    const rules = (await nextConfig.headers!()) as Rule[]
+    expect(rules.flatMap((rule) => rule.headers).some(({ key }) => key.toLowerCase() === 'x-powered-by')).toBe(false)
+    expect(nextConfig.poweredByHeader).toBe(false)
   })
 })
