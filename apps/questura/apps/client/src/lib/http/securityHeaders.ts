@@ -26,16 +26,21 @@
  * - connections: our own origin, the API, Google Maps, Endorsely, Instagram.
  * - images: any https host. Article photos come from the Bunny CDN, but
  *   editors can paste images from elsewhere, and an image cannot run code.
+ *   A build whose API is plain http (localhost, the readiness sandbox) also
+ *   serves its photos over plain http, so it allows `http:` images too;
+ *   otherwise every photo there is a console line. Live's API is https, so
+ *   live's policy is unchanged.
  * - frames: Instagram embeds and Google Maps.
  * - no plugins (`object-src 'none'`), no `<base>` from elsewhere, forms only
  *   post to this site.
  */
 export function reportOnlyContentSecurityPolicy(apiOrigin: string): string {
+  const imageSources = apiOrigin.startsWith("http:") ? "https: http:" : "https:";
   return [
     "default-src 'self'",
     "script-src 'self' 'unsafe-inline' https://assets.endorsely.com https://www.instagram.com https://maps.googleapis.com https://*.gstatic.com",
     `connect-src 'self' ${apiOrigin} https://*.googleapis.com https://*.gstatic.com https://*.endorsely.com https://www.instagram.com`,
-    "img-src 'self' data: blob: https:",
+    `img-src 'self' data: blob: ${imageSources}`,
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "font-src 'self' data: https://fonts.gstatic.com",
     "frame-src https://www.instagram.com https://www.google.com",

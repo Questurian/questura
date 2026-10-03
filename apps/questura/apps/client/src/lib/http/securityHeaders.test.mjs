@@ -36,3 +36,11 @@ test('the report-only policy lets the site reach its API and embeds', () => {
   assert.match(directive('script-src'), /https:\/\/www\.instagram\.com/)
   assert.match(directive('frame-src'), /https:\/\/www\.instagram\.com/)
 })
+
+// The readiness sandbox and localhost serve photos over plain http. Live must
+// still allow https images only.
+test('only a plain-http build allows plain-http images', () => {
+  const imgSrc = (api) => reportOnlyContentSecurityPolicy(api).split('; ').find((part) => part.startsWith('img-src '))
+  assert.equal(imgSrc('https://api.questurian.com'), "img-src 'self' data: blob: https:")
+  assert.equal(imgSrc('http://api.readiness.localhost:4100'), "img-src 'self' data: blob: https: http:")
+})
