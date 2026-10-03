@@ -115,6 +115,20 @@ function warnIfMigrationsPending() {
   console.log('    Fix:                pnpm db:migrate   (read AGENTS.md migration rules first)')
 }
 
+// Keeps local content in step with live: copies it again when the last copy
+// is over 6 h old (scripts/db-refresh/refresh.ts). Never blocks start-up; a
+// failure prints a line and the server starts on the content it had.
+function refreshLocalContentIfOld() {
+  if (process.env.NODE_ENV === 'production') return
+  const tsx = path.resolve(process.cwd(), 'node_modules/.bin/tsx')
+  const result = spawnSync(tsx, ['scripts/db-refresh/refresh.ts', '--auto'], {
+    stdio: 'inherit',
+    env: process.env,
+    timeout: 5 * 60 * 1000,
+  })
+  if (result.error) console.log(`    ⚠️  Local content refresh did not run: ${result.error.message}`)
+}
+
 async function printStartupInfo() {
   loadEnvFiles()
 
@@ -151,6 +165,7 @@ async function printStartupInfo() {
     if (databaseReachability?.status === 'reachable') {
       console.log('    Reachability:       Postgres socket reachable')
       warnIfMigrationsPending()
+      refreshLocalContentIfOld()
     } else {
       const failureReason = databaseReachability?.error || 'Unknown connection failure'
       console.log('    Reachability:       Postgres not reachable')
@@ -179,6 +194,9 @@ async function printStartupInfo() {
   console.log('                          Create a new Payload schema migration')
   console.log('    pnpm db:migrate:status')
   console.log('                          Show applied/pending Payload migrations')
+  console.log('    pnpm db:refresh       Copy live content to this Mac now (never readers,')
+  console.log('                          members or logins). pnpm dev does it every 6 h.')
+  console.log('    pnpm db:refresh:setup One-time: make the read-only live login it uses')
   console.log('    pnpm clear:payload:except-users')
   console.log('                      Preserves users and currencies')
   console.log('    pnpm clear:test       Clear test collections (preserves users)')
