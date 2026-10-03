@@ -2,7 +2,8 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 
 import { checkArticleStructuredData } from '../../../lib/seo/structuredDataCheck.mjs'
-import { PAYWALL_CLASS, buildArticleJsonLd } from './articleJsonLd.ts'
+import { buildArticleJsonLd } from './articleJsonLd.ts'
+import { PAYWALL_CLASS } from './gate.ts'
 
 const BASE = 'https://www.questurian.com'
 const PATH = '/peru/lima/guides/when-to-visit-lima'

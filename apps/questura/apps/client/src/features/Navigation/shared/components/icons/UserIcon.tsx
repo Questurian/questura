@@ -2,7 +2,6 @@
 
 import { User, ChevronDown } from "lucide-react";
 import { useUserModalStore } from "@/lib/stores/userModalStore";
-import GlobeMark from "./GlobeMark";
 
 interface UserIconProps {
   buttonClassName?: string;
@@ -25,7 +24,12 @@ export default function UserIcon({ buttonClassName = "", isMember = false }: Use
             // Dark behind the globe so its anti-aliased edge never shows a light hairline.
             style={{ background: '#04101E', boxShadow: '0 0 0 1px rgba(172,128,32,0.8)' }}
           >
-            <GlobeMark className="block h-full w-full" />
+            {/* A static file, not inline SVG: its path data is ~5 kB gzip, which would
+                otherwise ride in every page's JS for every visitor; as a file only
+                members fetch it, once. Regenerate it in the navbar lab
+                (scripts/render-globe-mark.mjs), don't hand-edit it. */}
+            {/* eslint-disable-next-line @next/next/no-img-element -- static local SVG; next/image adds no value and would route it through the optimizer. */}
+            <img src="/images/globe-mark.svg" alt="" aria-hidden width={28} height={28} className="block h-full w-full" />
             <span
               aria-hidden
               className="absolute -right-[2px] -top-[2px] text-[5px] leading-none 480:-right-[3px] 480:-top-[3px] 480:text-[6px]"

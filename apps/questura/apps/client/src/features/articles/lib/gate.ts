@@ -4,6 +4,14 @@
  * Always present on an article payload, on free items too, so the client never
  * has to infer "locked" from an absent key.
  */
+/**
+ * Marks the element standing in for the withheld content; the paywall JSON-LD
+ * points at it with `cssSelector` (ADR-0009). It lives here, not beside the
+ * JSON-LD builder, because `PaywallNotice` is browser code: importing it from
+ * `articleJsonLd.ts` shipped that whole builder to every article page.
+ */
+export const PAYWALL_CLASS = 'paywalled'
+
 export type GateState = {
   access: 'free' | 'member'
   locked: boolean
