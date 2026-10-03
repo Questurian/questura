@@ -20,9 +20,38 @@ and cross-subdomain cookies are checked on the live site.
 | Google OAuth redirects | Live site |
 | Staff/visitor cookies across subdomains | Live site |
 
-Local Postgres (`google-login` @5432) is an old copy. Never edit it expecting
-the site to change; content is edited on the live API. The live DB is Neon.
-Local never answers “what does live Stripe do?”
+Local Postgres (`google-login` @5432) holds a **copy of live's content**,
+refreshed by `pnpm dev` (below). Never edit it expecting the site to change;
+content is edited on the live API (the studio writes there). The live DB is
+Neon. Local never answers “what does live Stripe do?”
+
+### Local content comes from live
+
+`pnpm dev` copies live's content to the Mac when the last copy is over 6 hours
+old; the start-up banner says how old it is. `pnpm --dir apps/server
+db:refresh` copies it now (restart `pnpm dev` afterwards so pages drop what
+they cached). `QUESTURA_DB_REFRESH=off pnpm dev` skips it.
+
+- **Copied:** articles, locations, pages and their blocks, photos, listicles,
+  authors, currencies: the CONTENT list in
+  `apps/server/scripts/db-refresh/tables.ts`. Local rows in those tables are
+  replaced, so local content edits do not survive a refresh.
+- **Never copied or touched:** staff logins, readers, members, payments, email
+  (the PRIVATE list). Local test accounts and `dev:member` states survive.
+  Content that links to a live staff user loses that link locally.
+- **Cannot touch live:** it reads through `questura_local_refresh`, a login
+  that can only `SELECT` the content tables, and it refuses to write to any
+  database that is not on this Mac. The load is one transaction; a failure
+  leaves the old content in place.
+- **One-time setup:** `pnpm --dir apps/server db:refresh:setup` makes that
+  login on Neon (using the owner URL in `~/.questura-vault/generated.env`),
+  proves from it that staff, reader and member tables are refused, and saves
+  its URL to `~/.questura-vault/local-refresh.env`. Run it again after adding
+  a content table; `db:refresh` says when.
+- It refuses when live has a migration the Mac lacks: pull `main`, run
+  `pnpm db:migrate`, try again.
+- A new table must go in one of the two lists (`tables.test.ts` fails
+  otherwise). If people or payments live in it, it is PRIVATE.
 
 ## Local loop
 
