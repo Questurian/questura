@@ -15,7 +15,7 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "turbo": "^2.7.3"
+    "turbo": "^2.9.14"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
