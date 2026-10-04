@@ -1,8 +1,7 @@
 import Link from '@/components/navigation/PublicLink'
 import { Lock } from 'lucide-react'
 
-import { PAYWALL_CLASS } from '@/features/articles/lib/articleJsonLd'
-import { describeLock, type GateState } from '@/features/articles/lib/gate'
+import { PAYWALL_CLASS, describeLock, type GateState } from '@/features/articles/lib/gate'
 
 type PaywallNoticeProps = {
   gate: GateState

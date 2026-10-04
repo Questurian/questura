@@ -11,6 +11,7 @@ import {
 } from './location-grid/service'
 import { normalizePageBlocksArrayInPlace } from './resolve-page-blocks/operations/normalize-page-blocks'
 import { withSourceBlockKey } from './resolve-page-blocks/lib/source-block-key-field'
+import { signedInRead } from '@/features/auth/lib/signed-in-read'
 
 export const LocationHomepages: CollectionConfig = {
   slug: 'location-homepages',
@@ -25,7 +26,7 @@ export const LocationHomepages: CollectionConfig = {
     defaultColumns: ['location', 'isEnabled', 'updatedAt'],
   },
   access: {
-    read: () => true,
+    read: signedInRead,
     create: ({ req }) => {
       const role = staffUser(req.user)?.role
       return role === 'admin' || role === 'editor'

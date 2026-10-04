@@ -15,7 +15,7 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "turbo": "^2.7.3"
+    "turbo": "^2.9.14"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
@@ -55,7 +55,8 @@
       "postcss@>=8.0.0 <8.5.23": "^8.5.23",
       "rollup@>=4.0.0 <4.59.0": "^4.59.0",
       "ws@>=8.0.0 <8.21.0": "^8.21.0",
-      "qs@>=6.0.0 <6.16.0": "^6.16.0"
+      "qs@>=6.0.0 <6.16.0": "^6.16.0",
+      "undici@>=7.0.0 <7.29.1": "^7.29.1"
     },
     "patchedDependencies": {
       "@opennextjs/cloudflare@1.18.1": "patches/@opennextjs__cloudflare@1.18.1.patch"

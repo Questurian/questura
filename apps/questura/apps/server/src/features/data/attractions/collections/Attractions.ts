@@ -24,9 +24,7 @@ export const Attractions: CollectionConfig = {
   },
   access: {
     read: ({ req }) => {
-      if (!req.user) {
-        return { status: { equals: 'published' } }
-      }
+      if (!req.user) return false
       return (
         serviceAccountHasCollectionGrant(req.user, 'attractions', 'read') ||
         Boolean(staffUser(req.user))

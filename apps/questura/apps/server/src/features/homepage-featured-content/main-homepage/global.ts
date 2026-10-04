@@ -1,5 +1,6 @@
 import { staffUser } from '@/features/auth/lib/staff-user'
 import type { GlobalConfig } from 'payload'
+import { signedInRead } from '@/features/auth/lib/signed-in-read'
 
 export const MainHomepage: GlobalConfig = {
   slug: 'main-homepage',
@@ -9,7 +10,7 @@ export const MainHomepage: GlobalConfig = {
     description: 'Singleton curated homepage for the main domain homepage.',
   },
   access: {
-    read: () => true,
+    read: signedInRead,
     update: ({ req }) => {
       const role = staffUser(req.user)?.role
       return role === 'admin' || role === 'editor'

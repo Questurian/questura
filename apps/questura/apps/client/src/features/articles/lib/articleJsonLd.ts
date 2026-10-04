@@ -16,8 +16,7 @@
  * Pure (the base URL is passed in), so node:test covers it.
  */
 
-/** Marks the element standing in for the withheld content (ADR-0009). */
-export const PAYWALL_CLASS = 'paywalled'
+import { PAYWALL_CLASS } from './gate.ts'
 
 type MediaVariant = { url?: string | null } | null | undefined
 

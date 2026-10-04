@@ -4,6 +4,7 @@ import {
   revalidateArticleRedirectAfterChange,
   revalidateArticleRedirectAfterDelete,
 } from '@/features/public-revalidation/revalidate-client'
+import { signedInRead } from '@/features/auth/lib/signed-in-read'
 
 export const ArticleRedirects: CollectionConfig = {
   slug: 'article-redirects',
@@ -19,7 +20,7 @@ export const ArticleRedirects: CollectionConfig = {
       'Permanent redirects auto-generated when a published article changes its country, city, category, or slug.',
   },
   access: {
-    read: () => true,
+    read: signedInRead,
     create: ({ req }) => {
       const role = staffUser(req.user)?.role
       return role === 'admin' || role === 'editor'

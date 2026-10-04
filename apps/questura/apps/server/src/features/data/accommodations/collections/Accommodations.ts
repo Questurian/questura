@@ -24,14 +24,8 @@ export const Accommodations: CollectionConfig = {
   },
   access: {
     read: ({ req }) => {
-      // Public can only read published accommodations
-      if (!req.user) {
-        return {
-          status: {
-            equals: 'published',
-          },
-        }
-      }
+      // Anonymous readers use /api/public/*; see signed-in-read.ts.
+      if (!req.user) return false
       // Human staff and explicitly granted machines can read all.
       return (
         serviceAccountHasCollectionGrant(req.user, 'accommodations', 'read') ||

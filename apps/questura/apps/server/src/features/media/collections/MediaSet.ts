@@ -61,7 +61,7 @@ export const MediaSet: CollectionConfig = {
   },
   access: {
     read: ({ req }) => {
-      if (!req.user) return true
+      if (!req.user) return false
       if (
         serviceAccountHasCollectionGrant(req.user, 'media-sets', 'read') ||
         staffUser(req.user)?.role === 'admin' ||

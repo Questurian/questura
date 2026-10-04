@@ -32,6 +32,8 @@ export default defineConfig({
       'scripts/env-check/**/*.test.ts',
       // The launch-day runner, against a fake server (launch harness A9).
       'scripts/launch-verify/**/*.test.ts',
+      // Which tables the live-to-Mac content copy takes, and its SQL.
+      'scripts/db-refresh/**/*.test.ts',
     ],
   },
 })

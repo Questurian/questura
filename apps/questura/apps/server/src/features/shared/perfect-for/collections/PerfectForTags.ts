@@ -6,6 +6,7 @@
 
 import { staffUser } from '@/features/auth/lib/staff-user'
 import { CollectionConfig } from 'payload'
+import { signedInRead } from '@/features/auth/lib/signed-in-read'
 
 export const PerfectForTags: CollectionConfig = {
   slug: 'perfect-for-tags',
@@ -20,7 +21,7 @@ export const PerfectForTags: CollectionConfig = {
     description: 'Tags for categorizing venues by use case (e.g., "First Date", "Big Groups")',
   },
   access: {
-    read: () => true, // Public read access
+    read: signedInRead,
     create: ({ req }) => {
       const role = staffUser(req.user)?.role
       return role === 'editor' || role === 'admin'

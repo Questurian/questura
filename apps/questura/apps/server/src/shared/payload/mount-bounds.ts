@@ -174,6 +174,28 @@ export function clampMountQuery(url: URL): URL {
 
 type Handler = (req: NextRequest, context: unknown) => Promise<Response> | Response
 
+/**
+ * `GET /api/access` is Payload's permission map: every collection, global and
+ * field, and what the caller may do with each; `/api/{collection}/access/{id}`
+ * and `/api/globals/{slug}/access` are the same map for one entity. Signed in,
+ * it is how the admin, the writer app and Location Manager learn what they may
+ * do. Signed out it granted nothing -- it listed the whole schema, field by
+ * field, to anyone who asked. Nothing anonymous uses it (the admin's sign-in page does not), so a
+ * caller who proved nobody is refused before Payload builds it.
+ */
+const ACCESS_MAP_PATH = /^\/api\/(?:access|globals\/[^/]+\/access|(?!globals\/)[^/]+\/access(?:\/[^/]+)?)$/
+
+export function isAccessMap(url: URL): boolean {
+  return ACCESS_MAP_PATH.test(url.pathname.replace(/\/+$/, ''))
+}
+
+function accessMapRefusal(): Response {
+  return NextResponse.json(
+    { message: 'Sign in to read permissions.' },
+    { status: 401, headers: { 'Cache-Control': 'no-store' } },
+  )
+}
+
 export type MountBoundsOptions = { resolveIdentity?: ResolveMountIdentity }
 
 function refusal(error: unknown): Response | null {
@@ -222,7 +244,8 @@ async function verifiedCaller(
  *     resolved user in.
  *  4. Everyone else — no credential, or one that proved nobody — is one
  *     anonymous policy: per-IP limit, URL clamp, credential removed, and the
- *     `query` gate held until the handler has finished.
+ *     `query` gate held until the handler has finished. Payload's permission
+ *     map (`isAccessMap`) is refused to them outright.
  *
  * Only GET. The mount also serves sign-in and other writes, which have their
  * own limits and must not be refused by a gate meant for reads.
@@ -242,6 +265,8 @@ export function boundedRestRead(handler: Handler, options: MountBoundsOptions = 
           if (caller === 'staff' || caller === 'service') {
             return admitPublicWork('staff', async () => handler(req, context), signal)
           }
+
+          if (isAccessMap(new URL(req.url))) return accessMapRefusal()
 
           const limit = await checkPublicReadRateLimit(req.headers, 'payloadApi')
           if (!limit.allowed) return publicReadRateLimitResponse(limit.retryAfterSeconds)
