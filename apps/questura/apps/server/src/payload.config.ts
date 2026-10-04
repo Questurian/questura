@@ -20,6 +20,7 @@ import { Accommodations } from './features/data/accommodations/collections/Accom
 import { Dining } from './features/data/dining/collections/Dining'
 import { Attractions } from './features/data/attractions/collections/Attractions'
 import { Tours } from './features/data/tours/collections/Tours'
+import { Airbnbs } from './features/data/airbnbs/collections/Airbnbs'
 import { Nightlife } from './features/data/nightlife/collections/Nightlife'
 import { KeyLocations } from './features/data/key-locations/collections/KeyLocations'
 import { AffiliateProducts } from './features/data/affiliate/collections/AffiliateProducts'
@@ -58,7 +59,7 @@ export default buildConfig({
   serverURL: APP_URLS.backendLocal,
   cors: APP_CONFIG.CORS_ORIGINS,
   csrf: APP_CONFIG.CORS_ORIGINS,
-  collections: [Users, ServiceAccounts, Authors, EmailLogs, VisitorProfiles, Bookmarks, MediaAsset, MediaSet, Articles, SingleTypeListicles, ListicleItineraries, ArticleRedirects, Locations, Categories, Tags, Accommodations, Dining, Attractions, Tours, Nightlife, KeyLocations, AffiliateProducts, InstagramPosts, PerfectForTags, Currencies, LocationHomepages, StripeWebhookEvents, RefreshJobs],
+  collections: [Users, ServiceAccounts, Authors, EmailLogs, VisitorProfiles, Bookmarks, MediaAsset, MediaSet, Articles, SingleTypeListicles, ListicleItineraries, ArticleRedirects, Locations, Categories, Tags, Accommodations, Dining, Attractions, Tours, Airbnbs, Nightlife, KeyLocations, AffiliateProducts, InstagramPosts, PerfectForTags, Currencies, LocationHomepages, StripeWebhookEvents, RefreshJobs],
   globals: [MainHomepage],
   // Payload answers its own errors, so a 500 from its REST or GraphQL
   // handlers would otherwise reach the logs and never Sentry.

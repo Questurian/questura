@@ -21,6 +21,7 @@ const allowed: Record<string, ServiceAccountCollectionOperation[]> = {
   nightlife: ['read', 'create', 'update'],
   'key-locations': ['read', 'create', 'update'],
   tours: ['read', 'create', 'update'],
+  airbnbs: ['read', 'create', 'update'],
   'media-assets': ['read', 'create', 'update'],
   'media-sets': ['read', 'create', 'update'],
   'instagram-posts': ['read', 'create'],

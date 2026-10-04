@@ -49,6 +49,8 @@ import * as migration_20260922_063804_refresh_jobs_fencing from './20260922_0638
 import * as migration_20260924_145915_payload_3_90_upgrade from './20260924_145915_payload_3_90_upgrade'
 import * as migration_20260925_034038_visitor_billing_interval_and_paused_flag from './20260925_034038_visitor_billing_interval_and_paused_flag'
 import * as migration_20260929_222646_page_hero_and_questurian_maps_dark_blocks from './20260929_222646_page_hero_and_questurian_maps_dark_blocks'
+import * as migration_20261001_012843_listicle_moment_groups from './20261001_012843_listicle_moment_groups'
+import * as migration_20261004_172739_airbnbs from './20261004_172739_airbnbs'
 
 export const migrations = [
   {
@@ -305,5 +307,15 @@ export const migrations = [
     up: migration_20260929_222646_page_hero_and_questurian_maps_dark_blocks.up,
     down: migration_20260929_222646_page_hero_and_questurian_maps_dark_blocks.down,
     name: '20260929_222646_page_hero_and_questurian_maps_dark_blocks',
+  },
+  {
+    up: migration_20261001_012843_listicle_moment_groups.up,
+    down: migration_20261001_012843_listicle_moment_groups.down,
+    name: '20261001_012843_listicle_moment_groups',
+  },
+  {
+    up: migration_20261004_172739_airbnbs.up,
+    down: migration_20261004_172739_airbnbs.down,
+    name: '20261004_172739_airbnbs',
   },
 ]
