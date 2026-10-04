@@ -14,6 +14,14 @@ describe('setupRoleSql', () => {
     expect(sql).toContain('NOSUPERUSER')
   })
 
+  it('leaves SUPERUSER out of ALTER ROLE, which Neon owner logins may not use', () => {
+    const sql = setupRoleSql({ database: 'neondb', password, existingTables: [] })
+    const alter = sql.split('\n').find((line) => line.startsWith('ALTER ROLE') && line.includes('PASSWORD'))
+    expect(alter).toBeDefined()
+    expect(alter).not.toMatch(/SUPERUSER/)
+    expect(sql).toMatch(/CREATE ROLE "questura_local_refresh" WITH NOLOGIN NOSUPERUSER/)
+  })
+
   it('refuses a password that could break out of the literal', () => {
     expect(() => setupRoleSql({ database: 'neondb', password: "x'; DROP ROLE y; --aaaaaaaaaaaaaa", existingTables: [] })).toThrow()
   })

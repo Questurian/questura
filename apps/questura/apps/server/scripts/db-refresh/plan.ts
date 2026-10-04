@@ -32,8 +32,12 @@ export function setupRoleSql(input: { database: string; password: string; existi
 
   return [
     'BEGIN;',
-    `DO $$ BEGIN IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = '${REFRESH_ROLE}') THEN CREATE ROLE ${role}; END IF; END $$;`,
-    `ALTER ROLE ${role} WITH LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS NOINHERIT PASSWORD '${input.password}';`,
+    `DO $$ BEGIN IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = '${REFRESH_ROLE}') THEN CREATE ROLE ${role} WITH NOLOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS NOINHERIT; END IF; END $$;`,
+    // No SUPERUSER clause here: Postgres 16+ refuses one, even NOSUPERUSER,
+    // from anyone but a superuser, and Neon's owner login is not one. ALTER
+    // ROLE also refuses to touch a superuser at all, so this line succeeding
+    // proves the role is not one.
+    `ALTER ROLE ${role} WITH LOGIN NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS NOINHERIT PASSWORD '${input.password}';`,
     `ALTER ROLE ${role} SET default_transaction_read_only = on;`,
     `REVOKE ALL ON ALL TABLES IN SCHEMA public FROM ${role};`,
     `REVOKE ALL ON ALL SEQUENCES IN SCHEMA public FROM ${role};`,
