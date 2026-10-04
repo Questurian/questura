@@ -26,6 +26,7 @@ const SERVICE_ACCOUNT_GRANTS: Record<string, ServiceAccountGrants> = {
       nightlife: ['read', 'create', 'update'],
       'key-locations': ['read', 'create', 'update'],
       tours: ['read', 'create', 'update'],
+      airbnbs: ['read', 'create', 'update'],
       'media-assets': ['read', 'create', 'update'],
       'media-sets': ['read', 'create', 'update'],
       // Gallery merges populate existing Instagram relationships before an

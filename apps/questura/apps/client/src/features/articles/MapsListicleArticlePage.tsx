@@ -4,8 +4,13 @@ import { ListicleMapRegion } from '@/features/articles/components/ListicleMapReg
 import { ListicleSeparator } from '@/features/articles/components/ListicleSeparator'
 import { ListicleAd } from '@/features/articles/components/ListicleAd'
 import { ListicleVenueEntry } from '@/features/articles/components/ListicleVenueEntry'
+import {
+  hasListicleMoment,
+  ListicleMomentHeading,
+} from '@/features/articles/components/ListicleMomentHeading'
 import { InArticleAd } from '@/features/articles/components/InArticleAd'
 import { planListicleAds } from '@/features/articles/lib/listicleAdPlacement'
+import { groupListicleItemsByMoment } from '@/features/articles/lib/listicleMomentGroups'
 import { ADS_ENABLED } from '@/features/articles/lib/ads'
 import type { MapsListicleArticle } from '@/features/articles/types/mapsListicle'
 
@@ -22,6 +27,8 @@ export function MapsListicleArticlePage({
   const description = article.seoSection?.metaDescription
 
   const items = article.items ?? []
+  const runs = groupListicleItemsByMoment(items)
+  const isGrouped = runs.some((run) => hasListicleMoment(run.moment))
   const ads = planListicleAds(items.length, {
     enabled: ADS_ENABLED,
     hasIntro: Boolean(introHtml),
@@ -62,17 +69,47 @@ export function MapsListicleArticlePage({
 
       <div className="px-3 pb-20 pt-4 380:px-4 380:pt-6 480:px-5 480:pt-8 480:pb-24 550:px-6 550:pt-10 sm:px-8 sm:pt-8 sm:pb-32 768:px-10">
         <ListicleMapRegion>
-          <ol className="m-0 list-none p-0">
-            {items.map((row, i) => (
-              <Fragment key={row.id}>
-                <ListicleVenueEntry
-                  row={row}
-                  index={i}
-                />
-                {ads.afterItem.has(i) ? <ListicleAd slotId={`listicle-${i}`} /> : null}
-              </Fragment>
-            ))}
-          </ol>
+          {runs.map((run, runIndex) => {
+            const hasHeading = hasListicleMoment(run.moment)
+            const headingId = `listicle-moment-${run.start}`
+            const list = (
+              <ol start={run.start + 1} className="m-0 list-none p-0">
+                {run.items.map((row, offset) => {
+                  const i = run.start + offset
+                  return (
+                    <Fragment key={row.id}>
+                      <ListicleVenueEntry
+                        row={row}
+                        index={i}
+                        headingLevel={hasHeading ? 3 : 2}
+                      />
+                      {ads.afterItem.has(i) ? <ListicleAd slotId={`listicle-${i}`} /> : null}
+                    </Fragment>
+                  )
+                })}
+              </ol>
+            )
+            if (!isGrouped) return <Fragment key={run.start}>{list}</Fragment>
+
+            // A run without a moment after a grouped one gets a bare hairline,
+            // so its places do not read as part of the heading above.
+            return (
+              <section
+                key={run.start}
+                aria-labelledby={hasHeading ? headingId : undefined}
+                className={runIndex > 0 ? 'pt-12 480:pt-14 sm:pt-16 768:pt-20' : undefined}
+              >
+                {hasHeading && run.moment ? (
+                  <ListicleMomentHeading id={headingId} moment={run.moment} />
+                ) : runIndex > 0 ? (
+                  <div aria-hidden="true" className="h-px bg-foreground/18" />
+                ) : null}
+                <div className={hasHeading || runIndex > 0 ? 'pt-6 480:pt-8 sm:pt-10' : undefined}>
+                  {list}
+                </div>
+              </section>
+            )
+          })}
         </ListicleMapRegion>
       </div>
     </article>

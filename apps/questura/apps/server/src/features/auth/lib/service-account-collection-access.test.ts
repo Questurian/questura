@@ -8,6 +8,7 @@ import { Attractions } from '@/features/data/attractions/collections/Attractions
 import { Nightlife } from '@/features/data/nightlife/collections/Nightlife'
 import { KeyLocations } from '@/features/data/key-locations/collections/KeyLocations'
 import { Tours } from '@/features/data/tours/collections/Tours'
+import { Airbnbs } from '@/features/data/airbnbs/collections/Airbnbs'
 import { InstagramPosts } from '@/features/data/instagram/collections/InstagramPosts'
 import { AffiliateProducts } from '@/features/data/affiliate/collections/AffiliateProducts'
 import { MediaSet } from '@/features/media/collections/MediaSet'
@@ -35,6 +36,7 @@ const allowed: Array<[CollectionConfig, Operation[]]> = [
   [Nightlife, ['read', 'create', 'update']],
   [KeyLocations, ['read', 'create', 'update']],
   [Tours, ['read', 'create', 'update']],
+  [Airbnbs, ['read', 'create', 'update']],
   [MediaAsset, ['read', 'create', 'update']],
   [MediaSet, ['read', 'create', 'update']],
   [InstagramPosts, ['read', 'create']],
