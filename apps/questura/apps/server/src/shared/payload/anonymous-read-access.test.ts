@@ -72,6 +72,7 @@ describe('signed-in reads are unchanged', () => {
     'main-homepage',
     'dining',
     'tours',
+    'airbnbs',
     'instagram-posts',
     'affiliate-products',
     'single-type-listicles',
@@ -87,6 +88,7 @@ describe('signed-in reads are unchanged', () => {
     'media-sets',
     'dining',
     'tours',
+    'airbnbs',
     'key-locations',
     'instagram-posts',
     // Read because any signed-in caller may: Location Manager lists and
