@@ -6,6 +6,7 @@ import {
   editorialKickerClass,
 } from './EditorialRule'
 import { InlineMarkdown } from './InlineMarkdown'
+import { AirbnbCardBlockRenderer } from './AirbnbCardBlock'
 import {
   ContentBlock,
   FaqBlock,
@@ -256,6 +257,8 @@ export function BlockRenderer({ block }: { block: ContentBlock }) {
       return <HighlightCalloutBlockRenderer block={block} />
     case 'faq':
       return <FaqBlockRenderer block={block} />
+    case 'airbnb-card':
+      return <AirbnbCardBlockRenderer block={block} />
     default:
       return null
   }

@@ -271,6 +271,31 @@ export const FAQBlock: Block = {
 }
 
 /**
+ * Airbnb Card - one saved Airbnb shown inside a standard article. The card
+ * holds only the reference: photo, title, price, rating and link are read
+ * from the Airbnb at render time, so editing the Airbnb updates every article.
+ */
+export const AirbnbCardBlock: Block = {
+  slug: 'airbnb-card',
+  interfaceName: 'AirbnbCardBlock',
+  labels: {
+    singular: 'Airbnb Card',
+    plural: 'Airbnb Cards',
+  },
+  fields: [
+    {
+      name: 'airbnb',
+      type: 'relationship',
+      relationTo: 'airbnbs',
+      required: true,
+      admin: {
+        description: 'The Airbnb to show',
+      },
+    },
+  ],
+}
+
+/**
  * All available article blocks
  */
 export const articleBlocks = [
@@ -283,4 +308,5 @@ export const articleBlocks = [
   InTheKnowBlock,
   HighlightCalloutBlock,
   FAQBlock,
+  AirbnbCardBlock,
 ]

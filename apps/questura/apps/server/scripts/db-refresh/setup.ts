@@ -94,7 +94,12 @@ async function main() {
       'SELECT count(*)::int AS n FROM pg_auth_members m JOIN pg_roles r ON r.oid = m.member WHERE r.rolname = current_user',
     )
     if (rows[0].n !== 0) throw new Error('the new login belongs to another role; it must not')
-    console.log('Checked from the new login: content readable; staff, readers, members and writes refused.')
+    const { rows: attrs } = await check.query<{ privileged: boolean }>(
+      `SELECT rolsuper OR rolcreatedb OR rolcreaterole OR rolreplication OR rolbypassrls OR rolinherit AS privileged
+         FROM pg_roles WHERE rolname = current_user`,
+    )
+    if (attrs[0].privileged) throw new Error('the new login has a role attribute beyond LOGIN; it must not')
+    console.log('Checked from the new login: content readable; staff, readers, members and writes refused; no role attributes beyond LOGIN.')
   } finally {
     await check.end()
   }
@@ -110,4 +115,8 @@ async function main() {
   console.log('Next: pnpm db:refresh   (or just pnpm dev, which refreshes when the copy is 6 h old)')
 }
 
-main().catch((error) => fail(error instanceof Error ? error.message : String(error)))
+// Postgres puts the reason for a refusal in `detail`, not the message.
+main().catch((error) => {
+  const detail = (error as { detail?: string }).detail
+  fail(error instanceof Error ? `${error.message}${detail ? ` (${detail})` : ''}` : String(error))
+})

@@ -80,6 +80,26 @@ export type FaqBlock = {
   items: FaqItem[]
 }
 
+export type AirbnbCard = {
+  id: number
+  title: string
+  listingUrl: string
+  stayType: string | null
+  near: string | null
+  description: string | null
+  price: string | null
+  rating: number | null
+  reviewCount: number | null
+  image: { url: string; alt: string; width: number | null; height: number | null } | null
+}
+
+/** `airbnb` is null when the Airbnb is unpublished or gone; the card is then skipped. */
+export type AirbnbCardBlock = {
+  id: string
+  blockType: 'airbnb-card'
+  airbnb: AirbnbCard | null
+}
+
 export type ContentBlock =
   | TextBlock
   | ImageBlock
@@ -90,6 +110,7 @@ export type ContentBlock =
   | InTheKnowBlock
   | HighlightCalloutBlock
   | FaqBlock
+  | AirbnbCardBlock
 
 /**
  * The byline, as served from the Authors collection (ADR-0007). Authorship is
