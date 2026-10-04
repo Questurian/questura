@@ -36,8 +36,10 @@ function BookRing(): JSX.Element {
   )
 }
 
+const reviewCountFormat = new Intl.NumberFormat('en-US')
+
 function formatReviews(count: number): string {
-  return `${count.toLocaleString('en-US')} ${count === 1 ? 'review' : 'reviews'}`
+  return `${reviewCountFormat.format(count)} ${count === 1 ? 'review' : 'reviews'}`
 }
 
 /**
