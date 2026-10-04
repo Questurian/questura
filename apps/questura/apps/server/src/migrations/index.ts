@@ -51,6 +51,7 @@ import * as migration_20260925_034038_visitor_billing_interval_and_paused_flag f
 import * as migration_20260929_222646_page_hero_and_questurian_maps_dark_blocks from './20260929_222646_page_hero_and_questurian_maps_dark_blocks'
 import * as migration_20261001_012843_listicle_moment_groups from './20261001_012843_listicle_moment_groups'
 import * as migration_20261004_172739_airbnbs from './20261004_172739_airbnbs'
+import * as migration_20261004_184515_airbnb_card_block from './20261004_184515_airbnb_card_block'
 
 export const migrations = [
   {
@@ -317,5 +318,10 @@ export const migrations = [
     up: migration_20261004_172739_airbnbs.up,
     down: migration_20261004_172739_airbnbs.down,
     name: '20261004_172739_airbnbs',
+  },
+  {
+    up: migration_20261004_184515_airbnb_card_block.up,
+    down: migration_20261004_184515_airbnb_card_block.down,
+    name: '20261004_184515_airbnb_card_block',
   },
 ]

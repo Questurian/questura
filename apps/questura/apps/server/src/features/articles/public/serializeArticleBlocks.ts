@@ -5,6 +5,7 @@ import { convertLexicalToHTMLAsync } from '@payloadcms/richtext-lexical/html-asy
 import { resolveMediaSetForPlacement } from '@/features/media/lib/resolve-public-image'
 
 import { resolveArticleFeaturedImage } from './view-model'
+import { sanitizeAirbnbCards } from './airbnbCards'
 
 async function toLexicalHTML(data: unknown): Promise<string> {
   return convertLexicalToHTMLAsync({
@@ -126,10 +127,14 @@ async function serializeBlurbArray(
   )
 }
 
-async function serializeStandardArticleBlocks(article: Record<string, unknown>) {
+async function serializeStandardArticleBlocks(
+  article: Record<string, unknown>,
+  payload?: Payload,
+) {
   const blocks = article.contentBlocks as Array<Record<string, unknown>> | undefined
   if (!Array.isArray(blocks)) return
 
+  await sanitizeAirbnbCards(blocks, payload)
   await Promise.all(
     blocks.map(async (block) => {
       if (block.blockType === 'text' && block.content) {
@@ -228,7 +233,7 @@ export async function serializeArticleByCollection(
   article: Record<string, unknown>,
   payload?: Payload,
 ) {
-  if (collection === 'articles') await serializeStandardArticleBlocks(article)
+  if (collection === 'articles') await serializeStandardArticleBlocks(article, payload)
   if (collection === 'single-type-listicles') await serializeMapsListicleBlocks(article, payload)
   if (collection === 'listicle-itineraries') await serializeItineraryBlocks(article, payload)
   serializeArticleAuthor(article)

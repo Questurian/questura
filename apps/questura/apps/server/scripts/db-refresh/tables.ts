@@ -30,6 +30,7 @@ export const CONTENT_TABLES = [
   'article_redirects',
   'article_tags',
   'articles',
+  'articles_blocks_airbnb_card',
   'articles_blocks_faq',
   'articles_blocks_faq_items',
   'articles_blocks_highlight_callout',
