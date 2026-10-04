@@ -38,6 +38,7 @@ export function ListicleVenueEntry({
   moment,
   momentLabel,
   autoAdvancePhotos = false,
+  headingLevel,
 }: {
   row: ListicleItemRow;
   index: number;
@@ -45,6 +46,7 @@ export function ListicleVenueEntry({
   momentLabel?: string | null;
   /** Cycle this stop's photos while the map is showing it (itineraries). */
   autoAdvancePhotos?: boolean;
+  headingLevel?: 2 | 3;
 }): JSX.Element {
   const { registerEntry, activeId } = useListicleMapSync();
   const images = listicleItemImagesFromRow(row);
@@ -94,6 +96,7 @@ export function ListicleVenueEntry({
         <div className="space-y-2 480:space-y-2.5 sm:space-y-3">
           <ListicleVenueTitleRow
             title={row.item.title}
+            headingLevel={headingLevel}
             priceLevel={diningPriceLevel}
             priceDescriptor={priceTierDescriptor(diningPriceLevel)}
           />

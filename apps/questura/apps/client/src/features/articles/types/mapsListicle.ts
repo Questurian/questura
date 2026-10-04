@@ -65,6 +65,8 @@ export type ListicleItemRow = {
   selectedInstagramPost?: ListicleInstagramPost | number | string | null
   /** Operator-curated Tour Picks on attraction rows (ordered, max 4). */
   tours?: ListicleTourPick[] | null
+  /** Optional moment; neighbouring rows that share one sit under one heading. */
+  moment?: string | null
 }
 
 export type MapsListicleHeader = {
