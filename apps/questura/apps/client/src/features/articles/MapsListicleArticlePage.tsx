@@ -4,22 +4,27 @@ import { ListicleMapRegion } from '@/features/articles/components/ListicleMapReg
 import { ListicleSeparator } from '@/features/articles/components/ListicleSeparator'
 import { ListicleAd } from '@/features/articles/components/ListicleAd'
 import { ListicleVenueEntry } from '@/features/articles/components/ListicleVenueEntry'
-import {
-  hasListicleMoment,
-  ListicleMomentHeading,
-} from '@/features/articles/components/ListicleMomentHeading'
+import type { ListicleMomentHeadings } from '@/features/articles/components/ListicleMomentHeading'
 import { InArticleAd } from '@/features/articles/components/InArticleAd'
 import { planListicleAds } from '@/features/articles/lib/listicleAdPlacement'
-import { groupListicleItemsByMoment } from '@/features/articles/lib/listicleMomentGroups'
+import {
+  groupListicleItemsByMoment,
+  listicleMomentHeadingId,
+} from '@/features/articles/lib/listicleMomentGroups'
 import { ADS_ENABLED } from '@/features/articles/lib/ads'
 import type { MapsListicleArticle } from '@/features/articles/types/mapsListicle'
 
 type MapsListicleArticlePageProps = {
   article: MapsListicleArticle
+  /** Moment headings rendered on the server, keyed by the run they open. */
+  momentHeadings?: ListicleMomentHeadings
 }
+
+const NO_MOMENT_HEADINGS: ListicleMomentHeadings = {}
 
 export function MapsListicleArticlePage({
   article,
+  momentHeadings = NO_MOMENT_HEADINGS,
 }: MapsListicleArticlePageProps): JSX.Element {
   const featuredImage = article.header?.featuredImage
   const introRaw = article.header?.intro
@@ -28,7 +33,7 @@ export function MapsListicleArticlePage({
 
   const items = article.items ?? []
   const runs = groupListicleItemsByMoment(items)
-  const isGrouped = runs.some((run) => hasListicleMoment(run.moment))
+  const isGrouped = runs.some((run) => momentHeadings[run.start] !== undefined)
   const ads = planListicleAds(items.length, {
     enabled: ADS_ENABLED,
     hasIntro: Boolean(introHtml),
@@ -70,8 +75,9 @@ export function MapsListicleArticlePage({
       <div className="px-3 pb-20 pt-4 380:px-4 380:pt-6 480:px-5 480:pt-8 480:pb-24 550:px-6 550:pt-10 sm:px-8 sm:pt-8 sm:pb-32 768:px-10">
         <ListicleMapRegion>
           {runs.map((run, runIndex) => {
-            const hasHeading = hasListicleMoment(run.moment)
-            const headingId = `listicle-moment-${run.start}`
+            const heading = momentHeadings[run.start]
+            const hasHeading = heading !== undefined
+            const headingId = listicleMomentHeadingId(run.start)
             const list = (
               <ol start={run.start + 1} className="m-0 list-none p-0">
                 {run.items.map((row, offset) => {
@@ -99,8 +105,8 @@ export function MapsListicleArticlePage({
                 aria-labelledby={hasHeading ? headingId : undefined}
                 className={runIndex > 0 ? 'pt-12 480:pt-14 sm:pt-16 768:pt-20' : undefined}
               >
-                {hasHeading && run.moment ? (
-                  <ListicleMomentHeading id={headingId} moment={run.moment} />
+                {hasHeading ? (
+                  heading
                 ) : runIndex > 0 ? (
                   <div aria-hidden="true" className="h-px bg-foreground/18" />
                 ) : null}

@@ -6,6 +6,7 @@ import {
   ListicleMapSyncProvider,
   type ListicleMapPoint,
 } from '@/features/articles/components/ListicleMapSync'
+import type { ListicleMomentHeadings } from '@/features/articles/components/ListicleMomentHeading'
 import { ListicleArticleLayout } from '@/features/articles/layouts/ListicleArticleLayout'
 import { mapPointPreviewFromRow } from '@/features/articles/lib/listicleMapPreview'
 import type { ListicleFooterLinks } from '@/features/articles/lib/fetchListicleFooterLinks'
@@ -14,6 +15,7 @@ import type { MapsListicleArticle } from '@/features/articles/types/mapsListicle
 
 interface MapsArticleLayoutProps {
   article: MapsListicleArticle
+  momentHeadings: ListicleMomentHeadings
   relatedArticles: RelatedMapsArticleTeaser[]
   footerLinks?: ListicleFooterLinks | null
   country: string
@@ -22,6 +24,7 @@ interface MapsArticleLayoutProps {
 
 export function MapsArticleLayout({
   article,
+  momentHeadings,
   relatedArticles,
   footerLinks,
   country,
@@ -53,7 +56,7 @@ export function MapsArticleLayout({
         country={country}
         city={city}
       >
-        <MapsListicleArticlePage article={article} />
+        <MapsListicleArticlePage article={article} momentHeadings={momentHeadings} />
       </ListicleArticleLayout>
     </ListicleMapSyncProvider>
   )

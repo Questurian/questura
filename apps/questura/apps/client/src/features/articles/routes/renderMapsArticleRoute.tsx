@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation'
 import { JsonLd } from '@/components/seo/JsonLd'
+import { renderListicleMomentHeadings } from '@/features/articles/components/ListicleMomentHeading'
 import { buildArticleBreadcrumbJsonLd } from '@/features/articles/lib/articleBreadcrumbJsonLd'
 import { articleHrefForScope } from '@/features/articles/lib/articleScope'
 import { fetchArticle } from '@/features/articles/lib/fetchArticle'
@@ -44,6 +45,7 @@ export async function renderMapsArticleRoute({
       <JsonLd data={buildArticleBreadcrumbJsonLd({ path, articleTitle: article.title })} />
       <MapsArticleLayout
         article={article}
+        momentHeadings={renderListicleMomentHeadings(article.items ?? [])}
         relatedArticles={relatedArticles}
         footerLinks={footerLinks}
         country={scope.country}

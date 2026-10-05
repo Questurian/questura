@@ -27,3 +27,8 @@ export function groupListicleItemsByMoment<T extends { moment?: string | null }>
   })
   return runs
 }
+
+/** DOM id of the heading that opens the run starting at `start`. */
+export function listicleMomentHeadingId(start: number): string {
+  return `listicle-moment-${start}`
+}
