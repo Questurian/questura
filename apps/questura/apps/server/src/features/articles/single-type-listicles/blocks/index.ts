@@ -43,6 +43,8 @@ export const getBlocksForType = (type?: string): Block[] => {
       return [DataAttractionsBlock]
     case 'nightlife':
       return [DataNightlifeBlock]
+    case 'mixed':
+      return [DataDiningBlock, DataAccommodationsBlock, DataAttractionsBlock, DataNightlifeBlock]
     default:
       return []
   }

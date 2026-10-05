@@ -54,7 +54,7 @@ test('classifies destructive SQL, data rewrites, and auth schema changes', () =>
     ['WITH ids AS (SELECT id FROM users) UPDATE users SET role = \'admin\';', 'data rewrite'],
     ['DO $$ BEGIN UPDATE users SET role = \'admin\'; END $$;', 'data rewrite'],
     ['ALTER TABLE users ALTER COLUMN email SET NOT NULL', 'column or table rewrite'],
-    ['ALTER TYPE status ADD VALUE \'archived\'', 'type rewrite'],
+    ['ALTER TYPE status RENAME VALUE \'archived\' TO \'hidden\'', 'type rewrite'],
     ['ALTER TABLE visitor_auth_users ADD COLUMN example text', 'visitor auth schema'],
   ]
 
@@ -63,6 +63,54 @@ test('classifies destructive SQL, data rewrites, and auth schema changes', () =>
       export async function down() {}`
     assert.ok(assessMigration(source, 'example').includes(expectedRisk), sql)
   }
+})
+
+function migrationRunning(sql) {
+  return `export async function up() { await db.execute(sql\`${sql}\`) }
+    export async function down() {}`
+}
+
+test('allows adding a value to an existing enum', async () => {
+  const additions = [
+    'ALTER TYPE status ADD VALUE \'archived\'',
+    'ALTER TYPE "public"."enum_single_type_listicles_listicle_type" ADD VALUE \'mixed\';',
+    'ALTER TYPE public.status ADD VALUE IF NOT EXISTS \'archived\' BEFORE \'deleted\';',
+    'alter type "status" add value \'owner\'\'s pick\' after \'draft\';\n  ALTER TYPE "status" ADD VALUE \'archived\';',
+  ]
+  for (const sql of additions) {
+    assert.deepEqual(assessMigration(migrationRunning(sql), 'example'), [], sql)
+  }
+
+  const name = '20261005_174909_listicle_mixed_type'
+  const source = await fs.readFile(path.join(migrationsRoot, `${name}.ts`), 'utf8')
+  assert.deepEqual(assessMigration(source, name), [])
+})
+
+test('still blocks renaming or removing enum values', () => {
+  const renames = [
+    'ALTER TYPE status RENAME VALUE \'archived\' TO \'hidden\';',
+    'ALTER TYPE "public"."status" RENAME TO "old_status";',
+    'ALTER TYPE status SET SCHEMA private;',
+    // A safe addition does not wave through the rename beside it.
+    'ALTER TYPE status ADD VALUE \'archived\'; ALTER TYPE status RENAME VALUE \'draft\' TO \'wip\';',
+    // Not a plain quoted value: the guard cannot vouch for what it adds.
+    'ALTER TYPE status ADD VALUE archived;',
+    'ALTER TYPE status ADD VALUE \'archived\' CASCADE;',
+  ]
+  for (const sql of renames) {
+    assert.ok(assessMigration(migrationRunning(sql), 'example').includes('type rewrite'), sql)
+  }
+
+  // Postgres cannot drop one enum value, so Payload rebuilds the type. That is
+  // the down() of the mixed-type migration, run here as if it were an up().
+  const removal = `
+    ALTER TABLE "single_type_listicles" ALTER COLUMN "listicle_type" SET DATA TYPE text;
+    DROP TYPE "public"."enum_single_type_listicles_listicle_type";
+    CREATE TYPE "public"."enum_single_type_listicles_listicle_type" AS ENUM('dining', 'accommodations', 'attractions', 'nightlife');
+    ALTER TABLE "single_type_listicles" ALTER COLUMN "listicle_type" SET DATA TYPE "public"."enum_single_type_listicles_listicle_type" USING "listicle_type"::"public"."enum_single_type_listicles_listicle_type";`
+  const risks = assessMigration(migrationRunning(removal), 'example')
+  assert.ok(risks.includes('destructive SQL'), 'DROP TYPE')
+  assert.ok(risks.includes('column or table rewrite'), 'ALTER COLUMN')
 })
 
 test('fails closed when db.execute SQL cannot be statically inspected', () => {

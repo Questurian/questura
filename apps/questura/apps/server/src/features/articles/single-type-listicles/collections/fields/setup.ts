@@ -9,6 +9,8 @@ const listicleTypeOptions = [
   { label: 'Accommodations', value: 'accommodations' },
   { label: 'Attractions', value: 'attractions' },
   { label: 'Nightlife', value: 'nightlife' },
+  // One list that holds places of any type; each item's block says which.
+  { label: 'Mixed (any type per item)', value: 'mixed' },
 ]
 
 export const title: Field = {
@@ -48,7 +50,7 @@ export const listicleType: Field = {
   required: true,
   options: listicleTypeOptions,
   admin: {
-    description: 'Select one data type for this listicle',
+    description: 'Select one data type for this listicle, or Mixed to combine types',
     components: {
       Field: 'src/features/articles/single-type-listicles/components/field-components/SmartField.tsx',
     },

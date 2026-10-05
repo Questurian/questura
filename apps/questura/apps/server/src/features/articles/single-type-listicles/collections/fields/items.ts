@@ -16,7 +16,7 @@ export const items: Field = {
     components: {
       Field: 'src/features/articles/single-type-listicles/components/SingleTypeListicleBlocksField.tsx',
     },
-    description: 'Add ranked items. Only the selected listicle data type is allowed.',
+    description: 'Add ranked items. Only the selected listicle data type is allowed; a Mixed list allows all four.',
     condition: (data) => Boolean(data?.step1_complete && !data?.in_update_mode),
   },
 }

@@ -1,7 +1,7 @@
 name: Questura migration safety
 
 # Fails a pull request that adds or changes a Payload migration the deploy
-# guard would refuse (DROP, TRUNCATE, DELETE, column rewrites, visitor-auth
+# guard would refuse (DROP, TRUNCATE, DELETE, column and type rewrites, visitor-auth
 # tables, SQL it cannot read), unless the PR description acknowledges that
 # migration by name:
 #
