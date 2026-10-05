@@ -1,3 +1,4 @@
+import "server-only";
 import type { JSX } from "react";
 import {
   Armchair,
@@ -88,6 +89,10 @@ import {
   Zap,
   type LucideIcon,
 } from "lucide-react";
+import {
+  groupListicleItemsByMoment,
+  listicleMomentHeadingId,
+} from "@/features/articles/lib/listicleMomentGroups";
 
 /**
  * Display copy and icon for every single-type listicle moment. Mirrors
@@ -194,7 +199,7 @@ const MOMENT_CONFIG: Record<string, { label: string; Icon: LucideIcon }> = {
   business: { label: "Business trips", Icon: Briefcase },
 };
 
-export function hasListicleMoment(moment: string | null | undefined): boolean {
+function hasListicleMoment(moment: string | null | undefined): boolean {
   return typeof moment === "string" && Object.hasOwn(MOMENT_CONFIG, moment);
 }
 
@@ -228,4 +233,29 @@ export function ListicleMomentHeading({
       <span aria-hidden className="h-px min-w-8 flex-1 bg-foreground/18" />
     </h2>
   );
+}
+
+/** Rendered moment headings, keyed by the zero-based start of the run each opens. */
+export type ListicleMomentHeadings = Readonly<Record<number, JSX.Element>>;
+
+/**
+ * Renders every moment heading a listicle needs. Call it from a server
+ * component and pass the result down: the listicle page renders inside a
+ * client layout, and importing the icon set there adds ~10 kB gzip to the
+ * route's first-load JS. `server-only` above fails the build if that happens.
+ */
+export function renderListicleMomentHeadings(
+  items: readonly { moment?: string | null }[],
+): ListicleMomentHeadings {
+  const headings: Record<number, JSX.Element> = {};
+  for (const run of groupListicleItemsByMoment(items)) {
+    if (!run.moment || !hasListicleMoment(run.moment)) continue;
+    headings[run.start] = (
+      <ListicleMomentHeading
+        id={listicleMomentHeadingId(run.start)}
+        moment={run.moment}
+      />
+    );
+  }
+  return headings;
 }
