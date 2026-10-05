@@ -100,6 +100,25 @@ export type AirbnbCardBlock = {
   airbnb: AirbnbCard | null
 }
 
+export type HotelCard = {
+  id: number
+  title: string
+  /** Booking page, else the hotel's own site, else its map link. Null when it has none. */
+  url: string | null
+  type: string | null
+  district: string | null
+  /** Dollar ticks, for example "$$$". */
+  price: string | null
+  image: { url: string; alt: string; width: number | null; height: number | null } | null
+}
+
+/** `hotel` is null when the accommodation is unpublished or gone; the card is then skipped. */
+export type HotelCardBlock = {
+  id: string
+  blockType: 'hotel-card'
+  hotel: HotelCard | null
+}
+
 export type ContentBlock =
   | TextBlock
   | ImageBlock
@@ -111,6 +130,7 @@ export type ContentBlock =
   | HighlightCalloutBlock
   | FaqBlock
   | AirbnbCardBlock
+  | HotelCardBlock
 
 /**
  * The byline, as served from the Authors collection (ADR-0007). Authorship is

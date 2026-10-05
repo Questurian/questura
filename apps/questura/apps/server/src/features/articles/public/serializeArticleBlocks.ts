@@ -6,6 +6,7 @@ import { resolveMediaSetForPlacement } from '@/features/media/lib/resolve-public
 
 import { resolveArticleFeaturedImage } from './view-model'
 import { sanitizeAirbnbCards } from './airbnbCards'
+import { sanitizeHotelCards } from './hotelCards'
 
 async function toLexicalHTML(data: unknown): Promise<string> {
   return convertLexicalToHTMLAsync({
@@ -135,6 +136,7 @@ async function serializeStandardArticleBlocks(
   if (!Array.isArray(blocks)) return
 
   await sanitizeAirbnbCards(blocks, payload)
+  await sanitizeHotelCards(blocks, payload)
   await Promise.all(
     blocks.map(async (block) => {
       if (block.blockType === 'text' && block.content) {

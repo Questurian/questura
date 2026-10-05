@@ -7,6 +7,7 @@ import {
 } from './EditorialRule'
 import { InlineMarkdown } from './InlineMarkdown'
 import { AirbnbCardBlockRenderer } from './AirbnbCardBlock'
+import { HotelCardBlockRenderer } from './HotelCardBlock'
 import {
   ContentBlock,
   FaqBlock,
@@ -259,6 +260,8 @@ export function BlockRenderer({ block }: { block: ContentBlock }) {
       return <FaqBlockRenderer block={block} />
     case 'airbnb-card':
       return <AirbnbCardBlockRenderer block={block} />
+    case 'hotel-card':
+      return <HotelCardBlockRenderer block={block} />
     default:
       return null
   }
