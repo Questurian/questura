@@ -11,6 +11,21 @@ import ts from 'typescript'
 
 const { Client } = pg
 
+// Adding a value to an existing enum changes no stored row and breaks no code
+// already running, so it is the one ALTER TYPE the guard lets through. The
+// statement has to be exactly that: a quoted new value, optionally placed
+// BEFORE/AFTER another. RENAME VALUE, RENAME TO, SET SCHEMA, OWNER TO and every
+// other ALTER TYPE stay a type rewrite. (Removing a value has no ALTER TYPE
+// form; Payload writes it as DROP TYPE + CREATE TYPE, which is destructive SQL.)
+const SQL_NAME = String.raw`(?:"[^"]+"|[A-Za-z_][A-Za-z0-9_]*)`
+const SQL_LITERAL = String.raw`'(?:[^']|'')*'`
+const ENUM_ADD_VALUE = new RegExp(
+  String.raw`\bALTER\s+TYPE\s+${SQL_NAME}(?:\s*\.\s*${SQL_NAME})?\s+ADD\s+VALUE\s+` +
+    String.raw`(?:IF\s+NOT\s+EXISTS\s+)?${SQL_LITERAL}` +
+    String.raw`(?:\s+(?:BEFORE|AFTER)\s+${SQL_LITERAL})?\s*(?=;|$)`,
+  'gi',
+)
+
 const RISK_RULES = [
   ['destructive SQL', /\b(?:DROP|TRUNCATE)\b|\bDELETE\s+FROM\b/i],
   ['data rewrite', (statement) => /\bUPDATE\b/i.test(statement.replace(/\bON\s+UPDATE\b/gi, ''))],
@@ -18,7 +33,7 @@ const RISK_RULES = [
     'column or table rewrite',
     /\bALTER\s+TABLE\b[\s\S]{0,300}\b(?:ALTER\s+COLUMN|DROP\s+COLUMN|RENAME\s+(?:COLUMN|TO))\b/i,
   ],
-  ['type rewrite', /\bALTER\s+TYPE\b/i],
+  ['type rewrite', (statement) => /\bALTER\s+TYPE\b/i.test(statement.replace(ENUM_ADD_VALUE, ''))],
   ['visitor auth schema', /\b(?:visitor_auth_[a-z0-9_]*|better_auth_[a-z0-9_]*)\b/i],
 ]
 

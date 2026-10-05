@@ -205,7 +205,10 @@ deploy runs them through one guard,
 `apps/server/scripts/deploy/check-pending-migrations.mjs`. It blocks any
 pending migration whose `up()` contains `DROP`, `TRUNCATE`, `DELETE FROM`, an
 `UPDATE`, `ALTER COLUMN`/`DROP COLUMN`/`RENAME`, `ALTER TYPE`, touches the
-visitor-auth tables, or builds SQL the guard can't read.
+visitor-auth tables, or builds SQL the guard can't read. The one `ALTER TYPE`
+it lets through is `ALTER TYPE … ADD VALUE '<new value>'`: adding a value to
+an existing enum changes no stored row. Renaming a value stays blocked, and so
+does removing one (Payload writes that as `DROP TYPE` + `CREATE TYPE`).
 
 **Railway.** `infra/railway/railway.json` sets the pre-deploy command to
 `bash scripts/deploy/pre-deploy.sh`, run from the service root
