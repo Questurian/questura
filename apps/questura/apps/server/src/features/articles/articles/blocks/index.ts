@@ -296,6 +296,31 @@ export const AirbnbCardBlock: Block = {
 }
 
 /**
+ * Hotel Card - one saved accommodation shown inside a standard article. Like
+ * the Airbnb Card it holds only the reference: photo, name, type, price level
+ * and link are read from the accommodation at render time.
+ */
+export const HotelCardBlock: Block = {
+  slug: 'hotel-card',
+  interfaceName: 'HotelCardBlock',
+  labels: {
+    singular: 'Hotel Card',
+    plural: 'Hotel Cards',
+  },
+  fields: [
+    {
+      name: 'hotel',
+      type: 'relationship',
+      relationTo: 'accommodations',
+      required: true,
+      admin: {
+        description: 'The hotel or other accommodation to show',
+      },
+    },
+  ],
+}
+
+/**
  * All available article blocks
  */
 export const articleBlocks = [
@@ -309,4 +334,5 @@ export const articleBlocks = [
   HighlightCalloutBlock,
   FAQBlock,
   AirbnbCardBlock,
+  HotelCardBlock,
 ]

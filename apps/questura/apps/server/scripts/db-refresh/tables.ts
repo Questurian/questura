@@ -34,6 +34,7 @@ export const CONTENT_TABLES = [
   'articles_blocks_faq',
   'articles_blocks_faq_items',
   'articles_blocks_highlight_callout',
+  'articles_blocks_hotel_card',
   'articles_blocks_image',
   'articles_blocks_img_pair',
   'articles_blocks_img_trio',
