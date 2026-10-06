@@ -51,6 +51,7 @@ export function MapsArticleLayout({
   return (
     <ListicleMapSyncProvider points={points}>
       <ListicleArticleLayout
+        format="maps"
         relatedArticles={relatedArticles}
         footerLinks={footerLinks}
         country={country}

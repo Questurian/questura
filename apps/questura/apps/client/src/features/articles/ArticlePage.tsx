@@ -93,7 +93,7 @@ function StandardArticleHeader({
 
           <BookmarkButton targetType="articles" targetId={articleId} />
         </div>
-        {/* Same CTA the listicle/itinerary headers render (see ArticlePageHeader). */}
+        {/* Follow updates to standard articles on Google. */}
         <AddOnGoogleButton variant="google" />
       </div>
     </header>

@@ -1,7 +1,6 @@
 import type { JSX } from 'react'
 import { ShimmerImage } from '@/components/media/ShimmerImage'
 import type { ArticleAuthor } from '@/features/articles/types'
-import { AddOnGoogleButton } from '@/features/articles/components/AddOnGoogleButton'
 import { ArticleShareButton } from '@/features/articles/components/ArticleShareButton'
 import { BookmarkButton } from '@/features/bookmarks/components/BookmarkButton'
 import type { BookmarkTargetType } from '@/features/bookmarks/types'
@@ -75,7 +74,7 @@ export function ArticlePageHeader({
       <div className="text-center">
         {featuredImage?.url ? (
           <div className="mx-auto mb-5 sm:mb-6">
-            <div className="relative mx-auto h-20 w-20 overflow-hidden rounded-full ring-1 ring-foreground/10 380:h-24 380:w-24 480:h-28 480:w-28 sm:h-32 sm:w-32 768:h-36 768:w-36">
+            <div className="listicle-header-image relative mx-auto h-20 w-20 overflow-hidden rounded-full ring-1 ring-foreground/10 380:h-24 380:w-24 480:h-28 480:w-28 sm:h-32 sm:w-32 768:h-36 768:w-36">
               <ShimmerImage
                 src={featuredImage.url}
                 alt={featuredImage.alt ?? ''}
@@ -117,23 +116,6 @@ export function ArticlePageHeader({
           )}
 
           <div className="mx-auto flex w-full max-w-[44ch] flex-col items-center gap-3 380:gap-3.5 sm:gap-4">
-            {/*
-              "Add Us On Google" CTA. Two variants are available in
-              `AddOnGoogleButton`:
-                - variant="google"    -> brand-faithful Material-style button
-                                         (Roboto, white surface, 4px corners).
-                                         Use this when we want the action to
-                                         read as a first-party Google integration.
-                - variant="editorial" -> magazine-style pill button (Playfair,
-                                         fully rounded, foreground border) that
-                                         matches the rest of this header's
-                                         editorial typography. Swap to this
-                                         variant if the Google styling feels
-                                         too utilitarian on heavily editorial
-                                         surfaces.
-            */}
-            <AddOnGoogleButton variant="google" />
-
             <div className="flex items-center gap-3 380:gap-4">
               <ArticleShareButton title={title} imageUrl={featuredImage?.url} />
 

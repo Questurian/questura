@@ -227,10 +227,8 @@
   text-underline-offset: 2px;
 }
 
-/* Single-type maps use a compact editorial scale. Keep the split/map geometry
-   intact; cap the reading measure inside its column instead of stretching
-   photos and prose with a large viewport. Shared itinerary components retain
-   their existing scale. */
+/* Maps retain the article/map split, with an inset page frame and a compact
+   reading measure. Shared itinerary components retain their existing scale. */
 [data-listicle-type='maps'] .maps-listicle-entry {
   padding-block: 2rem;
 }
@@ -277,6 +275,31 @@
   font-size: 0.8125rem;
 }
 
+/* Header type follows its reading column, including narrow browser panels. */
+[data-article-layout='listicle'] [data-article-header] {
+  container-type: inline-size;
+}
+
+[data-article-layout='listicle'] [data-article-header] h1 {
+  font-size: clamp(26px, 9cqi, 36px);
+  line-height: 1.1;
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+}
+
+[data-article-layout='listicle'] [data-article-header] > div > p {
+  font-size: clamp(14px, 4.5cqi, 16px);
+  font-weight: 500;
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+
+[data-article-layout='listicle'] .listicle-header-image {
+  width: clamp(80px, 30cqi, 112px);
+  height: auto;
+  aspect-ratio: 1;
+}
+
 @media (min-width: 640px) {
   [data-listicle-type='maps'] .maps-listicle-venue-title {
     font-size: 1.5rem;
@@ -291,16 +314,6 @@
 
   [data-listicle-type='maps'] .maps-listicle-photo-slide {
     aspect-ratio: 2 / 1;
-  }
-
-  [data-listicle-type='maps'] [data-article-header] h1 {
-    font-size: 36px;
-    line-height: 1.12;
-  }
-
-  [data-listicle-type='maps'] [data-article-header] > div > p {
-    font-size: 16px;
-    line-height: 1.5;
   }
 
   [data-listicle-type='maps'] .maps-listicle-intro p {
@@ -714,6 +727,15 @@
 @media (min-width: 1536px) {
   [data-article-layout='listicle'] {
     --maps-content-width: 40%;
+  }
+}
+
+@media (min-width: 1024px) {
+  [data-article-layout='listicle'][data-listicle-format='maps'] {
+    --maps-content-width: 40%;
+    width: calc(100% - 96px);
+    max-width: 1344px;
+    margin-inline: auto;
   }
 }
 

@@ -20,6 +20,7 @@ interface ListicleArticleLayoutProps {
   footerLinks?: ListicleFooterLinks | null
   country: string
   city?: string | null
+  format?: 'maps' | 'itinerary'
 }
 
 const listicleLayoutStyle = {
@@ -35,6 +36,7 @@ export function ListicleArticleLayout({
   footerLinks,
   country,
   city,
+  format = 'itinerary',
 }: ListicleArticleLayoutProps): JSX.Element {
   const { mapsEnabled } = useDevStore()
   const isDesktopMap = useIsDesktopMap()
@@ -65,6 +67,7 @@ export function ListicleArticleLayout({
       />
       <div
         data-article-layout="listicle"
+        data-listicle-format={format}
         className="relative 1024:max-w-[1600px] 1024:mx-auto"
         style={listicleLayoutStyle}
       >
