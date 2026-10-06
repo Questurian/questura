@@ -40,7 +40,7 @@ export function MapsListicleArticlePage({
   })
 
   return (
-    <article className="maps-listicle-article min-h-screen bg-background sm:max-w-[600px] sm:mx-auto 1024:max-w-none 1024:mx-0">
+    <article data-listicle-type="maps" className="maps-listicle-article min-h-screen bg-background sm:max-w-[600px] sm:mx-auto 1024:max-w-none 1024:mx-0">
       <ArticlePageHeader
         title={article.title}
         description={description}
@@ -56,7 +56,7 @@ export function MapsListicleArticlePage({
       />
 
       {introHtml ? (
-        <div className="px-3 pt-6 pb-2 380:px-4 380:pt-8 380:pb-3 480:px-5 480:pt-10 480:pb-4 550:px-6 sm:px-8 sm:pt-10 sm:pb-5 768:px-10">
+        <div className="maps-listicle-intro-wrap px-3 pt-6 pb-2 380:px-4 380:pt-8 380:pb-3 480:px-5 480:pt-10 480:pb-4 550:px-6 sm:px-8 sm:pt-10 sm:pb-5 768:px-10">
           <div
             className="article-prose maps-listicle-intro max-w-none"
             dangerouslySetInnerHTML={{ __html: introHtml }}
@@ -72,7 +72,7 @@ export function MapsListicleArticlePage({
 
       <ListicleSeparator />
 
-      <div className="px-3 pb-20 pt-4 380:px-4 380:pt-6 480:px-5 480:pt-8 480:pb-24 550:px-6 550:pt-10 sm:px-8 sm:pt-8 sm:pb-32 768:px-10">
+      <div className="maps-listicle-entries px-3 pb-20 pt-4 380:px-4 380:pt-6 480:px-5 480:pt-8 480:pb-24 550:px-6 550:pt-10 sm:px-8 sm:pt-8 sm:pb-32 768:px-10">
         <ListicleMapRegion>
           {runs.map((run, runIndex) => {
             const heading = momentHeadings[run.start]
