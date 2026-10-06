@@ -155,7 +155,7 @@ export function ListicleVenueInfoGrid({
             {cells.map((c) => (
               <div
                 key={c.key}
-                className="maps-listicle-info-row group flex min-h-12 items-center gap-3 border-b border-foreground/15 px-1 py-3 480:min-h-13 480:gap-3.5 480:px-1.5 480:py-3.5 sm:min-h-14 sm:px-2"
+                className="maps-listicle-info-row group flex min-h-12 items-center gap-3 border-b border-accent/30 px-1 py-3 480:min-h-13 480:gap-3.5 480:px-1.5 480:py-3.5 sm:min-h-14 sm:px-2"
               >
                 <span>{c.icon}</span>
                 <div className="min-w-0 flex-1">{c.node}</div>

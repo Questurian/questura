@@ -83,7 +83,7 @@ export function ListicleVenueEntry({
   return (
     <li
       ref={entryRef}
-      className="maps-listicle-entry scroll-mt-4 border-t-[3px] border-double border-foreground/55 first:border-t-0 first:pt-0 pt-7 pb-7 last:pb-1 max-[379px]:pt-6 max-[379px]:pb-6 480:pt-9 480:pb-9 550:pt-11 550:pb-11 sm:pt-12 sm:pb-12 768:pt-14 768:pb-14"
+      className="maps-listicle-entry scroll-mt-4 border-t-[3px] border-double border-accent/60 first:border-t-0 first:pt-0 pt-7 pb-7 last:pb-1 max-[379px]:pt-6 max-[379px]:pb-6 480:pt-9 480:pb-9 550:pt-11 550:pb-11 sm:pt-12 sm:pb-12 768:pt-14 768:pb-14"
     >
       <div className="maps-listicle-entry-content min-w-0 space-y-3 380:space-y-3.5 480:space-y-4 sm:space-y-5">
         <ItineraryMomentBadge moment={moment} label={momentLabel} />
