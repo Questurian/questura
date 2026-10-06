@@ -25,7 +25,7 @@ export function ListicleVenueTitleRow({
 
   return (
     <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-      <Heading className="text-[1.15rem] font-bold leading-[1.08] tracking-[-0.045em] text-foreground [font-family:var(--font-editorial-serif)] 380:text-[1.35rem] 480:text-[1.5rem] 550:text-[1.55rem] sm:text-[1.7rem] 768:text-[1.8rem]">
+      <Heading className="maps-listicle-venue-title text-[1.15rem] font-bold leading-[1.08] tracking-[-0.045em] text-foreground [font-family:var(--font-editorial-serif)] 380:text-[1.35rem] 480:text-[1.5rem] 550:text-[1.55rem] sm:text-[1.7rem] 768:text-[1.8rem]">
         {title}
       </Heading>
       {priceLevel && priceLabel ? (

@@ -114,7 +114,7 @@ export function ListiclePhotoCarousel({
         {images.map((image, index) => (
           <div
             key={`${image.url}-${index}`}
-            className="aspect-[16/10] w-full min-w-full snap-center 380:aspect-[4/3] 480:aspect-[3/2] sm:aspect-[16/9]"
+            className="maps-listicle-photo-slide aspect-[16/10] w-full min-w-full snap-center 380:aspect-[4/3] 480:aspect-[3/2] sm:aspect-[16/9]"
             role={hasMultipleImages ? 'group' : undefined}
             aria-roledescription={hasMultipleImages ? 'slide' : undefined}
             aria-label={hasMultipleImages ? `${index + 1} of ${images.length}` : undefined}
@@ -135,7 +135,7 @@ export function ListiclePhotoCarousel({
         {advancing ? (
           <div
             aria-hidden
-            className="aspect-[16/10] w-full min-w-full snap-center 380:aspect-[4/3] 480:aspect-[3/2] sm:aspect-[16/9]"
+            className="maps-listicle-photo-slide aspect-[16/10] w-full min-w-full snap-center 380:aspect-[4/3] 480:aspect-[3/2] sm:aspect-[16/9]"
           >
             <ShimmerImage
               src={images[0].url}
