@@ -29,6 +29,12 @@ const MAX_FIT_ZOOM = 17
 // not a tight crop, so back off from the exact fit.
 const OVERVIEW_ZOOM_OUT = 1.5
 const FIT_PADDING = 56
+/**
+ * A locked itinerary's pins are all inert: no stop can become active, so the
+ * overview is the only view the reader gets. The usual step back, which leaves
+ * room to fly in to a stop, would only shrink the pins into a clump.
+ */
+const INERT_OVERVIEW_ZOOM_OUT = 0.4
 const ACCENT = '#3B5BDB'
 /**
  * A home pin is context, not a stop: it sits smaller than an active stop pin
@@ -332,11 +338,13 @@ export function MapPanel({
       const marker = new lib.AdvancedMarkerElement({
         map,
         position: { lat: point.lat, lng: point.lng },
-        title: point.title,
+        title: point.title || undefined,
         content: content.element,
-        gmpClickable: true,
+        gmpClickable: !point.inert,
       })
-      marker.addEventListener('gmp-click', () => scrollToEntry(point.id))
+      if (!point.inert) {
+        marker.addEventListener('gmp-click', () => scrollToEntry(point.id))
+      }
       markersById.current.set(point.id, { marker, content })
     }
   }, [ready, points, scrollToEntry])
@@ -375,7 +383,9 @@ export function MapPanel({
           insetBottom: viewportInsetBottomPx,
           padding: fitPadding,
           maxZoom: MAX_FIT_ZOOM,
-          zoomOut: OVERVIEW_ZOOM_OUT,
+          zoomOut: points.every((point) => point.inert)
+            ? INERT_OVERVIEW_ZOOM_OUT
+            : OVERVIEW_ZOOM_OUT,
           singlePointZoom: SINGLE_POINT_OVERVIEW_ZOOM,
           fallback: { center: LIMA_CENTER, zoom: DEFAULT_ZOOM },
         })

@@ -16,7 +16,10 @@ import { useListicleMapSync } from '@/features/articles/components/ListicleMapSy
  * switch.
  */
 export function ListicleMapStepper(): JSX.Element | null {
-  const { points, activeId, scrollToEntry } = useListicleMapSync()
+  const { points: allPoints, activeId, scrollToEntry } = useListicleMapSync()
+  // Inert pins have no entry to step to; arrows that do nothing are worse
+  // than no arrows.
+  const points = allPoints.filter((point) => !point.inert)
 
   if (points.length < 2) return null
 

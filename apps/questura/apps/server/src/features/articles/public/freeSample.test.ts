@@ -112,7 +112,7 @@ describe('applySampleRule — listicle itineraries', () => {
 
     const outcome = applySampleRule('listicle-itineraries', doc)
 
-    expect(outcome).toEqual({ applied: true, unit: 'days', shown: 0, total: 3 })
+    expect(outcome).toEqual({ applied: true, unit: 'days', shown: 0, total: 3, pins: [] })
     expect(doc.itineraryDays).toEqual([])
     expect(doc.whereStaying).toHaveLength(1)
   })
@@ -147,7 +147,54 @@ describe('applySampleRule — listicle itineraries', () => {
       unit: 'days',
       shown: 0,
       total: 0,
+      pins: [],
     })
+  })
+
+  it('lets each withheld stop through as a map position and nothing else', () => {
+    const stop = (title: string, latitude: number, longitude: number) => ({
+      blockType: 'dining',
+      blurb: `why ${title} is worth it`,
+      item: { title, latitude, longitude, address: `${title} street`, phone: '555' },
+    })
+    const doc: Record<string, unknown> = {
+      itineraryDays: [
+        { items: [stop('Isolina', -12.15, -77.02), stop('Canta Rana', -12.149, -77.021)] },
+        {
+          items: [stop('Juanito', -12.148, -77.022)],
+          whereStaying: [{ item: { title: 'Day hotel', latitude: -12.1, longitude: -77.0 } }],
+        },
+      ],
+    }
+
+    const outcome = applySampleRule('listicle-itineraries', doc)
+
+    expect(outcome.pins).toEqual([
+      { lat: -12.15, lng: -77.02 },
+      { lat: -12.149, lng: -77.021 },
+      { lat: -12.148, lng: -77.022 },
+    ])
+    // The pins are the only trace of the stops left anywhere on the document.
+    expect(JSON.stringify({ doc, outcome })).not.toMatch(/Isolina|Canta Rana|Juanito|street|555|worth it/)
+  })
+
+  it('pins nothing for a stop with no usable coordinates', () => {
+    const doc: Record<string, unknown> = {
+      itineraryDays: [
+        {
+          items: [
+            { blockType: 'itinerary-tour-agency', item: { title: 'Agency' } },
+            { blockType: 'dining', item: { latitude: '-12.1', longitude: -77 } },
+            { blockType: 'dining', item: { latitude: Number.NaN, longitude: -77 } },
+            { blockType: 'dining', item: 42 },
+            null,
+          ],
+        },
+      ],
+      items: [{ blockType: 'dining', item: { latitude: -12.2, longitude: -77.1 } }],
+    }
+
+    expect(applySampleRule('listicle-itineraries', doc).pins).toEqual([{ lat: -12.2, lng: -77.1 }])
   })
 })
 

@@ -18,6 +18,28 @@ export type GateState = {
   unit: 'blocks' | 'items' | 'days'
   shown: number
   total: number
+  /**
+   * Where each withheld stop of a locked itinerary sits on the map. Positions
+   * only; the server sends nothing else about a stop. Empty for everything
+   * that is not a locked itinerary.
+   */
+  mapPins: GateMapPin[]
+}
+
+export type GateMapPin = { lat: number; lng: number }
+
+function readMapPins(value: unknown): GateMapPin[] {
+  if (!Array.isArray(value)) return []
+
+  const pins: GateMapPin[] = []
+  for (const entry of value) {
+    if (!entry || typeof entry !== 'object') continue
+    const { lat, lng } = entry as { lat?: unknown; lng?: unknown }
+    if (typeof lat !== 'number' || typeof lng !== 'number') continue
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) continue
+    pins.push({ lat, lng })
+  }
+  return pins
 }
 
 export function readGate(article: unknown): GateState | null {
@@ -35,6 +57,7 @@ export function readGate(article: unknown): GateState | null {
       candidate.unit === 'items' || candidate.unit === 'days' ? candidate.unit : 'blocks',
     shown: Number.isFinite(candidate.shown) ? Number(candidate.shown) : 0,
     total: Number.isFinite(candidate.total) ? Number(candidate.total) : 0,
+    mapPins: readMapPins(candidate.mapPins),
   }
 }
 
@@ -49,28 +72,33 @@ export type LockCopy = {
 }
 
 /**
+ * The button says what to do, not what is behind it: "Unlock the full day"
+ * left a signed-out reader guessing that unlocking means joining.
+ */
+const UNLOCK_CTA = 'Become a member to unlock'
+
+/**
  * Names what is being withheld, in the unit the server actually cut on.
  *
  * Itineraries keep no day at all, so the old "Day 1 of 5" phrasing would read
- * as "Day 0 of 5" -- which sounds like a bug rather than an offer. The pitch
- * for an itinerary is the trip length being unlocked, not the fraction shown.
+ * as "Day 0 of 5" -- which sounds like a bug rather than an offer.
  */
 export function describeLock(gate: GateState): LockCopy {
-  if (!gate.locked) return { headline: null, cta: 'Unlock the full guide' }
+  if (!gate.locked) return { headline: null, cta: UNLOCK_CTA }
 
   if (gate.unit === 'days') {
     return {
       headline: 'Your stay is above. The day-by-day plan is for members.',
-      cta: gate.total === 1 ? 'Unlock the full day' : gate.total > 0 ? `Unlock all ${gate.total} days` : 'Unlock the full itinerary',
+      cta: UNLOCK_CTA,
     }
   }
 
   if (gate.total > gate.shown && gate.shown > 0) {
     return {
       headline: `You're reading the first ${gate.shown} of ${gate.total} sections.`,
-      cta: 'Unlock the full guide',
+      cta: UNLOCK_CTA,
     }
   }
 
-  return { headline: null, cta: 'Unlock the full guide' }
+  return { headline: null, cta: UNLOCK_CTA }
 }

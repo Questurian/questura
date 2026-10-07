@@ -29,6 +29,7 @@ test('readGate: reads a well-formed gate as sent', () => {
     unit: 'blocks',
     shown: 2,
     total: 12,
+    mapPins: [],
   })
 })
 
@@ -91,21 +92,24 @@ test('describeLock: says nothing when the item is not locked', () => {
   assert.ok(copy.cta.length > 0)
 })
 
-test('describeLock: an itinerary is sold on its length, not on a fraction', () => {
+test('describeLock: an itinerary never quotes a zero-day fraction', () => {
   // Itineraries keep no day at all, so "Day 0 of 5" would read as a bug rather
   // than an offer.
   const copy = describeLock(readGate(gated({ unit: 'days', shown: 0, total: 5 })))
 
-  assert.match(copy.cta, /5 days/)
   assert.ok(copy.headline)
   assert.doesNotMatch(copy.headline, /\b0\b/)
 })
 
-test('describeLock: an itinerary with no known day count still offers the unlock', () => {
-  const copy = describeLock(readGate(gated({ unit: 'days', shown: 0, total: 0 })))
-
-  assert.equal(copy.cta, 'Unlock the full itinerary')
-  assert.doesNotMatch(copy.cta, /0/)
+test('describeLock: the button tells a reader to join, whatever is withheld', () => {
+  // "Unlock the full day" did not say that unlocking means becoming a member.
+  for (const gate of [
+    gated({ unit: 'days', shown: 0, total: 1 }),
+    gated({ unit: 'days', shown: 0, total: 0 }),
+    gated({ shown: 2, total: 12 }),
+  ]) {
+    assert.equal(describeLock(readGate(gate)).cta, 'Become a member to unlock')
+  }
 })
 
 test('describeLock: an article names how much of it the reader has', () => {
@@ -123,4 +127,24 @@ test('describeLock: no fraction is quoted when it would read as nothing shown', 
     assert.equal(copy.headline, null)
     assert.ok(copy.cta.length > 0)
   }
+})
+
+test('readGate: keeps a locked itinerary\'s stop positions and nothing malformed', () => {
+  const gate = readGate(
+    gated({
+      unit: 'days',
+      mapPins: [
+        { lat: -12.15, lng: -77.02, title: 'must not survive' },
+        { lat: '-12.1', lng: -77 },
+        { lat: Number.NaN, lng: -77 },
+        null,
+      ],
+    }),
+  )
+
+  assert.deepEqual(gate.mapPins, [{ lat: -12.15, lng: -77.02 }])
+})
+
+test('readGate: an item with no pins reads as an empty list, not a missing key', () => {
+  assert.deepEqual(readGate(gated({ mapPins: 'nope' })).mapPins, [])
 })

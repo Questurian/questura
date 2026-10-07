@@ -76,6 +76,12 @@ export type ListicleMapPoint = {
   kind?: 'stay' | 'stop'
   /** Absent on desktop, where the reading column is already beside the map. */
   preview?: ListicleMapPointPreview
+  /**
+   * The pin has no entry on the page to travel to -- a locked itinerary's
+   * withheld stops. It is drawn and framed like any other, but it is not
+   * clickable and the stepper walks past it.
+   */
+  inert?: boolean
 }
 
 /**
