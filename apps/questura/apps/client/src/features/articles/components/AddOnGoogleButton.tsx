@@ -1,22 +1,4 @@
-import type { ButtonHTMLAttributes, JSX } from 'react'
-
-export type AddOnGoogleButtonVariant = 'google' | 'editorial'
-
-export type AddOnGoogleButtonProps = {
-  /**
-   * Visual variant.
-   * - `'google'` — Google-branded button (white surface, Roboto, 4px corners,
-   *   official-feeling Google G logo). Use this anywhere we want the action
-   *   to read as a first-party Google integration.
-   * - `'editorial'` — Pill button styled to match the magazine header
-   *   (Playfair display font, full rounded corners, foreground border).
-   *   Use this on heavily editorial surfaces where a plain Google button
-   *   would clash with the typographic system.
-   */
-  variant?: AddOnGoogleButtonVariant
-  label?: string
-  popover?: '' | 'auto' | 'manual'
-} & Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'children' | 'popover'>
+import type { JSX } from 'react'
 
 function GoogleG({ size = 18 }: { size?: number }): JSX.Element {
   return (
@@ -47,61 +29,18 @@ function GoogleG({ size = 18 }: { size?: number }): JSX.Element {
   )
 }
 
-/**
- * "Add Us On Google" button with two visual treatments.
- * Default is `'google'` (Material-style, brand-faithful).
- */
-export function AddOnGoogleButton({
-  variant = 'google',
-  label = 'Add Us On Google',
-  className,
-  type = 'button',
-  ...rest
-}: AddOnGoogleButtonProps): JSX.Element {
-  if (variant === 'editorial') {
-    return (
-      <button
-        type={type}
-        className={[
-          'inline-flex items-center justify-center gap-2',
-          'rounded-full border border-foreground/25 bg-background',
-          'px-4 py-2 font-display text-[12px] font-medium tracking-[0.01em] text-foreground',
-          'transition-colors hover:bg-foreground/[0.04] active:bg-foreground/[0.06]',
-          '380:px-5 380:py-2.5 380:text-[13px]',
-          'sm:px-6 sm:py-2.5 sm:text-[14px]',
-          className ?? '',
-        ]
-          .filter(Boolean)
-          .join(' ')}
-        {...rest}
-      >
-        <GoogleG size={16} />
-        {label}
-      </button>
-    )
-  }
-
+/** Compact Preferred Sources link with the original Google logo. */
+export function AddOnGoogleButton(): JSX.Element {
   return (
-    <button
-      type={type}
-      className={[
-        'inline-flex items-center justify-center gap-2.5',
-        'rounded-[6px] border border-foreground/15 bg-[var(--cream)]',
-        'px-4 py-[9px] font-roboto text-[14px] font-medium leading-none tracking-[0.01em] text-foreground',
-        'shadow-[0_1px_2px_rgba(26,26,26,0.05)] transition-[box-shadow,background-color,border-color] duration-150',
-        'hover:border-foreground/25 hover:bg-[#FFFCF6] hover:shadow-[0_1px_2px_rgba(26,26,26,0.06),0_2px_6px_rgba(26,26,26,0.06)]',
-        'active:bg-[var(--background-warm)]',
-        'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1a73e8]',
-        '380:px-[18px] 380:py-[10px]',
-        'sm:px-5 sm:py-[11px]',
-        className ?? '',
-      ]
-        .filter(Boolean)
-        .join(' ')}
-      {...rest}
+    <a
+      href="https://www.google.com/preferences/source?q=questurian.com"
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label="Add Questurian as a preferred source on Google"
+      className="inline-flex shrink-0 items-center justify-center gap-2 rounded-[4px] border border-foreground/20 bg-background px-3 py-2 font-roboto text-[12px] font-medium leading-none text-foreground transition-colors hover:border-foreground/35 hover:bg-paper focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
     >
-      <GoogleG size={18} />
-      {label}
-    </button>
+      <GoogleG size={14} />
+      Add Us On Google
+    </a>
   )
 }

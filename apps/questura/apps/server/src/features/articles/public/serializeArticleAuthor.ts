@@ -88,6 +88,7 @@ export function serializeArticleAuthor(article: Record<string, unknown>): void {
 
   const articleByline = recordValue(author.articleByline)
   const avatar = serializeAvatar(author)
+  const showArticlePresentation = articleByline?.showAvatar === true
 
   article.author = {
     id: author.id,
@@ -98,8 +99,10 @@ export function serializeArticleAuthor(article: Record<string, unknown>): void {
     avatar,
     socialLinks: serializeSocialLinks(author),
     articleByline: {
-      avatar: articleByline?.showAvatar === true ? avatar : null,
-      links: serializeFeaturedLinks(author, articleByline?.featuredLinks),
+      avatar: showArticlePresentation ? avatar : null,
+      links: showArticlePresentation
+        ? serializeFeaturedLinks(author, articleByline?.featuredLinks)
+        : [],
     },
   }
 }
