@@ -34,7 +34,7 @@ export default function SubscribeButton() {
         380:max-[479.98px]:h-[30px] 380:max-[479.98px]:w-auto 380:max-[479.98px]:px-2
         380:max-[479.98px]:text-[0.72rem] 380:max-[479.98px]:font-medium
         480:h-[40px] 480:w-[125px] 480:px-1.5 480:text-[.850rem]
-        550:h-[40px] 550:w-[234px] 550:px-1.5 550:text-[.850rem]
+        640:w-[234px]
       `}
     >
       {/*
@@ -52,8 +52,10 @@ export default function SubscribeButton() {
         deliberate (2026-08-15).
       */}
       <span className="380:hidden">Subscribe</span>
-      <span className="hidden 380:inline 550:hidden">Join: $1.54/wk</span>
-      <span className="hidden 550:inline">Subscribe: under $1.55/wk</span>
+      {/* The long line needs the 234px button, which crowds the wordmark
+          on anything narrower than 640. */}
+      <span className="hidden 380:inline 640:hidden">Join: $1.54/wk</span>
+      <span className="hidden 640:inline">Subscribe: under $1.55/wk</span>
     </button>
   );
 }
