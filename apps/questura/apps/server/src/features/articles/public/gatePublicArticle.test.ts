@@ -68,7 +68,7 @@ describe('gatePublicArticle', () => {
 
     const state = gatePublicArticle('listicle-itineraries', doc)
 
-    expect(state).toEqual({ access: 'member', locked: true, unit: 'days', shown: 0, total: 5 })
+    expect(state).toEqual({ access: 'member', locked: true, unit: 'days', shown: 0, total: 5, mapPins: [] })
     expect(doc.itineraryDays).toEqual([])
     expect(doc.whereStaying).toHaveLength(1)
   })

@@ -1,6 +1,6 @@
 import { DEFAULT_ACCESS_TIER, isAccessTier, isGatedItem } from '@/shared/content/accessTier'
 import type { AccessTier } from '@/shared/content/accessTier'
-import { applySampleRule, type SampleUnit } from './freeSample'
+import { applySampleRule, type SamplePin, type SampleUnit } from './freeSample'
 import type { ArticleCollectionSlug } from './serializeArticleBlocks'
 
 /**
@@ -17,6 +17,12 @@ export type GateState = {
   unit: SampleUnit
   shown: number
   total: number
+  /**
+   * Locked itineraries only: where each withheld stop sits on the map, so the
+   * reader's map is not empty. Present (possibly empty) on every locked
+   * itinerary and on nothing else.
+   */
+  mapPins?: SamplePin[]
 }
 
 /**
@@ -75,6 +81,7 @@ export function gatePublicArticle(
     unit: outcome.unit,
     shown: outcome.shown,
     total: outcome.total,
+    ...(outcome.pins ? { mapPins: outcome.pins } : {}),
   }
 
   doc.gate = state

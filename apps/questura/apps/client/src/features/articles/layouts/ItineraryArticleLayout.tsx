@@ -40,7 +40,9 @@ export function ItineraryArticleLayout({
   city,
   path,
 }: ItineraryArticleLayoutProps): JSX.Element {
-  const gate = readGate(article)
+  // Memoised because the map's points depend on `gate.mapPins`: a fresh array
+  // every render would rebuild every marker and re-frame the camera each time.
+  const gate = useMemo(() => readGate(article), [article])
   const locked = gate?.locked === true
 
   // The swap happens here rather than deeper down because this is where days
@@ -54,6 +56,12 @@ export function ItineraryArticleLayout({
   })
 
   const effectiveArticle = locked && phase === 'ready' && data ? data : article
+  // The notice is up and the stay card is not rendered (see `paywalled` on the
+  // page), so nothing on the page answers to a pin.
+  const paywalled = Boolean(locked && gate) && (phase === 'identifying' || phase === 'anonymous')
+  // Stops the server withheld, as positions only. Dropped the moment the full
+  // body is in, because that body draws the same stops as real pins.
+  const lockedPins = locked && effectiveArticle === article ? gate?.mapPins : undefined
   const days = useMemo(() => itineraryDaysForArticle(effectiveArticle), [effectiveArticle])
   const [selectedDayIndex, setSelectedDayIndex] = useState(0)
   const dayIndex = Math.min(selectedDayIndex, Math.max(days.length - 1, 0))
@@ -76,6 +84,7 @@ export function ItineraryArticleLayout({
         lng: longitude,
         kind: 'stay',
         preview: mapPointPreviewFromRow(row),
+        inert: paywalled,
       })
     })
 
@@ -99,8 +108,22 @@ export function ItineraryArticleLayout({
       })
     })
 
+    // Every day at once: a locked itinerary has no day tabs to split them by,
+    // and the map frames whatever it is given, so it zooms out to hold them.
+    lockedPins?.forEach((pin, index) => {
+      result.push({
+        id: `locked-stop-${index}`,
+        index,
+        title: '',
+        lat: pin.lat,
+        lng: pin.lng,
+        kind: 'stop',
+        inert: true,
+      })
+    })
+
     return result
-  }, [days, dayIndex])
+  }, [days, dayIndex, lockedPins, paywalled])
 
   // The map carries its own day switcher, because the takeover covers the
   // article's day tabs. Same state, so the two can never disagree.
@@ -129,10 +152,11 @@ export function ItineraryArticleLayout({
           days={days}
           selectedDayIndex={dayIndex}
           onSelectDay={setSelectedDayIndex}
+          paywalled={paywalled}
           lockedSlot={
             locked && gate ? (
               phase === 'identifying' || phase === 'anonymous' ? (
-                <PaywallNotice gate={gate} returnTo={path ?? '/'} />
+                <PaywallNotice gate={gate} returnTo={path ?? '/'} fade={false} />
               ) : phase === 'unverified' ? (
                 <GatedLoadError onRetry={retry} reason="access" />
               ) : phase === 'loading' ? (

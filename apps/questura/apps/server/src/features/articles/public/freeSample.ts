@@ -17,7 +17,10 @@ import type { ArticleCollectionSlug } from './serializeArticleBlocks'
  *   callouts, FAQ -- are held back even when they appear early, because each
  *   carries standalone value and is a reason to subscribe on its own.
  * - An itinerary never shows a day. Only its top-level lodging section
- *   survives; the day-by-day plan is the product.
+ *   survives; the day-by-day plan is the product. The one thing let through
+ *   about the withheld stops is where each sits on the map (owner decision,
+ *   2026-10-06): a locked itinerary whose map showed only the hotel read as an
+ *   empty one. Coordinates only -- no name, photo, text or day.
  * - A single-type listicle is never gated at all. Those earn from ads, and ad
  *   revenue needs the whole page reachable.
  *
@@ -49,6 +52,9 @@ export const DEFAULT_SAMPLE_LIMITS: SampleLimits = {
  */
 const SAMPLEABLE_ARTICLE_BLOCKS = new Set(['text'])
 
+/** Where a withheld itinerary stop sits on the map, and nothing else about it. */
+export type SamplePin = { lat: number; lng: number }
+
 export type SampleOutcome = {
   /** Whether anything was actually removed. */
   applied: boolean
@@ -56,6 +62,8 @@ export type SampleOutcome = {
   unit: SampleUnit
   shown: number
   total: number
+  /** Itineraries only: one pin per withheld stop that has coordinates. */
+  pins?: SamplePin[]
 }
 
 function asArray(value: unknown): unknown[] | null {
@@ -202,9 +210,42 @@ function sampleArticle(doc: Record<string, unknown>, limits: SampleLimits): Samp
   }
 }
 
+/**
+ * Built field by field rather than by deleting keys from the stop, so a field
+ * added to a venue later cannot ride out with the pin.
+ */
+function pinsForStops(stops: unknown[]): SamplePin[] {
+  const pins: SamplePin[] = []
+
+  for (const stop of stops) {
+    if (!stop || typeof stop !== 'object') continue
+    const item = (stop as { item?: unknown }).item
+    if (!item || typeof item !== 'object') continue
+
+    const { latitude, longitude } = item as { latitude?: unknown; longitude?: unknown }
+    if (typeof latitude !== 'number' || typeof longitude !== 'number') continue
+    if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) continue
+
+    pins.push({ lat: latitude, lng: longitude })
+  }
+
+  return pins
+}
+
 function sampleItinerary(doc: Record<string, unknown>): SampleOutcome {
   const days = asArray(doc.itineraryDays) ?? []
   const legacyItems = asArray(doc.items) ?? []
+
+  // Read before the days are emptied below. Day lodging is not pinned: it is
+  // withheld with its day, and the surviving top-level lodging has its own pin.
+  const pins = [
+    ...days.flatMap((day) =>
+      day && typeof day === 'object'
+        ? pinsForStops(asArray((day as { items?: unknown }).items) ?? [])
+        : [],
+    ),
+    ...pinsForStops(legacyItems),
+  ]
 
   // Every day goes, including each day's own lodging -- per-day lodging lives
   // inside the day rows, and the policy is that no day survives. Only the
@@ -218,5 +259,6 @@ function sampleItinerary(doc: Record<string, unknown>): SampleOutcome {
     unit: 'days',
     shown: 0,
     total: days.length,
+    pins,
   }
 }

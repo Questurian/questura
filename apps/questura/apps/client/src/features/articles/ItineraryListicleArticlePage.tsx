@@ -7,6 +7,7 @@ import { ArticleAuthorBanner } from "@/features/articles/components/ArticleAutho
 import { ArticlePageHeader } from "@/features/articles/components/ArticlePageHeader";
 import { InstagramEmbedBlock } from "@/features/articles/components/InstagramEmbedBlock";
 import { ItineraryStayCard } from "@/features/articles/components/ItineraryStayCard";
+import { PaywallFade } from "@/features/articles/components/PaywallNotice";
 import { ItineraryMomentBadge } from "@/features/articles/components/ItineraryMomentBadge";
 import { ListicleMapRegion } from "@/features/articles/components/ListicleMapRegion";
 import { ListicleSeparator } from "@/features/articles/components/ListicleSeparator";
@@ -39,6 +40,13 @@ type ItineraryListicleArticlePageProps = {
    * and the reader has not paid for it. Null once a member's full body loads.
    */
   lockedSlot?: ReactNode;
+  /**
+   * True while `lockedSlot` is the paywall notice. The notice then follows the
+   * intro directly: the stay block and the separator are not rendered, and
+   * the intro carries the fade, so the reader meets the lock before any of
+   * the plan rather than after a hotel card.
+   */
+  paywalled?: boolean;
 };
 
 function formatDuration(hours: number): string {
@@ -260,6 +268,7 @@ export function ItineraryListicleArticlePage({
   selectedDayIndex,
   onSelectDay,
   lockedSlot,
+  paywalled = false,
 }: ItineraryListicleArticlePageProps): JSX.Element {
   const dayIndex = Math.min(selectedDayIndex, Math.max(days.length - 1, 0));
   const selectedDay = days[dayIndex] ?? { whereStaying: [], items: [] };
@@ -288,15 +297,20 @@ export function ItineraryListicleArticlePage({
       />
 
       {introHtml ? (
-        <div className="px-3 pt-6 pb-2 380:px-4 380:pt-8 380:pb-3 480:px-5 480:pt-10 480:pb-4 550:px-6 sm:px-8 sm:pt-10 sm:pb-5 768:px-10">
+        <div className="relative px-3 pt-6 pb-2 380:px-4 380:pt-8 380:pb-3 480:px-5 480:pt-10 480:pb-4 550:px-6 sm:px-8 sm:pt-10 sm:pb-5 768:px-10">
           <div
             className="article-prose maps-listicle-intro max-w-none"
             dangerouslySetInnerHTML={{ __html: introHtml }}
           />
+          {/* Bounded by the intro, so a short one cannot push the fade up
+              onto the header's share and bookmark controls. */}
+          {paywalled ? (
+            <PaywallFade className="bottom-0 h-full max-h-56 sm:max-h-72" />
+          ) : null}
         </div>
       ) : null}
 
-      <ListicleSeparator />
+      {paywalled ? null : <ListicleSeparator />}
 
       {days.length > 1 ? (
         <div
@@ -334,7 +348,7 @@ export function ItineraryListicleArticlePage({
 
       <div className="px-3 pb-20 pt-6 380:px-4 380:pt-7 480:px-5 480:pt-8 480:pb-24 550:px-6 550:pt-10 sm:px-8 sm:pt-8 sm:pb-32 768:px-10">
         <ListicleMapRegion>
-          {whereStaying.length > 0 ? (
+          {whereStaying.length > 0 && !paywalled ? (
             <div className="mb-7 space-y-8 border-b-[3px] border-double border-accent/60 pb-7 max-[379px]:mb-6 max-[379px]:pb-6 480:mb-9 480:space-y-10 480:pb-9 550:mb-11 550:pb-11 sm:mb-12 sm:space-y-12 sm:pb-12 768:mb-14 768:pb-14">
               {whereStaying.map((row) => (
                 <ItineraryStayCard key={row.id} row={row} />
