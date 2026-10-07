@@ -76,7 +76,12 @@ export function clampAnonymousRead<T extends ReadArgs>(args: T): T {
 }
 
 export const boundAnonymousReads: CollectionBeforeOperationHook = async ({ args, operation, req }) => {
-  if (operation !== 'read' || !isExternalAnonymous(req)) return args
+  // Internal Local API lookups may retain the incoming REST/GraphQL req.
+  // In particular API-key authentication runs before req.user is assigned;
+  // rate-limiting that trusted lookup makes Payload swallow the 429 and
+  // reject a valid credential as anonymous. REST callers cannot set this
+  // server-owned operation flag through request parameters.
+  if (operation !== 'read' || args.overrideAccess === true || !isExternalAnonymous(req)) return args
 
   // The same per-IP limiter as the public reads, in its own bucket. Fails
   // open with the rest of them if Redis is down; the clamp below still holds.
