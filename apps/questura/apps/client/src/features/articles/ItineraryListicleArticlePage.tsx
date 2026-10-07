@@ -350,7 +350,7 @@ export function ItineraryListicleArticlePage({
         {/* The header keeps the byline to name and date; the author's photo
             and links sit here, after the plan, as on a standard article. */}
         {article.author ? (
-          <div className="mt-14 480:mt-16 sm:mt-20">
+          <div className={lockedSlot ? "mt-8 sm:mt-10" : "mt-14 480:mt-16 sm:mt-20"}>
             <ArticleAuthorBanner author={article.author} />
           </div>
         ) : null}

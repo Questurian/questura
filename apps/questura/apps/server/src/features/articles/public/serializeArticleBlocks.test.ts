@@ -222,6 +222,31 @@ describe('serializeArticleByCollection author byline', () => {
     },
   )
 
+  it.each(['articles', 'single-type-listicles', 'listicle-itineraries'] as const)(
+    'hides retained social selections when avatar presentation is disabled for %s',
+    async (collection) => {
+      const article: Record<string, unknown> = {
+        author: {
+          id: 42,
+          displayName: 'Staff Writer',
+          avatar: { url: 'https://cdn.example/staff.webp' },
+          socialLinks: {
+            instagram: 'https://instagram.com/staff',
+            twitter: 'https://x.com/staff',
+          },
+          articleByline: { showAvatar: false, featuredLinks: ['instagram', 'twitter'] },
+        },
+      }
+
+      await serializeArticleByCollection(collection, article)
+
+      expect(article.author).toMatchObject({
+        displayName: 'Staff Writer',
+        articleByline: { avatar: null, links: [] },
+      })
+    },
+  )
+
   it('supports avatar-only presentation and suppresses selected links without URLs', async () => {
     const article: Record<string, unknown> = {
       author: {

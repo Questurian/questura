@@ -81,8 +81,8 @@ function StandardArticleHeader({
         <div className="mt-5 h-px w-full bg-foreground/18" aria-hidden />
       )}
 
-      <div className="mt-6 flex flex-wrap items-center justify-between gap-x-6 gap-y-4">
-        <div className="flex items-center gap-3 380:gap-4">
+      <div className="mt-6 flex flex-col items-start gap-4">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-3">
           <ArticleShareButton
             url={shareUrl}
             title={title}
@@ -93,8 +93,7 @@ function StandardArticleHeader({
 
           <BookmarkButton targetType="articles" targetId={articleId} />
         </div>
-        {/* Follow updates to standard articles on Google. */}
-        <AddOnGoogleButton variant="google" />
+        <AddOnGoogleButton />
       </div>
     </header>
   )

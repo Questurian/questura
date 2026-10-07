@@ -61,7 +61,7 @@ export function describeLock(gate: GateState): LockCopy {
   if (gate.unit === 'days') {
     return {
       headline: 'Your stay is above. The day-by-day plan is for members.',
-      cta: gate.total > 0 ? `Unlock all ${gate.total} days` : 'Unlock the full itinerary',
+      cta: gate.total === 1 ? 'Unlock the full day' : gate.total > 0 ? `Unlock all ${gate.total} days` : 'Unlock the full itinerary',
     }
   }
 

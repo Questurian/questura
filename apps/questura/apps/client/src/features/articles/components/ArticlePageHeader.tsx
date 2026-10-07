@@ -1,6 +1,7 @@
 import type { JSX } from 'react'
 import { ShimmerImage } from '@/components/media/ShimmerImage'
 import type { ArticleAuthor } from '@/features/articles/types'
+import { AddOnGoogleButton } from '@/features/articles/components/AddOnGoogleButton'
 import { ArticleShareButton } from '@/features/articles/components/ArticleShareButton'
 import { BookmarkButton } from '@/features/bookmarks/components/BookmarkButton'
 import type { BookmarkTargetType } from '@/features/bookmarks/types'
@@ -116,7 +117,7 @@ export function ArticlePageHeader({
           )}
 
           <div className="mx-auto flex w-full max-w-[44ch] flex-col items-center gap-3 380:gap-3.5 sm:gap-4">
-            <div className="flex items-center gap-3 380:gap-4">
+            <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-3">
               <ArticleShareButton title={title} imageUrl={featuredImage?.url} />
 
               {bookmark ? (
@@ -132,7 +133,9 @@ export function ArticlePageHeader({
                   />
                 </>
               ) : null}
+
             </div>
+            <AddOnGoogleButton />
           </div>
         </div>
       ) : null}
