@@ -45,6 +45,23 @@ describe('boundAnonymousReads', () => {
     await expect(call(args, { payloadAPI: 'local' })).resolves.toBe(args)
   })
 
+  it('does not rate-limit the trusted API-key lookup before req.user exists', async () => {
+    limiter.check.mockResolvedValue({ allowed: false, retryAfterSeconds: 30 })
+    // Payload APIKeyAuthentication calls payload.find with overrideAccess:true,
+    // passing the original REST request before assigning the verified user.
+    const args = { overrideAccess: true, limit: 1, depth: 0, pagination: false }
+    await expect(call(args, { payloadAPI: 'REST', user: null })).resolves.toBe(args)
+    expect(limiter.check).not.toHaveBeenCalled()
+  })
+
+  it('still limits external reads carrying an unverified credential', async () => {
+    limiter.check.mockResolvedValue({ allowed: false, retryAfterSeconds: 30 })
+    await expect(call({ overrideAccess: false, limit: 1 }, {
+      payloadAPI: 'REST', user: null,
+      headers: new Headers({ Authorization: 'service-accounts API-Key invalid' }),
+    })).rejects.toMatchObject({ status: 429 })
+  })
+
   it('leaves writes alone', async () => {
     const args = { data: {} }
     await expect(call(args, { payloadAPI: 'REST' }, 'create')).resolves.toBe(args)
