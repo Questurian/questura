@@ -22,7 +22,7 @@ async function paywallToPlans(page: Page) {
   await expect(page.getByText(MEMBER_ARTICLE.memberOnlyText)).toHaveCount(0)
   await expectNoHorizontalScroll(page)
 
-  await page.getByRole('link', { name: 'Unlock the full guide' }).click()
+  await page.getByRole('link', { name: 'Become a member to unlock', exact: true }).click()
   await expect(page).toHaveURL((url) => url.pathname === '/join' && url.searchParams.get('returnTo') === ARTICLE)
   // The site always advertises the catalog prices (AGENTS.md, membership pricing).
   await expect(page.getByText('$12.99', { exact: true }).first()).toBeVisible()
