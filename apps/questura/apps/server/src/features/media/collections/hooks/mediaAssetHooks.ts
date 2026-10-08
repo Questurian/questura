@@ -4,7 +4,6 @@ import type {
   CollectionBeforeChangeHook,
 } from 'payload'
 import { syncLocationFields } from '@/shared/location/server/syncLocationFields'
-import { ensureWidthLadder } from './ensureWidthLadder'
 import { removeWidthLadder } from './removeWidthLadder'
 import { ensureMediaSetVariant, syncMediaSetVariant } from './mediaSetVariant'
 import { setUploadedBy } from './setUploadedBy'
@@ -19,6 +18,6 @@ export const mediaAssetHooks = {
     setUploadedBy,
     syncBunnyOriginalUrl,
   ] as CollectionBeforeChangeHook[],
-  afterChange: [syncMediaSetVariant, ensureWidthLadder()] as CollectionAfterChangeHook[],
+  afterChange: [syncMediaSetVariant] as CollectionAfterChangeHook[],
   afterDelete: [removeWidthLadder()] as CollectionAfterDeleteHook[],
 }

@@ -1,6 +1,9 @@
-import type { CSSProperties, ReactEventHandler } from "react";
+"use client";
+
+import { useCallback, useEffect, useRef, type CSSProperties, type ReactEventHandler } from "react";
 
 import { buildSrcSet } from "@/components/media/imageSrcSet";
+import { retryOriginalImage } from "@/components/media/retryOriginalImage";
 
 export type PublicImageProps = {
   src: string;
@@ -39,18 +42,38 @@ export function PublicImage({
   imgRef,
   loading,
   priority = false,
+  onError,
   sizes,
   src,
   width,
   ...props
 }: PublicImageProps) {
   const srcSet = buildSrcSet(src);
+  const imageRef = useRef<HTMLImageElement | null>(null);
+  const setImageRef = useCallback(
+    (image: HTMLImageElement | null) => {
+      imageRef.current = image;
+      if (typeof imgRef === "function") imgRef(image);
+      else if (imgRef) imgRef.current = image;
+    },
+    [imgRef],
+  );
+
+  // A missing rung can fail before hydration attaches onError, and React does
+  // not replay that event, so check once the element is ours.
+  useEffect(() => {
+    const image = imageRef.current;
+    if (image?.complete && image.naturalWidth === 0) retryOriginalImage(image);
+  }, [src]);
 
   return (
     /* eslint-disable-next-line @next/next/no-img-element */
     <img
       {...props}
-      ref={imgRef}
+      ref={setImageRef}
+      onError={(event) => {
+        if (!retryOriginalImage(event.currentTarget)) onError?.(event);
+      }}
       alt={alt ?? ""}
       decoding={decoding}
       fetchPriority={priority ? "high" : fetchPriority ?? "auto"}
@@ -85,5 +108,14 @@ export type PublicSourceProps = {
 export function PublicSource({ media, sizes, src }: PublicSourceProps) {
   const srcSet = buildSrcSet(src);
 
-  return <source media={media} srcSet={srcSet ?? src} sizes={srcSet ? sizes : undefined} />;
+  // The sibling PublicImage owns error recovery; this names the crop to fall
+  // back to if a rung of this source's ladder is missing.
+  return (
+    <source
+      media={media}
+      srcSet={srcSet ?? src}
+      sizes={srcSet ? sizes : undefined}
+      data-fallback-src={src}
+    />
+  );
 }

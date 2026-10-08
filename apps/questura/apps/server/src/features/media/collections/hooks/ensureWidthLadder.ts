@@ -28,9 +28,10 @@ import { isLadderFilename } from '@/features/media/pipeline/width-ladder'
  * are already there -- so the common case, an asset the pipeline just handled,
  * costs five HEAD requests and no image work.
  *
- * A failure here is logged rather than thrown. Losing the upload would be a
- * worse outcome than a photo that serves at full size until the backfill picks
- * it up, which is what the reader saw before any of this existed.
+ * Registered by widthLadderAfterStoragePlugin after Bunny storage, because
+ * plugin-cloud-storage appends its upload afterChange after collection hooks.
+ * Registering here on the collection would read a file not yet uploaded.
+ * Failures are logged; PublicImage retries the base variant if a rung is absent.
  */
 
 const isVariantKey = (value: unknown): value is MediaVariantKey =>

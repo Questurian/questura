@@ -12,6 +12,7 @@ import { Authors } from './features/authors/collections/Authors'
 import { ServiceAccounts } from './features/auth/collections/ServiceAccounts'
 import { EmailLogs } from './features/emails/collections/EmailLogs'
 import { MediaAsset } from './features/media/collections/MediaAsset'
+import { widthLadderAfterStoragePlugin } from './features/media/width-ladder-plugin'
 import { MEDIA_ASSETS_PREFIX, sandboxMediaOrigin, sandboxMediaUrl } from './features/media/lib/bunny-public-url'
 import { MediaSet } from './features/media/collections/MediaSet'
 import { Articles } from './features/articles/articles/collections/Articles'
@@ -157,6 +158,7 @@ export default buildConfig({
         region: 'ny',
       },
     }),
+    widthLadderAfterStoragePlugin,
     // Last, so it sees every collection any plugin above added. Clamps and
     // rate-limits anonymous REST/GraphQL reads; see the plugin for why.
     anonymousApiBoundsPlugin,
