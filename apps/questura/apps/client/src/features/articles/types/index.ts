@@ -1,6 +1,12 @@
 import type { GateState } from '@/features/articles/lib/gate'
 
-export type MediaAsset = {
+export type ImageAttributionData = {
+  photographer_credit?: string | null
+  edit_credit?: string | null
+  sources?: { position: string; title?: string | null; credit: string; url?: string | null }[] | null
+}
+
+export type MediaAsset = ImageAttributionData & {
   id: number
   url: string
   alt_text?: string

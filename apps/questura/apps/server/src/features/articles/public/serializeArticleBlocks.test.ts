@@ -3,6 +3,24 @@ import { describe, expect, it } from 'vitest'
 import { serializeArticleByCollection } from './serializeArticleBlocks'
 
 describe('serializeArticleByCollection featured image resolution', () => {
+  it('publishes safe attribution across article types without exposing source relationships', async () => {
+    for (const collection of ['articles', 'single-type-listicles', 'listicle-itineraries'] as const) {
+      const key = collection === 'articles' ? 'headerSection' : 'header'
+      const article: Record<string, unknown> = { [key]: { featuredMediaSet: {
+        photographer_credit: 'Photos: Maria · Edit: Alan', edit_credit: 'Alan',
+        sources: [{ id: 'private-row', position: 'Left', title: 'Cafe', credit: 'Maria', url: 'https://example.com/original', mediaSet: 21, mediaAsset: { id: 42, uploadedBy: 'private' } }, { position: 'Right', credit: 'Bea', url: 'javascript:alert(1)' }],
+        variants: { wide: { url: 'https://cdn.example/composite.webp' } }
+      } } }
+      await serializeArticleByCollection(collection, article)
+      const header = article[key] as Record<string, unknown>
+      expect(header).not.toHaveProperty('featuredMediaSet')
+      expect(header.featuredImage).toMatchObject({ edit_credit: 'Alan', sources: [{ position: 'Left', title: 'Cafe', credit: 'Maria', url: 'https://example.com/original' }, { position: 'Right', credit: 'Bea' }] })
+      const image = header.featuredImage as { sources: Record<string, unknown>[] }
+      expect(image.sources[0]).not.toHaveProperty('mediaSet')
+      expect(image.sources[0]).not.toHaveProperty('mediaAsset')
+      expect(image.sources[1]).not.toHaveProperty('url')
+    }
+  })
   it('resolves header.featuredMediaSet into header.featuredImage for itineraries', async () => {
     const article: Record<string, unknown> = {
       header: {

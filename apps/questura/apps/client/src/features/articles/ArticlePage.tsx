@@ -1,5 +1,6 @@
 import Link from '@/components/navigation/PublicLink'
 import { PublicImage } from '@/components/media/PublicImage'
+import { ImageAttribution } from '@/features/articles/components/ImageAttribution'
 import { GatedArticleBody } from '@/features/articles/components/GatedArticleBody'
 import { ArticleShareButton } from '@/features/articles/components/ArticleShareButton'
 import { AddOnGoogleButton } from '@/features/articles/components/AddOnGoogleButton'
@@ -134,11 +135,14 @@ export function ArticlePage({ article, path }: { article: Article; path?: string
                     priority
                   />
                 </div>
-                {featuredImage.alt_text ? (
-                  <figcaption className="px-4 pt-2 font-mono text-[11px] text-foreground/45 1024:px-0">
-                    {featuredImage.alt_text}
-                  </figcaption>
-                ) : null}
+                <figcaption className="px-4 1024:px-0">
+                  {featuredImage.alt_text ? (
+                    <p className="pt-2 font-mono text-[11px] text-foreground/45">
+                      {featuredImage.alt_text}
+                    </p>
+                  ) : null}
+                  <ImageAttribution image={featuredImage} />
+                </figcaption>
               </figure>
             ) : null}
 

@@ -7,11 +7,13 @@ import { BookmarkButton } from '@/features/bookmarks/components/BookmarkButton'
 import type { BookmarkTargetType } from '@/features/bookmarks/types'
 import { ArticleByline } from '@/features/articles/components/ArticleByline'
 import { formatArticleDate } from '@/lib/dates'
+import type { ImageAttributionData } from '@/features/articles/types'
+import { ImageAttribution } from './ImageAttribution'
 
 type ArticlePageHeaderProps = {
   title: string
   description?: string | null
-  featuredImage?: { url: string; alt?: string } | null
+  featuredImage?: ({ url: string; alt?: string } & ImageAttributionData) | null
   publishedAt?: string
   updatedAt?: string
   author?: ArticleAuthor | null
@@ -87,6 +89,7 @@ export function ArticlePageHeader({
                 priority
               />
             </div>
+            <ImageAttribution image={featuredImage} />
           </div>
         ) : null}
 

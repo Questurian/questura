@@ -19,9 +19,15 @@ export type PublicImage = {
   height: number | null
   variant: MediaVariantKey | null
   status: PublicImageStatus
+  photographer_credit?: string
+  edit_credit?: string
+  sources?: { position: string; title?: string; credit: string; url?: string }[]
 }
 
 type MediaAssetLike = {
+  photographer_credit?: unknown
+  edit_credit?: unknown
+  sources?: unknown
   url?: unknown
   filename?: unknown
   prefix?: unknown
@@ -33,6 +39,9 @@ type MediaAssetLike = {
 }
 
 type MediaSetLike = {
+  photographer_credit?: unknown
+  edit_credit?: unknown
+  sources?: unknown
   title?: unknown
   alt_text?: unknown
   variants?: unknown
@@ -85,6 +94,28 @@ const numberOrNull = (value: unknown): number | null => {
     return Number.isFinite(parsed) ? parsed : null
   }
   return null
+}
+
+const publicAttribution = (asset: MediaAssetLike, parent?: MediaSetLike): Partial<PublicImage> => {
+  const credit = textOrNull(parent?.photographer_credit) ?? textOrNull(asset.photographer_credit)
+  const edit = textOrNull(parent?.edit_credit) ?? textOrNull(asset.edit_credit)
+  const raw = parent?.sources ?? asset.sources
+  const sources: NonNullable<PublicImage['sources']> = []
+  if (Array.isArray(raw)) for (const row of raw) {
+    if (!isRecord(row)) continue
+    const name = textOrNull(row.credit)
+    if (!name) continue
+    const source: NonNullable<PublicImage['sources']>[number] = { position: textOrNull(row.position) ?? '', credit: name }
+    const title = textOrNull(row.title)
+    if (title) source.title = title
+    const url = textOrNull(row.url)
+    if (url) try {
+      const parsed = new URL(url)
+      if (['http:', 'https:'].includes(parsed.protocol) && !parsed.username && !parsed.password) source.url = url
+    } catch { /* Never expose unsafe source links. */ }
+    sources.push(source)
+  }
+  return { ...(credit ? { photographer_credit: credit } : {}), ...(edit ? { edit_credit: edit } : {}), ...(sources.length ? { sources } : {}) }
 }
 
 const backendOriginForPublicUrls = (): string | null => {
@@ -193,6 +224,7 @@ const assetToPublicImage = (
   variant: MediaVariantKey | null,
   status: PublicImageStatus,
   mediaSet?: MediaSetLike,
+  includeAttribution = false,
 ): PublicImage => {
   const url = assetUrl(asset, status)
   if (!url) return MISSING_IMAGE
@@ -208,6 +240,7 @@ const assetToPublicImage = (
     height: numberOrNull(asset.height),
     variant,
     status,
+    ...(includeAttribution ? publicAttribution(asset, mediaSet) : {}),
   }
 }
 
@@ -233,7 +266,7 @@ export const resolveMediaSetForPlacement = (
   const requiredAsset = getVariantAsset(mediaSet, config.required)
 
   if (requiredAsset) {
-    const image = assetToPublicImage(requiredAsset, config.required, 'ready', mediaSet)
+    const image = assetToPublicImage(requiredAsset, config.required, 'ready', mediaSet, placement === 'article-header')
     if (image.status === 'ready') return image
   }
 
@@ -241,7 +274,7 @@ export const resolveMediaSetForPlacement = (
     for (const fallbackVariant of config.migrationFallbacks) {
       const fallbackAsset = getVariantAsset(mediaSet, fallbackVariant)
       if (!fallbackAsset) continue
-      const image = assetToPublicImage(fallbackAsset, fallbackVariant, 'legacy_fallback', mediaSet)
+      const image = assetToPublicImage(fallbackAsset, fallbackVariant, 'legacy_fallback', mediaSet, placement === 'article-header')
       if (image.status === 'legacy_fallback') return image
     }
   }
@@ -253,12 +286,10 @@ export const resolveLegacyAssetForPlacement = (
   asset: MediaAssetLike | null | undefined,
   placement: MediaPlacement,
 ): PublicImage => {
-  void placement
-
   if (!asset || !isRecord(asset)) return MISSING_IMAGE
 
   const variant = isMediaVariantKey(asset.variant) ? asset.variant : null
-  return assetToPublicImage(asset, variant, 'legacy_fallback')
+  return assetToPublicImage(asset, variant, 'legacy_fallback', undefined, placement === 'article-header')
 }
 
 export const isMediaSetReadyForPlacement = (

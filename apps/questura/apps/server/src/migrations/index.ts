@@ -56,6 +56,8 @@ import * as migration_20261005_170711_hotel_card_block from './20261005_170711_h
 import * as migration_20261005_174909_listicle_mixed_type from './20261005_174909_listicle_mixed_type'
 import * as migration_20261007_163342_listicle_blurb_only_items from './20261007_163342_listicle_blurb_only_items'
 
+import * as migration_20261008_182100_composite_photo_attribution from './20261008_182100_composite_photo_attribution'
+
 export const migrations = [
   {
     up: migration_20260514000000_promote_location_cover_image.up,
@@ -341,5 +343,10 @@ export const migrations = [
     up: migration_20261007_163342_listicle_blurb_only_items.up,
     down: migration_20261007_163342_listicle_blurb_only_items.down,
     name: '20261007_163342_listicle_blurb_only_items',
+  },
+  {
+    up: migration_20261008_182100_composite_photo_attribution.up,
+    down: migration_20261008_182100_composite_photo_attribution.down,
+    name: '20261008_182100_composite_photo_attribution',
   },
 ]
