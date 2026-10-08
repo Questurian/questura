@@ -52,7 +52,11 @@ export const createDataListicleBlock = ({
     listicleMomentField,
     // Tour Picks exist only where the source records carry LM-linked tours.
     ...(relationTo === 'attractions' ? [createTourPicksField()] : []),
-    ...createItemMediaFields(relationTo),
+    ...createItemMediaFields(relationTo, {
+      allowNoMedia: true,
+      modeDescription:
+        'Select whether this list item uses photos, Instagram, both, or no media (blurb only).',
+    }),
     angleField,
     {
       name: 'blurb',

@@ -1,7 +1,7 @@
-import type { CollectionBeforeValidateHook } from 'payload'
+import { APIError, type CollectionBeforeValidateHook } from 'payload'
 import { getBlocksForType } from '../../blocks'
 import {
-  getMediaMode,
+  getListicleMediaMode,
   requiresInstagram,
   requiresPhotos,
 } from '../../../shared/utils/itemMedia/mediaMode'
@@ -25,6 +25,9 @@ import {
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value)
 
+// Expected input failures must reach ABW instead of being masked as a server error.
+const validationError = (message: string): APIError => new APIError(message, 400)
+
 export const validateSingleTypeListicle: CollectionBeforeValidateHook = async ({
   data,
   operation,
@@ -36,18 +39,18 @@ export const validateSingleTypeListicle: CollectionBeforeValidateHook = async ({
   })
 
   if (sharedNeighborhoodValidation !== true) {
-    throw new Error(sharedNeighborhoodValidation)
+    throw validationError(sharedNeighborhoodValidation)
   }
 
   if ((operation === 'create' || operation === 'update') && !data?.step1_complete) {
-    throw new Error(
+    throw validationError(
       'Please complete setup: title, location, listicle type, and target list size',
     )
   }
 
   const count = Number(data?.targetItemCount)
   if (!Number.isFinite(count) || count < 1 || count > 50) {
-    throw new Error('Target list size must be a number between 1 and 50')
+    throw validationError('Target list size must be a number between 1 and 50')
   }
 
   if (data?.listicleType && data?.items && Array.isArray(data.items)) {
@@ -60,13 +63,13 @@ export const validateSingleTypeListicle: CollectionBeforeValidateHook = async ({
   const itemCount = Array.isArray(data?.items) ? data.items.length : 0
 
   if (itemCount > count) {
-    throw new Error(
+    throw validationError(
       `This list has ${itemCount} items, but target list size is ${count}. Reduce items before saving.`,
     )
   }
 
   if (data?.status === 'published' && itemCount !== count) {
-    throw new Error(
+    throw validationError(
       `Publishing requires exactly ${count} items. Current item count is ${itemCount}.`,
     )
   }
@@ -74,12 +77,12 @@ export const validateSingleTypeListicle: CollectionBeforeValidateHook = async ({
   if (data?.status === 'published') {
     const requiredSlug = typeof data?.slug === 'string' ? data.slug.trim() : ''
     if (!requiredSlug) {
-      throw new Error('Published listicles must have a slug.')
+      throw validationError('Published listicles must have a slug.')
     }
 
     const header = isRecord(data?.header) ? data.header : null
     if (!header?.featuredImage && !header?.featuredMediaSet) {
-      throw new Error(
+      throw validationError(
         'Published listicles must have a featured image or media set (Header section).',
       )
     }
@@ -90,12 +93,12 @@ export const validateSingleTypeListicle: CollectionBeforeValidateHook = async ({
         ? seoSection.metaDescription.trim()
         : ''
     if (!metaDesc) {
-      throw new Error(
+      throw validationError(
         'Published listicles must have a meta description (SEO & Metadata tab).',
       )
     }
     if (metaDesc.length < 50) {
-      throw new Error(
+      throw validationError(
         `Meta description is ${metaDesc.length} characters — at least 50 required for indexing.`,
       )
     }
@@ -123,13 +126,13 @@ export const validateSingleTypeListicle: CollectionBeforeValidateHook = async ({
 
       const sourceItemId = normalizeRelationshipId(item.item)
       if (sourceItemId === null) {
-        throw new Error(`Item ${i + 1} must reference a ${sourceCollection} entry.`)
+        throw validationError(`Item ${i + 1} must reference a ${sourceCollection} entry.`)
       }
 
       const cacheKey = `${sourceCollection}:${relationshipIdToKey(sourceItemId)}`
       const firstUse = seenSourceItems.get(cacheKey)
       if (firstUse !== undefined) {
-        throw new Error(
+        throw validationError(
           `Item ${i + 1} references the same ${sourceCollection} entry as item ${firstUse + 1}. Each venue can only appear once per list.`,
         )
       }
@@ -142,7 +145,7 @@ export const validateSingleTypeListicle: CollectionBeforeValidateHook = async ({
 
       const sourceItem = sourceItemCache.get(cacheKey)
       if (!sourceItem) {
-        throw new Error(
+        throw validationError(
           `Item ${i + 1} references a ${sourceCollection} entry that could not be loaded.`,
         )
       }
@@ -155,18 +158,18 @@ export const validateSingleTypeListicle: CollectionBeforeValidateHook = async ({
         })
       }
 
-      const mediaMode = getMediaMode(item.mediaMode)
+      const mediaMode = getListicleMediaMode(item.mediaMode)
       if (!mediaMode) {
-        throw new Error(
-          `Item ${i + 1} must select a media mode (photos, instagram, or both).`,
+        throw validationError(
+          `Item ${i + 1} must select a media mode (photos, instagram, both, or no media).`,
         )
       }
 
-      if (mediaMode === 'photos') {
+      if (mediaMode === 'photos' || mediaMode === 'none') {
         item.selectedInstagramPost = null
       }
 
-      if (mediaMode === 'instagram') {
+      if (mediaMode === 'instagram' || mediaMode === 'none') {
         item.selectedPhotos = []
       }
 
@@ -178,7 +181,7 @@ export const validateSingleTypeListicle: CollectionBeforeValidateHook = async ({
 
       if (requiresPhotos(mediaMode)) {
         if (selectedPhotoIds.length < 1 || selectedPhotoIds.length > 6) {
-          throw new Error(`Item ${i + 1} must select between 1 and 6 photos.`)
+          throw validationError(`Item ${i + 1} must select between 1 and 6 photos.`)
         }
 
         const invalidPhotoId = selectedPhotoIds.find(
@@ -186,7 +189,7 @@ export const validateSingleTypeListicle: CollectionBeforeValidateHook = async ({
         )
 
         if (invalidPhotoId !== undefined) {
-          throw new Error(
+          throw validationError(
             `Item ${i + 1} selected photo ${invalidPhotoId} is not in the source gallery.`,
           )
         }
@@ -194,11 +197,11 @@ export const validateSingleTypeListicle: CollectionBeforeValidateHook = async ({
 
       if (requiresInstagram(mediaMode)) {
         if (selectedInstagramPostId === null) {
-          throw new Error(`Item ${i + 1} must select one Instagram embed.`)
+          throw validationError(`Item ${i + 1} must select one Instagram embed.`)
         }
 
         if (!availableInstagramKeys.has(relationshipIdToKey(selectedInstagramPostId))) {
-          throw new Error(
+          throw validationError(
             `Item ${i + 1} selected Instagram embed is not in the source gallery.`,
           )
         }
@@ -206,7 +209,7 @@ export const validateSingleTypeListicle: CollectionBeforeValidateHook = async ({
 
       if (parentLocation && typeof sourceItem.location === 'string') {
         if (!isLocationWithinArticleScope(sourceItem.location, locationScope)) {
-          throw new Error(
+          throw validationError(
             locationScope.exactNeighborhoods
               ? `Item ${i + 1} location does not match the selected neighborhoods.`
               : `Item ${i + 1} location does not match listicle location (${parentLocation}).`,

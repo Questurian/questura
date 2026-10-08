@@ -54,6 +54,7 @@ import * as migration_20261004_172739_airbnbs from './20261004_172739_airbnbs'
 import * as migration_20261004_184515_airbnb_card_block from './20261004_184515_airbnb_card_block'
 import * as migration_20261005_170711_hotel_card_block from './20261005_170711_hotel_card_block'
 import * as migration_20261005_174909_listicle_mixed_type from './20261005_174909_listicle_mixed_type'
+import * as migration_20261007_163342_listicle_blurb_only_items from './20261007_163342_listicle_blurb_only_items'
 
 export const migrations = [
   {
@@ -335,5 +336,10 @@ export const migrations = [
     up: migration_20261005_174909_listicle_mixed_type.up,
     down: migration_20261005_174909_listicle_mixed_type.down,
     name: '20261005_174909_listicle_mixed_type',
+  },
+  {
+    up: migration_20261007_163342_listicle_blurb_only_items.up,
+    down: migration_20261007_163342_listicle_blurb_only_items.down,
+    name: '20261007_163342_listicle_blurb_only_items',
   },
 ]

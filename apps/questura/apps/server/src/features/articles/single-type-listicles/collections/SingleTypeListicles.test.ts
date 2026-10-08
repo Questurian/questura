@@ -181,3 +181,47 @@ describe('SingleTypeListicles duplicate venue guard', () => {
     ).resolves.toBeTruthy()
   })
 })
+
+describe('SingleTypeListicles blurb-only items', () => {
+  it.each(['data-dining', 'data-accommodations', 'data-attractions', 'data-nightlife'])(
+    'accepts a %s item with no media and drops any media left on it',
+    async (blockType) => {
+      const row = {
+        ...buildVenueRow('row-a', 296),
+        blockType,
+        mediaMode: 'none',
+        selectedInstagramPost: 9,
+      }
+
+      await expect(
+        runBeforeValidate({ step1_complete: true, targetItemCount: 10, items: [row] }),
+      ).resolves.toBeTruthy()
+      expect(row.selectedPhotos).toEqual([])
+      expect(row.selectedInstagramPost).toBeNull()
+    },
+  )
+
+  it('still requires photos on an item left in photos mode', async () => {
+    const row = { ...buildVenueRow('row-a', 296), selectedPhotos: [] }
+
+    await expect(
+      runBeforeValidate({ step1_complete: true, targetItemCount: 10, items: [row] }),
+    ).rejects.toThrow('Item 1 must select between 1 and 6 photos.')
+  })
+})
+
+describe('SingleTypeListicles sync validation errors', () => {
+  it('returns an actionable public 400 error for invalid media selections', async () => {
+    await expect(
+      runBeforeValidate({
+        step1_complete: true,
+        targetItemCount: 10,
+        items: [{ ...buildVenueRow('row-a', 296), selectedPhotos: [] }],
+      }),
+    ).rejects.toMatchObject({
+      status: 400,
+      isPublic: true,
+      message: 'Item 1 must select between 1 and 6 photos.',
+    })
+  })
+})
