@@ -1,8 +1,10 @@
 import type { Field } from 'payload'
 import { createLocationRefField } from '@/shared/location/server/fields'
 import { MEDIA_VARIANT_OPTIONS } from '@/features/media/constants'
+import { attributionFields } from './attributionFields'
 
 export const mediaAssetFields: Field[] = [
+  ...attributionFields(),
   {
     name: 'user',
     type: 'relationship',

@@ -7,6 +7,7 @@ import { serviceAccountHasCollectionGrant } from '@/features/auth/lib/service-ac
 import type { CollectionConfig, Field } from 'payload'
 import { createLocationRefField } from '@/shared/location/server/fields'
 import { syncLocationFields } from '@/shared/location/server/syncLocationFields'
+import { attributionFields } from './fields/attributionFields'
 import {
   MEDIA_VARIANT_KEYS,
   MEDIA_VARIANT_OPTIONS,
@@ -145,6 +146,7 @@ export const MediaSet: CollectionConfig = {
     ],
   },
   fields: [
+    ...attributionFields(),
     {
       name: 'title',
       type: 'text',

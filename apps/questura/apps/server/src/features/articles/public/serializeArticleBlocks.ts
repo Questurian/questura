@@ -215,12 +215,17 @@ function attachResolvedFeaturedImage(article: Record<string, unknown>) {
   if (!section) return
 
   const resolved = resolveArticleFeaturedImage(article, { placement: 'article-header' })
+  // Readers receive attribution text/links, never the private source graph.
+  delete section.featuredMediaSet
   section.featuredImage = resolved.url
     ? {
         url: resolved.url,
         alt_text: resolved.alt,
         width: resolved.width,
         height: resolved.height,
+        ...(resolved.photographer_credit ? { photographer_credit: resolved.photographer_credit } : {}),
+        ...(resolved.edit_credit ? { edit_credit: resolved.edit_credit } : {}),
+        ...(resolved.sources ? { sources: resolved.sources } : {}),
       }
     : null
 }

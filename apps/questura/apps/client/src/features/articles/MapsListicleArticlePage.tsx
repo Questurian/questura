@@ -46,7 +46,7 @@ export function MapsListicleArticlePage({
         description={description}
         featuredImage={
           featuredImage?.url
-            ? { url: featuredImage.url, alt: featuredImage.alt_text }
+            ? { ...featuredImage, url: featuredImage.url, alt: featuredImage.alt_text }
             : null
         }
         publishedAt={article.publishedAt}
