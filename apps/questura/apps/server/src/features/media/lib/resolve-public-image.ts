@@ -224,6 +224,7 @@ const assetToPublicImage = (
   variant: MediaVariantKey | null,
   status: PublicImageStatus,
   mediaSet?: MediaSetLike,
+  includeAttribution = false,
 ): PublicImage => {
   const url = assetUrl(asset, status)
   if (!url) return MISSING_IMAGE
@@ -239,7 +240,7 @@ const assetToPublicImage = (
     height: numberOrNull(asset.height),
     variant,
     status,
-    ...publicAttribution(asset, mediaSet),
+    ...(includeAttribution ? publicAttribution(asset, mediaSet) : {}),
   }
 }
 
@@ -265,7 +266,7 @@ export const resolveMediaSetForPlacement = (
   const requiredAsset = getVariantAsset(mediaSet, config.required)
 
   if (requiredAsset) {
-    const image = assetToPublicImage(requiredAsset, config.required, 'ready', mediaSet)
+    const image = assetToPublicImage(requiredAsset, config.required, 'ready', mediaSet, placement === 'article-header')
     if (image.status === 'ready') return image
   }
 
@@ -273,7 +274,7 @@ export const resolveMediaSetForPlacement = (
     for (const fallbackVariant of config.migrationFallbacks) {
       const fallbackAsset = getVariantAsset(mediaSet, fallbackVariant)
       if (!fallbackAsset) continue
-      const image = assetToPublicImage(fallbackAsset, fallbackVariant, 'legacy_fallback', mediaSet)
+      const image = assetToPublicImage(fallbackAsset, fallbackVariant, 'legacy_fallback', mediaSet, placement === 'article-header')
       if (image.status === 'legacy_fallback') return image
     }
   }
@@ -285,12 +286,10 @@ export const resolveLegacyAssetForPlacement = (
   asset: MediaAssetLike | null | undefined,
   placement: MediaPlacement,
 ): PublicImage => {
-  void placement
-
   if (!asset || !isRecord(asset)) return MISSING_IMAGE
 
   const variant = isMediaVariantKey(asset.variant) ? asset.variant : null
-  return assetToPublicImage(asset, variant, 'legacy_fallback')
+  return assetToPublicImage(asset, variant, 'legacy_fallback', undefined, placement === 'article-header')
 }
 
 export const isMediaSetReadyForPlacement = (
