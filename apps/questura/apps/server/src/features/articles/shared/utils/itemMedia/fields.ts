@@ -12,18 +12,25 @@ import {
 import type {
   ItemMediaFieldOptions,
   ItemMediaSourceCollection,
+  ListicleMediaMode,
   MediaMode,
 } from '../../types/item-media.types'
 
-const mediaModeOptions: Array<{ label: string; value: MediaMode }> = [
+const mediaModeOptions: Array<{ label: string; value: ListicleMediaMode }> = [
   { label: 'Photos', value: 'photos' },
   { label: 'Instagram', value: 'instagram' },
   { label: 'Photos + Instagram', value: 'both' },
 ]
 
+const noMediaOption: { label: string; value: ListicleMediaMode } = {
+  label: 'No media (blurb only)',
+  value: 'none',
+}
+
 const defaultItemMediaFieldOptions: Required<ItemMediaFieldOptions> = {
   mediaModeDbName: 'mm',
   mediaModeEnumName: 'stl_media_mode',
+  allowNoMedia: false,
   modeDescription: 'Select whether this list item uses photos, Instagram, or both.',
   photosDescription: 'Select 1 to 6 photos from the selected source item gallery.',
   instagramDescription: 'Select one Instagram embed from the selected source item.',
@@ -117,7 +124,7 @@ export const createItemMediaFields = (
       dbName: config.mediaModeDbName,
       enumName: config.mediaModeEnumName,
       required: true,
-      options: mediaModeOptions,
+      options: config.allowNoMedia ? [...mediaModeOptions, noMediaOption] : mediaModeOptions,
       admin: {
         description: config.modeDescription,
       },
