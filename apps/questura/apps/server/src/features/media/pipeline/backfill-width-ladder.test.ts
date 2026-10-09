@@ -6,6 +6,7 @@ import {
   backfillWidthLadder,
   backfillZoneLadder,
   ladderFromVariantFile,
+  listMediaZone,
   variantFromFilename,
   type LadderIo,
 } from './backfill-width-ladder'
@@ -17,7 +18,12 @@ const IMAGE_WORK_TIMEOUT_MS = 30_000
 const makeVariantFile = async (variant: keyof typeof VARIANT_SPECS): Promise<Buffer> => {
   const spec = VARIANT_SPECS[variant]
   return sharp({
-    create: { width: spec.width, height: spec.height, channels: 3, background: { r: 10, g: 120, b: 200 } },
+    create: {
+      width: spec.width,
+      height: spec.height,
+      channels: 3,
+      background: { r: 10, g: 120, b: 200 },
+    },
   })
     .webp()
     .toBuffer()
@@ -218,7 +224,9 @@ describe('variantFromFilename', () => {
     // Both sides agreeing on this one rule is what makes the job cover exactly
     // the files the client will go on to ask about.
     expect(variantFromFilename('lima-bar-12_square.webp')).toBe('square')
-    expect(variantFromFilename('christ-the-redeemer_1775875880053_thumbnail.webp')).toBe('thumbnail')
+    expect(variantFromFilename('christ-the-redeemer_1775875880053_thumbnail.webp')).toBe(
+      'thumbnail',
+    )
     expect(variantFromFilename('a_open_graph.webp')).toBe('open_graph')
   })
 
@@ -333,4 +341,54 @@ describe('the zone pass at scale', () => {
     },
     IMAGE_WORK_TIMEOUT_MS,
   )
+})
+
+describe('listMediaZone', () => {
+  const listing = (names: string[]) =>
+    new Response(JSON.stringify(names.map((ObjectName) => ({ ObjectName, IsDirectory: false }))))
+  const noWait = async () => {}
+
+  it('retries the intermittent 500 Bunny gives for the big listing', async () => {
+    const responses = [
+      new Response('', { status: 500 }),
+      new Response('', { status: 500 }),
+      listing(['a_wide.webp']),
+    ]
+    const fetchListing = vi.fn(async () => responses.shift()!)
+    await expect(listMediaZone(fetchListing, [1, 1, 1], noWait)).resolves.toEqual(['a_wide.webp'])
+    expect(fetchListing).toHaveBeenCalledTimes(3)
+  })
+
+  it('retries a dropped connection', async () => {
+    const fetchListing = vi
+      .fn<() => Promise<Response>>()
+      .mockRejectedValueOnce(new TypeError('fetch failed'))
+      .mockResolvedValueOnce(listing(['a_wide.webp']))
+    await expect(listMediaZone(fetchListing, [1], noWait)).resolves.toEqual(['a_wide.webp'])
+  })
+
+  it('skips folders', async () => {
+    const response = new Response(
+      JSON.stringify([
+        { ObjectName: 'sub', IsDirectory: true },
+        { ObjectName: 'a_wide.webp', IsDirectory: false },
+      ]),
+    )
+    await expect(listMediaZone(async () => response, [], noWait)).resolves.toEqual(['a_wide.webp'])
+  })
+
+  it('gives up after the last retry and says how many tries it made', async () => {
+    const fetchListing = vi.fn(async () => new Response('', { status: 500 }))
+    await expect(listMediaZone(fetchListing, [1, 1], noWait)).rejects.toThrow(
+      'Could not list the media zone (500) after 3 tries',
+    )
+  })
+
+  it('does not retry a wrong key or zone', async () => {
+    const fetchListing = vi.fn(async () => new Response('', { status: 401 }))
+    await expect(listMediaZone(fetchListing, [1, 1], noWait)).rejects.toThrow(
+      'Could not list the media zone (401)',
+    )
+    expect(fetchListing).toHaveBeenCalledTimes(1)
+  })
 })

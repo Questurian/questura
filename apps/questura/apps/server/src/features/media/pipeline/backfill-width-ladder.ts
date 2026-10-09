@@ -71,19 +71,48 @@ const BUNNY_STORAGE_LIST_URL = () => {
   return `https://ny.storage.bunnycdn.com/${zoneName}/media/`
 }
 
-export const bunnyLadderIo: LadderIo = {
-  list: async () => {
-    const response = await fetch(BUNNY_STORAGE_LIST_URL(), {
-      headers: { AccessKey: bunnyKey(), Accept: 'application/json' },
-    })
-    if (!response.ok) {
-      throw new Error(`Could not list the media zone (${response.status})`)
+/**
+ * The zone is one flat folder (155,804 files, an 80 MB listing on 2026-10-08)
+ * and Bunny builds the listing in a single response. About one call in three
+ * gives up with a 500 after ~10s; the next call usually succeeds in ~4s. So a
+ * 5xx or a dropped connection is retried, while a 4xx (wrong key or zone name)
+ * fails at once because asking again cannot fix it.
+ */
+export const LIST_RETRY_DELAYS_MS = [2_000, 5_000, 10_000, 20_000]
+
+export const listMediaZone = async (
+  fetchListing: () => Promise<Response>,
+  delaysMs: readonly number[] = LIST_RETRY_DELAYS_MS,
+  wait: (ms: number) => Promise<void> = (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
+): Promise<string[]> => {
+  for (let attempt = 0; ; attempt++) {
+    const result = await fetchListing().catch((error: unknown) =>
+      error instanceof Error ? error : new Error(String(error)),
+    )
+    if (result instanceof Response && result.ok) {
+      const entries = (await result.json()) as Array<{ ObjectName?: string; IsDirectory?: boolean }>
+      return entries
+        .filter((entry) => !entry.IsDirectory && typeof entry.ObjectName === 'string')
+        .map((entry) => entry.ObjectName as string)
     }
-    const entries = (await response.json()) as Array<{ ObjectName?: string; IsDirectory?: boolean }>
-    return entries
-      .filter((entry) => !entry.IsDirectory && typeof entry.ObjectName === 'string')
-      .map((entry) => entry.ObjectName as string)
-  },
+    const failure = result instanceof Response ? String(result.status) : result.message
+    if (result instanceof Response && result.status < 500) {
+      throw new Error(`Could not list the media zone (${failure})`)
+    }
+    if (attempt >= delaysMs.length) {
+      throw new Error(`Could not list the media zone (${failure}) after ${attempt + 1} tries`)
+    }
+    await wait(delaysMs[attempt])
+  }
+}
+
+export const bunnyLadderIo: LadderIo = {
+  list: () =>
+    listMediaZone(() =>
+      fetch(BUNNY_STORAGE_LIST_URL(), {
+        headers: { AccessKey: bunnyKey(), Accept: 'application/json' },
+      }),
+    ),
   exists: async (filename) => {
     const response = await fetch(bunnyStorageUrl(filename), {
       method: 'HEAD',
@@ -253,9 +282,7 @@ export const backfillWidthLadder = async ({
     failures: [],
   }
 
-  const effectiveIo: LadderIo = dryRun
-    ? { ...io, write: async () => undefined }
-    : io
+  const effectiveIo: LadderIo = dryRun ? { ...io, write: async () => undefined } : io
 
   let page = 1
   let hasNextPage = true
@@ -283,7 +310,10 @@ export const backfillWidthLadder = async ({
       }
 
       try {
-        const result = await backfillAssetLadder({ id: doc.id as number, filename, variant }, effectiveIo)
+        const result = await backfillAssetLadder(
+          { id: doc.id as number, filename, variant },
+          effectiveIo,
+        )
         summary.assetsVisited += 1
         summary.rungsWritten += result.written.length
         summary.rungsAlreadyPresent += result.alreadyPresent.length
@@ -311,7 +341,6 @@ export const backfillWidthLadder = async ({
 
   return summary
 }
-
 
 /**
  * Backfill driven by the storage zone rather than by MediaAsset rows.
@@ -372,11 +401,7 @@ export const backfillZoneLadder = async ({
     while (next < queue.length) {
       const { filename, variant } = queue[next++]
       try {
-        const result = await backfillAssetLadder(
-          { id: 0, filename, variant },
-          effectiveIo,
-          present,
-        )
+        const result = await backfillAssetLadder({ id: 0, filename, variant }, effectiveIo, present)
         summary.assetsVisited += 1
         summary.rungsWritten += result.written.length
         summary.rungsAlreadyPresent += result.alreadyPresent.length
