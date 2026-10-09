@@ -15,7 +15,11 @@ const fakeRedis = {
   eval: vi.fn(),
   on: vi.fn(),
 }
-vi.mocked(Redis).mockImplementation(() => fakeRedis as never)
+// `new Redis(...)`: vitest 4 only constructs a mock whose implementation is a
+// function or class, never an arrow.
+vi.mocked(Redis).mockImplementation(function () {
+  return fakeRedis
+} as never)
 
 const { logger } = await import('@/shared/utils/logger')
 const { redisClientOptions, redisSecondaryStorage, warnConnectionError } = await import('./redis-secondary-storage')
