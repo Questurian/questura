@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi, type MockInstance } from 'vitest'
 
 const mocks = vi.hoisted(() => ({
   requireVisitorPrincipal: vi.fn(),
@@ -62,7 +62,7 @@ import { catalogPriceRetrieve } from './__fixtures__/membership-prices'
 
 import { POST } from '@/app/api/payments/create-checkout-session/route'
 
-let consoleLogSpy: ReturnType<typeof vi.spyOn> | null = null
+let consoleLogSpy: MockInstance<typeof console.log> | null = null
 
 function createRequest() {
   return new Request('http://localhost:4000/api/payments/create-checkout-session', {
