@@ -41,6 +41,7 @@ import {
 } from './fields'
 import { sanitizeListicleItineraryIncomingIds } from './sanitizeListicleClientIds'
 import { bylineOnCreate, findAuthorIdForUser } from '@/features/authors/lib/author-for-user'
+import { fieldRuleError } from '@/features/articles/shared/lib/fieldRuleError'
 import {
   type ComputedItineraryBlock,
   validateListicleItineraryBlockRows,
@@ -204,26 +205,46 @@ export const ListicleItineraries: CollectionConfig = {
         })
 
         if (sharedNeighborhoodValidation !== true) {
-          throw new Error(sharedNeighborhoodValidation)
+          throw fieldRuleError({
+            collection: 'listicle-itineraries',
+            path: 'sharedNeighborhoods',
+            label: 'Shared neighborhoods',
+            message: sharedNeighborhoodValidation,
+          })
         }
 
         if (
           (operation === 'create' || operation === 'update')
           && !getValue<boolean>(merged, 'step1_complete')
         ) {
-          throw new Error('Please complete setup: title and location.')
+          throw fieldRuleError({
+            collection: 'listicle-itineraries',
+            path: 'step1_complete',
+            label: 'Setup',
+            message: 'Please complete setup: title and location.',
+          })
         }
 
         const requiredTitle = typeof getValue<string>(merged, 'title') === 'string'
           ? getValue<string>(merged, 'title')?.trim()
           : ''
         if (!requiredTitle) {
-          throw new Error('Title is required.')
+          throw fieldRuleError({
+            collection: 'listicle-itineraries',
+            path: 'title',
+            label: 'Title',
+            message: 'Title is required.',
+          })
         }
 
         const requiredLocation = getValue<string>(merged, 'location')
         if (!requiredLocation) {
-          throw new Error('Location is required.')
+          throw fieldRuleError({
+            collection: 'listicle-itineraries',
+            path: 'location',
+            label: 'Location',
+            message: 'Location is required.',
+          })
         }
 
         const rawLegacyItems = Array.isArray(getValue<unknown[]>(merged, 'items'))
@@ -317,11 +338,14 @@ export const ListicleItineraries: CollectionConfig = {
 
           for (const block of computed) {
             if (block.location && !isLocationWithinArticleScope(block.location, locationScope)) {
-              throw new Error(
-                locationScope.exactNeighborhoods
+              throw fieldRuleError({
+                collection: 'listicle-itineraries',
+                path: 'itineraryDays',
+                label: block.displayLabel,
+                message: locationScope.exactNeighborhoods
                   ? `${block.displayLabel} location does not match the selected neighborhoods.`
                   : `${block.displayLabel} location does not match itinerary location (${parentLocation}).`,
-              )
+              })
             }
           }
         }
@@ -330,9 +354,12 @@ export const ListicleItineraries: CollectionConfig = {
         if (currentStatus === 'published') {
           for (let dayIndex = 0; dayIndex < normalizedDays.length; dayIndex += 1) {
             if (normalizedDays[dayIndex].items.length < 1) {
-              throw new Error(
-                `Publishing requires at least one itinerary stop on day ${dayIndex + 1}.`,
-              )
+              throw fieldRuleError({
+                collection: 'listicle-itineraries',
+                path: `itineraryDays.${dayIndex}.items`,
+                label: 'Stops',
+                message: `Publishing requires at least one itinerary stop on day ${dayIndex + 1}.`,
+              })
             }
           }
 
@@ -340,14 +367,22 @@ export const ListicleItineraries: CollectionConfig = {
             ? (getValue<string>(merged, 'slug') as string).trim()
             : ''
           if (!slug) {
-            throw new Error('Published itineraries must have a slug.')
+            throw fieldRuleError({
+              collection: 'listicle-itineraries',
+              path: 'slug',
+              label: 'Slug',
+              message: 'Published itineraries must have a slug.',
+            })
           }
 
           const header = getValue<Record<string, unknown>>(merged, 'header')
           if (!header?.featuredImage && !header?.featuredMediaSet) {
-            throw new Error(
-              'Published itineraries must have a featured image or media set (Header section).',
-            )
+            throw fieldRuleError({
+              collection: 'listicle-itineraries',
+              path: 'header.featuredImage',
+              label: 'Featured image (Header section)',
+              message: 'Published itineraries must have a featured image or media set (Header section).',
+            })
           }
 
           const seoSection = getValue<Record<string, unknown>>(merged, 'seoSection')
@@ -356,14 +391,20 @@ export const ListicleItineraries: CollectionConfig = {
               ? (seoSection.metaDescription as string).trim()
               : ''
           if (!metaDesc) {
-            throw new Error(
-              'Published itineraries must have a meta description (SEO & Metadata tab).',
-            )
+            throw fieldRuleError({
+              collection: 'listicle-itineraries',
+              path: 'seoSection.metaDescription',
+              label: 'Meta description (SEO & Metadata tab)',
+              message: 'Published itineraries must have a meta description (SEO & Metadata tab).',
+            })
           }
           if (metaDesc.length < 50) {
-            throw new Error(
-              `Meta description is ${metaDesc.length} characters — at least 50 required for indexing.`,
-            )
+            throw fieldRuleError({
+              collection: 'listicle-itineraries',
+              path: 'seoSection.metaDescription',
+              label: 'Meta description (SEO & Metadata tab)',
+              message: `Meta description is ${metaDesc.length} characters — at least 50 required for indexing.`,
+            })
           }
         }
 
