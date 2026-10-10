@@ -268,6 +268,13 @@ export type MapPanelProps = {
    * reach the related-guides shelf.
    */
   showArticleControls?: boolean
+  /**
+   * Google's touch handling. The default reads a one-finger drag as a page
+   * scroll and shows "use two fingers to move the map". The phone takeover
+   * passes 'greedy' (no message, two fingers still pan and zoom) and claims
+   * the one-finger drag for stepping between stops (useOneFingerSwipe).
+   */
+  gestureHandling?: google.maps.MapOptions['gestureHandling']
 }
 
 export function MapPanel({
@@ -277,6 +284,7 @@ export function MapPanel({
   fitPadding = FIT_PADDING,
   guides,
   showArticleControls = true,
+  gestureHandling = 'auto',
 }: MapPanelProps = {}) {
   const mapRef = useRef<HTMLDivElement>(null)
   const { points, activeId, scrollToEntry } = useListicleMapSync()
@@ -398,6 +406,10 @@ export function MapPanel({
     }
     hasFramedPoints.current = true
   }, [ready, activeId, points, paused, viewportInsetBottomPx, activeZoom, fitPadding])
+
+  useEffect(() => {
+    if (ready) mapInstance.current?.setOptions({ gestureHandling })
+  }, [ready, gestureHandling])
 
   useEffect(() => {
     const animation = cameraAnimation.current

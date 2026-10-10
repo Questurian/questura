@@ -1,12 +1,17 @@
 'use client'
 
-import { useCallback, useEffect, useState, type JSX } from 'react'
+import { useCallback, useEffect, useRef, useState, type JSX } from 'react'
 import { CornerUpLeft, List, Map as MapIcon, MapPin, Rows2 } from 'lucide-react'
 import type { ListicleMapGuides } from '@/features/articles/components/ListicleMapGuidesMenu'
 import { LISTICLE_MAP_REGION_SELECTOR } from '@/features/articles/components/ListicleMapRegion'
 import { MapPanel } from '@/features/articles/components/MapPanel'
 import { ListicleMapVenueCard } from '@/features/articles/components/ListicleMapVenueCard'
 import { useListicleMapSync } from '@/features/articles/components/ListicleMapSync'
+import {
+  adjacentStops,
+  type SwipeDirection,
+} from '@/features/articles/components/ListicleMapSwipe'
+import { useOneFingerSwipe } from '@/features/articles/components/useOneFingerSwipe'
 import {
   hiddenBelowFold,
   sheetHeightPx,
@@ -181,6 +186,24 @@ export function ListicleMapSheet({
     return () => observer.disconnect()
   }, [])
 
+  /**
+   * Takeover only: a one-finger horizontal swipe on the map or on the venue
+   * card steps to the next or previous stop, the same as the arrows. Two
+   * fingers still pan and zoom; taps on pins and the card still work.
+   */
+  const mapSwipeRef = useRef<HTMLDivElement>(null)
+  const cardSwipeRef = useRef<HTMLDivElement>(null)
+  const handleSwipe = useCallback(
+    (direction: SwipeDirection) => {
+      const { previous, next } = adjacentStops(points, activeId)
+      const target = direction === 'next' ? next : previous
+      if (target) scrollToEntry(target.id)
+    },
+    [points, activeId, scrollToEntry],
+  )
+  useOneFingerSwipe(mapSwipeRef, handleSwipe, mode === 'map')
+  useOneFingerSwipe(cardSwipeRef, handleSwipe, mode === 'map')
+
   const handleReturnToEntry = useCallback(() => {
     if (activeId) scrollToEntry(activeId)
     setMode('list')
@@ -212,7 +235,7 @@ export function ListicleMapSheet({
         style={{ height, transform: `translateY(${translateY}px)`, transition }}
         inert={!showMap}
       >
-        <div className="min-h-0 flex-1">
+        <div ref={mapSwipeRef} className="min-h-0 flex-1">
           {hasOpened ? (
             <MapPanel
               viewportInsetBottomPx={mapInset}
@@ -224,6 +247,7 @@ export function ListicleMapSheet({
               // scroll, so the map only adds what the phone cannot otherwise
               // reach: the related guides.
               showArticleControls={mode === 'map'}
+              gestureHandling={mode === 'map' ? 'greedy' : 'auto'}
             />
           ) : null}
         </div>
@@ -245,14 +269,16 @@ export function ListicleMapSheet({
         }}
         inert={!showControls}
       >
-        {mode === 'map' && activePoint ? (
-          <ListicleMapVenueCard
-            point={activePoint}
-            position={activeIndex + 1}
-            total={points.length}
-            onOpen={handleReturnToEntry}
-          />
-        ) : null}
+        <div ref={cardSwipeRef} className="contents">
+          {mode === 'map' && activePoint ? (
+            <ListicleMapVenueCard
+              point={activePoint}
+              position={activeIndex + 1}
+              total={points.length}
+              onOpen={handleReturnToEntry}
+            />
+          ) : null}
+        </div>
 
         {mode === 'split' && activePoint ? (
           <button

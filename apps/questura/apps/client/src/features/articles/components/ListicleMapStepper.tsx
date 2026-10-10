@@ -3,6 +3,7 @@
 import type { JSX } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useListicleMapSync } from '@/features/articles/components/ListicleMapSync'
+import { adjacentStops } from '@/features/articles/components/ListicleMapSwipe'
 
 /**
  * Prev/next arrows sitting on the map, walking the stops in list order.
@@ -18,16 +19,10 @@ import { useListicleMapSync } from '@/features/articles/components/ListicleMapSy
 export function ListicleMapStepper(): JSX.Element | null {
   const { points: allPoints, activeId, scrollToEntry } = useListicleMapSync()
   // Inert pins have no entry to step to; arrows that do nothing are worse
-  // than no arrows.
-  const points = allPoints.filter((point) => !point.inert)
+  // than no arrows. The phone's one-finger swipe steps the same way.
+  const { points, previous, next } = adjacentStops(allPoints, activeId)
 
   if (points.length < 2) return null
-
-  const index = points.findIndex((point) => point.id === activeId)
-  // No active stop means the reader is above the list looking at every pin;
-  // forward starts the walk, back has nowhere to go.
-  const previous = index > 0 ? points[index - 1] : null
-  const next = index < 0 ? points[0] : points[index + 1]
 
   const buttonClass =
     'flex size-10 items-center justify-center text-foreground/70 transition-colors hover:text-accent disabled:text-foreground/25 1024:size-9'
