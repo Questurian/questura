@@ -257,3 +257,43 @@ describe('ListicleItineraries attraction tour-picks validation', () => {
     )
   })
 })
+
+describe('ListicleItineraries publish rules', () => {
+  function publishedItinerary(overrides: Record<string, unknown> = {}) {
+    return {
+      ...buildData(),
+      status: 'published',
+      slug: 'one-day-cusco',
+      header: { featuredImage: 9 },
+      seoSection: { metaDescription: 'x'.repeat(50) },
+      ...overrides,
+    }
+  }
+
+  it('accepts a 50-character meta description', async () => {
+    await expect(runBeforeValidate(publishedItinerary())).resolves.toBeTruthy()
+  })
+
+  it('answers a short meta description with a 400 on seoSection.metaDescription, not a 500', async () => {
+    await expect(
+      runBeforeValidate(publishedItinerary({ seoSection: { metaDescription: 'x'.repeat(46) } })),
+    ).rejects.toMatchObject({
+      status: 400,
+      data: {
+        errors: [
+          {
+            path: 'seoSection.metaDescription',
+            message: 'Meta description is 46 characters — at least 50 required for indexing.',
+          },
+        ],
+      },
+    })
+  })
+
+  it('answers a missing slug with a 400 on slug', async () => {
+    await expect(runBeforeValidate(publishedItinerary({ slug: ' ' }))).rejects.toMatchObject({
+      status: 400,
+      data: { errors: [{ path: 'slug' }] },
+    })
+  })
+})

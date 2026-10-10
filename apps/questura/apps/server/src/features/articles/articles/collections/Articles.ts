@@ -21,6 +21,7 @@ import {
 import { handleCanonicalPathChange } from '../lib/handleCanonicalPathChange'
 import { gateExternalApiRead } from '@/features/articles/public/gateExternalApiRead'
 import { bylineOnCreate, findAuthorIdForUser } from '@/features/authors/lib/author-for-user'
+import { fieldRuleError } from '@/features/articles/shared/lib/fieldRuleError'
 import {
   step1Complete,
   inUpdateMode,
@@ -207,7 +208,12 @@ export const Articles: CollectionConfig = {
         )
 
         if (sharedNeighborhoodValidation !== true) {
-          throw new Error(sharedNeighborhoodValidation)
+          throw fieldRuleError({
+            collection: 'articles',
+            path: 'sharedNeighborhoods',
+            label: 'Shared neighborhoods',
+            message: sharedNeighborhoodValidation,
+          })
         }
 
         // Only enforce step1_complete on create/update operations (not on initial load)
@@ -218,7 +224,12 @@ export const Articles: CollectionConfig = {
              // If we have the data but flag is false, we can technically allow it or auto-set it,
              // but the UI relies on the flag.
              // For safety, if the user tries to save an incomplete article via API without the flag, throw error.
-             throw new Error('Please complete the initial setup: title and location')
+             throw fieldRuleError({
+               collection: 'articles',
+               path: 'step1_complete',
+               label: 'Setup',
+               message: 'Please complete the initial setup: title and location',
+             })
           }
         }
 
@@ -232,16 +243,24 @@ export const Articles: CollectionConfig = {
         ) {
           const parts = data.location.split('|').filter(Boolean)
           if (parts.length >= 1 && !data?.category) {
-            throw new Error(
-              'Published articles must have a category — it determines the public URL.',
-            )
+            throw fieldRuleError({
+              collection: 'articles',
+              path: 'category',
+              label: 'Category',
+              message: 'Published articles must have a category — it determines the public URL.',
+            })
           }
         }
 
         if ((operation === 'create' || operation === 'update') && data?.status === 'published') {
           const slug = typeof data?.slug === 'string' ? data.slug.trim() : ''
           if (!slug) {
-            throw new Error('Published articles must have a slug.')
+            throw fieldRuleError({
+              collection: 'articles',
+              path: 'slug',
+              label: 'Slug',
+              message: 'Published articles must have a slug.',
+            })
           }
 
           const seoSection = data?.seoSection as Record<string, unknown> | null | undefined
@@ -250,14 +269,20 @@ export const Articles: CollectionConfig = {
               ? (seoSection.metaDescription as string).trim()
               : ''
           if (!metaDesc) {
-            throw new Error(
-              'Published articles must have a meta description (SEO & Metadata tab).',
-            )
+            throw fieldRuleError({
+              collection: 'articles',
+              path: 'seoSection.metaDescription',
+              label: 'Meta description (SEO & Metadata tab)',
+              message: 'Published articles must have a meta description (SEO & Metadata tab).',
+            })
           }
           if (metaDesc.length < 50) {
-            throw new Error(
-              `Meta description is ${metaDesc.length} characters — at least 50 required for indexing.`,
-            )
+            throw fieldRuleError({
+              collection: 'articles',
+              path: 'seoSection.metaDescription',
+              label: 'Meta description (SEO & Metadata tab)',
+              message: `Meta description is ${metaDesc.length} characters — at least 50 required for indexing.`,
+            })
           }
         }
 

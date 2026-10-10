@@ -225,3 +225,35 @@ describe('SingleTypeListicles sync validation errors', () => {
     })
   })
 })
+
+describe('SingleTypeListicles publish rules', () => {
+  const published = (seoSection: Record<string, unknown>) => ({
+    step1_complete: true,
+    status: 'published',
+    targetItemCount: 1,
+    items: [buildVenueRow('row-a', 296)],
+    slug: 'best-lima-ceviche',
+    header: { featuredImage: 101 },
+    seoSection,
+  })
+
+  it('accepts a 50-character meta description', async () => {
+    await expect(runBeforeValidate(published({ metaDescription: 'x'.repeat(50) }))).resolves.toBeTruthy()
+  })
+
+  it('answers a short meta description with a 400 on seoSection.metaDescription', async () => {
+    await expect(
+      runBeforeValidate(published({ metaDescription: 'x'.repeat(46) })),
+    ).rejects.toMatchObject({
+      status: 400,
+      data: {
+        errors: [
+          {
+            path: 'seoSection.metaDescription',
+            message: 'Meta description is 46 characters — at least 50 required for indexing.',
+          },
+        ],
+      },
+    })
+  })
+})

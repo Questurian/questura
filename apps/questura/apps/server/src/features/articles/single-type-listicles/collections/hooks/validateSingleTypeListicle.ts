@@ -21,6 +21,7 @@ import {
   isLocationWithinArticleScope,
   validateSharedNeighborhoodSelection,
 } from '@/shared/location/server/articleLocationScope'
+import { fieldRuleError } from '@/features/articles/shared/lib/fieldRuleError'
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value)
@@ -77,14 +78,22 @@ export const validateSingleTypeListicle: CollectionBeforeValidateHook = async ({
   if (data?.status === 'published') {
     const requiredSlug = typeof data?.slug === 'string' ? data.slug.trim() : ''
     if (!requiredSlug) {
-      throw validationError('Published listicles must have a slug.')
+      throw fieldRuleError({
+        collection: 'single-type-listicles',
+        path: 'slug',
+        label: 'Slug',
+        message: 'Published listicles must have a slug.',
+      })
     }
 
     const header = isRecord(data?.header) ? data.header : null
     if (!header?.featuredImage && !header?.featuredMediaSet) {
-      throw validationError(
-        'Published listicles must have a featured image or media set (Header section).',
-      )
+      throw fieldRuleError({
+        collection: 'single-type-listicles',
+        path: 'header.featuredImage',
+        label: 'Featured image (Header section)',
+        message: 'Published listicles must have a featured image or media set (Header section).',
+      })
     }
 
     const seoSection = isRecord(data?.seoSection) ? data.seoSection : null
@@ -93,14 +102,20 @@ export const validateSingleTypeListicle: CollectionBeforeValidateHook = async ({
         ? seoSection.metaDescription.trim()
         : ''
     if (!metaDesc) {
-      throw validationError(
-        'Published listicles must have a meta description (SEO & Metadata tab).',
-      )
+      throw fieldRuleError({
+        collection: 'single-type-listicles',
+        path: 'seoSection.metaDescription',
+        label: 'Meta description (SEO & Metadata tab)',
+        message: 'Published listicles must have a meta description (SEO & Metadata tab).',
+      })
     }
     if (metaDesc.length < 50) {
-      throw validationError(
-        `Meta description is ${metaDesc.length} characters — at least 50 required for indexing.`,
-      )
+      throw fieldRuleError({
+        collection: 'single-type-listicles',
+        path: 'seoSection.metaDescription',
+        label: 'Meta description (SEO & Metadata tab)',
+        message: `Meta description is ${metaDesc.length} characters — at least 50 required for indexing.`,
+      })
     }
   }
 
