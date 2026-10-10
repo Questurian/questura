@@ -384,3 +384,10 @@
     padding: 0 32px;
   }
 }
+
+/* Phones: copy flush with the hero photo (see featured-articles-five.css). */
+@media (max-width: 767px) {
+  .city-four-hero-card .city-article-content {
+    padding-inline: 0;
+  }
+}

@@ -8,6 +8,7 @@ import type {
 import { BlockSection } from '../BlockSection'
 import { PublicImage, PublicSource } from '@/components/media/PublicImage'
 import { BLOCK_IMAGE_SIZES } from '../blockImageSizes'
+import { PHONE_SQUARE_MEDIA } from '../PhoneSquareImage'
 import { heroImagePriority } from '../heroImagePriority'
 import { BLOCK_TYPE } from '../blockType'
 
@@ -28,12 +29,20 @@ function ArticleImage({ article, square }: { article: FeaturedArticleTeaser; squ
     ? article.imageSquare?.alt ?? article.image?.alt ?? ''
     : article.imageWide?.alt ?? article.image?.alt ?? article.imageSquare?.alt ?? ''
 
-  const image = (
-    <PublicImage src={src} alt={alt ?? ''} loading="lazy" decoding="async"
+  // Wide frames still show the square crop on phones (PHONE SQUARE RULE).
+  const phoneSrc = square ? null : article.imageUrlSquare ?? null
+  const img = (
+    <PublicImage src={phoneSrc ?? src} alt={alt ?? ''} loading="lazy" decoding="async"
       className="h-full w-full object-cover transition-opacity duration-200 group-hover/image:opacity-85"
       sizes={BLOCK_IMAGE_SIZES.sideThumbnail}
     />
   )
+  const image = phoneSrc && phoneSrc !== src ? (
+    <picture className="block h-full w-full">
+      <PublicSource media={PHONE_SQUARE_MEDIA} src={src} sizes={BLOCK_IMAGE_SIZES.sideThumbnail} />
+      {img}
+    </picture>
+  ) : img
   return article.articlePath ? (
     <Link href={article.articlePath}
       className="group/image block h-full w-full overflow-hidden outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-background">
@@ -56,7 +65,7 @@ function RelatedArticle({ article, count, index }: {
   return (
     <article className={`grid min-w-0 gap-3 border-b border-foreground/25 pb-4 last:border-b-0 ${showImage ? imageColumn : 'grid-cols-[2rem_1fr]'}`}>
       {showImage ? (
-        <div className={square ? 'aspect-square overflow-hidden bg-paper' : 'aspect-[16/10] overflow-hidden bg-paper'}>
+        <div className={square ? 'aspect-square overflow-hidden bg-paper' : 'aspect-square overflow-hidden bg-paper 768:aspect-[16/10]'}>
           <ArticleImage article={article} square={square} />
         </div>
       ) : (

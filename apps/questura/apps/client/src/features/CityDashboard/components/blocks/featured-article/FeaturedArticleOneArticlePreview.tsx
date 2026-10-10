@@ -115,15 +115,15 @@ export function FeaturedArticleOneArticlePreview({
   const mobileContent = (
     <>
       {mobileImageUrl ? (
-        <div className="city-article-image-shell relative w-full aspect-[3/2] overflow-hidden bg-[#1a1a1a]">
+        <div className="city-article-image-shell relative mx-[var(--block-gutter)] aspect-square overflow-hidden bg-[#1a1a1a]">
           <ArticleImage src={mobileImageUrl} priority={imagePriority} className="h-full w-full object-cover" />
           <NavigableImageTarget href={articlePath} label={`Read ${article.title}`} />
         </div>
       ) : (
-        <div className="w-full aspect-[3/2] bg-[#1a1a1a]" />
+        <div className="mx-[var(--block-gutter)] aspect-square bg-[#1a1a1a]" />
       )}
       <div className="relative">
-        <div className={`city-article-content px-6 py-9 ${showAuthorAvatar ? 'text-center' : ''}`}>
+        <div className={`city-article-content px-[var(--block-gutter)] py-9 ${showAuthorAvatar ? 'text-center' : ''}`}>
           {creatorKicker ? (
             <p className={`mb-6 text-center text-accent-soft ${BLOCK_TYPE.kicker}`}>
               {creatorKicker}

@@ -327,3 +327,12 @@
     padding-left: 40px;
   }
 }
+
+/* Phones: the hero card already sits on the gutter, so its copy starts at
+   the photo's edge instead of a second gutter in (PHONE SQUARE RULE,
+   blocks/PhoneSquareImage.tsx). */
+@media (max-width: 767px) {
+  .city-five-hero-card .city-article-content {
+    padding-inline: 0;
+  }
+}
