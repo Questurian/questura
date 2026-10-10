@@ -313,6 +313,7 @@ export const ListicleItineraries: CollectionConfig = {
             blocks: day.whereStaying,
             section: 'whereStaying',
             labelAt: (i) => `${dayPrefix}Where you're staying (${i + 1})`,
+            pathAt: (i) => `itineraryDays.${dayIndex}.whereStaying.${i}`,
             sourceItemCache,
             instagramPostCache,
           })
@@ -322,6 +323,7 @@ export const ListicleItineraries: CollectionConfig = {
             blocks: day.items,
             section: 'stops',
             labelAt: (i) => `${dayPrefix}Stop ${i + 1}`,
+            pathAt: (i) => `itineraryDays.${dayIndex}.items.${i}`,
             sourceItemCache,
             instagramPostCache,
           })
