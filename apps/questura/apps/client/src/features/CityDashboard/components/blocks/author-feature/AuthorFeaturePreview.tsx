@@ -10,6 +10,7 @@ import { BlockSection } from "../BlockSection";
 import { PublicImage, PublicSource } from "@/components/media/PublicImage";
 import { BLOCK_IMAGE_SIZES } from "../blockImageSizes";
 import { BLOCK_TYPE } from "../blockType";
+import { PHONE_SQUARE_MEDIA } from "../PhoneSquareImage";
 
 function Linked({
   href,
@@ -111,20 +112,33 @@ function ArticleImage({
     ? (article.imageSquare ?? article.image ?? article.imageWide)
     : (article.imageWide ?? article.image ?? article.imageSquare);
   if (!image?.url) return null;
+  // Wide frames still show the square crop on phones (PHONE SQUARE RULE).
+  const phoneImage = square ? null : (article.imageSquare ?? null);
+
+  const img = (
+    <PublicImage
+      src={phoneImage?.url ?? image.url}
+      alt={image.alt ?? ""}
+      loading="lazy"
+      decoding="async"
+      className="h-full w-full object-cover"
+      sizes={BLOCK_IMAGE_SIZES.sideThumbnail}
+    />
+  );
 
   return (
     <Linked
       href={article.articlePath}
       className="block h-full w-full overflow-hidden outline-none focus-visible:ring-2 focus-visible:ring-accent"
     >
-      <PublicImage
-        src={image.url}
-        alt={image.alt ?? ""}
-        loading="lazy"
-        decoding="async"
-        className="h-full w-full object-cover"
-        sizes={BLOCK_IMAGE_SIZES.sideThumbnail}
-      />
+      {phoneImage?.url && phoneImage.url !== image.url ? (
+        <picture className="block h-full w-full">
+          <PublicSource media={PHONE_SQUARE_MEDIA} src={image.url} sizes={BLOCK_IMAGE_SIZES.sideThumbnail} />
+          {img}
+        </picture>
+      ) : (
+        img
+      )}
     </Linked>
   );
 }
@@ -149,7 +163,7 @@ function RelatedArticle({
   if (solo) {
     return (
       <article className="flex min-h-0 flex-col border-b border-foreground/25 pb-4">
-        <div className="aspect-[16/10] min-h-0 overflow-hidden bg-paper 1024:flex-1 1024:aspect-auto">
+        <div className="aspect-square min-h-0 overflow-hidden bg-paper 768:aspect-[16/10] 1024:flex-1 1024:aspect-auto">
           <ArticleImage article={article} square={false} />
         </div>
         <div className="pt-5">
@@ -187,7 +201,7 @@ function RelatedArticle({
         </span>
       ) : (
         <div
-          className={`${square ? "aspect-square" : "aspect-[16/10]"} overflow-hidden bg-paper`}
+          className={`${square ? "aspect-square" : "aspect-square 768:aspect-[16/10]"} overflow-hidden bg-paper`}
         >
           <ArticleImage article={article} square={square} />
         </div>

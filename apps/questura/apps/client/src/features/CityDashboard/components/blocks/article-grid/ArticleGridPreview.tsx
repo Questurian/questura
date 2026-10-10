@@ -11,9 +11,10 @@ import { AuthorLink } from '@/features/authors/components/AuthorLink'
 import { NavigableImageTarget } from '../NavigableImageTarget'
 import { PublicImage } from '@/components/media/PublicImage'
 import { BLOCK_IMAGE_SIZES } from '../blockImageSizes'
-import { isPriorityImage } from '../heroImagePriority'
+import { EAGER_IMAGE, LAZY_IMAGE, isPriorityImage } from '../heroImagePriority'
 import { BlockSectionHeader } from '../BlockSectionHeader'
 import { BLOCK_TYPE } from '../blockType'
+import { PhoneSquareImage } from '../PhoneSquareImage'
 
 function getArticleTypeLabel(article: FeaturedArticleTeaser): string {
   return article.articleType ?? article.category?.name ?? 'Article'
@@ -42,15 +43,12 @@ function ThreeArticleCard({
 
   return (
     <article className="city-article-card group flex min-w-0 flex-col">
-      <div className="city-article-image-shell relative aspect-[1.92/1] overflow-hidden bg-[#d7dcde]">
+      <div className="city-article-image-shell relative aspect-square overflow-hidden bg-[#d7dcde] 768:aspect-[1.92/1]">
         {imageUrl ? (
-          <PublicImage
-            src={imageUrl}
-            alt=""
+          <PhoneSquareImage
+            article={article}
             className="relative z-10 h-full w-full object-cover transition-transform duration-300 ease-out motion-reduce:transition-none group-hover:scale-[1.015]"
-            decoding="async"
-            fetchPriority={isPriority ? 'high' : 'auto'}
-            loading={isPriority ? 'eager' : 'lazy'}
+            priority={isPriority ? EAGER_IMAGE : LAZY_IMAGE}
             sizes={BLOCK_IMAGE_SIZES.thirdColumn}
           />
         ) : null}
@@ -60,7 +58,7 @@ function ThreeArticleCard({
         />
       </div>
 
-      <div className="flex min-h-[13.5rem] flex-1 flex-col px-4 pb-7 pt-5 1024:px-5 1024:pb-8">
+      <div className="flex min-h-[13.5rem] flex-1 flex-col pb-7 pt-5 768:px-4 1024:px-5 1024:pb-8">
         <p className={BLOCK_TYPE.kicker}>
           {getArticleTypeLabel(article)}
         </p>
@@ -118,9 +116,9 @@ function GridArticleCard({
   const inner = (
     <>
       <div
-        className={`city-article-image-shell relative ${useSquareImage ? 'aspect-square' : 'aspect-[16/10]'} overflow-hidden bg-[#d7dcde]`}
+        className={`city-article-image-shell relative aspect-square overflow-hidden bg-[#d7dcde] ${useSquareImage ? '' : '768:aspect-[16/10]'}`}
       >
-        {imageUrl ? (
+        {imageUrl && useSquareImage ? (
           <PublicImage
             src={imageUrl}
             alt=""
@@ -128,6 +126,12 @@ function GridArticleCard({
             decoding="async"
             fetchPriority={isPriority ? 'high' : 'auto'}
             loading={isPriority ? 'eager' : 'lazy'}
+            sizes={BLOCK_IMAGE_SIZES.quarterColumn}
+          />
+        ) : imageUrl ? (
+          <PhoneSquareImage
+            article={article}
+            priority={isPriority ? EAGER_IMAGE : LAZY_IMAGE}
             sizes={BLOCK_IMAGE_SIZES.quarterColumn}
           />
         ) : null}

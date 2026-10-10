@@ -13,7 +13,8 @@ import { AuthorLink } from '@/features/authors/components/AuthorLink'
 import { NavigableImageTarget } from '../NavigableImageTarget'
 import { PublicImage, PublicSource } from '@/components/media/PublicImage'
 import { BLOCK_IMAGE_SIZES } from '../blockImageSizes'
-import { heroImagePriority, type ImagePriority } from '../heroImagePriority'
+import { LAZY_IMAGE, heroImagePriority, type ImagePriority } from '../heroImagePriority'
+import { PhoneSquareImage } from '../PhoneSquareImage'
 
 function joinClassNames(...classes: Array<string | false | null | undefined>): string {
   return classes.filter(Boolean).join(' ')
@@ -140,15 +141,7 @@ function StackedWideCard({ article, variant = 'stack' }: StackedWideCardProps): 
     >
       <div className="city-article-image-shell city-three-stack-image">
         {imageUrl ? (
-          <PublicImage
-            src={imageUrl}
-            alt=""
-            className="relative z-10 h-full w-full object-cover"
-            decoding="async"
-            fetchPriority="auto"
-            loading="lazy"
-            sizes={BLOCK_IMAGE_SIZES.halfColumn}
-          />
+          <PhoneSquareImage article={article} priority={LAZY_IMAGE} sizes={BLOCK_IMAGE_SIZES.halfColumn} />
         ) : null}
         <NavigableImageTarget href={article.articlePath} label={`Read ${article.title}`} />
       </div>

@@ -12,10 +12,10 @@ import { BLOCK_GUTTER_CLASS, BlockSection, CAROUSEL_CARD_WIDTH_CLASS } from '../
 import { useSnapCarousel } from '../useSnapCarousel'
 import { AuthorLink } from '@/features/authors/components/AuthorLink'
 import { NavigableImageTarget } from '../NavigableImageTarget'
-import { PublicImage } from '@/components/media/PublicImage'
 import { BLOCK_IMAGE_SIZES } from '../blockImageSizes'
-import { isPriorityImage } from '../heroImagePriority'
+import { EAGER_IMAGE, LAZY_IMAGE, isPriorityImage, type ImagePriority } from '../heroImagePriority'
 import { BLOCK_TYPE } from '../blockType'
+import { PhoneSquareImage } from '../PhoneSquareImage'
 
 function getArticleTypeLabel(article: FeaturedArticleTeaser): string {
   return article.articleType ?? article.category?.name ?? 'Article'
@@ -37,6 +37,7 @@ type CarouselArticleCardProps = {
 
 function CarouselArticleCard({ article, isPriority, isLast }: CarouselArticleCardProps): JSX.Element {
   const imageUrl = article.imageUrl ?? article.imageUrlSquare ?? null
+  const priority: ImagePriority = isPriority ? EAGER_IMAGE : LAZY_IMAGE
   // Success needs no state: the image paints from the server HTML the moment
   // it decodes. Only a broken URL needs JavaScript, and only to fall back to
   // the grey tile behind it.
@@ -48,15 +49,12 @@ function CarouselArticleCard({ article, isPriority, isLast }: CarouselArticleCar
 
   const inner = (
     <>
-      <div className="relative aspect-[3/2] overflow-hidden bg-[#d7dcde]">
+      <div className="relative aspect-square overflow-hidden bg-[#d7dcde] 768:aspect-[3/2]">
         {imageUrl ? (
-          <PublicImage
-            src={imageUrl}
-            alt=""
+          <PhoneSquareImage
+            article={article}
             className={`h-full w-full object-cover${hasFailed ? ' opacity-0' : ''}`}
-            decoding="async"
-            fetchPriority={isPriority ? 'high' : 'auto'}
-            loading={isPriority ? 'eager' : 'lazy'}
+            priority={priority}
             onError={() => setHasFailed(true)}
             sizes={BLOCK_IMAGE_SIZES.carouselCard}
           />

@@ -195,3 +195,16 @@
     gap: 44px;
   }
 }
+
+/* Phones: square photos, copy flush with the photo's edge (PHONE SQUARE
+   RULE, blocks/PhoneSquareImage.tsx). */
+@media (max-width: 767px) {
+  .city-three-hero-card .city-article-content {
+    padding-inline: 0;
+  }
+
+  .city-three-stack-image,
+  .city-three-fc-center-image {
+    aspect-ratio: 1 / 1;
+  }
+}
