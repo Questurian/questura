@@ -112,3 +112,27 @@ export const canonicalPath: Field = {
       'Public URL — auto-generated from country, city, category, and slug. Only set for published city-scope articles with a category. Changing the source fields on a published article creates an automatic 301 redirect from the previous URL.',
   },
 }
+
+/**
+ * How the public article page is framed. The body blocks, paywall, ads and
+ * author banner are the same in every layout; only the header and the frame
+ * around the body change. Told apart by name, never by article count.
+ */
+export const ARTICLE_DISPLAY_LAYOUTS = ['classic', 'dark-hero', 'centered'] as const
+export type ArticleDisplayLayout = (typeof ARTICLE_DISPLAY_LAYOUTS)[number]
+
+export const displayLayout: Field = {
+  name: 'displayLayout',
+  type: 'select',
+  required: false,
+  defaultValue: 'classic',
+  options: [
+    { label: 'Classic (today’s page)', value: 'classic' },
+    { label: 'Dark hero — ink header band', value: 'dark-hero' },
+    { label: 'Centered — centered header, wide hero', value: 'centered' },
+  ],
+  admin: {
+    position: 'sidebar',
+    description: 'How the public article page is laid out. Body, paywall and ads are the same in all three.',
+  },
+}
