@@ -258,6 +258,55 @@ describe('ListicleItineraries attraction tour-picks validation', () => {
   })
 })
 
+describe('ListicleItineraries stop-row rules answer 400 on the row', () => {
+  it('answers a missing tour title with a 400 on the stop, not a 500', async () => {
+    await expect(runBeforeValidate(buildData({ title: ' ' }))).rejects.toMatchObject({
+      status: 400,
+      message: 'Day 1 — Stop 1 must include a tour title.',
+      data: {
+        errors: [
+          {
+            path: 'itineraryDays.0.items.0',
+            message: 'Day 1 — Stop 1 must include a tour title.',
+          },
+        ],
+      },
+    })
+  })
+
+  it('names the day and section: a tour agency in day 2 Where you\'re staying', async () => {
+    const data = {
+      ...buildData(),
+      items: undefined,
+      itineraryDays: [
+        { whereStaying: [], items: [buildTourAgencyItem()] },
+        { whereStaying: [buildTourAgencyItem()], items: [] },
+      ],
+    }
+
+    await expect(runBeforeValidate(data)).rejects.toMatchObject({
+      status: 400,
+      data: {
+        errors: [
+          {
+            path: 'itineraryDays.1.whereStaying.0',
+            message: "Day 2 — Where you're staying (1) cannot be a tour agency block — use the Stops section.",
+          },
+        ],
+      },
+    })
+  })
+
+  it('points a bad key location at its row', async () => {
+    const data = buildData({ keyLocations: [{ source: 'manual', title: 'Maras lookout' }] })
+
+    await expect(runBeforeValidate(data)).rejects.toMatchObject({
+      status: 400,
+      data: { errors: [{ path: 'itineraryDays.0.items.0.keyLocations.0' }] },
+    })
+  })
+})
+
 describe('ListicleItineraries publish rules', () => {
   function publishedItinerary(overrides: Record<string, unknown> = {}) {
     return {
