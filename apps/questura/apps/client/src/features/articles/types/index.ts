@@ -200,7 +200,11 @@ export type Article = {
   seoSection?: SeoSection
   /** Access tier and lock state, always sent by the public routes (ADR-0009). */
   gate?: GateState
+  /** How the standard article page is framed; missing on older rows means classic. */
+  displayLayout?: ArticleDisplayLayout | null
 }
+
+export type ArticleDisplayLayout = 'classic' | 'dark-hero' | 'centered'
 
 export {
   isListicleVenue,

@@ -58,6 +58,7 @@ import * as migration_20261007_163342_listicle_blurb_only_items from './20261007
 
 import * as migration_20261008_182100_composite_photo_attribution from './20261008_182100_composite_photo_attribution'
 import * as migration_20261010_034941_featured_articles_center_lead_5_slot from './20261010_034941_featured_articles_center_lead_5_slot'
+import * as migration_20261010_040409_article_display_layout from './20261010_040409_article_display_layout'
 
 export const migrations = [
   {
@@ -354,5 +355,10 @@ export const migrations = [
     up: migration_20261010_034941_featured_articles_center_lead_5_slot.up,
     down: migration_20261010_034941_featured_articles_center_lead_5_slot.down,
     name: '20261010_034941_featured_articles_center_lead_5_slot',
+  },
+  {
+    up: migration_20261010_040409_article_display_layout.up,
+    down: migration_20261010_040409_article_display_layout.down,
+    name: '20261010_040409_article_display_layout',
   },
 ]
