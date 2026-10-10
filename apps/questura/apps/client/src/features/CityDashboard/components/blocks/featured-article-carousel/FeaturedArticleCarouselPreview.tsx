@@ -15,6 +15,7 @@ import { NavigableImageTarget } from '../NavigableImageTarget'
 import { PublicImage } from '@/components/media/PublicImage'
 import { BLOCK_IMAGE_SIZES } from '../blockImageSizes'
 import { isPriorityImage } from '../heroImagePriority'
+import { BLOCK_TYPE } from '../blockType'
 
 function getArticleTypeLabel(article: FeaturedArticleTeaser): string {
   return article.articleType ?? article.category?.name ?? 'Article'
@@ -64,21 +65,21 @@ function CarouselArticleCard({ article, isPriority, isLast }: CarouselArticleCar
       </div>
 
       <div className="pt-4 flex flex-col flex-1">
-        <p className="font-[family-name:var(--font-dm-sans)] text-[0.62rem] font-semibold uppercase leading-none tracking-[0.12em] text-[#1e3599] 768:text-[0.67rem]">
+        <p className={BLOCK_TYPE.kicker}>
           {articleTypeLabel}
         </p>
 
-        <h3 className="mt-2 font-editorial text-[1.35rem] font-semibold leading-[1.1] text-[#1a1a1a]">
+        <h3 className={`mt-2 ${BLOCK_TYPE.titleM}`}>
           {articlePath ? <Link href={articlePath}>{article.title}</Link> : article.title}
         </h3>
 
         {excerpt ? (
-          <p data-article-dek className="mt-2 overflow-hidden font-editorial text-[0.88rem] font-normal leading-[1.5] text-[#3f3a35] [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:3]">
+          <p data-article-dek className={`mt-2 overflow-hidden [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:3] ${BLOCK_TYPE.dek}`}>
             {articlePath ? <Link href={articlePath}>{excerpt}</Link> : excerpt}
           </p>
         ) : null}
 
-        <p className="mt-auto pt-3 font-[family-name:var(--font-dm-sans)] text-[0.62rem] font-semibold uppercase tracking-[0.08em] text-[#5f5952] 768:text-[0.65rem]">
+        <p className={`mt-auto pt-3 ${BLOCK_TYPE.byline}`}>
           By <AuthorLink authorSlug={article.author?.slug} authorId={article.author?.id} className="hover:underline">{authorLabel}</AuthorLink>
         </p>
       </div>
@@ -116,12 +117,12 @@ export function FeaturedArticleCarouselPreview({
       <div className={`flex items-center justify-between gap-3 ${BLOCK_GUTTER_CLASS} mb-5`}>
         <div className="flex-1 min-w-0">
           {heading ? (
-            <h2 className="font-editorial font-semibold leading-tight text-[#1a1a1a] text-[1.4rem] 768:text-[1.7rem] 1024:text-[2rem] 1280:text-[2.3rem]">
+            <h2 className={BLOCK_TYPE.sectionHeading}>
               {heading}
             </h2>
           ) : null}
           {subheading ? (
-            <p className="mt-1 font-[family-name:var(--font-dm-sans)] text-[0.75rem] 768:text-[0.85rem] 1024:text-[0.9rem] text-[#3f3a35] leading-relaxed">
+            <p className={BLOCK_TYPE.sectionSubheading}>
               {subheading}
             </p>
           ) : null}

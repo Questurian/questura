@@ -27,6 +27,7 @@ const ENTRYPOINTS = [
     imports: [
       './global/article-prose-and-media.css',
       './global/editorial-effects.css',
+      './global/block-type.css',
       './global/featured-articles-shared-and-seven.css',
       './global/featured-articles-four.css',
       './global/featured-articles-five.css',

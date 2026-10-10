@@ -12,6 +12,8 @@ import { NavigableImageTarget } from '../NavigableImageTarget'
 import { PublicImage } from '@/components/media/PublicImage'
 import { BLOCK_IMAGE_SIZES } from '../blockImageSizes'
 import { heroImagePriority, type ImagePriority } from '../heroImagePriority'
+import { BlockSectionHeader } from '../BlockSectionHeader'
+import { BLOCK_TYPE } from '../blockType'
 
 function getArticleTypeLabel(article: FeaturedArticleTeaser): string {
   return article.articleType ?? article.category?.name ?? 'Article'
@@ -41,21 +43,21 @@ function ArticleRow({ article, imagePriority }: ArticleRowProps): JSX.Element {
     <>
       {/* ── Text ─────────────────────────────────────────── */}
       <div className="min-w-0 flex-1">
-        <p className="font-[family-name:var(--font-dm-sans)] text-[0.62rem] font-semibold uppercase leading-none tracking-[0.12em] text-[#1a1a1a] 768:text-[0.67rem]">
+        <p className={BLOCK_TYPE.kicker}>
           {articleTypeLabel}
         </p>
 
-        <h3 className="mt-2 font-editorial text-[1.25rem] font-semibold leading-[1.15] text-[#1a1a1a] 768:text-[1.45rem] 1024:text-[1.65rem]">
+        <h3 className={`mt-2 ${BLOCK_TYPE.titleM}`}>
           {articlePath ? <Link href={articlePath}>{article.title}</Link> : article.title}
         </h3>
 
         {excerpt ? (
-          <p data-article-dek className="mt-2 font-editorial text-[0.88rem] font-normal leading-[1.5] text-[#3f3a35] 768:text-[0.92rem] 1024:text-[0.95rem]">
+          <p data-article-dek className={`mt-2 ${BLOCK_TYPE.dek}`}>
             {articlePath ? <Link href={articlePath}>{excerpt}</Link> : excerpt}
           </p>
         ) : null}
 
-        <p className="mt-3 font-[family-name:var(--font-dm-sans)] text-[0.62rem] font-semibold uppercase tracking-[0.08em] text-[#5f5952] 768:text-[0.65rem]">
+        <p className={`mt-3 ${BLOCK_TYPE.byline}`}>
           By <AuthorLink authorSlug={article.author?.slug} authorId={article.author?.id} className="hover:underline">{authorLabel}</AuthorLink>
         </p>
       </div>
@@ -98,16 +100,7 @@ export function ArticleListPreview({
   return (
     <BlockSection className="bg-[#f5f0e8]" contentClassName="pb-6 pt-8" aria-label="Article list">
         {sectionHeading ? (
-          <div className="mb-4 pb-2">
-            <h2 className="font-editorial text-[1.4rem] font-semibold leading-tight text-[#1a1a1a] 768:text-[1.7rem] 1024:text-[2rem] 1280:text-[2.3rem]">
-              {sectionHeading}
-            </h2>
-            {sectionSubheading ? (
-              <p className="mt-1 font-[family-name:var(--font-dm-sans)] text-[0.75rem] leading-relaxed text-[#3f3a35] 768:text-[0.85rem]">
-                {sectionSubheading}
-              </p>
-            ) : null}
-          </div>
+          <BlockSectionHeader heading={sectionHeading} subheading={sectionSubheading} className="mb-4 pb-2" />
         ) : null}
 
         <div className="divide-y divide-[#d9d3c9]">

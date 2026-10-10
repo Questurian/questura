@@ -12,6 +12,8 @@ import { NavigableImageTarget } from '../NavigableImageTarget'
 import { PublicImage } from '@/components/media/PublicImage'
 import { BLOCK_IMAGE_SIZES } from '../blockImageSizes'
 import { isPriorityImage } from '../heroImagePriority'
+import { BlockSectionHeader } from '../BlockSectionHeader'
+import { BLOCK_TYPE } from '../blockType'
 
 function getArticleTypeLabel(article: FeaturedArticleTeaser): string {
   return article.articleType ?? article.category?.name ?? 'Article'
@@ -59,10 +61,10 @@ function ThreeArticleCard({
       </div>
 
       <div className="flex min-h-[13.5rem] flex-1 flex-col px-4 pb-7 pt-5 1024:px-5 1024:pb-8">
-        <p className="font-[family-name:var(--font-dm-sans)] text-[0.61rem] font-semibold uppercase leading-none tracking-[0.16em] text-accent">
+        <p className={BLOCK_TYPE.kicker}>
           {getArticleTypeLabel(article)}
         </p>
-        <h3 className="mt-3 font-editorial text-[1rem] font-medium uppercase leading-[1.2] tracking-[0.035em] text-foreground 1024:text-[1.08rem]">
+        <h3 className={`mt-3 ${BLOCK_TYPE.titleM}`}>
           {articlePath ? (
             <Link href={articlePath}>{article.title}</Link>
           ) : (
@@ -72,7 +74,7 @@ function ThreeArticleCard({
         {article.excerpt ? (
           <p
             data-article-dek
-            className="mt-4 overflow-hidden font-[family-name:var(--font-dm-sans)] text-[0.78rem] leading-[1.65] text-foreground/58 [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:3] 1024:text-[0.82rem]"
+            className={`mt-3 overflow-hidden [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:3] ${BLOCK_TYPE.dek}`}
           >
             {articlePath ? (
               <Link href={articlePath}>{article.excerpt}</Link>
@@ -136,11 +138,11 @@ function GridArticleCard({
       </div>
 
       <div className="city-article-content flex flex-1 flex-col pt-4">
-        <p className="font-[family-name:var(--font-dm-sans)] text-[0.62rem] font-semibold uppercase leading-none tracking-[0.12em] text-[#1e3599] 768:text-[0.67rem]">
+        <p className={BLOCK_TYPE.kicker}>
           {articleTypeLabel}
         </p>
 
-        <h3 className="mt-2 font-editorial text-[1.35rem] font-semibold leading-[1.1] text-[#1a1a1a]">
+        <h3 className={`mt-2 ${BLOCK_TYPE.titleM}`}>
           {articlePath ? (
             <Link href={articlePath}>{article.title}</Link>
           ) : (
@@ -151,7 +153,7 @@ function GridArticleCard({
         {excerpt ? (
           <p
             data-article-dek
-            className="mt-2 overflow-hidden font-editorial text-[0.88rem] font-normal leading-[1.5] text-[#3f3a35] [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:3]"
+            className={`mt-2 overflow-hidden [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:3] ${BLOCK_TYPE.dek}`}
           >
             {articlePath ? (
               <Link href={articlePath}>{excerpt}</Link>
@@ -161,7 +163,7 @@ function GridArticleCard({
           </p>
         ) : null}
 
-        <p className="mt-auto pt-3 font-[family-name:var(--font-dm-sans)] text-[0.62rem] font-semibold uppercase tracking-[0.08em] text-[#5f5952] 768:text-[0.65rem]">
+        <p className={`mt-auto pt-3 ${BLOCK_TYPE.byline}`}>
           By{' '}
           <AuthorLink
             authorSlug={article.author?.slug}
@@ -224,18 +226,7 @@ export function ArticleGridPreview({
 
   return (
     <BlockSection className="py-8 bg-[#f5f0e8]" aria-label="Article grid">
-      {heading ? (
-        <div className="mb-5">
-          <h2 className="font-editorial font-semibold leading-tight text-[#1a1a1a] text-[1.4rem] 768:text-[1.7rem] 1024:text-[2rem] 1280:text-[2.3rem]">
-            {heading}
-          </h2>
-          {subheading ? (
-            <p className="mt-1 font-[family-name:var(--font-dm-sans)] text-[0.75rem] 768:text-[0.85rem] 1024:text-[0.9rem] text-[#3f3a35] leading-relaxed">
-              {subheading}
-            </p>
-          ) : null}
-        </div>
-      ) : null}
+      {heading ? <BlockSectionHeader heading={heading} subheading={subheading} className="mb-5" /> : null}
 
       <div className={gridClass}>
         {items.map((article, index) => (
