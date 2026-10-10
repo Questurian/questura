@@ -33,6 +33,9 @@ export const BLOCK_IMAGE_SIZES = {
   /** A centre feature: 1.55fr of 1fr/1.55fr/1fr with 32px gaps, so ~562px. */
   centreFeature: '(min-width: 1024px) 580px, 100vw',
 
+  /** The lead of the 5-slot centre-lead layout: 2fr of 1fr/2fr/1fr, so ~650px. */
+  centreLead: '(min-width: 1024px) 680px, 100vw',
+
   /** The 1fr partner of a hero-left split, so ~541px. */
   halfColumn: '(min-width: 1024px) 560px, 100vw',
 

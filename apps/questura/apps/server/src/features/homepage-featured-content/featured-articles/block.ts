@@ -95,15 +95,20 @@ export const FeaturedArticlesBlock: Block = {
       dbName: 's5_lo',
       type: 'select',
       required: false,
-      defaultValue: 'card-grid',
+      defaultValue: 'hero-sidebar',
       options: [
         {
-          label: 'Card grid (default)',
-          value: 'card-grid',
+          label: 'Magazine — hero + sidebar stack (default)',
+          value: 'hero-sidebar',
         },
         {
-          label: 'Magazine — hero + sidebar stack',
-          value: 'hero-sidebar',
+          label: 'Center lead — two stacked on each side',
+          value: 'center-lead',
+        },
+        {
+          // Retired: kept so stored rows stay valid. Reads as Magazine.
+          label: 'Card grid (retired — shows as Magazine)',
+          value: 'card-grid',
         },
       ],
       admin: {

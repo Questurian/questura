@@ -319,11 +319,17 @@ export type CityHomepageBlock<TItem = unknown> =
   | CityHomepageLegacyBlock<TItem>;
 
 export type FeaturedArticlesSlot3Layout = "hero-left" | "featured-center";
+export type FeaturedArticlesSlot4Layout = "sidebar-stack" | "one-over-three";
+export type FeaturedArticlesSlot5Layout = "hero-sidebar" | "center-lead";
 
 export type FeaturedArticlesBlock = CityHomepageArticleBlock & {
   blockType: "featured-articles";
   /** Present when totalSlots === 3; picks between the two public 3-slot layouts. */
   slot3Layout?: FeaturedArticlesSlot3Layout | null;
+  /** Present when totalSlots === 4. */
+  slot4Layout?: FeaturedArticlesSlot4Layout | null;
+  /** Present when totalSlots === 5. The retired card grid arrives as hero-sidebar. */
+  slot5Layout?: FeaturedArticlesSlot5Layout | null;
 };
 
 export type ArticleGridFourLayout = "four-across" | "two-by-two";

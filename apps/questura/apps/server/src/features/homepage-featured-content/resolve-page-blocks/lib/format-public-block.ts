@@ -1,5 +1,9 @@
 import { publicArticleGridFourLayout } from '../../article-grid/service'
-import { publicFeaturedArticlesSlot3Layout } from '../../featured-articles/lib/slot-layouts'
+import {
+  publicFeaturedArticlesSlot3Layout,
+  publicFeaturedArticlesSlot4Layout,
+  publicFeaturedArticlesSlot5Layout,
+} from '../../featured-articles/lib/slot-layouts'
 import { publicCreatorKicker } from '../../featured-creator-article/creator-kicker'
 import { PUBLIC_ARTICLE_BLOCK_TYPES } from '../constants'
 import { formatPublicArticleItem } from './format-public-article'
@@ -65,11 +69,16 @@ export function formatPublicHomepageBlock(block: unknown, location?: LocationCon
     return creatorKicker ? { ...base, creatorKicker } : base
   }
 
-  const slot3Layout =
-    blockType === 'featured-articles' ? publicFeaturedArticlesSlot3Layout(block, totalSlots) : null
-
-  if (slot3Layout) {
-    return { ...base, slot3Layout }
+  if (blockType === 'featured-articles') {
+    // Each helper returns null unless the block has its slot count, so at most
+    // one of these keys is sent.
+    const slot3Layout = publicFeaturedArticlesSlot3Layout(block, totalSlots)
+    const slot4Layout = publicFeaturedArticlesSlot4Layout(block, totalSlots)
+    const slot5Layout = publicFeaturedArticlesSlot5Layout(block, totalSlots)
+    if (slot3Layout) return { ...base, slot3Layout }
+    if (slot4Layout) return { ...base, slot4Layout }
+    if (slot5Layout) return { ...base, slot5Layout }
+    return base
   }
 
   const articleGridFourLayout =
