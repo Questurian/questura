@@ -90,8 +90,10 @@ export function parseSlot4LayoutBodyField(body: Record<string, unknown>): Slot4L
 }
 
 export function normalizeFeaturedArticlesSlot5Layout(raw: unknown): FeaturedArticlesSlot5Layout {
-  if (raw === 'hero-sidebar' || raw === 'card-grid') return raw
-  return 'card-grid'
+  if (raw === 'center-lead') return raw
+  // `card-grid` is retired and reads as the magazine, which is what the site
+  // always drew for it.
+  return 'hero-sidebar'
 }
 
 export function publicFeaturedArticlesSlot5Layout(
@@ -113,8 +115,9 @@ export function parseSlot5LayoutBodyField(body: Record<string, unknown>): Slot5L
   }
 
   const v = body.slot5Layout
-  if (v === null) {
-    return { ok: true, omit: false, value: 'card-grid' }
+  // Older editor builds still send the retired `card-grid`.
+  if (v === null || v === 'card-grid') {
+    return { ok: true, omit: false, value: 'hero-sidebar' }
   }
   if (typeof v !== 'string') {
     return { ok: false, message: 'slot5Layout must be a string.' }

@@ -259,6 +259,43 @@ describe('formatPublicLocationHomepageDoc', () => {
     expect(response.pageBlocks[0]).not.toHaveProperty('slot3Layout')
   })
 
+  function featuredBlock(totalSlots: number, extra: Record<string, unknown> = {}) {
+    return formatPublicLocationHomepageDoc([
+      {
+        blockType: 'featured-articles',
+        ...extra,
+        selection: {
+          totalSlots,
+          items: [{ relationTo: 'articles', title: 'Best Lima Cafes' }],
+        },
+      },
+    ] as never).pageBlocks[0]
+  }
+
+  it('exposes slot4Layout on 4-slot featured-articles blocks, defaulting to sidebar-stack', () => {
+    expect(featuredBlock(4, { slot4Layout: 'one-over-three' })).toMatchObject({
+      slot4Layout: 'one-over-three',
+    })
+    expect(featuredBlock(4)).toMatchObject({ slot4Layout: 'sidebar-stack' })
+    expect(featuredBlock(5, { slot4Layout: 'one-over-three' })).not.toHaveProperty('slot4Layout')
+  })
+
+  it('exposes slot5Layout on 5-slot featured-articles blocks', () => {
+    expect(featuredBlock(5, { slot5Layout: 'center-lead' })).toMatchObject({
+      slot5Layout: 'center-lead',
+    })
+    expect(featuredBlock(3, { slot5Layout: 'center-lead' })).not.toHaveProperty('slot5Layout')
+  })
+
+  // The site never drew the card grid; every stored card-grid block has always
+  // rendered as the magazine, so that is what the API says it is.
+  it('reads the retired card-grid and a missing slot5Layout as hero-sidebar', () => {
+    expect(featuredBlock(5, { slot5Layout: 'card-grid' })).toMatchObject({
+      slot5Layout: 'hero-sidebar',
+    })
+    expect(featuredBlock(5)).toMatchObject({ slot5Layout: 'hero-sidebar' })
+  })
+
   it('exposes articleGridFourLayout on 4-slot article-grid blocks', () => {
     const response = formatPublicLocationHomepageDoc([
       {

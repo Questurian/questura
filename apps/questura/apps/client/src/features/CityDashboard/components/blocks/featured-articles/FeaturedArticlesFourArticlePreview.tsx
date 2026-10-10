@@ -14,6 +14,7 @@ import { NavigableImageTarget } from '../NavigableImageTarget'
 import { PublicImage, PublicSource } from '@/components/media/PublicImage'
 import { BLOCK_IMAGE_SIZES } from '../blockImageSizes'
 import { heroImagePriority, type ImagePriority } from '../heroImagePriority'
+import { FeaturedArticlesFourOneOverThree } from './FeaturedArticlesFourOneOverThree'
 
 function getArticleTypeLabel(article: FeaturedArticleTeaser): string {
   return article.articleType ?? article.category?.name ?? 'Article'
@@ -192,23 +193,27 @@ export function FeaturedArticlesFourArticlePreview({
         />
       ) : null}
 
-      <div className="city-featured-four-layout">
-        <div className="city-featured-four-hero">
-          {heroArticle ? (
-            <HeroArticleCard
-              key={getArticleKey(heroArticle, 0)}
-              article={heroArticle}
-              imagePriority={imagePriority}
-            />
-          ) : null}
-        </div>
+      {block.slot4Layout === 'one-over-three' ? (
+        <FeaturedArticlesFourOneOverThree items={block.items} imagePriority={imagePriority} />
+      ) : (
+        <div className="city-featured-four-layout">
+          <div className="city-featured-four-hero">
+            {heroArticle ? (
+              <HeroArticleCard
+                key={getArticleKey(heroArticle, 0)}
+                article={heroArticle}
+                imagePriority={imagePriority}
+              />
+            ) : null}
+          </div>
 
-        <div className="city-featured-four-list">
-          {sideArticles.map((article, index) => (
-            <SideListArticleCard key={getArticleKey(article, index + 1)} article={article} />
-          ))}
+          <div className="city-featured-four-list">
+            {sideArticles.map((article, index) => (
+              <SideListArticleCard key={getArticleKey(article, index + 1)} article={article} />
+            ))}
+          </div>
         </div>
-      </div>
+      )}
     </section>
   )
 }

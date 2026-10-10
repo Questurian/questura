@@ -258,3 +258,129 @@
     margin-top: 18px;
   }
 }
+
+/* ─── Four-article lead row, then three columns (slot4Layout: one-over-three)
+   Phone: one column in slot order. ≥768px: the lead is a row (copy left,
+   wide image right) over a hairline, then three columns with rules between. */
+
+.city-featured-four-o3-layout {
+  width: 100%;
+  max-width: var(--block-max-width);
+  margin-inline: auto;
+  padding: 0 var(--block-gutter) 40px;
+}
+
+.city-four-o3-lead,
+.city-four-o3-col {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+
+.city-four-o3-col {
+  padding-top: 20px;
+  margin-top: 20px;
+  border-top: 1px solid rgba(95, 89, 82, 0.22);
+}
+
+.city-four-o3-image {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  background: #d7dcde;
+}
+
+.city-four-o3-copy {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.city-four-o3-title {
+  margin-top: 8px;
+}
+
+.city-four-o3-dek {
+  margin-top: 8px;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+.city-four-o3-lead .city-four-o3-dek {
+  margin-top: 12px;
+  -webkit-line-clamp: 4;
+}
+
+.city-four-o3-byline {
+  margin-top: 12px;
+}
+
+@media (min-width: 768px) {
+  .city-featured-four-o3-layout {
+    padding-top: 24px;
+    padding-bottom: 56px;
+    border-top: 1px solid rgba(95, 89, 82, 0.18);
+  }
+
+  .city-four-o3-lead {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.8fr);
+    gap: 32px;
+    align-items: center;
+    padding-bottom: 28px;
+    border-bottom: 1px solid rgba(95, 89, 82, 0.22);
+  }
+
+  .city-four-o3-lead .city-four-o3-image {
+    grid-column: 2;
+    grid-row: 1;
+    aspect-ratio: 16 / 9;
+  }
+
+  .city-four-o3-lead .city-four-o3-copy {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .city-four-o3-columns {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    padding-top: 28px;
+  }
+
+  .city-four-o3-col {
+    margin: 0;
+    padding: 0 24px;
+    border-top: 0;
+  }
+
+  .city-four-o3-col:first-child {
+    padding-left: 0;
+  }
+
+  .city-four-o3-col:last-child {
+    padding-right: 0;
+  }
+
+  .city-four-o3-col + .city-four-o3-col {
+    border-left: 1px solid rgba(95, 89, 82, 0.22);
+  }
+
+  .city-four-o3-col .city-four-o3-image {
+    aspect-ratio: 3 / 2;
+  }
+}
+
+@media (min-width: 1280px) {
+  .city-four-o3-lead {
+    gap: 48px;
+  }
+
+  .city-four-o3-col {
+    padding: 0 32px;
+  }
+}

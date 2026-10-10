@@ -177,3 +177,153 @@
     padding-left: 48px;
   }
 }
+
+/* ─── Five-article centre lead (slot5Layout: center-lead) ───────────────────
+   Phone: one column in slot order. Tablet: lead across the top, the four
+   others in a 2x2. Desktop: 1fr / 2fr / 1fr with hairline column rules, lead
+   in the centre, slots 2-3 on the left, 4-5 on the right. */
+
+.city-featured-five-cl-layout {
+  display: grid;
+  width: 100%;
+  max-width: var(--block-max-width);
+  margin-inline: auto;
+  padding: 0 var(--block-gutter) 40px;
+}
+
+.city-five-cl-side {
+  display: contents;
+}
+
+.city-five-cl-card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+  padding: 20px 0;
+  border-top: 1px solid rgba(95, 89, 82, 0.22);
+}
+
+.city-five-cl-card--lead {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.city-five-cl-image {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  background: #d7dcde;
+}
+
+.city-five-cl-copy {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.city-five-cl-title {
+  margin-top: 8px;
+}
+
+.city-five-cl-dek {
+  margin-top: 8px;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+.city-five-cl-card--lead .city-five-cl-dek {
+  margin-top: 12px;
+}
+
+.city-five-cl-byline {
+  margin-top: 12px;
+}
+
+@media (min-width: 768px) {
+  .city-featured-five-cl-layout {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    column-gap: 32px;
+    padding-top: 24px;
+    padding-bottom: 56px;
+    border-top: 1px solid rgba(95, 89, 82, 0.18);
+  }
+
+  .city-five-cl-center {
+    grid-column: 1 / -1;
+  }
+
+  .city-five-cl-image {
+    aspect-ratio: 3 / 2;
+  }
+
+  .city-five-cl-card--lead .city-five-cl-image {
+    aspect-ratio: 16 / 9;
+  }
+}
+
+@media (min-width: 1024px) {
+  .city-featured-five-cl-layout {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) minmax(0, 1fr);
+    column-gap: 0;
+  }
+
+  .city-five-cl-side {
+    display: flex;
+    flex-direction: column;
+    grid-row: 1;
+  }
+
+  .city-five-cl-side--left {
+    grid-column: 1;
+    padding-right: 28px;
+  }
+
+  .city-five-cl-center {
+    grid-column: 2;
+    grid-row: 1;
+    padding-inline: 28px;
+    border-inline: 1px solid rgba(95, 89, 82, 0.22);
+  }
+
+  .city-five-cl-side--right {
+    grid-column: 3;
+    padding-left: 28px;
+  }
+
+  .city-five-cl-card {
+    padding: 0;
+    border-top: 0;
+  }
+
+  .city-five-cl-side .city-five-cl-card + .city-five-cl-card {
+    margin-top: 28px;
+    padding-top: 28px;
+    border-top: 1px solid rgba(95, 89, 82, 0.22);
+  }
+
+  .city-five-cl-image {
+    aspect-ratio: 16 / 10;
+  }
+
+  .city-five-cl-card--lead .city-five-cl-image {
+    aspect-ratio: 16 / 10;
+  }
+}
+
+@media (min-width: 1440px) {
+  .city-five-cl-side--left {
+    padding-right: 40px;
+  }
+
+  .city-five-cl-center {
+    padding-inline: 40px;
+  }
+
+  .city-five-cl-side--right {
+    padding-left: 40px;
+  }
+}

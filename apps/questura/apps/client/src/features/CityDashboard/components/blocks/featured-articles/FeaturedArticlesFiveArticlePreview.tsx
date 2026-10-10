@@ -14,6 +14,7 @@ import { NavigableImageTarget } from '../NavigableImageTarget'
 import { PublicImage } from '@/components/media/PublicImage'
 import { BLOCK_IMAGE_SIZES } from '../blockImageSizes'
 import { heroImagePriority, type ImagePriority } from '../heroImagePriority'
+import { FeaturedArticlesFiveCenterLead } from './FeaturedArticlesFiveCenterLead'
 
 function getArticleTypeLabel(article: FeaturedArticleTeaser): string {
   return article.articleType ?? article.category?.name ?? 'Article'
@@ -218,26 +219,30 @@ export function FeaturedArticlesFiveArticlePreview({
         />
       ) : null}
 
-      <div className="city-featured-five-layout">
-        <div className="city-featured-five-hero">
-          {heroArticle ? (
-            <MagazineHeroCard
-              key={getArticleKey(heroArticle, 0)}
-              article={heroArticle}
-              imagePriority={imagePriority}
-            />
-          ) : null}
-        </div>
+      {block.slot5Layout === 'center-lead' ? (
+        <FeaturedArticlesFiveCenterLead items={block.items} imagePriority={imagePriority} />
+      ) : (
+        <div className="city-featured-five-layout">
+          <div className="city-featured-five-hero">
+            {heroArticle ? (
+              <MagazineHeroCard
+                key={getArticleKey(heroArticle, 0)}
+                article={heroArticle}
+                imagePriority={imagePriority}
+              />
+            ) : null}
+          </div>
 
-        <div className="city-featured-five-sidebar">
-          {mediaArticle ? (
-            <SidebarMediaCard key={getArticleKey(mediaArticle, 1)} article={mediaArticle} />
-          ) : null}
-          {textArticles.map((article, index) => (
-            <SidebarTextRow key={getArticleKey(article, index + 2)} article={article} />
-          ))}
+          <div className="city-featured-five-sidebar">
+            {mediaArticle ? (
+              <SidebarMediaCard key={getArticleKey(mediaArticle, 1)} article={mediaArticle} />
+            ) : null}
+            {textArticles.map((article, index) => (
+              <SidebarTextRow key={getArticleKey(article, index + 2)} article={article} />
+            ))}
+          </div>
         </div>
-      </div>
+      )}
     </section>
   )
 }
