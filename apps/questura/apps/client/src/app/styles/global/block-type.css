@@ -1,0 +1,196 @@
+/* ─── BLOCK TYPE STYLES — city homepage article blocks ──────────────────────
+
+   Single source of truth for the text inside every article-type homepage
+   block (featured-articles 3/4/5/7/8/9, article grid, article list, single
+   feature, creator feature, carousel, editorial feature, author feature).
+   Each kind of text has ONE named style; blocks apply the class and never
+   set their own font family, size, weight, case or tracking. Lima Block 1
+   (the 5-slot magazine) is the reference the sizes came from.
+
+   House rule: any text not in the display serif is ALL CAPS.
+
+   The styles sit in the `components` layer so a Tailwind colour utility on
+   the same element (text-white on the dark single-feature block) still wins,
+   while layout CSS cannot quietly resize them. Class names are mirrored in
+   features/CityDashboard/components/blocks/blockType.ts; ai-blog-writer's
+   homepage canvases copy the same numbers. */
+
+@layer theme, base, components, utilities;
+
+@layer components {
+  /* Block heading ("Itineraries", "Destination Spotlight" blocks' titles). */
+  .block-type-section-heading {
+    font-family: var(--font-editorial-serif);
+    font-size: 1.4rem;
+    font-weight: 600;
+    line-height: 1.25;
+    color: #1a1a1a;
+  }
+
+  /* The line under a block heading. */
+  .block-type-section-subheading {
+    margin-top: 6px;
+    font-family: var(--font-dm-sans);
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    line-height: 1.5;
+    text-transform: uppercase;
+    color: #5f5952;
+  }
+
+  /* Category / article-type label on a card, and feature labels. */
+  .block-type-kicker {
+    font-family: var(--font-dm-sans);
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    line-height: 1;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  /* Lead story in any block. Phone size follows title length
+     (data-title-length, from blockTitleLength()). */
+  .block-type-title-l {
+    font-family: var(--font-editorial-serif);
+    font-size: 1.72rem;
+    font-weight: 600;
+    line-height: 0.96;
+    color: #1a1a1a;
+  }
+
+  .block-type-title-l[data-title-length='short'] {
+    font-size: 2rem;
+    line-height: 0.92;
+  }
+
+  .block-type-title-l[data-title-length='long'] {
+    font-size: 1.55rem;
+    line-height: 0.98;
+  }
+
+  .block-type-title-l[data-title-length='very-long'] {
+    font-size: 1.38rem;
+    line-height: 1.02;
+  }
+
+  /* Secondary stories that carry an image. */
+  .block-type-title-m {
+    font-family: var(--font-editorial-serif);
+    font-size: 1.08rem;
+    font-weight: 700;
+    line-height: 1.1;
+    color: #111111;
+  }
+
+  /* Text-only and compact rows. */
+  .block-type-title-s {
+    font-family: var(--font-editorial-serif);
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1.1;
+    color: #111111;
+  }
+
+  /* Card description. `--lead` is the dek under a lead title. */
+  .block-type-dek,
+  .block-type-dek-lead {
+    font-family: var(--font-editorial-serif);
+    font-size: 0.88rem;
+    font-weight: 400;
+    line-height: 1.35;
+    color: #3f3a35;
+  }
+
+  .block-type-dek-lead {
+    line-height: 1.4;
+  }
+
+  /* Author line. */
+  .block-type-byline {
+    font-family: var(--font-dm-sans);
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    line-height: 1;
+    text-transform: uppercase;
+    color: #5f5952;
+  }
+
+  @media (min-width: 768px) {
+    .block-type-section-heading {
+      font-size: 1.7rem;
+    }
+
+    .block-type-section-subheading {
+      font-size: 0.74rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .block-type-section-heading {
+      font-size: 2rem;
+    }
+
+    .block-type-section-subheading {
+      font-size: 0.78rem;
+    }
+
+    .block-type-kicker {
+      font-size: 0.68rem;
+    }
+
+    .block-type-title-l,
+    .block-type-title-l[data-title-length] {
+      font-size: 2rem;
+      line-height: 0.97;
+    }
+
+    .block-type-title-m {
+      font-size: 1.15rem;
+    }
+
+    .block-type-title-s {
+      font-size: 1.08rem;
+    }
+
+    .block-type-dek {
+      font-size: 0.9rem;
+      line-height: 1.38;
+    }
+
+    .block-type-dek-lead {
+      font-size: 1rem;
+      line-height: 1.45;
+    }
+
+    .block-type-byline {
+      font-size: 0.66rem;
+    }
+  }
+
+  @media (min-width: 1280px) {
+    .block-type-section-heading {
+      font-size: 2.3rem;
+    }
+
+    .block-type-title-l,
+    .block-type-title-l[data-title-length] {
+      font-size: 2.3rem;
+      line-height: 0.96;
+    }
+
+    .block-type-title-m {
+      font-size: 1.25rem;
+    }
+
+    .block-type-title-s {
+      font-size: 1.15rem;
+    }
+
+    .block-type-dek-lead {
+      font-size: 1.05rem;
+    }
+  }
+}

@@ -60,22 +60,10 @@
 
 .city-four-side-type {
   margin: 0;
-  font-family: var(--font-dm-sans);
-  font-size: 0.62rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  line-height: 1;
-  text-transform: uppercase;
-  color: #1e3599;
 }
 
 .city-four-side-title {
   margin: 6px 0 0;
-  font-family: var(--font-editorial-serif);
-  font-size: 1.08rem;
-  font-weight: 700;
-  line-height: 1.08;
-  color: #111111;
 }
 
 .city-four-side-meta {
@@ -84,22 +72,10 @@
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
-  font-family: var(--font-editorial-serif);
-  font-size: 0.88rem;
-  font-weight: 400;
-  line-height: 1.28;
-  color: #49423d;
 }
 
 .city-four-side-author {
   margin-top: 10px;
-  font-family: var(--font-dm-sans);
-  font-size: 0.6rem;
-  font-weight: 700;
-  letter-spacing: 0.11em;
-  line-height: 1;
-  text-transform: uppercase;
-  color: #5e5752;
 }
 
 /* ── <380px tweaks ── */
@@ -113,14 +89,6 @@
   .city-four-side-image {
     width: 74px;
     height: 74px;
-  }
-
-  .city-four-side-title {
-    font-size: 1rem;
-  }
-
-  .city-four-side-meta {
-    font-size: 0.82rem;
   }
 }
 
@@ -160,27 +128,16 @@
   }
 
   .city-four-hero-card h2 {
-    font-size: 2rem;
-    line-height: 0.97;
     margin-top: 0;
-  }
-
-  .city-four-hero-card .city-article-content > p:first-child {
-    font-size: 0.68rem;
-    letter-spacing: 0.12em;
   }
 
   .city-four-hero-card .city-article-content > p:nth-of-type(2) {
     margin-top: 14px;
-    font-size: 1rem;
-    line-height: 1.45;
     -webkit-line-clamp: 4;
   }
 
   .city-four-hero-card .city-article-content > p:last-child {
     margin-top: 16px;
-    font-size: 0.66rem;
-    letter-spacing: 0.12em;
   }
 
   .city-four-side-card {
@@ -207,21 +164,13 @@
     padding-top: 2px;
   }
 
-  .city-four-side-title {
-    font-size: 1.15rem;
-    line-height: 1.1;
-  }
-
   .city-four-side-meta {
     margin-top: 10px;
-    font-size: 0.9rem;
-    line-height: 1.38;
     -webkit-line-clamp: 3;
   }
 
   .city-four-side-author {
     margin-top: 13px;
-    font-size: 0.64rem;
   }
 }
 
@@ -235,13 +184,7 @@
     aspect-ratio: 1 / 1;
   }
 
-  .city-four-hero-card h2 {
-    font-size: 2.3rem;
-    line-height: 0.96;
-  }
-
   .city-four-hero-card .city-article-content > p:nth-of-type(2) {
-    font-size: 1.05rem;
     -webkit-line-clamp: 5;
   }
 
@@ -255,20 +198,13 @@
     height: 190px;
   }
 
-  .city-four-side-title {
-    font-size: 1.25rem;
-    line-height: 1.08;
-  }
-
   .city-four-side-meta {
-    font-size: 0.95rem;
     margin-top: 12px;
     -webkit-line-clamp: 4;
   }
 
   .city-four-side-author {
     margin-top: 14px;
-    font-size: 0.66rem;
   }
 }
 
@@ -284,20 +220,13 @@
     height: 220px;
   }
 
-  .city-four-side-title {
-    font-size: 1.35rem;
-    line-height: 1.07;
-  }
-
   .city-four-side-meta {
-    font-size: 1rem;
     margin-top: 13px;
     -webkit-line-clamp: 4;
   }
 
   .city-four-side-author {
     margin-top: 16px;
-    font-size: 0.68rem;
   }
 
   .city-featured-four-hero {
@@ -321,18 +250,11 @@
     height: 240px;
   }
 
-  .city-four-side-title {
-    font-size: 1.45rem;
-    line-height: 1.06;
-  }
-
   .city-four-side-meta {
-    font-size: 1.05rem;
     margin-top: 14px;
   }
 
   .city-four-side-author {
     margin-top: 18px;
-    font-size: 0.7rem;
   }
 }

@@ -12,6 +12,8 @@ import { NavigableImageTarget } from '../NavigableImageTarget'
 import { PublicImage } from '@/components/media/PublicImage'
 import { BLOCK_IMAGE_SIZES } from '../blockImageSizes'
 import { heroImagePriority, type ImagePriority } from '../heroImagePriority'
+import { BlockSectionHeader } from '../BlockSectionHeader'
+import { BLOCK_TYPE, blockTitleLength } from '../blockType'
 
 function getAuthorLabel(article: FeaturedArticleTeaser): string {
   return article.author?.name || 'Questurian'
@@ -108,6 +110,7 @@ export function FeaturedArticleOneArticlePreview({
     ? block.creatorKicker?.trim() || sectionHeading
     : null
   const articlePath = article.articlePath ?? null
+  const titleLength = blockTitleLength(article.title)
 
   const mobileContent = (
     <>
@@ -122,7 +125,7 @@ export function FeaturedArticleOneArticlePreview({
       <div className="relative">
         <div className={`city-article-content px-6 py-9 ${showAuthorAvatar ? 'text-center' : ''}`}>
           {creatorKicker ? (
-            <p className="mb-6 text-center font-[family-name:var(--font-dm-sans)] text-[0.88rem] font-bold uppercase tracking-[0.16em] text-accent-soft">
+            <p className={`mb-6 text-center text-accent-soft ${BLOCK_TYPE.kicker}`}>
               {creatorKicker}
             </p>
           ) : null}
@@ -131,15 +134,15 @@ export function FeaturedArticleOneArticlePreview({
               authorLabel={authorLabel}
               imagePriority={imagePriority}
             /> : null}
-          <h2 className="font-editorial font-semibold text-[2.1rem] leading-[1.0] text-white">
+          <h2 className={`text-white ${BLOCK_TYPE.titleL}`} data-title-length={titleLength}>
             {articlePath ? <Link href={articlePath}>{article.title}</Link> : article.title}
           </h2>
           {excerpt ? (
-            <p data-article-dek className="mt-4 font-editorial text-[0.95rem] leading-[1.55] text-[#b0a89e]">
+            <p data-article-dek className={`mt-4 text-[#b0a89e] ${BLOCK_TYPE.dekLead}`}>
               {articlePath ? <Link href={articlePath}>{excerpt}</Link> : excerpt}
             </p>
           ) : null}
-          <p className="mt-7 text-center font-[family-name:var(--font-dm-sans)] text-[0.62rem] font-semibold uppercase tracking-[0.16em] text-[#6a635c]">
+          <p className={`mt-7 text-center text-[#6a635c] ${BLOCK_TYPE.byline}`}>
             BY <AuthorLink authorSlug={article.author?.slug} authorId={article.author?.id} className="hover:underline">{authorLabel}</AuthorLink>
           </p>
         </div>
@@ -158,7 +161,7 @@ export function FeaturedArticleOneArticlePreview({
       >
         <div className="city-article-content mx-auto w-full max-w-[460px] text-center">
           {creatorKicker ? (
-            <p className="mb-6 text-center font-[family-name:var(--font-dm-sans)] text-[0.9rem] font-bold uppercase tracking-[0.16em] text-accent-soft 1024:text-[1rem]">
+            <p className={`mb-6 text-center text-accent-soft ${BLOCK_TYPE.kicker}`}>
               {creatorKicker}
             </p>
           ) : null}
@@ -167,15 +170,15 @@ export function FeaturedArticleOneArticlePreview({
               authorLabel={authorLabel}
               imagePriority={imagePriority}
             /> : null}
-          <h2 className="font-editorial font-semibold leading-[1.15] text-white text-[1.35rem] 1024:text-[1.6rem] 1280:text-[1.85rem]">
+          <h2 className={`text-white ${BLOCK_TYPE.titleL}`} data-title-length={titleLength}>
             {articlePath ? <Link href={articlePath}>{article.title}</Link> : article.title}
           </h2>
           {excerpt ? (
-            <p data-article-dek className="mt-3 font-editorial text-[0.85rem] leading-[1.45] text-[#b0a89e] 1024:text-[0.9rem]">
+            <p data-article-dek className={`mt-3 text-[#b0a89e] ${BLOCK_TYPE.dekLead}`}>
               {articlePath ? <Link href={articlePath}>{excerpt}</Link> : excerpt}
             </p>
           ) : null}
-          <p className="mt-4 font-[family-name:var(--font-dm-sans)] text-[0.6rem] font-semibold uppercase tracking-[0.16em] text-[#6a635c]">
+          <p className={`mt-4 text-[#6a635c] ${BLOCK_TYPE.byline}`}>
             BY <AuthorLink authorSlug={article.author?.slug} authorId={article.author?.id} className="hover:underline">{authorLabel}</AuthorLink>
           </p>
         </div>
@@ -194,16 +197,13 @@ export function FeaturedArticleOneArticlePreview({
   return (
     <section className="bg-[#0a0a0a] text-white">
       {sectionHeading && !showAuthorAvatar ? (
-        <div className={`${BLOCK_MAX_WIDTH_CLASS} ${BLOCK_GUTTER_CLASS} pt-8 pb-2`}>
-          <h2 className="font-editorial font-semibold leading-tight text-white text-[1.4rem] 768:text-[1.7rem] 1024:text-[2rem] 1280:text-[2.3rem]">
-            {sectionHeading}
-          </h2>
-          {sectionSubheading ? (
-            <p className="mt-1 font-[family-name:var(--font-dm-sans)] text-[0.75rem] 768:text-[0.85rem] 1024:text-[0.9rem] text-[#b0a89e] leading-relaxed">
-              {sectionSubheading}
-            </p>
-          ) : null}
-        </div>
+        <BlockSectionHeader
+          heading={sectionHeading}
+          subheading={sectionSubheading}
+          className={`${BLOCK_MAX_WIDTH_CLASS} ${BLOCK_GUTTER_CLASS} pt-8 pb-2`}
+          headingClassName="text-white"
+          subheadingClassName="text-[#b0a89e]"
+        />
       ) : null}
 
       {/* ── Mobile ─────────────────────────────────────────────── */}

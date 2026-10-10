@@ -9,6 +9,7 @@ import { BlockSection } from '../BlockSection'
 import { PublicImage, PublicSource } from '@/components/media/PublicImage'
 import { BLOCK_IMAGE_SIZES } from '../blockImageSizes'
 import { heroImagePriority } from '../heroImagePriority'
+import { BLOCK_TYPE } from '../blockType'
 
 function Linked({ href, className, children }: {
   href: string | null
@@ -59,12 +60,12 @@ function RelatedArticle({ article, count, index }: {
           <ArticleImage article={article} square={square} />
         </div>
       ) : (
-        <span aria-hidden="true" className="pt-0.5 font-sans text-xs font-semibold tabular-nums text-accent">
+        <span aria-hidden="true" className={`pt-0.5 tabular-nums ${BLOCK_TYPE.kicker}`}>
           {String(index + 1).padStart(2, '0')}
         </span>
       )}
       <div className="min-w-0 self-start">
-        <p className="mb-1 font-sans text-[0.68rem] font-semibold uppercase tracking-[0.1em] text-accent">
+        <p className={`mb-1 ${BLOCK_TYPE.kicker}`}>
           <Linked
             href={article.articlePath}
             className="outline-none focus-visible:ring-2 focus-visible:ring-accent"
@@ -72,7 +73,7 @@ function RelatedArticle({ article, count, index }: {
             {article.category?.name ?? article.articleType ?? 'Article'}
           </Linked>
         </p>
-        <h3 className="font-editorial text-[1.08rem] font-semibold leading-[1.08] text-foreground 1280:text-[1.24rem]">
+        <h3 className={BLOCK_TYPE.titleM}>
           <Linked href={article.articlePath} className="outline-none focus-visible:ring-2 focus-visible:ring-accent">
             {article.title}
           </Linked>
@@ -120,7 +121,7 @@ export function EditorialFeaturePreview({
 
         <div className="flex min-w-0 flex-col justify-center border-foreground/30 py-8 text-center 768:border-y 768:px-5 1024:border-y-0 1024:px-0">
           {block.featureKicker ? (
-            <p className="mb-4 font-sans text-xs font-semibold uppercase tracking-[0.14em] text-accent">
+            <p className={`mb-4 ${BLOCK_TYPE.kicker}`}>
               <Linked href={featureHref} className="outline-none focus-visible:ring-2 focus-visible:ring-accent">
                 {block.featureKicker}
               </Linked>

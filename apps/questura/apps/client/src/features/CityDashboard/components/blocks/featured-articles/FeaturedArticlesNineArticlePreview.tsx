@@ -7,15 +7,13 @@ import type {
   HomepageBlockLayoutProps,
 } from '../../../types'
 import { BLOCK_GUTTER_CLASS, BLOCK_MAX_WIDTH_CLASS } from '../BlockSection'
+import { BlockSectionHeader } from '../BlockSectionHeader'
+import { BLOCK_TYPE, blockTitleLength } from '../blockType'
 import { AuthorLink } from '@/features/authors/components/AuthorLink'
 import { NavigableImageTarget } from '../NavigableImageTarget'
 import { PublicImage, PublicSource } from '@/components/media/PublicImage'
 import { BLOCK_IMAGE_SIZES } from '../blockImageSizes'
 import { heroImagePriority, type ImagePriority } from '../heroImagePriority'
-
-function joinClassNames(...classes: Array<string | false | null | undefined>): string {
-  return classes.filter(Boolean).join(' ')
-}
 
 function getArticleTypeLabel(article: FeaturedArticleTeaser): string {
   return article.articleType ?? article.category?.name ?? 'Article'
@@ -23,14 +21,6 @@ function getArticleTypeLabel(article: FeaturedArticleTeaser): string {
 
 function getAuthorLabel(article: FeaturedArticleTeaser): string {
   return article.author?.name || 'Questurian'
-}
-
-function getSmallMobileTitleClass(title: string): string {
-  const characterCount = title.trim().length
-  if (characterCount <= 28) return 'text-[2rem] leading-[0.92]'
-  if (characterCount <= 44) return 'text-[1.72rem] leading-[0.94]'
-  if (characterCount <= 64) return 'text-[1.55rem] leading-[0.98]'
-  return 'text-[1.38rem] leading-[1.02]'
 }
 
 function getArticleKey(article: FeaturedArticleTeaser, index: number): string {
@@ -53,7 +43,6 @@ function WideCard({ article }: SlotCardProps): JSX.Element {
 
   const articleTypeLabel = getArticleTypeLabel(article)
   const authorLabel = getAuthorLabel(article)
-  const smallMobileTitleClass = getSmallMobileTitleClass(article.title)
 
   return (
     <section className="city-article-card city-article-card--nine-wide grid gap-3 px-[var(--block-gutter)] py-4">
@@ -78,16 +67,11 @@ function WideCard({ article }: SlotCardProps): JSX.Element {
       </div>
 
       <div className="city-article-content flex w-full flex-col justify-start py-0">
-        <p className="font-[family-name:var(--font-dm-sans)] text-[0.68rem] font-semibold uppercase leading-3 tracking-[0.08em] text-[#1e3599] 768:text-[0.74rem] 768:leading-4 768:tracking-[0.1em]">
+        <p className={BLOCK_TYPE.kicker}>
           {articleTypeLabel}
         </p>
 
-        <h2
-          className={joinClassNames(
-            'mt-2.5 font-editorial font-semibold text-[#1a1a1a]',
-            smallMobileTitleClass,
-          )}
-        >
+        <h2 className={`mt-2.5 ${BLOCK_TYPE.titleM}`}>
           {article.articlePath ? (
             <Link href={article.articlePath} className="hover:underline">
               {article.title}
@@ -97,7 +81,7 @@ function WideCard({ article }: SlotCardProps): JSX.Element {
           )}
         </h2>
 
-        <p className="mt-3 font-[family-name:var(--font-dm-sans)] text-[0.68rem] font-semibold uppercase tracking-[0.08em] text-[#5f5952]">
+        <p className={`mt-3 ${BLOCK_TYPE.byline}`}>
           <AuthorLink
             authorSlug={article.author?.slug}
             authorId={article.author?.id}
@@ -128,7 +112,6 @@ function CenterHeroCard({ article, imagePriority }: CenterHeroCardProps): JSX.El
   const articleTypeLabel = getArticleTypeLabel(article)
   const excerpt = article.excerpt ?? 'Meta description not set'
   const authorLabel = getAuthorLabel(article)
-  const smallMobileTitleClass = getSmallMobileTitleClass(article.title)
 
   return (
     <section className="city-article-card city-article-card--nine-hero grid gap-3 px-[var(--block-gutter)] py-4">
@@ -152,16 +135,11 @@ function CenterHeroCard({ article, imagePriority }: CenterHeroCardProps): JSX.El
       </div>
 
       <div className="city-article-content flex w-full flex-col justify-start py-0">
-        <p className="font-[family-name:var(--font-dm-sans)] text-[0.68rem] font-semibold uppercase leading-3 tracking-[0.08em] text-[#1e3599] 768:text-[0.74rem] 768:leading-4 768:tracking-[0.1em]">
+        <p className={BLOCK_TYPE.kicker}>
           {articleTypeLabel}
         </p>
 
-        <h2
-          className={joinClassNames(
-            'mt-2.5 font-editorial font-semibold text-[#1a1a1a]',
-            smallMobileTitleClass,
-          )}
-        >
+        <h2 className={`mt-2.5 ${BLOCK_TYPE.titleL}`} data-title-length={blockTitleLength(article.title)}>
           {article.articlePath ? (
             <Link href={article.articlePath} className="hover:underline">
               {article.title}
@@ -173,12 +151,12 @@ function CenterHeroCard({ article, imagePriority }: CenterHeroCardProps): JSX.El
 
         <p
           data-article-dek
-          className="mt-3 overflow-hidden font-editorial text-sm font-normal leading-[1.4] text-[#3f3a35] [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]"
+          className={`mt-3 overflow-hidden [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2] ${BLOCK_TYPE.dekLead}`}
         >
           {article.articlePath ? <Link href={article.articlePath}>{excerpt}</Link> : excerpt}
         </p>
 
-        <p className="mt-3.5 font-[family-name:var(--font-dm-sans)] text-[0.68rem] font-semibold uppercase tracking-[0.08em] text-[#5f5952]">
+        <p className={`mt-3.5 ${BLOCK_TYPE.byline}`}>
           <AuthorLink
             authorSlug={article.author?.slug}
             authorId={article.author?.id}
@@ -202,11 +180,11 @@ function HorizontalCard({ article }: SlotCardProps): JSX.Element {
   return (
     <section className="city-article-card city-nine-horiz-card px-[var(--block-gutter)] py-4">
       <div className="city-article-content flex w-full flex-col justify-start py-0">
-        <p className="font-[family-name:var(--font-dm-sans)] text-[0.62rem] font-semibold uppercase leading-3 tracking-[0.1em] text-[#1e3599]">
+        <p className={BLOCK_TYPE.kicker}>
           {articleTypeLabel}
         </p>
 
-        <h2 className="mt-2 font-editorial text-[1.18rem] font-bold leading-[1.08] text-[#111111]">
+        <h2 className={`mt-2 ${BLOCK_TYPE.titleM}`}>
           {article.articlePath ? (
             <Link href={article.articlePath} className="hover:underline">
               {article.title}
@@ -216,7 +194,7 @@ function HorizontalCard({ article }: SlotCardProps): JSX.Element {
           )}
         </h2>
 
-        <p className="mt-2.5 font-[family-name:var(--font-dm-sans)] text-[0.6rem] font-bold uppercase tracking-[0.11em] leading-none text-[#5e5752]">
+        <p className={`mt-2.5 ${BLOCK_TYPE.byline}`}>
           <AuthorLink
             authorSlug={article.author?.slug}
             authorId={article.author?.id}
@@ -254,7 +232,7 @@ function CompactListCard({ article }: SlotCardProps): JSX.Element {
   return (
     <section className="city-compact-article-card px-[var(--block-gutter)] py-4">
       <div className="city-compact-article-copy">
-        <h2 className="city-compact-article-title">
+        <h2 className={`city-compact-article-title ${BLOCK_TYPE.titleS}`}>
           {article.articlePath ? (
             <Link href={article.articlePath} className="hover:underline">
               {article.title}
@@ -263,10 +241,10 @@ function CompactListCard({ article }: SlotCardProps): JSX.Element {
             article.title
           )}
         </h2>
-        <p data-article-dek className="city-compact-article-meta">
+        <p data-article-dek className={`city-compact-article-meta ${BLOCK_TYPE.dek}`}>
           {article.articlePath ? <Link href={article.articlePath}>{excerpt}</Link> : excerpt}
         </p>
-        <p className="city-compact-article-author">
+        <p className={`city-compact-article-author ${BLOCK_TYPE.byline}`}>
           By{' '}
           <AuthorLink
             authorSlug={article.author?.slug}
@@ -314,16 +292,11 @@ export function FeaturedArticlesNineArticlePreview({
   return (
     <section aria-label="Featured articles">
       {sectionHeading ? (
-        <div className={`${BLOCK_MAX_WIDTH_CLASS} ${BLOCK_GUTTER_CLASS} pt-8 pb-0`}>
-          <h2 className="font-editorial font-semibold leading-tight text-[#1a1a1a] text-[1.4rem] 768:text-[1.7rem] 1024:text-[2rem] 1280:text-[2.3rem]">
-            {sectionHeading}
-          </h2>
-          {sectionSubheading ? (
-            <p className="mt-1 font-[family-name:var(--font-dm-sans)] text-[0.75rem] 768:text-[0.85rem] 1024:text-[0.9rem] text-[#3f3a35] leading-relaxed">
-              {sectionSubheading}
-            </p>
-          ) : null}
-        </div>
+        <BlockSectionHeader
+          heading={sectionHeading}
+          subheading={sectionSubheading}
+          className={`${BLOCK_MAX_WIDTH_CLASS} ${BLOCK_GUTTER_CLASS} pt-8 pb-0`}
+        />
       ) : null}
 
       <div className="city-featured-nine-layout">

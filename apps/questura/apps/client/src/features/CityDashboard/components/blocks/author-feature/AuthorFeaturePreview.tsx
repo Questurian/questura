@@ -9,6 +9,7 @@ import type {
 import { BlockSection } from "../BlockSection";
 import { PublicImage, PublicSource } from "@/components/media/PublicImage";
 import { BLOCK_IMAGE_SIZES } from "../blockImageSizes";
+import { BLOCK_TYPE } from "../blockType";
 
 function Linked({
   href,
@@ -152,10 +153,10 @@ function RelatedArticle({
           <ArticleImage article={article} square={false} />
         </div>
         <div className="pt-5">
-          <p className="mb-2 font-sans text-[0.68rem] font-semibold uppercase tracking-[0.1em] text-accent">
+          <p className={`mb-2 ${BLOCK_TYPE.kicker}`}>
             {article.category?.name ?? article.articleType ?? "Article"}
           </p>
-          <h3 className="font-editorial text-[1.4rem] font-semibold leading-[1.08] text-foreground 1280:text-[1.65rem]">
+          <h3 className={BLOCK_TYPE.titleM}>
             <Linked
               href={article.articlePath}
               className="outline-none focus-visible:ring-2 focus-visible:ring-accent"
@@ -164,7 +165,7 @@ function RelatedArticle({
             </Linked>
           </h3>
           {article.excerpt ? (
-            <p className="mt-3 line-clamp-3 font-editorial text-[0.92rem] leading-[1.45] text-foreground/70">
+            <p className={`mt-3 line-clamp-3 ${BLOCK_TYPE.dek}`}>
               {article.excerpt}
             </p>
           ) : null}
@@ -180,7 +181,7 @@ function RelatedArticle({
       {numbered ? (
         <span
           aria-hidden="true"
-          className="pt-0.5 font-sans text-xs font-semibold tabular-nums text-accent"
+          className={`pt-0.5 tabular-nums ${BLOCK_TYPE.kicker}`}
         >
           {String(index + 1).padStart(2, "0")}
         </span>
@@ -192,10 +193,10 @@ function RelatedArticle({
         </div>
       )}
       <div className="min-w-0 self-start">
-        <p className="mb-1 font-sans text-[0.68rem] font-semibold uppercase tracking-[0.1em] text-accent">
+        <p className={`mb-1 ${BLOCK_TYPE.kicker}`}>
           {article.category?.name ?? article.articleType ?? "Article"}
         </p>
-        <h3 className="font-editorial text-[1.08rem] font-semibold leading-[1.08] text-foreground 1280:text-[1.24rem]">
+        <h3 className={BLOCK_TYPE.titleM}>
           <Linked
             href={article.articlePath}
             className="outline-none focus-visible:ring-2 focus-visible:ring-accent"
@@ -224,7 +225,7 @@ export function AuthorFeaturePreview({
         <AuthorPortrait card={author} style={block.imageStyle} />
 
         <div className="relative z-20 flex min-w-0 flex-col justify-center border-foreground/30 py-8 text-center 768:border-y 768:px-5 1024:border-y-0 1024:px-0">
-          <p className="mb-4 font-sans text-xs font-semibold uppercase tracking-[0.14em] text-accent">
+          <p className={`mb-4 ${BLOCK_TYPE.kicker}`}>
             {block.sectionHeading || "Author spotlight"}
           </p>
           <h2 className="mx-auto max-w-none text-balance font-display text-[2.55rem] font-medium leading-[0.94] text-foreground 768:max-w-[9ch] 768:text-[3.05rem] 1280:text-[3.35rem]">
@@ -236,12 +237,12 @@ export function AuthorFeaturePreview({
             </Linked>
           </h2>
           {author.spotlightNote ? (
-            <p className="mx-auto mt-4 font-sans text-[0.72rem] font-semibold uppercase tracking-[0.12em] text-foreground/55">
+            <p className={`mx-auto mt-4 ${BLOCK_TYPE.byline}`}>
               {author.spotlightNote}
             </p>
           ) : null}
           {author.displayDescription ? (
-            <p className="mx-auto mt-5 max-w-[38rem] font-editorial text-[1rem] leading-[1.5] text-foreground/80">
+            <p className="mx-auto mt-5 max-w-[38rem] font-editorial text-[1.05rem] leading-[1.55] text-foreground/80">
               <Linked
                 href={author.author.href}
                 className="outline-none focus-visible:ring-2 focus-visible:ring-accent"
@@ -251,7 +252,7 @@ export function AuthorFeaturePreview({
             </p>
           ) : null}
           {author.displayExpertise.length ? (
-            <p className="mx-auto mt-5 font-sans text-[0.66rem] font-semibold uppercase tracking-[0.11em] text-accent">
+            <p className={`mx-auto mt-5 ${BLOCK_TYPE.kicker}`}>
               {author.displayExpertise.join(" / ")}
             </p>
           ) : null}

@@ -7,15 +7,13 @@ import type {
   HomepageBlockLayoutProps,
 } from '../../../types'
 import { BLOCK_GUTTER_CLASS, BLOCK_MAX_WIDTH_CLASS } from '../BlockSection'
+import { BlockSectionHeader } from '../BlockSectionHeader'
+import { BLOCK_TYPE, blockTitleLength } from '../blockType'
 import { AuthorLink } from '@/features/authors/components/AuthorLink'
 import { NavigableImageTarget } from '../NavigableImageTarget'
 import { PublicImage, PublicSource } from '@/components/media/PublicImage'
 import { BLOCK_IMAGE_SIZES } from '../blockImageSizes'
 import { heroImagePriority, type ImagePriority } from '../heroImagePriority'
-
-function joinClassNames(...classes: Array<string | false | null | undefined>): string {
-  return classes.filter(Boolean).join(' ')
-}
 
 function getArticleTypeLabel(article: FeaturedArticleTeaser): string {
   return article.articleType ?? article.category?.name ?? 'Article'
@@ -23,14 +21,6 @@ function getArticleTypeLabel(article: FeaturedArticleTeaser): string {
 
 function getAuthorLabel(article: FeaturedArticleTeaser): string {
   return article.author?.name || 'Questurian'
-}
-
-function getSmallMobileTitleClass(title: string): string {
-  const characterCount = title.trim().length
-  if (characterCount <= 28) return 'text-[2rem] leading-[0.92]'
-  if (characterCount <= 44) return 'text-[1.72rem] leading-[0.94]'
-  if (characterCount <= 64) return 'text-[1.55rem] leading-[0.98]'
-  return 'text-[1.38rem] leading-[1.02]'
 }
 
 function getArticleKey(article: FeaturedArticleTeaser, index: number): string {
@@ -62,7 +52,6 @@ function HeroArticleCard({ article, imagePriority }: HeroArticleCardProps): JSX.
   const articleTypeLabel = getArticleTypeLabel(article)
   const excerpt = article.excerpt ?? 'Meta description not set'
   const authorLabel = getAuthorLabel(article)
-  const smallMobileTitleClass = getSmallMobileTitleClass(article.title)
 
   const articlePath = article.articlePath ?? null
 
@@ -88,16 +77,11 @@ function HeroArticleCard({ article, imagePriority }: HeroArticleCardProps): JSX.
       </div>
 
       <div className="city-article-content flex w-full flex-col justify-start px-[var(--block-gutter)] py-3">
-        <p className="font-[family-name:var(--font-dm-sans)] text-[0.68rem] font-semibold uppercase leading-3 tracking-[0.08em] text-[#1e3599] 768:text-[0.74rem] 768:leading-4 768:tracking-[0.1em]">
+        <p className={BLOCK_TYPE.kicker}>
           {articleTypeLabel}
         </p>
 
-        <h2
-          className={joinClassNames(
-            'mt-2.5 font-editorial font-semibold text-[#1a1a1a]',
-            smallMobileTitleClass,
-          )}
-        >
+        <h2 className={`mt-2.5 ${BLOCK_TYPE.titleL}`} data-title-length={blockTitleLength(article.title)}>
           {articlePath ? (
             <Link href={articlePath} className="hover:underline">
               {article.title}
@@ -109,12 +93,12 @@ function HeroArticleCard({ article, imagePriority }: HeroArticleCardProps): JSX.
 
         <p
           data-article-dek
-          className="mt-3 overflow-hidden font-editorial text-sm font-normal leading-[1.4] text-[#3f3a35] [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:3]"
+          className={`mt-3 overflow-hidden [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:3] ${BLOCK_TYPE.dekLead}`}
         >
           {articlePath ? <Link href={articlePath}>{excerpt}</Link> : excerpt}
         </p>
 
-        <p className="mt-3.5 font-[family-name:var(--font-dm-sans)] text-[0.68rem] font-semibold uppercase tracking-[0.08em] text-[#5f5952]">
+        <p className={`mt-3.5 ${BLOCK_TYPE.byline}`}>
           <AuthorLink
             authorSlug={article.author?.slug}
             authorId={article.author?.id}
@@ -158,8 +142,8 @@ function SideListArticleCard({ article }: SideListArticleCardProps): JSX.Element
       </div>
 
       <div className="city-four-side-copy">
-        <p className="city-four-side-type">{articleTypeLabel}</p>
-        <h3 className="city-four-side-title">
+        <p className={`city-four-side-type ${BLOCK_TYPE.kicker}`}>{articleTypeLabel}</p>
+        <h3 className={`city-four-side-title ${BLOCK_TYPE.titleM}`}>
           {articlePath ? (
             <Link href={articlePath} className="hover:underline">
               {article.title}
@@ -168,10 +152,10 @@ function SideListArticleCard({ article }: SideListArticleCardProps): JSX.Element
             article.title
           )}
         </h3>
-        <p data-article-dek className="city-four-side-meta">
+        <p data-article-dek className={`city-four-side-meta ${BLOCK_TYPE.dek}`}>
           {articlePath ? <Link href={articlePath}>{excerpt}</Link> : excerpt}
         </p>
-        <p className="city-four-side-author">
+        <p className={`city-four-side-author ${BLOCK_TYPE.byline}`}>
           <AuthorLink
             authorSlug={article.author?.slug}
             authorId={article.author?.id}
@@ -201,16 +185,11 @@ export function FeaturedArticlesFourArticlePreview({
   return (
     <section className="bg-[#f5f0e8]" aria-label="Featured articles">
       {sectionHeading ? (
-        <div className={`${BLOCK_MAX_WIDTH_CLASS} ${BLOCK_GUTTER_CLASS} pt-8 pb-4`}>
-          <h2 className="font-editorial font-semibold leading-tight text-[#1a1a1a] text-[1.4rem] 768:text-[1.7rem] 1024:text-[2rem] 1280:text-[2.3rem]">
-            {sectionHeading}
-          </h2>
-          {sectionSubheading ? (
-            <p className="mt-1 font-[family-name:var(--font-dm-sans)] text-[0.75rem] 768:text-[0.85rem] 1024:text-[0.9rem] text-[#3f3a35] leading-relaxed">
-              {sectionSubheading}
-            </p>
-          ) : null}
-        </div>
+        <BlockSectionHeader
+          heading={sectionHeading}
+          subheading={sectionSubheading}
+          className={`${BLOCK_MAX_WIDTH_CLASS} ${BLOCK_GUTTER_CLASS} pt-8 pb-4`}
+        />
       ) : null}
 
       <div className="city-featured-four-layout">

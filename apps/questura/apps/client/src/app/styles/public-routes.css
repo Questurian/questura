@@ -17,6 +17,7 @@
  */
 @import "./global/article-prose-and-media.css";
 @import "./global/editorial-effects.css";
+@import "./global/block-type.css";
 @import "./global/featured-articles-shared-and-seven.css";
 @import "./global/featured-articles-four.css";
 @import "./global/featured-articles-five.css";

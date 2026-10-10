@@ -11,6 +11,7 @@ import { NavigableImageTarget } from '../NavigableImageTarget'
 import { PublicImage, PublicSource } from '@/components/media/PublicImage'
 import { BLOCK_IMAGE_SIZES } from '../blockImageSizes'
 import { isPriorityImage } from '../heroImagePriority'
+import { BLOCK_TYPE, blockTitleLength } from '../blockType'
 
 const PREVIEW_ARTICLE_COUNT = 3
 
@@ -27,24 +28,6 @@ function getArticleTypeLabel(article: FeaturedArticleTeaser): string {
 
 function getAuthorLabel(article: FeaturedArticleTeaser): string {
   return article.author?.name || 'Questurian'
-}
-
-function getSmallMobileTitleClass(title: string): string {
-  const characterCount = title.trim().length
-
-  if (characterCount <= 28) {
-    return 'text-[2rem] leading-[0.92]'
-  }
-
-  if (characterCount <= 44) {
-    return 'text-[1.72rem] leading-[0.94]'
-  }
-
-  if (characterCount <= 64) {
-    return 'text-[1.55rem] leading-[0.98]'
-  }
-
-  return 'text-[1.38rem] leading-[1.02]'
 }
 
 type FeaturedArticlePreviewCardProps = {
@@ -69,7 +52,7 @@ function FeaturedArticlePreviewCard({
   const articleTypeLabel = getArticleTypeLabel(article)
   const excerpt = article.excerpt ?? 'Meta description not set'
   const authorLabel = getAuthorLabel(article)
-  const smallMobileTitleClass = getSmallMobileTitleClass(article.title)
+  const isLead = placement !== 'left'
 
   return (
     <section
@@ -99,12 +82,13 @@ function FeaturedArticlePreviewCard({
       </div>
 
       <div className="city-article-content flex w-full flex-col justify-start py-0">
-        <p className="font-[family-name:var(--font-dm-sans)] text-[0.68rem] font-semibold uppercase leading-3 tracking-[0.08em] text-[#1e3599] 768:text-[0.74rem] 768:leading-4 768:tracking-[0.1em]">
+        <p className={BLOCK_TYPE.kicker}>
           {articleTypeLabel}
         </p>
 
         <h2
-          className={`mt-2.5 max-w-2xl font-editorial font-semibold text-[#1a1a1a] 768:max-w-none 768:text-[2.1rem] 768:leading-[1] ${smallMobileTitleClass}`}
+          className={`mt-2.5 max-w-2xl 768:max-w-none ${isLead ? BLOCK_TYPE.titleL : BLOCK_TYPE.titleM}`}
+          data-title-length={isLead ? blockTitleLength(article.title) : undefined}
         >
           {article.articlePath ? (
             <Link href={article.articlePath} className="hover:underline">
@@ -117,12 +101,12 @@ function FeaturedArticlePreviewCard({
 
         <p
           data-article-dek
-          className="mt-3 max-w-xl overflow-hidden font-editorial text-sm font-normal leading-[1.4] text-[#3f3a35] 768:max-w-none 768:text-[1.04rem] 768:leading-[1.5] [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2] 768:[-webkit-line-clamp:3]"
+          className={`mt-3 max-w-xl overflow-hidden 768:max-w-none [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2] 768:[-webkit-line-clamp:3] ${isLead ? BLOCK_TYPE.dekLead : BLOCK_TYPE.dek}`}
         >
           {article.articlePath ? <Link href={article.articlePath}>{excerpt}</Link> : excerpt}
         </p>
 
-        <p className="mt-3.5 font-[family-name:var(--font-dm-sans)] text-[0.68rem] font-semibold uppercase tracking-[0.08em] text-[#5f5952] 768:mt-4 768:text-[0.72rem] 768:tracking-[0.1em]">
+        <p className={`mt-3.5 768:mt-4 ${BLOCK_TYPE.byline}`}>
           <AuthorLink
             authorSlug={article.author?.slug}
             authorId={article.author?.id}
@@ -159,7 +143,7 @@ function CompactArticlePreviewCard({
       )}
     >
       <div className="city-compact-article-copy">
-        <h2 className="city-compact-article-title">
+        <h2 className={`city-compact-article-title ${BLOCK_TYPE.titleS}`}>
           {article.articlePath ? (
             <Link href={article.articlePath} className="hover:underline">
               {article.title}
@@ -168,10 +152,10 @@ function CompactArticlePreviewCard({
             article.title
           )}
         </h2>
-        <p data-article-dek className="city-compact-article-meta">
+        <p data-article-dek className={`city-compact-article-meta ${BLOCK_TYPE.dek}`}>
           {article.articlePath ? <Link href={article.articlePath}>{excerpt}</Link> : excerpt}
         </p>
-        <p className="city-compact-article-author">
+        <p className={`city-compact-article-author ${BLOCK_TYPE.byline}`}>
           By{' '}
           <AuthorLink
             authorSlug={article.author?.slug}
@@ -211,7 +195,7 @@ function RecommendedDivider(): JSX.Element {
       className="city-recommended-divider px-[var(--block-gutter)]"
       aria-label="Recommended articles"
     >
-      <span className="city-recommended-divider__label">Recommended</span>
+      <span className={`city-recommended-divider__label ${BLOCK_TYPE.byline}`}>Recommended</span>
     </div>
   )
 }
