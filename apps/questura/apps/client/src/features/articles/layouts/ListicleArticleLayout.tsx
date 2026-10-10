@@ -1,10 +1,8 @@
 'use client'
 
 import type { CSSProperties, JSX } from 'react'
-import {
-  LISTICLE_MAP_PILL_CLEARANCE,
-  ListicleMapSheet,
-} from '@/features/articles/components/ListicleMapSheet'
+import dynamic from 'next/dynamic'
+import { LISTICLE_MAP_PILL_CLEARANCE } from '@/features/articles/components/ListicleMapModes'
 import { ListicleArticleFooter } from '@/features/articles/components/ListicleArticleFooter'
 import { MapPanel } from '@/features/articles/components/MapPanel'
 import { RelatedListicleShelf } from '@/features/articles/components/RelatedListicleShelf'
@@ -22,6 +20,18 @@ interface ListicleArticleLayoutProps {
   city?: string | null
   format?: 'maps' | 'itinerary'
 }
+
+// The phone map sheet draws nothing until the browser has measured the
+// viewport, so it never needed to be in the page's first JavaScript. Loading
+// it after hydration keeps the sheet, its venue card and its swipe handling
+// out of the maps and itinerary pages' first-load budget.
+const ListicleMapSheet = dynamic(
+  () =>
+    import('@/features/articles/components/ListicleMapSheet').then(
+      (module) => module.ListicleMapSheet,
+    ),
+  { ssr: false },
+)
 
 const listicleLayoutStyle = {
   '--maps-card-inset': '32px',
