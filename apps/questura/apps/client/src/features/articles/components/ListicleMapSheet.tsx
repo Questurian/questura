@@ -14,6 +14,7 @@ import {
 import { useOneFingerSwipe } from '@/features/articles/components/useOneFingerSwipe'
 import {
   hiddenBelowFold,
+  LISTICLE_MAP_PILL_CLEARANCE,
   sheetHeightPx,
   translateForVisibleHeight,
   visibleHeightForMode,
@@ -22,12 +23,6 @@ import {
   type ListicleMapMode,
 } from '@/features/articles/components/ListicleMapModes'
 
-/**
- * Space the article leaves under its last entry so the floating switch never
- * covers copy. Also the starting guess for how much of the map the floating
- * stack hides, before it has been measured.
- */
-export const LISTICLE_MAP_PILL_CLEARANCE = 72
 /**
  * How close the camera sits on the active stop, per mode.
  *

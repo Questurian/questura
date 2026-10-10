@@ -15,6 +15,16 @@
  * the system notification-shade gesture.
  */
 
+/**
+ * Space the article leaves under its last entry so the floating switch never
+ * covers copy. Also the starting guess for how much of the map the floating
+ * stack hides, before it has been measured.
+ *
+ * Lives here, not in ListicleMapSheet, because the layout reads it on first
+ * render and the sheet itself is loaded lazily.
+ */
+export const LISTICLE_MAP_PILL_CLEARANCE = 72
+
 export type ListicleMapMode = 'list' | 'split' | 'map'
 
 export const LISTICLE_MAP_MODES: ListicleMapMode[] = ['list', 'split', 'map']
