@@ -59,3 +59,15 @@ export async function fetchNeighborhoodHomepage(
     }
   }, logFallback(`neighborhood homepage ${country}/${city}/${neighborhood}`))
 }
+
+/** The published main homepage (questurian.com), same shape as a city's. */
+export async function fetchMainHomepage(): Promise<CityHomepageResponse | null> {
+  const url = `${config.backendUrl}/api/public/main-homepage`
+  return lastGoodHomepages.read(url, async () => {
+    const res = await fetch(url, publicFetchOptions([publicCacheTags.mainHomepage()]))
+    return {
+      value: await readPublicResponse<CityHomepageResponse>(res, 'main homepage'),
+      validatedAt: validatedAtFrom(res),
+    }
+  }, logFallback('main homepage'))
+}

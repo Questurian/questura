@@ -24,6 +24,7 @@ import { POST as resetAllHomepageContent } from '@/app/api/homepage-featured-con
 import { POST as addMainHomepageBlock } from '@/app/api/homepage-featured-content/blocks/route'
 import { PATCH as reorderLocationHomepageBlocks } from '@/app/api/location-homepages/[id]/blocks/route'
 import { GET as getPublicLocationHomepage } from '@/app/api/public/location-homepages/[country]/[city]/route'
+import { GET as getPublicMainHomepage } from '@/app/api/public/main-homepage/route'
 import { authenticateRequest } from '@/features/auth/lib/auth-middleware'
 import { getPayload } from 'payload'
 
@@ -92,6 +93,41 @@ describe('location homepage routes', () => {
         collection: 'location-homepages',
         depth: 0,
       }),
+    )
+  })
+
+  // questurian.com rendered nothing for a published main homepage because no
+  // public endpoint served it (2026-10-11). Only the published snapshot may
+  // leave the server; the editor's draft never does.
+  it('serves the published main homepage blocks and never the draft', async () => {
+    const payload = {
+      findGlobal: vi.fn().mockResolvedValue({
+        draftPageBlocks: [
+          { id: 'draft-1', blockType: 'newsletter-signup', sectionHeading: 'Unpublished draft' },
+        ],
+        publishedPageBlocks: [
+          { id: 'pub-1', blockType: 'newsletter-signup', sectionHeading: 'Published heading' },
+        ],
+      }),
+      find: vi.fn(),
+    }
+    vi.mocked(getPayload).mockResolvedValue(payload as never)
+
+    const response = await getPublicMainHomepage(
+      new Request('http://localhost:4000/api/public/main-homepage') as never,
+    )
+    const data = await response.json()
+
+    expect(response.status).toBe(200)
+    expect(data.location).toBeNull()
+    expect(data.pageBlocks).toHaveLength(1)
+    expect(data.pageBlocks[0]).toMatchObject({
+      blockType: 'newsletter-signup',
+      sectionHeading: 'Published heading',
+    })
+    expect(JSON.stringify(data)).not.toContain('Unpublished draft')
+    expect(payload.findGlobal).toHaveBeenCalledWith(
+      expect.objectContaining({ slug: 'main-homepage' }),
     )
   })
 

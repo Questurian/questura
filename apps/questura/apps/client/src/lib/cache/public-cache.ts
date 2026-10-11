@@ -66,6 +66,7 @@ export function publicFetchOptions(tags: string[]): PublicFetchOptions {
 export const publicCacheTags = {
   sitemap: () => "sitemap",
   countryCities: (country: string) => `country-cities:${tagPart(country)}`,
+  mainHomepage: () => "main-homepage",
   locationHomepage: (country: string, city: string, neighborhood?: string) =>
     `location-homepage:${tagPart(country)}:${tagPart(city)}${neighborhood ? `:${tagPart(neighborhood)}` : ''}`,
   article: (scope: ArticleScope, type: ArticleTypeKey, slug: string, lang: string) =>
