@@ -14,6 +14,7 @@ import {
   fetchListicleSourceItem,
   getSourceCollectionForBlockType,
 } from '../../shared/utils/itemMedia/sourceItems'
+import { fieldRuleError } from '../../shared/lib/fieldRuleError'
 import { validateTourPicks } from '../../shared/utils/tourPicks'
 import { isPriceTier, normalizePriceTier } from '@/shared/content/priceTier'
 
@@ -94,33 +95,43 @@ export async function validateListicleItineraryBlockRows(params: {
   blocks: Record<string, unknown>[]
   section: ValidateListicleSection
   labelAt: (index: number) => string
+  /** Field path of row `index`, e.g. `itineraryDays.0.items.2`. */
+  pathAt: (index: number) => string
   sourceItemCache: Map<string, Record<string, unknown> | null>
   instagramPostCache: Map<string, boolean>
 }): Promise<ComputedItineraryBlock[]> {
-  const { req, blocks, section, labelAt, sourceItemCache, instagramPostCache } = params
+  const { req, blocks, section, labelAt, pathAt, sourceItemCache, instagramPostCache } = params
 
   const computed: ComputedItineraryBlock[] = []
 
   for (let i = 0; i < blocks.length; i++) {
     const block = blocks[i]
     const itemLabel = labelAt(i)
+    // Every rule here is one the editor fixes on this row, so it answers 400 on
+    // the row's path rather than a 500 that Sentry reports as a server fault.
+    const reject = (message: string, subPath?: string) => fieldRuleError({
+      collection: 'listicle-itineraries',
+      path: subPath ? `${pathAt(i)}.${subPath}` : pathAt(i),
+      label: itemLabel,
+      message,
+    })
     const blockType = String(block.blockType ?? '')
 
     if (!blockType) {
-      throw new Error(`${itemLabel} has no block type.`)
+      throw reject(`${itemLabel} has no block type.`)
     }
 
     if (section === 'whereStaying') {
       if (blockType === 'itinerary-tour-agency') {
-        throw new Error(`${itemLabel} cannot be a tour agency block — use the Stops section.`)
+        throw reject(`${itemLabel} cannot be a tour agency block — use the Stops section.`)
       }
       if (blockType !== 'itinerary-where-staying') {
-        throw new Error(`${itemLabel} must be a "Where you're staying" lodging block (got ${blockType}).`)
+        throw reject(`${itemLabel} must be a "Where you're staying" lodging block (got ${blockType}).`)
       }
     }
 
     if (section === 'stops' && blockType === 'itinerary-where-staying') {
-      throw new Error(`${itemLabel} belongs in the Where you're staying field, not Stops.`)
+      throw reject(`${itemLabel} belongs in the Where you're staying field, not Stops.`)
     }
 
     if (blockType === 'itinerary-tour-agency') {
@@ -148,15 +159,15 @@ export async function validateListicleItineraryBlockRows(params: {
         : []
 
       if (!titleValue) {
-        throw new Error(`${itemLabel} must include a tour title.`)
+        throw reject(`${itemLabel} must include a tour title.`)
       }
 
       if (!operatorValue) {
-        throw new Error(`${itemLabel} must include a tour operator.`)
+        throw reject(`${itemLabel} must include a tour operator.`)
       }
 
       if (!urlValue || !isValidAbsoluteUrl(urlValue)) {
-        throw new Error(`${itemLabel} must include a valid absolute URL.`)
+        throw reject(`${itemLabel} must include a valid absolute URL.`)
       }
 
       if (
@@ -165,15 +176,15 @@ export async function validateListicleItineraryBlockRows(params: {
         && priceValue !== ''
         && !isTourAgencyPriceTier(priceValue)
       ) {
-        throw new Error(`${itemLabel} price must be $, $$, $$$, or $$$$.`)
+        throw reject(`${itemLabel} price must be $, $$, $$$, or $$$$.`)
       }
 
       if (!Number.isInteger(tourDurationValue) || tourDurationValue < 1 || tourDurationValue > 24) {
-        throw new Error(`${itemLabel} must include a tour duration between 1 and 24 hours.`)
+        throw reject(`${itemLabel} must include a tour duration between 1 and 24 hours.`)
       }
 
       if (hasStartingPoint && (!isLatitude(startingPointLatitude) || !isLongitude(startingPointLongitude))) {
-        throw new Error(`${itemLabel} starting point must include valid latitude and longitude.`)
+        throw reject(`${itemLabel} starting point must include valid latitude and longitude.`)
       }
 
       if (instagramPostId !== null) {
@@ -193,7 +204,7 @@ export async function validateListicleItineraryBlockRows(params: {
         }
 
         if (!instagramPostCache.get(cacheKey)) {
-          throw new Error(`${itemLabel} Instagram embed could not be loaded.`)
+          throw reject(`${itemLabel} Instagram embed could not be loaded.`)
         }
       }
 
@@ -205,8 +216,9 @@ export async function validateListicleItineraryBlockRows(params: {
           const relationship = normalizePolymorphicRelationship(row.relatedItem)
 
           if (!relationship) {
-            throw new Error(
+            throw reject(
               `${itemLabel} key location ${rowIndex + 1} must select an existing travel item.`,
+              `keyLocations.${rowIndex}`,
             )
           }
 
@@ -217,8 +229,9 @@ export async function validateListicleItineraryBlockRows(params: {
           }
 
           if (!sourceItemCache.get(cacheKey)) {
-            throw new Error(
+            throw reject(
               `${itemLabel} key location ${rowIndex + 1} references an item that could not be loaded.`,
+              `keyLocations.${rowIndex}`,
             )
           }
 
@@ -231,16 +244,18 @@ export async function validateListicleItineraryBlockRows(params: {
           const longitude = Number(row.longitude)
 
           if (!manualTitle || !Number.isFinite(latitude) || !Number.isFinite(longitude)) {
-            throw new Error(
+            throw reject(
               `${itemLabel} key location ${rowIndex + 1} must include a title, latitude, and longitude.`,
+              `keyLocations.${rowIndex}`,
             )
           }
 
           continue
         }
 
-        throw new Error(
+        throw reject(
           `${itemLabel} key location ${rowIndex + 1} must be marked as existing or manual.`,
+          `keyLocations.${rowIndex}`,
         )
       }
 
@@ -250,12 +265,12 @@ export async function validateListicleItineraryBlockRows(params: {
 
     const sourceCollection = getSourceCollectionForBlockType(blockType)
     if (!sourceCollection) {
-      throw new Error(`${itemLabel} has unsupported block type (${blockType}).`)
+      throw reject(`${itemLabel} has unsupported block type (${blockType}).`)
     }
 
     const sourceItemId = normalizeRelationshipId(block.item)
     if (sourceItemId === null) {
-      throw new Error(`${itemLabel} must reference a ${sourceCollection} entry.`)
+      throw reject(`${itemLabel} must reference a ${sourceCollection} entry.`)
     }
 
     const cacheKey = `${sourceCollection}:${relationshipIdToKey(sourceItemId)}`
@@ -266,7 +281,7 @@ export async function validateListicleItineraryBlockRows(params: {
 
     const sourceItem = sourceItemCache.get(cacheKey)
     if (!sourceItem) {
-      throw new Error(
+      throw reject(
         `${itemLabel} references a ${sourceCollection} entry that could not be loaded.`,
       )
     }
@@ -277,7 +292,7 @@ export async function validateListicleItineraryBlockRows(params: {
 
     const mediaMode = getMediaMode(block.mediaMode)
     if (!mediaMode) {
-      throw new Error(`${itemLabel} must select a media mode (photos, instagram, or both).`)
+      throw reject(`${itemLabel} must select a media mode (photos, instagram, or both).`)
     }
 
     if (mediaMode === 'photos') {
@@ -297,7 +312,7 @@ export async function validateListicleItineraryBlockRows(params: {
 
     if (requiresPhotos(mediaMode)) {
       if (selectedPhotoIds.length < 1 || selectedPhotoIds.length > 6) {
-        throw new Error(`${itemLabel} must select between 1 and 6 photos.`)
+        throw reject(`${itemLabel} must select between 1 and 6 photos.`)
       }
 
       const invalidPhotoId = selectedPhotoIds.find(
@@ -305,7 +320,7 @@ export async function validateListicleItineraryBlockRows(params: {
       )
 
       if (invalidPhotoId !== undefined) {
-        throw new Error(
+        throw reject(
           `${itemLabel} selected photo ${invalidPhotoId} is not in the source gallery.`,
         )
       }
@@ -313,11 +328,11 @@ export async function validateListicleItineraryBlockRows(params: {
 
     if (requiresInstagram(mediaMode)) {
       if (selectedInstagramPostId === null) {
-        throw new Error(`${itemLabel} must select one Instagram embed.`)
+        throw reject(`${itemLabel} must select one Instagram embed.`)
       }
 
       if (!availableInstagramKeys.has(relationshipIdToKey(selectedInstagramPostId))) {
-        throw new Error(
+        throw reject(
           `${itemLabel} selected Instagram embed is not in the source gallery.`,
         )
       }
