@@ -21,6 +21,7 @@ import {
   OPTIONS as optionsPublicLocationMenu,
 } from '@/app/api/public/locations/menu/route'
 import { POST as resetAllHomepageContent } from '@/app/api/homepage-featured-content/reset/route'
+import { POST as publishMainHomepage } from '@/app/api/homepage-featured-content/publish/route'
 import { POST as addMainHomepageBlock } from '@/app/api/homepage-featured-content/blocks/route'
 import { PATCH as reorderLocationHomepageBlocks } from '@/app/api/location-homepages/[id]/blocks/route'
 import { GET as getPublicLocationHomepage } from '@/app/api/public/location-homepages/[country]/[city]/route'
@@ -401,15 +402,36 @@ describe('location homepage routes', () => {
         publishedRevision: 0,
       },
     }))
+    // The live main homepage is never emptied: questurian.com has no fallback.
     expect(payload.updateGlobal).toHaveBeenCalledWith(expect.objectContaining({
       slug: 'main-homepage',
-      data: {
-        draftPageBlocks: [],
-        publishedPageBlocks: [],
-        lastPublishedAt: null,
-        lastPublishedBy: null,
-        publishedRevision: 0,
-      },
+      data: { draftPageBlocks: [] },
     }))
+  })
+
+  it('refuses to publish an empty main homepage', async () => {
+    vi.mocked(authenticateRequest).mockResolvedValue({
+      user: { id: 1, role: 'editor' },
+      error: null,
+      status: 200,
+    } as never)
+    const payload = {
+      findGlobal: vi.fn().mockResolvedValue({
+        draftPageBlocks: [],
+        publishedPageBlocks: [{ blockType: 'newsletter-signup' }],
+      }),
+      updateGlobal: vi.fn(),
+    }
+    vi.mocked(getPayload).mockResolvedValue(payload as never)
+
+    const response = await publishMainHomepage(new Request(
+      'http://localhost:4000/api/homepage-featured-content/publish',
+      { method: 'POST' },
+    ) as never)
+    const data = await response.json()
+
+    expect(response.status).toBe(400)
+    expect(data.message).toContain('at least one block')
+    expect(payload.updateGlobal).not.toHaveBeenCalled()
   })
 })

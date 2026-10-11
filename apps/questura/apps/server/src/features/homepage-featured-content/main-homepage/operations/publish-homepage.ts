@@ -15,12 +15,21 @@ import type {
   MainHomepageOperationResult,
 } from '../types'
 
+// questurian.com draws only what is published here, so an empty publish
+// blanks the live homepage. City homepages fall back to an article list when
+// empty; the main homepage has nothing to fall back to.
+export const EMPTY_MAIN_HOMEPAGE_MESSAGE =
+  'The main homepage needs at least one block. Publishing it empty would leave questurian.com blank.'
+
 export async function publishMainHomepage(
   userId: string | number | null,
 ): Promise<MainHomepageOperationResult> {
   const payload = await getMainHomepagePayload()
   const doc = await loadMainHomepage(payload)
   const draftBlocks = getDraftPageBlocks(doc)
+  if (draftBlocks.length === 0) {
+    return { status: 400, body: { message: EMPTY_MAIN_HOMEPAGE_MESSAGE } }
+  }
   const resolvedDraftBlocks = await resolveMainBlocks(payload, draftBlocks)
   assertPublishableResolvedBlocks(resolvedDraftBlocks)
 

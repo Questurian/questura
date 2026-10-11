@@ -33,15 +33,11 @@ export async function resetAllHomepageContent(): Promise<ResetAllHomepageContent
     })
   }
 
+  // The main homepage keeps its published blocks: emptying them would blank
+  // questurian.com, which has no fallback. Only the editor's draft is cleared.
   await payload.updateGlobal({
     slug: 'main-homepage',
-    data: {
-      draftPageBlocks: [],
-      publishedPageBlocks: [],
-      lastPublishedAt: null,
-      lastPublishedBy: null,
-      publishedRevision: 0,
-    },
+    data: { draftPageBlocks: [] },
     depth: 0,
     overrideAccess: true,
   })
