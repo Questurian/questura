@@ -22,6 +22,7 @@ import {
 } from '@/app/api/public/locations/menu/route'
 import { POST as resetAllHomepageContent } from '@/app/api/homepage-featured-content/reset/route'
 import { POST as publishMainHomepage } from '@/app/api/homepage-featured-content/publish/route'
+import { POST as publishLocationHomepage } from '@/app/api/location-homepages/[id]/publish/route'
 import { POST as addMainHomepageBlock } from '@/app/api/homepage-featured-content/blocks/route'
 import { PATCH as reorderLocationHomepageBlocks } from '@/app/api/location-homepages/[id]/blocks/route'
 import { GET as getPublicLocationHomepage } from '@/app/api/public/location-homepages/[country]/[city]/route'
@@ -365,7 +366,7 @@ describe('location homepage routes', () => {
     }))
   })
 
-  it('clears legacy, draft, and published blocks for every homepage', async () => {
+  it('clears only drafts, never what readers see, for every homepage', async () => {
     vi.mocked(authenticateRequest).mockResolvedValue({
       user: { role: 'editor' },
       error: null,
@@ -393,13 +394,8 @@ describe('location homepage routes', () => {
       collection: 'location-homepages',
       id: 10,
       data: {
-        isEnabled: false,
         pageBlocks: [],
         draftPageBlocks: [],
-        publishedPageBlocks: [],
-        lastPublishedAt: null,
-        lastPublishedBy: null,
-        publishedRevision: 0,
       },
     }))
     // The live main homepage is never emptied: questurian.com has no fallback.
@@ -433,5 +429,36 @@ describe('location homepage routes', () => {
     expect(response.status).toBe(400)
     expect(data.message).toContain('at least one block')
     expect(payload.updateGlobal).not.toHaveBeenCalled()
+  })
+
+  it('refuses to publish an empty city homepage', async () => {
+    vi.mocked(authenticateRequest).mockResolvedValue({
+      user: { id: 1, role: 'editor' },
+      error: null,
+      status: 200,
+    } as never)
+    const payload = {
+      findByID: vi.fn().mockResolvedValue({
+        id: 20,
+        isEnabled: true,
+        location: 10,
+        draftPageBlocks: [],
+        publishedPageBlocks: [{ blockType: 'newsletter-signup' }],
+      }),
+      update: vi.fn(),
+    }
+    vi.mocked(getPayload).mockResolvedValue(payload as never)
+
+    const response = await publishLocationHomepage(
+      new Request('http://localhost:4000/api/location-homepages/20/publish', {
+        method: 'POST',
+      }) as never,
+      { params: Promise.resolve({ id: '20' }) },
+    )
+    const data = await response.json()
+
+    expect(response.status).toBe(400)
+    expect(data.message).toContain('turn the homepage off')
+    expect(payload.update).not.toHaveBeenCalled()
   })
 })
