@@ -41,6 +41,11 @@ async function resolveDraftBlocks(
   return resolvePageBlocks(payload, blocks, locationGridScope)
 }
 
+// Publishing a homepage with no blocks is refused, as on the main homepage.
+// The way back to a place's plain article list is turning the homepage off.
+export const EMPTY_LOCATION_HOMEPAGE_MESSAGE =
+  'This homepage needs at least one block to publish. To show the article list instead, turn the homepage off.'
+
 export async function publishLocationHomepage(
   id: string,
   userId: string | number | null,
@@ -48,6 +53,9 @@ export async function publishLocationHomepage(
   const payload = await getLocationHomepagePayload()
   const doc = await loadLocationHomepage(payload, id, 0)
   const draftBlocks = getDraftPageBlocks(doc)
+  if (draftBlocks.length === 0) {
+    return { status: 400, body: { message: EMPTY_LOCATION_HOMEPAGE_MESSAGE } }
+  }
   const resolvedDraftBlocks = await resolveDraftBlocks(payload, draftBlocks, doc.location)
 
   assertPublishableResolvedBlocks(resolvedDraftBlocks)

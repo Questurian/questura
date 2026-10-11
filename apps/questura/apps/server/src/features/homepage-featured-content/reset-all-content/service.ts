@@ -19,14 +19,10 @@ export async function resetAllHomepageContent(): Promise<ResetAllHomepageContent
     await payload.update({
       collection: 'location-homepages',
       id: homepage.id,
+      // Drafts only: what readers see is never emptied from here.
       data: {
-        isEnabled: false,
         pageBlocks: [],
         draftPageBlocks: [],
-        publishedPageBlocks: [],
-        lastPublishedAt: null,
-        lastPublishedBy: null,
-        publishedRevision: 0,
       },
       depth: 0,
       overrideAccess: true,
