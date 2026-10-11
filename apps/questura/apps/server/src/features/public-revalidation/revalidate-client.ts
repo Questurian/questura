@@ -7,4 +7,5 @@ export {
   revalidateLocationAfterDelete,
   revalidateLocationHomepageAfterChange,
   revalidateLocationHomepageAfterDelete,
+  revalidateMainHomepageAfterChange,
 } from './revalidation/hooks'

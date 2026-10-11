@@ -1,4 +1,8 @@
-import type { CollectionAfterChangeHook, CollectionAfterDeleteHook } from 'payload'
+import type {
+  CollectionAfterChangeHook,
+  CollectionAfterDeleteHook,
+  GlobalAfterChangeHook,
+} from 'payload'
 import { requestRevalidation } from '@/features/refresh-outbox/request'
 import {
   articleRevalidationTarget,
@@ -9,6 +13,7 @@ import {
   mergeTargets,
   redirectTarget,
 } from './targets'
+import { publicCacheTags } from './cache-tags'
 import { idValue } from './documents'
 import type { AnyDoc } from './types'
 
@@ -84,6 +89,17 @@ export const revalidateLocationHomepageAfterDelete: CollectionAfterDeleteHook = 
     req,
     await locationHomepageTarget(req, doc as AnyDoc | undefined),
     'location-homepages:delete',
+  )
+}
+
+// Any save of the main homepage global refreshes questurian.com. Draft edits
+// trigger it too, which is harmless: the page only ever reads the published
+// snapshot, so it re-renders unchanged.
+export const revalidateMainHomepageAfterChange: GlobalAfterChangeHook = async ({ req }) => {
+  await requestRevalidation(
+    req,
+    { tags: [publicCacheTags.mainHomepage()], paths: ['/'] },
+    'main-homepage:update',
   )
 }
 

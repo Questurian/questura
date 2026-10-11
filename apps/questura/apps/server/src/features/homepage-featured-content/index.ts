@@ -6,6 +6,7 @@ export {
   convertMainHomepageBlock,
   deleteMainHomepageBlock,
   getMainHomepage,
+  getPublicMainHomepage,
   publishMainHomepage,
   reorderMainHomepageBlocks,
   updateMainHomepageBlockContent,

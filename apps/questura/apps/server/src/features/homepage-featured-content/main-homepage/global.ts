@@ -1,6 +1,7 @@
 import { staffUser } from '@/features/auth/lib/staff-user'
 import type { GlobalConfig } from 'payload'
 import { signedInRead } from '@/features/auth/lib/signed-in-read'
+import { revalidateMainHomepageAfterChange } from '@/features/public-revalidation/revalidate-client'
 
 export const MainHomepage: GlobalConfig = {
   slug: 'main-homepage',
@@ -15,6 +16,9 @@ export const MainHomepage: GlobalConfig = {
       const role = staffUser(req.user)?.role
       return role === 'admin' || role === 'editor'
     },
+  },
+  hooks: {
+    afterChange: [revalidateMainHomepageAfterChange],
   },
   fields: [
     {
