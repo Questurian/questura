@@ -28,14 +28,6 @@ function getArticleKey(article: FeaturedArticleTeaser, index: number): string {
   return [article.title, article.imageUrlSquare ?? article.imageUrl ?? index].join(':')
 }
 
-function getBlockSectionHeading(items: FeaturedArticleTeaser[]): string | null {
-  const type = items[0]?.articleType
-  if (!type) return null
-  if (type.endsWith('y')) return type.slice(0, -1) + 'ies'
-  if (type.endsWith('s')) return type
-  return type + 's'
-}
-
 type MagazineHeroCardProps = {
   article: FeaturedArticleTeaser
   imagePriority: ImagePriority
@@ -206,7 +198,7 @@ export function FeaturedArticlesFiveArticlePreview({
   const heroArticle = block.items[0]
   const mediaArticle = block.items[1] ?? null
   const textArticles = block.items.slice(2, 5)
-  const sectionHeading = block.sectionHeading?.trim() || getBlockSectionHeading(block.items)
+  const sectionHeading = block.sectionHeading?.trim() || null
   const sectionSubheading = block.sectionSubheading?.trim() || null
 
   return (
