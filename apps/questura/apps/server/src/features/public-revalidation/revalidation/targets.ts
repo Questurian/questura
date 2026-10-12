@@ -1,5 +1,6 @@
 import type { PayloadRequest } from 'payload'
 import { DEFAULT_LANG } from '@/shared/i18n/languageField'
+import { findHomepagesFeaturing } from '@/features/homepage-featured-content/location-homepages/lib/reference-locks'
 import { logger } from '@/shared/utils/logger'
 import { publicCacheTags, unique } from './cache-tags'
 import {
@@ -40,6 +41,28 @@ export function articleRevalidationTarget(
     paths: unique([path]),
   }
 }
+/**
+ * The homepages whose cards show this article. Without it, a new cover or
+ * title reached the article page and nowhere else: questurian.com and the
+ * city pages kept the old card until their own next save.
+ */
+export async function featuringHomepagesTarget(
+  req: PayloadRequest,
+  collection: 'articles' | 'single-type-listicles' | 'listicle-itineraries',
+  id: string | number,
+): Promise<RevalidationTarget> {
+  const featuring = await findHomepagesFeaturing(req.payload, collection, id)
+
+  return mergeTargets(
+    featuring.mainHomepage ? { tags: [publicCacheTags.mainHomepage()], paths: ['/'] } : {},
+    ...(await Promise.all(
+      featuring.locationHomepages.map((homepage) =>
+        locationHomepageTarget(req, homepage as unknown as AnyDoc),
+      ),
+    )),
+  )
+}
+
 /**
  * Published articles are read a page at a time, not all at once.
  *

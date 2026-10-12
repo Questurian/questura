@@ -3,6 +3,7 @@ import {
   articleRevalidationTarget,
   authoredArticlesTarget,
   AUTHOR_PAGE_SIZE,
+  featuringHomepagesTarget,
   locationHomepageTarget,
   locationTarget,
   mergeTargets,
@@ -224,5 +225,69 @@ describe('location lookup failure is not a missing location', () => {
 
     expect(findByID).not.toHaveBeenCalled()
     expect(target.paths).toEqual(['/peru', '/peru/lima'])
+  })
+})
+
+describe('featuringHomepagesTarget', () => {
+  const featured = (relationTo: string, id: number) => ({
+    blockType: 'featured-articles',
+    items: [{ relationTo, value: id }],
+  })
+
+  function reqWith({
+    locationHomepages,
+    mainPublished = [],
+    mainDraft = [],
+  }: {
+    locationHomepages: Array<Record<string, unknown>>
+    mainPublished?: unknown[]
+    mainDraft?: unknown[]
+  }) {
+    return {
+      payload: {
+        find: vi.fn(async () => ({ docs: locationHomepages })),
+        findGlobal: vi.fn(async () => ({
+          publishedPageBlocks: mainPublished,
+          draftPageBlocks: mainDraft,
+        })),
+        findByID: vi.fn(async ({ id }: { id: number }) => ({ id, locationKey: 'Peru|Lima' })),
+      },
+    } as unknown as PayloadRequest
+  }
+
+  it('refreshes questurian.com and the city page that show the article', async () => {
+    const req = reqWith({
+      locationHomepages: [
+        { id: 1, location: 7, publishedPageBlocks: [featured('single-type-listicles', 42)] },
+        { id: 2, location: 8, publishedPageBlocks: [featured('single-type-listicles', 99)] },
+      ],
+      mainPublished: [featured('single-type-listicles', 42)],
+    })
+
+    expect(await featuringHomepagesTarget(req, 'single-type-listicles', 42)).toEqual({
+      tags: ['main-homepage', 'sitemap', 'country-cities:peru', 'location-homepage:peru:lima'],
+      paths: ['/', '/Peru', '/Peru/Lima'],
+    })
+  })
+
+  it('ignores homepages that only feature it in an unpublished draft', async () => {
+    const req = reqWith({
+      locationHomepages: [{ id: 1, location: 7, draftPageBlocks: [featured('articles', 42)] }],
+      mainDraft: [featured('articles', 42)],
+    })
+
+    expect(await featuringHomepagesTarget(req, 'articles', 42)).toEqual({ tags: [], paths: [] })
+  })
+
+  it('does not confuse a same-numbered document from another collection', async () => {
+    const req = reqWith({
+      locationHomepages: [],
+      mainPublished: [featured('articles', 42)],
+    })
+
+    expect(await featuringHomepagesTarget(req, 'single-type-listicles', 42)).toEqual({
+      tags: [],
+      paths: [],
+    })
   })
 })

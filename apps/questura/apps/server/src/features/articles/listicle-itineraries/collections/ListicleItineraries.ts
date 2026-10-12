@@ -42,6 +42,7 @@ import {
 import { sanitizeListicleItineraryIncomingIds } from './sanitizeListicleClientIds'
 import { bylineOnCreate, findAuthorIdForUser } from '@/features/authors/lib/author-for-user'
 import { fieldRuleError } from '@/features/articles/shared/lib/fieldRuleError'
+import { clearStaleSocialImagesOnFeaturedImageChange } from '@/features/articles/shared/lib/clearStaleSocialImages'
 import {
   type ComputedItineraryBlock,
   validateListicleItineraryBlockRows,
@@ -185,6 +186,7 @@ export const ListicleItineraries: CollectionConfig = {
 
         return data
       },
+      clearStaleSocialImagesOnFeaturedImageChange,
     ],
     beforeValidate: [
       async ({ data }) => {
