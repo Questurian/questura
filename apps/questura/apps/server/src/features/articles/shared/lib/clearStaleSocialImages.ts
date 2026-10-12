@@ -121,6 +121,27 @@ const clearMatchingStructuredDataImages = (
   return { value: nextValue, changed }
 }
 
+const COVER_FIELDS = ['featuredMediaSet', 'featuredImage'] as const
+
+/**
+ * Did this save change the cover? The cover is `featuredMediaSet` (what every
+ * builder writes today) or the legacy `featuredImage` upload. Watching only
+ * `featuredImage` meant a cover swapped through a media set never cleared the
+ * old share picture, so links shared after the swap still showed the old one.
+ */
+const coverChanged = (
+  previousHeader: Record<string, unknown> | null,
+  nextHeader: Record<string, unknown>,
+): boolean =>
+  COVER_FIELDS.some(
+    (field) =>
+      Object.prototype.hasOwnProperty.call(nextHeader, field) &&
+      !relationshipIdsEqual(
+        extractRelationshipId(previousHeader?.[field]),
+        extractRelationshipId(nextHeader[field]),
+      ),
+  )
+
 export const clearStaleSocialImagesOnFeaturedImageChange: CollectionBeforeChangeHook = ({
   data,
   operation,
@@ -129,17 +150,10 @@ export const clearStaleSocialImagesOnFeaturedImageChange: CollectionBeforeChange
   if (!data || operation !== 'update') return data
 
   const nextHeader = isRecord(data.header) ? data.header : null
-  if (!nextHeader || !Object.prototype.hasOwnProperty.call(nextHeader, 'featuredImage')) {
-    return data
-  }
+  if (!nextHeader) return data
 
   const previousHeader = isRecord(originalDoc?.header) ? originalDoc.header : null
-  const previousFeaturedImageId = extractRelationshipId(previousHeader?.featuredImage)
-  const nextFeaturedImageId = extractRelationshipId(nextHeader.featuredImage)
-
-  if (relationshipIdsEqual(previousFeaturedImageId, nextFeaturedImageId)) {
-    return data
-  }
+  if (!coverChanged(previousHeader, nextHeader)) return data
 
   const originalSeo = isRecord(originalDoc?.seoSection) ? originalDoc.seoSection : {}
   const inputSeo = isRecord(data.seoSection) ? data.seoSection : {}

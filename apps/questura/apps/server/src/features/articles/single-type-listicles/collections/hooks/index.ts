@@ -5,7 +5,7 @@ import {
   syncSharedNeighborhoodsField,
 } from '@/shared/location/server/articleLocationScope'
 import { syncLocationFields } from '@/shared/location/server/syncLocationFields'
-import { clearStaleSocialImagesOnFeaturedImageChange } from './clearStaleSocialImages'
+import { clearStaleSocialImagesOnFeaturedImageChange } from '@/features/articles/shared/lib/clearStaleSocialImages'
 import {
   applySingleTypeListicleMetadata,
   preventSingleTypeListicleDelete,

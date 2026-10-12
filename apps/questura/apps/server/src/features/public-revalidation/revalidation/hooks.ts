@@ -8,6 +8,7 @@ import {
   articleRevalidationTarget,
   authoredArticlesTarget,
   authorTarget,
+  featuringHomepagesTarget,
   locationHomepageTarget,
   locationTarget,
   mergeTargets,
@@ -21,11 +22,21 @@ export function revalidateArticleCollection(
   collection: 'articles' | 'single-type-listicles' | 'listicle-itineraries',
 ) {
   const afterChange: CollectionAfterChangeHook = async ({ doc, previousDoc, operation, req }) => {
+    const before = articleRevalidationTarget(collection, previousDoc as AnyDoc | undefined)
+    const after = articleRevalidationTarget(collection, doc as AnyDoc | undefined)
+    // Only a live article can be on a live homepage.
+    const wasLive = Boolean(before.paths?.length || before.tags?.length)
+    const isLive = Boolean(after.paths?.length || after.tags?.length)
+    const id = idValue(doc)
+
     await requestRevalidation(
       req,
       mergeTargets(
-        articleRevalidationTarget(collection, previousDoc as AnyDoc | undefined),
-        articleRevalidationTarget(collection, doc as AnyDoc | undefined),
+        before,
+        after,
+        id !== null && (wasLive || isLive)
+          ? await featuringHomepagesTarget(req, collection, id)
+          : {},
       ),
       `${collection}:${operation}`,
     )

@@ -77,6 +77,7 @@ async function loadHomepagesForReferenceScan(payload: Payload): Promise<Location
     overrideAccess: true,
     select: {
       id: true,
+      location: true,
       pageBlocks: true,
       draftPageBlocks: true,
       publishedPageBlocks: true,
@@ -146,5 +147,35 @@ export async function assertCanUnpublishHomepageFeaturedContent(
     throw new Error(
       `Cannot unpublish ${relationTo} #${id}; it is used by a published curated homepage: ${describeReferences(refs)}.`,
     )
+  }
+}
+
+export type HomepagesFeaturing = {
+  mainHomepage: boolean
+  locationHomepages: LocationHomepageDoc[]
+}
+
+/**
+ * Every live homepage that shows this article. A homepage card reads the
+ * article's title and cover when the homepage renders, so the homepage's
+ * cached page goes stale the moment the article changes — not only when the
+ * homepage itself is saved. Draft blocks are skipped: nobody sees them.
+ */
+export async function findHomepagesFeaturing(
+  payload: Payload,
+  relationTo: HomepageFeaturedCollection,
+  id: string | number,
+): Promise<HomepagesFeaturing> {
+  const live = new Set(['published', 'legacy'] as const)
+  const locationDocs = await loadHomepagesForReferenceScan(payload)
+  const mainDocs = await loadMainHomepageForReferenceScan(payload)
+
+  const locationIds = new Set(
+    collectReferences(locationDocs, relationTo, id, live).map((ref) => ref.homepageId),
+  )
+
+  return {
+    mainHomepage: collectReferences(mainDocs, relationTo, id, live).length > 0,
+    locationHomepages: locationDocs.filter((doc) => locationIds.has(doc.id)),
   }
 }

@@ -22,6 +22,7 @@ import { handleCanonicalPathChange } from '../lib/handleCanonicalPathChange'
 import { gateExternalApiRead } from '@/features/articles/public/gateExternalApiRead'
 import { bylineOnCreate, findAuthorIdForUser } from '@/features/authors/lib/author-for-user'
 import { fieldRuleError } from '@/features/articles/shared/lib/fieldRuleError'
+import { clearStaleSocialImagesOnFeaturedImageChange } from '@/features/articles/shared/lib/clearStaleSocialImages'
 import {
   step1Complete,
   inUpdateMode,
@@ -194,6 +195,7 @@ export const Articles: CollectionConfig = {
 
         return data
       },
+      clearStaleSocialImagesOnFeaturedImageChange,
     ],
     beforeValidate: [
       syncLocationFields(),

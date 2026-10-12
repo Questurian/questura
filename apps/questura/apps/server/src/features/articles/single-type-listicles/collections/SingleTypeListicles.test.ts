@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { SingleTypeListicles } from './SingleTypeListicles'
-import { clearStaleSocialImagesOnFeaturedImageChange } from './hooks/clearStaleSocialImages'
+import { clearStaleSocialImagesOnFeaturedImageChange } from '@/features/articles/shared/lib/clearStaleSocialImages'
 import { validateSingleTypeListicle } from './hooks/validateSingleTypeListicle'
 
 async function runBeforeChange(
@@ -60,6 +60,42 @@ describe('SingleTypeListicles featured image SEO sync', () => {
     expect(twitterCard.imageUrl).toBeNull()
     expect(structuredData.image).toBeUndefined()
     expect(seoSection.seoTitle).toBe('Best Lima Restaurants')
+  })
+
+  it('clears the old share picture when the cover is swapped through its media set', async () => {
+    const data = {
+      header: {
+        featuredMediaSet: 902,
+        featuredImage: 101,
+      },
+      seoSection: {
+        openGraph: { imageUrl: 'https://cdn.example.com/old-og.webp' },
+        twitterCard: { imageUrl: 'https://cdn.example.com/old-twitter.webp' },
+      },
+    }
+
+    const result = await runBeforeChange(
+      data,
+      buildOriginalDoc({ header: { featuredMediaSet: 901, featuredImage: 101 } }),
+    ) as Record<string, unknown>
+    const seoSection = result.seoSection as Record<string, unknown>
+
+    expect((seoSection.openGraph as Record<string, unknown>).imageUrl).toBeNull()
+    expect((seoSection.twitterCard as Record<string, unknown>).imageUrl).toBeNull()
+    expect((seoSection.structuredData as Record<string, unknown>).image).toBeUndefined()
+  })
+
+  it('keeps the share picture when the same media set is saved again', async () => {
+    const data = {
+      header: { featuredMediaSet: { id: 901 }, featuredImage: 101 },
+    }
+
+    const result = await runBeforeChange(
+      data,
+      buildOriginalDoc({ header: { featuredMediaSet: 901, featuredImage: 101 } }),
+    ) as Record<string, unknown>
+
+    expect(result.seoSection).toBeUndefined()
   })
 
   it('preserves custom social image URLs changed in the same save', async () => {
