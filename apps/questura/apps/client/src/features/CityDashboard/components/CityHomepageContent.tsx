@@ -46,8 +46,10 @@ export function CityHomepageContent({ location = null, pageBlocks }: CityHomepag
     ? createElement('h1', { className: 'sr-only', key: '__page-heading' }, location.label)
     : null
 
+  // A <div>, not <main>: the page chrome (PublicChrome) already supplies the
+  // page's one <main>.
   return createElement(
-    'main',
+    'div',
     { className: 'bg-[#f5f0e8] text-[#1a1a1a]' },
     heading,
     renderedBlocks,

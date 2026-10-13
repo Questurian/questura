@@ -17,6 +17,9 @@ export default async function HomePage() {
 
   return (
     <section aria-label="Questurian" className="min-h-[70vh] bg-background">
+      {/* The page's one <h1>. The blocks have no slot for a page title, so it
+          is visually hidden, like a city homepage's. */}
+      <h1 className="sr-only">Questurian — Curated City Guides, Maps &amp; Itineraries</h1>
       {/* Members' pages send a signed-out reader here to sign in. */}
       <SuspenseBoundary fallback={null}>
         <SignInPromptFromLink />
