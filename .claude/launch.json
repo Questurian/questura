@@ -49,6 +49,23 @@
         "dev"
       ],
       "port": 3000
+    },
+    {
+      "name": "questura-client-live-api-3001",
+      "runtimeExecutable": "env",
+      "runtimeArgs": [
+        "NEXT_PUBLIC_BACKEND_URL=https://api.questurian.com",
+        "pnpm",
+        "--dir",
+        "apps/questura/apps/client",
+        "exec",
+        "next",
+        "dev",
+        "--turbopack",
+        "-p",
+        "3001"
+      ],
+      "port": 3001
     }
   ]
 }
