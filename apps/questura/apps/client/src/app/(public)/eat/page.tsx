@@ -9,5 +9,5 @@ export const metadata: Metadata = {
 }
 
 export default function EatPage() {
-  return <SectionPage title="Eat" />
+  return <SectionPage title="Eat" page="eat" />
 }

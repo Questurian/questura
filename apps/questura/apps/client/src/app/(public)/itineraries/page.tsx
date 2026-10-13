@@ -9,5 +9,5 @@ export const metadata: Metadata = {
 }
 
 export default function ItinerariesPage() {
-  return <SectionPage title="Itineraries" />
+  return <SectionPage title="Itineraries" page="itineraries" />
 }

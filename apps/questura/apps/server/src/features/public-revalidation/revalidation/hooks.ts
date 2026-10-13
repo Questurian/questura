@@ -114,6 +114,17 @@ export const revalidateMainHomepageAfterChange: GlobalAfterChangeHook = async ({
   )
 }
 
+// The same for a navbar section page (/eat, /stay, /itineraries).
+export const revalidateSectionPageAfterChange =
+  (page: string, path: string): GlobalAfterChangeHook =>
+  async ({ req }) => {
+    await requestRevalidation(
+      req,
+      { tags: [publicCacheTags.sectionPage(page)], paths: [path] },
+      `section-page:${page}:update`,
+    )
+  }
+
 export const revalidateLocationAfterChange: CollectionAfterChangeHook = async ({
   doc,
   previousDoc,

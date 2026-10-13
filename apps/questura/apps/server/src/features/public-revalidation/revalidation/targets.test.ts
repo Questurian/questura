@@ -238,17 +238,19 @@ describe('featuringHomepagesTarget', () => {
     locationHomepages,
     mainPublished = [],
     mainDraft = [],
+    sectionPublished = {},
   }: {
     locationHomepages: Array<Record<string, unknown>>
     mainPublished?: unknown[]
     mainDraft?: unknown[]
+    sectionPublished?: Record<string, unknown[]>
   }) {
     return {
       payload: {
         find: vi.fn(async () => ({ docs: locationHomepages })),
-        findGlobal: vi.fn(async () => ({
-          publishedPageBlocks: mainPublished,
-          draftPageBlocks: mainDraft,
+        findGlobal: vi.fn(async ({ slug }: { slug: string }) => ({
+          publishedPageBlocks: slug === 'main-homepage' ? mainPublished : sectionPublished[slug] ?? [],
+          draftPageBlocks: slug === 'main-homepage' ? mainDraft : [],
         })),
         findByID: vi.fn(async ({ id }: { id: number }) => ({ id, locationKey: 'Peru|Lima' })),
       },
@@ -267,6 +269,18 @@ describe('featuringHomepagesTarget', () => {
     expect(await featuringHomepagesTarget(req, 'single-type-listicles', 42)).toEqual({
       tags: ['main-homepage', 'sitemap', 'country-cities:peru', 'location-homepage:peru:lima'],
       paths: ['/', '/Peru', '/Peru/Lima'],
+    })
+  })
+
+  it('refreshes a navbar section page that shows the article', async () => {
+    const req = reqWith({
+      locationHomepages: [],
+      sectionPublished: { 'eat-page': [featured('single-type-listicles', 42)] },
+    })
+
+    expect(await featuringHomepagesTarget(req, 'single-type-listicles', 42)).toEqual({
+      tags: ['section-page:eat'],
+      paths: ['/eat'],
     })
   })
 

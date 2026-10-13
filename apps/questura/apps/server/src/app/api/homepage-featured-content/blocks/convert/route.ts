@@ -5,7 +5,10 @@ import {
   getCorsHeaders,
   handleCorsOptions,
 } from '@/features/auth/lib/auth-middleware'
-import { convertMainHomepageBlock } from '@/features/homepage-featured-content'
+import {
+  curatedPageFromSearchParams,
+  convertMainHomepageBlock,
+} from '@/features/homepage-featured-content'
 import { getErrorMessage, wantsLeanResponse } from '@/shared/utils/api-response'
 
 export async function POST(req: NextRequest) {
@@ -19,9 +22,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: authResult.error }, { status: authResult.status, headers })
     }
 
+    const page = curatedPageFromSearchParams(new URL(req.url).searchParams)
+    if (!page) return NextResponse.json({ message: 'Unknown page.' }, { status: 400, headers })
     const result = await convertMainHomepageBlock(
       await req.json().catch(() => null),
       wantsLeanResponse(req),
+      page,
     )
     return NextResponse.json(result.body, { status: result.status, headers })
   } catch (error) {

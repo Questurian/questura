@@ -3,9 +3,10 @@ import type { Payload } from 'payload'
 import { normalizeHomepageFeaturedRef } from '../../featured-articles/service'
 import type { HomepageFeaturedCollection } from '../../featured-articles/types'
 import type { LocationHomepageDoc, RawBlock } from '../../resolve-page-blocks/service'
+import { CURATED_PAGES, CURATED_PAGE_KEYS, type CuratedPageKey } from '../../main-homepage/pages'
 
 type HomepageReference = {
-  homepageId: number | 'main'
+  homepageId: number | CuratedPageKey
   scope: 'draft' | 'published' | 'legacy'
   blockIndex: number
   blockType: string
@@ -87,26 +88,34 @@ async function loadHomepagesForReferenceScan(payload: Payload): Promise<Location
   return result.docs as unknown as LocationHomepageDoc[]
 }
 
-async function loadMainHomepageForReferenceScan(payload: Payload): Promise<LocationHomepageDoc[]> {
-  try {
-    const doc = await payload.findGlobal({
-      slug: 'main-homepage',
-      depth: 0,
-      overrideAccess: true,
-    })
+function curatedPageBlocks(doc: unknown, field: 'draftPageBlocks' | 'publishedPageBlocks'): RawBlock[] {
+  const value = (doc as Record<string, unknown> | null)?.[field]
+  return Array.isArray(value) ? (value as RawBlock[]) : []
+}
 
-    return [{
-      id: 'main' as unknown as number,
-      draftPageBlocks: Array.isArray((doc as { draftPageBlocks?: unknown }).draftPageBlocks)
-        ? (doc as { draftPageBlocks: RawBlock[] }).draftPageBlocks
-        : [],
-      publishedPageBlocks: Array.isArray((doc as { publishedPageBlocks?: unknown }).publishedPageBlocks)
-        ? (doc as { publishedPageBlocks: RawBlock[] }).publishedPageBlocks
-        : [],
-    }]
-  } catch {
-    return []
-  }
+/** The main homepage and the navbar section pages, each tagged with its page key as id. */
+async function loadCuratedPagesForReferenceScan(payload: Payload): Promise<LocationHomepageDoc[]> {
+  const docs = await Promise.all(
+    CURATED_PAGE_KEYS.map(async (page) => {
+      try {
+        const doc = await payload.findGlobal({
+          slug: CURATED_PAGES[page].globalSlug,
+          depth: 0,
+          overrideAccess: true,
+        })
+
+        return [{
+          id: page as unknown as number,
+          draftPageBlocks: curatedPageBlocks(doc, 'draftPageBlocks'),
+          publishedPageBlocks: curatedPageBlocks(doc, 'publishedPageBlocks'),
+        }]
+      } catch {
+        return []
+      }
+    }),
+  )
+
+  return docs.flat() as unknown as LocationHomepageDoc[]
 }
 
 export async function assertCanDeleteHomepageFeaturedContent(
@@ -116,7 +125,7 @@ export async function assertCanDeleteHomepageFeaturedContent(
 ): Promise<void> {
   const docs = [
     ...await loadHomepagesForReferenceScan(payload),
-    ...await loadMainHomepageForReferenceScan(payload),
+    ...await loadCuratedPagesForReferenceScan(payload),
   ]
   const refs = collectReferences(
     docs,
@@ -139,7 +148,7 @@ export async function assertCanUnpublishHomepageFeaturedContent(
 ): Promise<void> {
   const docs = [
     ...await loadHomepagesForReferenceScan(payload),
-    ...await loadMainHomepageForReferenceScan(payload),
+    ...await loadCuratedPagesForReferenceScan(payload),
   ]
   const refs = collectReferences(docs, relationTo, id, new Set(['published', 'legacy']))
 
@@ -152,6 +161,8 @@ export async function assertCanUnpublishHomepageFeaturedContent(
 
 export type HomepagesFeaturing = {
   mainHomepage: boolean
+  /** Navbar section pages (eat, stay, itineraries) whose published blocks show it. */
+  sectionPages: Exclude<CuratedPageKey, 'main'>[]
   locationHomepages: LocationHomepageDoc[]
 }
 
@@ -168,14 +179,21 @@ export async function findHomepagesFeaturing(
 ): Promise<HomepagesFeaturing> {
   const live = new Set(['published', 'legacy'] as const)
   const locationDocs = await loadHomepagesForReferenceScan(payload)
-  const mainDocs = await loadMainHomepageForReferenceScan(payload)
+  const curatedDocs = await loadCuratedPagesForReferenceScan(payload)
 
   const locationIds = new Set(
     collectReferences(locationDocs, relationTo, id, live).map((ref) => ref.homepageId),
   )
 
+  const curatedPages = new Set(
+    collectReferences(curatedDocs, relationTo, id, live).map((ref) => ref.homepageId),
+  )
+
   return {
-    mainHomepage: collectReferences(mainDocs, relationTo, id, live).length > 0,
+    mainHomepage: curatedPages.has('main'),
+    sectionPages: CURATED_PAGE_KEYS.filter(
+      (page): page is Exclude<CuratedPageKey, 'main'> => page !== 'main' && curatedPages.has(page),
+    ),
     locationHomepages: locationDocs.filter((doc) => locationIds.has(doc.id)),
   }
 }

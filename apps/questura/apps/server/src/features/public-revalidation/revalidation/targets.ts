@@ -55,6 +55,10 @@ export async function featuringHomepagesTarget(
 
   return mergeTargets(
     featuring.mainHomepage ? { tags: [publicCacheTags.mainHomepage()], paths: ['/'] } : {},
+    ...featuring.sectionPages.map((page) => ({
+      tags: [publicCacheTags.sectionPage(page)],
+      paths: [`/${page}`],
+    })),
     ...(await Promise.all(
       featuring.locationHomepages.map((homepage) =>
         locationHomepageTarget(req, homepage as unknown as AnyDoc),

@@ -10,6 +10,7 @@ import {
   type RawBlock,
 } from '../../resolve-page-blocks/service'
 import type { MainHomepageDoc } from '../types'
+import { CURATED_PAGES, type CuratedPageKey } from '../pages'
 
 export const MAIN_HOMEPAGE_LOCATION_GRID_SCOPE = {
   childLevel: 'city' as const,
@@ -32,9 +33,12 @@ export async function getMainHomepagePayload(): Promise<PayloadInstance> {
   return getPayload({ config })
 }
 
-export async function loadMainHomepage(payload: PayloadInstance): Promise<MainHomepageDoc> {
+export async function loadMainHomepage(
+  payload: PayloadInstance,
+  page: CuratedPageKey = 'main',
+): Promise<MainHomepageDoc> {
   return (await payload.findGlobal({
-    slug: 'main-homepage',
+    slug: CURATED_PAGES[page].globalSlug,
     depth: 0,
     overrideAccess: true,
   })) as unknown as MainHomepageDoc
@@ -43,9 +47,10 @@ export async function loadMainHomepage(payload: PayloadInstance): Promise<MainHo
 export async function updateMainHomepageDraft(
   payload: PayloadInstance,
   pageBlocks: unknown[],
+  page: CuratedPageKey = 'main',
 ): Promise<MainHomepageDoc> {
   return (await payload.updateGlobal({
-    slug: 'main-homepage',
+    slug: CURATED_PAGES[page].globalSlug,
     data: { draftPageBlocks: pageBlocks } as never,
     depth: 0,
     overrideAccess: true,
@@ -87,7 +92,8 @@ export async function formatMainHomepage(
 export async function updateAndFormatMainHomepageBlocks(
   payload: PayloadInstance,
   pageBlocks: unknown[],
+  page: CuratedPageKey = 'main',
 ) {
-  const updated = await updateMainHomepageDraft(payload, pageBlocks)
+  const updated = await updateMainHomepageDraft(payload, pageBlocks, page)
   return formatMainHomepage(payload, updated)
 }

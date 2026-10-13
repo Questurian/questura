@@ -60,6 +60,7 @@ import * as migration_20261008_182100_composite_photo_attribution from './202610
 import * as migration_20261010_034941_featured_articles_center_lead_5_slot from './20261010_034941_featured_articles_center_lead_5_slot'
 import * as migration_20261010_040409_article_display_layout from './20261010_040409_article_display_layout'
 import * as migration_20261013_132021_articles_location_optional from './20261013_132021_articles_location_optional'
+import * as migration_20261013_201348_section_pages_curated_blocks from './20261013_201348_section_pages_curated_blocks'
 
 export const migrations = [
   {
@@ -366,5 +367,10 @@ export const migrations = [
     up: migration_20261013_132021_articles_location_optional.up,
     down: migration_20261013_132021_articles_location_optional.down,
     name: '20261013_132021_articles_location_optional',
+  },
+  {
+    up: migration_20261013_201348_section_pages_curated_blocks.up,
+    down: migration_20261013_201348_section_pages_curated_blocks.down,
+    name: '20261013_201348_section_pages_curated_blocks',
   },
 ]

@@ -5,7 +5,10 @@ import {
   getCorsHeaders,
   handleCorsOptions,
 } from '@/features/auth/lib/auth-middleware'
-import { publishMainHomepage } from '@/features/homepage-featured-content'
+import {
+  curatedPageFromSearchParams,
+  publishMainHomepage,
+} from '@/features/homepage-featured-content'
 import { getErrorMessage } from '@/shared/utils/api-response'
 
 export async function POST(req: NextRequest) {
@@ -19,7 +22,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: authResult.error }, { status: authResult.status, headers })
     }
 
-    const result = await publishMainHomepage(authResult.user?.id ?? null)
+    const page = curatedPageFromSearchParams(new URL(req.url).searchParams)
+    if (!page) return NextResponse.json({ message: 'Unknown page.' }, { status: 400, headers })
+    const result = await publishMainHomepage(authResult.user?.id ?? null, page)
     return NextResponse.json(result.body, { status: result.status, headers })
   } catch (error) {
     return NextResponse.json(

@@ -1,5 +1,12 @@
 export { LocationHomepages } from './collection'
-export { MainHomepage } from './main-homepage/global'
+export { CuratedPageGlobals, MainHomepage } from './main-homepage/global'
+export {
+  CURATED_PAGES,
+  CURATED_PAGE_KEYS,
+  curatedPageFromSearchParams,
+  isCuratedPageKey,
+  type CuratedPageKey,
+} from './main-homepage/pages'
 export {
   MAIN_HOMEPAGE_LOCATION_GRID_SCOPE,
   addMainHomepageBlock,
