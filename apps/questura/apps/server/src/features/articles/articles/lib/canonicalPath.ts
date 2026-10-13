@@ -18,7 +18,12 @@ type CanonicalPathInputs = {
  *       filtering, but the public URL is flattened to city scope. Slug is
  *       globally unique on Articles so no collision is possible.
  *
- * Drafts and global scope return null. Uniqueness across category vs.
+ * Published articles with no location (worldwide: multi-country, general
+ * travel, news) live at /articles/${slug} whether or not they have a category.
+ * That is the route `app/(public)/articles/[slug]` serves; `articles` can't
+ * be a country slug because Locations reserve the public route segments.
+ *
+ * Drafts return null. Uniqueness across category vs.
  * city/country slugs is enforced at write time on Categories/Locations.
  */
 export function buildCanonicalPath({
@@ -27,10 +32,11 @@ export function buildCanonicalPath({
   slug,
   status,
 }: CanonicalPathInputs): string | null {
-  if (!location || !slug || !categorySlug) return null
-  if (status !== 'published') return null
+  if (!slug || status !== 'published') return null
 
-  const parts = location.split('|').filter(Boolean)
+  const parts = (location ?? '').split('|').filter(Boolean)
+  if (parts.length === 0) return `/articles/${slug}`
+  if (!categorySlug) return null
 
   if (parts.length === 1) {
     const [country] = parts

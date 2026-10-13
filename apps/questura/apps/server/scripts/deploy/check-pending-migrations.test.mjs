@@ -113,6 +113,42 @@ test('still blocks renaming or removing enum values', () => {
   assert.ok(risks.includes('column or table rewrite'), 'ALTER COLUMN')
 })
 
+test('allows letting a column hold NULL', async () => {
+  const loosenings = [
+    'ALTER TABLE "articles" ALTER COLUMN "location" DROP NOT NULL;',
+    'alter table if exists only public.articles alter location drop not null',
+    'ALTER TABLE "a" ALTER COLUMN "b" DROP NOT NULL;\n  ALTER TABLE "c" ALTER COLUMN "d" DROP NOT NULL;',
+  ]
+  for (const sql of loosenings) {
+    assert.deepEqual(assessMigration(migrationRunning(sql), 'example'), [], sql)
+  }
+
+  const name = '20261013_132021_articles_location_optional'
+  const source = await fs.readFile(path.join(migrationsRoot, `${name}.ts`), 'utf8')
+  assert.deepEqual(assessMigration(source, name), [])
+})
+
+test('still blocks every other column change, even beside a DROP NOT NULL', () => {
+  const rewrites = [
+    'ALTER TABLE "articles" ALTER COLUMN "location" SET NOT NULL;',
+    'ALTER TABLE "articles" ALTER COLUMN "location" SET DATA TYPE varchar(40);',
+    'ALTER TABLE "articles" ALTER COLUMN "location" SET DEFAULT \'peru\';',
+    // Chained in one statement: the guard cannot vouch for the rest.
+    'ALTER TABLE "articles" ALTER COLUMN "location" DROP NOT NULL, ALTER COLUMN "slug" SET NOT NULL;',
+    'ALTER TABLE "articles" ALTER COLUMN "slug" SET NOT NULL, ALTER COLUMN "location" DROP NOT NULL;',
+    // A safe statement does not wave through the one beside it.
+    'ALTER TABLE "a" ALTER COLUMN "b" DROP NOT NULL; ALTER TABLE "a" RENAME COLUMN "b" TO "c";',
+  ]
+  for (const sql of rewrites) {
+    assert.ok(assessMigration(migrationRunning(sql), 'example').includes('column or table rewrite'), sql)
+  }
+
+  const chainedDrop = 'ALTER TABLE "a" ALTER COLUMN "b" DROP NOT NULL, DROP COLUMN "c";'
+  assert.ok(assessMigration(migrationRunning(chainedDrop), 'example').includes('destructive SQL'))
+  const besideDrop = 'ALTER TABLE "a" ALTER COLUMN "b" DROP NOT NULL; DROP TABLE "c";'
+  assert.ok(assessMigration(migrationRunning(besideDrop), 'example').includes('destructive SQL'))
+})
+
 test('fails closed when db.execute SQL cannot be statically inspected', () => {
   const source = `
     export async function up() { const query = makeQuery(); await db.execute(query) }

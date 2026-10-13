@@ -26,6 +26,18 @@ const ENUM_ADD_VALUE = new RegExp(
   'gi',
 )
 
+// Letting a column hold NULL rewrites no row and breaks no code already
+// running (that code never writes NULL there), so it is the one ALTER COLUMN
+// the guard lets through. The statement has to be exactly that, alone: one
+// column, DROP NOT NULL, nothing chained after a comma. SET NOT NULL, a type
+// change, a default and every other ALTER COLUMN stay a column rewrite.
+const COLUMN_DROP_NOT_NULL = new RegExp(
+  String.raw`(?:^|(?<=;))\s*ALTER\s+TABLE\s+(?:IF\s+EXISTS\s+)?(?:ONLY\s+)?` +
+    String.raw`${SQL_NAME}(?:\s*\.\s*${SQL_NAME})?\s+ALTER\s+(?:COLUMN\s+)?${SQL_NAME}` +
+    String.raw`\s+DROP\s+NOT\s+NULL\s*(?=;|$)`,
+  'gi',
+)
+
 const RISK_RULES = [
   ['destructive SQL', /\b(?:DROP|TRUNCATE)\b|\bDELETE\s+FROM\b/i],
   ['data rewrite', (statement) => /\bUPDATE\b/i.test(statement.replace(/\bON\s+UPDATE\b/gi, ''))],
@@ -164,7 +176,8 @@ export function inspectMigration(migrationSource, migrationName) {
   visit(up.body)
 
   const risks = new Set()
-  for (const statement of sqlStatements) {
+  for (const sqlText of sqlStatements) {
+    const statement = sqlText.replace(COLUMN_DROP_NOT_NULL, '')
     for (const [label, detector] of RISK_RULES) {
       const detected = typeof detector === 'function'
         ? detector(statement)

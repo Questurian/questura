@@ -8,9 +8,10 @@ export const location: Field = {
   name: 'location',
   label: 'Location',
   type: 'text',
-  required: true,
+  required: false,
   admin: {
-    description: 'Select the location this article is about',
+    description:
+      'Select the location this article is about. Leave empty for a worldwide article (multi-country, general travel, news); it lives at /articles/<slug>.',
     components: {
       Field: 'src/shared/location/LocationPickerField.tsx',
     },
