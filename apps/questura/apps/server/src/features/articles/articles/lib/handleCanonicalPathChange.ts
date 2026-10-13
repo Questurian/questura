@@ -36,8 +36,10 @@ export async function handleCanonicalPathChange({
     status: stringOrNull(originalDoc?.status),
   })
 
+  // Not `??`: a null location is an article being made worldwide, not a
+  // location left untouched (undefined).
   const newPath = buildCanonicalPath({
-    location: stringOrNull(data.location ?? originalDoc?.location),
+    location: stringOrNull(data.location !== undefined ? data.location : originalDoc?.location),
     categorySlug: nextCategorySlug,
     slug: stringOrNull(data.slug ?? originalDoc?.slug),
     status: stringOrNull(data.status ?? originalDoc?.status),

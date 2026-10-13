@@ -109,7 +109,7 @@ export const canonicalPath: Field = {
     readOnly: true,
     position: 'sidebar',
     description:
-      'Public URL — auto-generated from country, city, category, and slug. Only set for published city-scope articles with a category. Changing the source fields on a published article creates an automatic 301 redirect from the previous URL.',
+      'Public URL — auto-generated from country, city, category, and slug. Set for published articles: located ones need a category, worldwide ones (no location) live at /articles/<slug>. Changing the source fields on a published article creates an automatic 301 redirect from the previous URL.',
   },
 }
 
