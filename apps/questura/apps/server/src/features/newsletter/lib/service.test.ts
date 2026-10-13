@@ -8,6 +8,7 @@ const mocks = vi.hoisted(() => ({
   sendConfirmation: vi.fn(),
   emailLimit: vi.fn(),
   dailyLimit: vi.fn(),
+  push: vi.fn(),
 }))
 
 vi.mock('payload', () => ({
@@ -19,12 +20,13 @@ vi.mock('payload', () => ({
 }))
 vi.mock('@/payload.config', () => ({ default: {} }))
 vi.mock('@/features/emails', () => ({ sendNewsletterConfirmationEmail: mocks.sendConfirmation }))
+vi.mock('./sync', () => ({ pushSubscriberState: mocks.push }))
 vi.mock('./rate-limit', () => ({
   checkConfirmationEmailLimit: mocks.emailLimit,
   checkDailyConfirmationLimit: mocks.dailyLimit,
 }))
 
-import { confirm, isWellFormedConfirmToken, subscribe } from './service'
+import { accountSubscribe, confirm, isWellFormedConfirmToken, subscribe, suppress, unsubscribe } from './service'
 
 const NOW = new Date('2026-10-13T12:00:00.000Z')
 const headers = new Headers()
@@ -127,7 +129,7 @@ describe('subscribe', () => {
     mocks.find
       .mockResolvedValueOnce(rows())
       .mockResolvedValueOnce(rows({ id: 3, email: 'reader@example.com', status: 'pending' }))
-    mocks.create.mockRejectedValue(new Error('duplicate key value violates unique constraint'))
+    mocks.create.mockRejectedValueOnce(new Error('duplicate key value violates unique constraint'))
 
     const result = await subscribe({ email: 'reader@example.com', source: 'homepage-block', headers, now: NOW })
 
@@ -141,13 +143,14 @@ describe('confirm', () => {
   const live = '2026-10-14T00:00:00.000Z'
 
   it('subscribes a pending row whose link is still live', async () => {
-    mocks.find.mockResolvedValue(rows({ id: 1, status: 'pending', confirmTokenExpiresAt: live }))
+    mocks.find.mockResolvedValue(rows({ id: 1, email: 'reader@example.com', status: 'pending', confirmTokenExpiresAt: live }))
 
     expect(await confirm(token, NOW)).toBe('confirmed')
     expect(mocks.find.mock.calls[0]![0].where).toEqual({ confirmTokenHash: { equals: sha256(token) } })
     expect(mocks.update).toHaveBeenCalledWith(
       expect.objectContaining({ id: 1, data: { status: 'subscribed', confirmedAt: NOW.toISOString() } }),
     )
+    expect(mocks.push).toHaveBeenCalledWith('reader@example.com', true)
   })
 
   it('reads a repeat click as confirmed and writes nothing', async () => {
@@ -183,4 +186,71 @@ describe('isWellFormedConfirmToken', () => {
       expect(isWellFormedConfirmToken(value)).toBe(false)
     },
   )
+})
+
+describe('the account switch', () => {
+  it('subscribes a verified account email at once, recording the click as consent', async () => {
+    const result = await accountSubscribe({ email: 'reader@example.com', emailVerified: true, headers, now: NOW })
+
+    expect(result).toEqual({ outcome: 'subscribed' })
+    expect(mocks.create.mock.calls[0]![0].data).toEqual({
+      email: 'reader@example.com',
+      status: 'subscribed',
+      source: 'account',
+      signedUpAt: NOW.toISOString(),
+      confirmedAt: NOW.toISOString(),
+    })
+    expect(mocks.sendConfirmation).not.toHaveBeenCalled()
+    expect(mocks.push).toHaveBeenCalledWith('reader@example.com', true)
+  })
+
+  it('sends an unverified account email through double opt-in', async () => {
+    const result = await accountSubscribe({ email: 'reader@example.com', emailVerified: false, headers, now: NOW })
+
+    expect(result).toEqual({ outcome: 'confirmation-sent' })
+    expect(mocks.create.mock.calls[0]![0].data).toMatchObject({ status: 'pending', source: 'account' })
+  })
+
+  it('never resubscribes a complained address', async () => {
+    mocks.find.mockResolvedValue(rows({ id: 1, email: 'reader@example.com', status: 'complained' }))
+
+    expect(await accountSubscribe({ email: 'reader@example.com', emailVerified: true, headers, now: NOW })).toEqual({
+      outcome: 'nothing-to-send',
+    })
+    expect(mocks.update).not.toHaveBeenCalled()
+  })
+})
+
+describe('unsubscribe', () => {
+  it('copies a stop made on the site to Resend', async () => {
+    mocks.find.mockResolvedValue(rows({ id: 1, email: 'reader@example.com', status: 'subscribed' }))
+
+    await unsubscribe('reader@example.com', 'site', NOW)
+
+    expect(mocks.update).toHaveBeenCalledWith(
+      expect.objectContaining({ data: { status: 'unsubscribed', unsubscribedAt: NOW.toISOString() } }),
+    )
+    expect(mocks.push).toHaveBeenCalledWith('reader@example.com', false)
+  })
+
+  it('does not echo a stop that came from Resend back to Resend', async () => {
+    mocks.find.mockResolvedValue(rows({ id: 1, email: 'reader@example.com', status: 'subscribed' }))
+
+    await unsubscribe('reader@example.com', 'resend', NOW)
+
+    expect(mocks.update).toHaveBeenCalledOnce()
+    expect(mocks.push).not.toHaveBeenCalled()
+  })
+})
+
+describe('suppress', () => {
+  it('lets a complaint outrank a bounce, never the other way', async () => {
+    mocks.find.mockResolvedValue(rows({ id: 1, email: 'reader@example.com', status: 'complained' }))
+    await suppress('reader@example.com', 'bounced')
+    expect(mocks.update).not.toHaveBeenCalled()
+
+    mocks.find.mockResolvedValue(rows({ id: 1, email: 'reader@example.com', status: 'bounced' }))
+    await suppress('reader@example.com', 'complained')
+    expect(mocks.update).toHaveBeenCalledWith(expect.objectContaining({ data: { status: 'complained' } }))
+  })
 })

@@ -20,7 +20,7 @@ export function EmailSection({ user, methods }: EmailSectionProps) {
             Email
           </h3>
           <p className="text-[0.8rem] 480:text-[0.84rem] text-[#6b6a68] leading-[1.65] mb-3 480:mb-4">
-            Use this email to sign in. This is also where we&apos;ll send email communication and newsletters.
+            Use this email to sign in. It is also where we send account emails, and the newsletter if you turn it on below.
           </p>
           <div className="text-[0.85rem] 480:text-[0.9rem] text-[#1A1A1A] font-medium mb-1.5 break-all">
             {user?.email}

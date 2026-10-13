@@ -9,7 +9,8 @@
  *  1. every session of the reader ends, in Redis and Postgres, and the other
  *     devices' cookie copies stop being trusted within a second
  *     (`session-revocations.ts`);
- *  2. bookmarks and outstanding reset / verification tokens are deleted, and
+ *  2. bookmarks, the newsletter subscription (here and its copy in Resend)
+ *     and outstanding reset / verification tokens are deleted, and
  *     the profile is deleted (or, while it still names a Stripe customer,
  *     emptied of name and address and kept, so a late Stripe event or a
  *     dispute still finds the billing record);
@@ -78,6 +79,9 @@ async function main(): Promise<number> {
     const sessions = await count(`SELECT count(*) AS n FROM visitor_auth_sessions WHERE "userId" = $1`)
     const accounts = await count(`SELECT count(*) AS n FROM visitor_auth_accounts WHERE "userId" = $1`)
     const bookmarks = await count(`SELECT count(*) AS n FROM bookmarks WHERE auth_user_id = $1`)
+    const newsletter = Number(
+      (await pool.query<{ n: string }>(`SELECT count(*) AS n FROM newsletter_subscribers WHERE email = $1`, [email])).rows[0]?.n ?? 0,
+    )
 
     const live =
       profile &&
@@ -100,6 +104,7 @@ async function main(): Promise<number> {
       `sign_in_methods=${accounts}`,
       `bookmarks=${bookmarks}`,
       `profile=${!profile ? 'none' : keepProfile ? 'emptied (still names a Stripe customer)' : 'deleted'}`,
+      `newsletter=${newsletter}`,
     ].join(' ')
 
     if (!apply) {
@@ -118,6 +123,7 @@ async function main(): Promise<number> {
     try {
       await client.query('BEGIN')
       await client.query(`DELETE FROM bookmarks WHERE auth_user_id = $1`, [user.id])
+      await client.query(`DELETE FROM newsletter_subscribers WHERE email = $1`, [email])
       await client.query(`DELETE FROM visitor_auth_verifications WHERE value = $1`, [user.id])
       if (profile && keepProfile) {
         await client.query(
@@ -143,11 +149,27 @@ async function main(): Promise<number> {
     // 3. The sign-in account: sessions again (anything signed in meanwhile), Google link, password, user.
     await auth.internalAdapter.deleteUser(user.id)
 
-    console.log(`ERASE done ${plan}`)
+    // 4. The newsletter list's copy in Resend. Its `contact.deleted` webhook
+    // finds no row here any more, so nothing comes back.
+    const resend = await deleteResendContact(email)
+
+    console.log(`ERASE done ${plan} newsletter_resend=${resend}`)
     return 0
   } finally {
     await pool.end()
   }
+}
+
+async function deleteResendContact(email: string): Promise<string> {
+  const apiKey = process.env.RESEND_NEWSLETTER_API_KEY?.trim()
+  if (!apiKey) return 'skipped (no RESEND_NEWSLETTER_API_KEY: delete the contact in Resend by hand)'
+  const response = await fetch(`https://api.resend.com/contacts/${encodeURIComponent(email)}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${apiKey}` },
+  })
+  if (response.ok) return 'deleted'
+  if (response.status === 404) return 'none'
+  return `FAILED (${response.status}): delete the contact in Resend by hand`
 }
 
 main()

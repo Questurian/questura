@@ -4,6 +4,7 @@ import type { JSX, ReactNode } from "react";
 import { Clock, ExternalLink, MapPin, Route } from "lucide-react";
 import { ShimmerImage } from "@/components/media/ShimmerImage";
 import { ArticleAuthorBanner } from "@/features/articles/components/ArticleAuthorBanner";
+import { NewsletterArticleBand } from "@/features/newsletter/components/NewsletterArticleBand";
 import { ArticlePageHeader } from "@/features/articles/components/ArticlePageHeader";
 import { InstagramEmbedBlock } from "@/features/articles/components/InstagramEmbedBlock";
 import { ItineraryStayCard } from "@/features/articles/components/ItineraryStayCard";
@@ -368,6 +369,8 @@ export function ItineraryListicleArticlePage({
             <ArticleAuthorBanner author={article.author} />
           </div>
         ) : null}
+
+        <NewsletterArticleBand className="mt-14 480:mt-16 sm:mt-20" />
       </div>
     </article>
   );

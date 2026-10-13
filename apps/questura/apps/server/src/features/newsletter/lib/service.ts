@@ -9,6 +9,7 @@ import { logger } from '@/shared/utils/logger'
 import { maskEmail } from '@/features/emails/lib/mask-email'
 import { CONFIRM_PAGE_PATH, CONFIRM_TOKEN_TTL_MS, type NewsletterSignupSource } from './constants'
 import { checkConfirmationEmailLimit, checkDailyConfirmationLimit } from './rate-limit'
+import { pushSubscriberState } from './sync'
 
 const COLLECTION = 'newsletter-subscribers' as const
 
@@ -145,5 +146,85 @@ export async function confirm(token: string, now = new Date()): Promise<ConfirmR
     id: row.id,
     data: { status: 'subscribed', confirmedAt: now.toISOString() },
   })
+  await pushSubscriberState(row.email, true)
   return 'confirmed'
+}
+
+export type AccountNewsletterStatus = 'subscribed' | 'pending' | 'not-subscribed'
+
+/** What the account page shows for the signed-in reader's address. */
+export async function accountStatus(email: string): Promise<AccountNewsletterStatus> {
+  const payload = await getPayload({ config })
+  const row = await findByEmail(payload, email)
+  if (row?.status === 'subscribed') return 'subscribed'
+  if (row?.status === 'pending') return 'pending'
+  return 'not-subscribed'
+}
+
+/**
+ * The account page's switch, turned on.
+ *
+ * A verified account email has already proved the inbox is the reader's, so
+ * it is subscribed at once; that click is the consent, recorded as source
+ * `account`. An unverified one goes through the normal double opt-in.
+ * A suppressed address (bounced, complained) stays suppressed either way.
+ */
+export async function accountSubscribe({
+  email,
+  emailVerified,
+  headers,
+  now = new Date(),
+}: {
+  email: string
+  emailVerified: boolean
+  headers: Headers
+  now?: Date
+}): Promise<SubscribeResult | { outcome: 'subscribed' }> {
+  if (!emailVerified) return subscribe({ email, source: 'account', headers, now })
+
+  const payload = await getPayload({ config })
+  const existing = await findByEmail(payload, email)
+  if (existing && SUPPRESSED.has(existing.status)) return { outcome: 'nothing-to-send' }
+  if (existing?.status === 'subscribed') return { outcome: 'subscribed' }
+
+  const data = {
+    status: 'subscribed' as const,
+    source: 'account' as const,
+    signedUpAt: now.toISOString(),
+    confirmedAt: now.toISOString(),
+  }
+  if (existing) await payload.update({ collection: COLLECTION, id: existing.id, data })
+  else await payload.create({ collection: COLLECTION, data: { email, ...data } })
+  await pushSubscriberState(email, true)
+  return { outcome: 'subscribed' }
+}
+
+/**
+ * A reader said stop: the account switch (`from: 'site'`, copied to Resend)
+ * or Resend's own unsubscribe link (`from: 'resend'`, already true there).
+ * Never copied back to Resend in the second case: that write would fire
+ * another `contact.updated` webhook, and that one another write.
+ */
+export async function unsubscribe(email: string, from: 'site' | 'resend', now = new Date()): Promise<void> {
+  const payload = await getPayload({ config })
+  const row = await findByEmail(payload, email)
+  if (row && (row.status === 'subscribed' || row.status === 'pending')) {
+    await payload.update({
+      collection: COLLECTION,
+      id: row.id,
+      data: { status: 'unsubscribed', unsubscribedAt: now.toISOString() },
+    })
+  }
+  if (from === 'site') await pushSubscriberState(email, false)
+}
+
+/**
+ * A hard bounce or a spam complaint. Terminal for mail: no confirmation and
+ * no issue goes to the address again. A complaint outranks a bounce.
+ */
+export async function suppress(email: string, reason: 'bounced' | 'complained'): Promise<void> {
+  const payload = await getPayload({ config })
+  const row = await findByEmail(payload, email)
+  if (!row || row.status === 'complained' || row.status === reason) return
+  await payload.update({ collection: COLLECTION, id: row.id, data: { status: reason } })
 }

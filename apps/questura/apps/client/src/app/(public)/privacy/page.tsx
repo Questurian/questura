@@ -26,7 +26,7 @@ export default function PrivacyPage() {
         <h1 className="font-display text-[1.8rem] 480:text-[2.2rem] text-foreground leading-[1.15]">
           Privacy
         </h1>
-        <p className="text-[0.85rem] text-foreground/60 mt-2">Last updated 25 September 2026</p>
+        <p className="text-[0.85rem] text-foreground/60 mt-2">Last updated 13 October 2026</p>
 
         <p className={`${body} mt-6`}>
           You can read Questurian without an account, and we do not run advertising or tracking
@@ -59,6 +59,18 @@ export default function PrivacyPage() {
         <h2 className={heading}>Bookmarks</h2>
         <p className={body}>The articles you bookmark, so you can find them again.</p>
 
+        <h2 className={heading}>The newsletter</h2>
+        <p className={body}>
+          You do not need an account to get the newsletter, and having one does not sign you up.
+          When you sign up we keep your email address, which form you used and when, and we
+          email you a link to confirm; nothing else is sent until you click it. We then keep
+          when you confirmed, and later when you unsubscribed, so we never email an address that
+          asked us to stop. Every issue has a one-click unsubscribe link, and signed-in readers
+          can also turn it off on their account page. Our email provider keeps a copy of the
+          list in order to send it, and tells us when an address unsubscribes, bounces or marks
+          an issue as spam.
+        </p>
+
         <h2 className={heading}>Errors</h2>
         <p className={body}>
           When something breaks, we record the error so we can fix it. Email addresses, cookies
@@ -68,7 +80,7 @@ export default function PrivacyPage() {
         <h2 className={heading}>Who else handles it</h2>
         <p className={body}>
           Our hosting and database providers store the data above for us, Stripe handles
-          payments, Google handles Google sign-in, and our email provider delivers account mail.
+          payments, Google handles Google sign-in, and our email provider delivers account mail and the newsletter.
           We do not sell your data or share it with anyone else.
         </p>
 
@@ -80,7 +92,7 @@ export default function PrivacyPage() {
           </a>{' '}
           from the address you sign in with, and we delete your account within{' '}
           {ACCOUNT_DELETION_DAYS} days. We cancel any membership first, sign you out everywhere,
-          and delete your account, bookmarks and sign-in details. Stripe keeps its own record of
+          and delete your account, bookmarks, newsletter subscription and sign-in details. Stripe keeps its own record of
           past payments, as the law requires of it.
         </p>
       </article>
