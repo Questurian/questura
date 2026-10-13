@@ -9,6 +9,7 @@ import {
   addMainHomepageBlock,
   deleteMainHomepageBlock,
   reorderMainHomepageBlocks,
+  curatedPageFromSearchParams,
 } from '@/features/homepage-featured-content'
 import { getErrorMessage, wantsLeanResponse } from '@/shared/utils/api-response'
 
@@ -28,7 +29,9 @@ export async function POST(req: NextRequest) {
   try {
     const authResponse = await authenticate(req, headers)
     if (authResponse) return authResponse
-    const result = await addMainHomepageBlock(await req.json().catch(() => null))
+    const page = curatedPageFromSearchParams(new URL(req.url).searchParams)
+    if (!page) return NextResponse.json({ message: 'Unknown page.' }, { status: 400, headers })
+    const result = await addMainHomepageBlock(await req.json().catch(() => null), page)
     return NextResponse.json(result.body, { status: result.status, headers })
   } catch (error) {
     return NextResponse.json(
@@ -43,9 +46,12 @@ export async function DELETE(req: NextRequest) {
   try {
     const authResponse = await authenticate(req, headers)
     if (authResponse) return authResponse
+    const page = curatedPageFromSearchParams(new URL(req.url).searchParams)
+    if (!page) return NextResponse.json({ message: 'Unknown page.' }, { status: 400, headers })
     const result = await deleteMainHomepageBlock(
       await req.json().catch(() => null),
       wantsLeanResponse(req),
+      page,
     )
     return NextResponse.json(result.body, { status: result.status, headers })
   } catch (error) {
@@ -61,9 +67,12 @@ export async function PATCH(req: NextRequest) {
   try {
     const authResponse = await authenticate(req, headers)
     if (authResponse) return authResponse
+    const page = curatedPageFromSearchParams(new URL(req.url).searchParams)
+    if (!page) return NextResponse.json({ message: 'Unknown page.' }, { status: 400, headers })
     const result = await reorderMainHomepageBlocks(
       await req.json().catch(() => null),
       wantsLeanResponse(req),
+      page,
     )
     return NextResponse.json(result.body, { status: result.status, headers })
   } catch (error) {

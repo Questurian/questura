@@ -366,6 +366,57 @@ describe('location homepage routes', () => {
     }))
   })
 
+  it('adds a block to the Eat page, not the main homepage, when ?page=eat', async () => {
+    vi.mocked(authenticateRequest).mockResolvedValue({
+      user: { role: 'editor' },
+      error: null,
+      status: 200,
+    } as never)
+    const payload = {
+      findGlobal: vi.fn().mockResolvedValue({
+        draftPageBlocks: [],
+        publishedPageBlocks: [],
+        publishedRevision: 0,
+      }),
+      updateGlobal: vi.fn().mockImplementation(({ data }) => Promise.resolve({
+        ...data,
+        publishedRevision: 0,
+      })),
+    }
+    vi.mocked(getPayload).mockResolvedValue(payload as never)
+
+    const response = await addMainHomepageBlock(new Request(
+      'http://localhost:4000/api/homepage-featured-content/blocks?page=eat',
+      {
+        method: 'POST',
+        body: JSON.stringify({ blockType: 'newsletter-signup', slotCount: 0 }),
+      },
+    ) as never)
+
+    expect(response.status).toBe(201)
+    expect(payload.findGlobal).toHaveBeenCalledWith(expect.objectContaining({ slug: 'eat-page' }))
+    expect(payload.updateGlobal).toHaveBeenCalledWith(expect.objectContaining({ slug: 'eat-page' }))
+    expect(payload.updateGlobal).not.toHaveBeenCalledWith(expect.objectContaining({ slug: 'main-homepage' }))
+  })
+
+  it('rejects an unknown ?page=', async () => {
+    vi.mocked(authenticateRequest).mockResolvedValue({
+      user: { role: 'editor' },
+      error: null,
+      status: 200,
+    } as never)
+
+    const response = await addMainHomepageBlock(new Request(
+      'http://localhost:4000/api/homepage-featured-content/blocks?page=shop',
+      {
+        method: 'POST',
+        body: JSON.stringify({ blockType: 'newsletter-signup', slotCount: 0 }),
+      },
+    ) as never)
+
+    expect(response.status).toBe(400)
+  })
+
   it('clears only drafts, never what readers see, for every homepage', async () => {
     vi.mocked(authenticateRequest).mockResolvedValue({
       user: { role: 'editor' },

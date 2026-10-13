@@ -1,6 +1,7 @@
 import { getPayload } from 'payload'
 
 import config from '@/payload.config'
+import { CURATED_PAGES, CURATED_PAGE_KEYS } from '../main-homepage/pages'
 
 export type ResetAllHomepageContentResult = {
   locationHomepagesCleared: number
@@ -29,14 +30,17 @@ export async function resetAllHomepageContent(): Promise<ResetAllHomepageContent
     })
   }
 
-  // The main homepage keeps its published blocks: emptying them would blank
-  // questurian.com, which has no fallback. Only the editor's draft is cleared.
-  await payload.updateGlobal({
-    slug: 'main-homepage',
-    data: { draftPageBlocks: [] },
-    depth: 0,
-    overrideAccess: true,
-  })
+  // The main homepage and section pages keep their published blocks: emptying
+  // them would blank questurian.com, which has no fallback. Only the editors'
+  // drafts are cleared.
+  for (const page of CURATED_PAGE_KEYS) {
+    await payload.updateGlobal({
+      slug: CURATED_PAGES[page].globalSlug,
+      data: { draftPageBlocks: [] },
+      depth: 0,
+      overrideAccess: true,
+    })
+  }
 
   return {
     locationHomepagesCleared: locationHomepages.docs.length,

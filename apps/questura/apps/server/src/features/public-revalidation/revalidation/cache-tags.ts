@@ -14,6 +14,8 @@ export const publicCacheTags = {
   sitemap: () => 'sitemap',
   countryCities: (country: string) => `country-cities:${tagPart(country)}`,
   mainHomepage: () => 'main-homepage',
+  /** A navbar section page (Eat, Stay, Itineraries); the main homepage keeps its own tag. */
+  sectionPage: (page: string) => `section-page:${tagPart(page)}`,
   locationHomepage: (country: string, city: string, neighborhood?: string) =>
     `location-homepage:${tagPart(country)}:${tagPart(city)}${neighborhood ? `:${tagPart(neighborhood)}` : ''}`,
   article: (scope: ArticleScope, type: ArticleTypeKey, slug: string, lang: string) =>

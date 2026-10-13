@@ -8,6 +8,7 @@ import {
 import {
   getMainHomepage,
   updateMainHomepageBlockContent,
+  curatedPageFromSearchParams,
 } from '@/features/homepage-featured-content'
 import { getErrorMessage } from '@/shared/utils/api-response'
 
@@ -27,7 +28,9 @@ export async function GET(req: NextRequest) {
   try {
     const authResponse = await authenticate(req, headers)
     if (authResponse) return authResponse
-    const result = await getMainHomepage()
+    const page = curatedPageFromSearchParams(new URL(req.url).searchParams)
+    if (!page) return NextResponse.json({ message: 'Unknown page.' }, { status: 400, headers })
+    const result = await getMainHomepage(page)
     return NextResponse.json(result.body, { status: result.status, headers })
   } catch (error) {
     return NextResponse.json(
@@ -42,7 +45,9 @@ export async function PUT(req: NextRequest) {
   try {
     const authResponse = await authenticate(req, headers)
     if (authResponse) return authResponse
-    const result = await updateMainHomepageBlockContent(await req.json().catch(() => null))
+    const page = curatedPageFromSearchParams(new URL(req.url).searchParams)
+    if (!page) return NextResponse.json({ message: 'Unknown page.' }, { status: 400, headers })
+    const result = await updateMainHomepageBlockContent(await req.json().catch(() => null), page)
     return NextResponse.json(result.body, { status: result.status, headers })
   } catch (error) {
     return NextResponse.json(

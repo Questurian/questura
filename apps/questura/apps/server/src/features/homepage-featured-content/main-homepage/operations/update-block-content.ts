@@ -21,9 +21,11 @@ import {
   updateMainHomepageDraft,
 } from '../lib/persistence'
 import type { MainHomepageErrorBody, MainHomepageOperationResult } from '../types'
+import { CURATED_PAGES, type CuratedPageKey } from '../pages'
 
 export async function updateMainHomepageBlockContent(
   body: unknown,
+  page: CuratedPageKey = 'main',
 ): Promise<
   MainHomepageOperationResult<
     Awaited<ReturnType<typeof formatMainHomepage>> | MainHomepageErrorBody
@@ -35,14 +37,14 @@ export async function updateMainHomepageBlockContent(
   }
 
   const payload = await getMainHomepagePayload()
-  const doc = await loadMainHomepage(payload)
+  const doc = await loadMainHomepage(payload, page)
   const blocks = getDraftPageBlocks(doc)
   const blockIndex = blocks.findIndex((block) => block.id === parsed.input.blockId)
 
   if (blockIndex === -1) {
     return {
       status: 404,
-      body: { message: `Block ${parsed.input.blockId} not found in main homepage.` },
+      body: { message: `Block ${parsed.input.blockId} not found in ${CURATED_PAGES[page].label}.` },
     }
   }
 
@@ -101,6 +103,6 @@ export async function updateMainHomepageBlockContent(
     updatedBlocks[blockIndex] = blockWithFieldUpdates
   }
 
-  const updated = await updateMainHomepageDraft(payload, updatedBlocks)
+  const updated = await updateMainHomepageDraft(payload, updatedBlocks, page)
   return { status: 200, body: await formatMainHomepage(payload, updated) }
 }

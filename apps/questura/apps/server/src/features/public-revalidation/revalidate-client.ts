@@ -8,4 +8,5 @@ export {
   revalidateLocationHomepageAfterChange,
   revalidateLocationHomepageAfterDelete,
   revalidateMainHomepageAfterChange,
+  revalidateSectionPageAfterChange,
 } from './revalidation/hooks'

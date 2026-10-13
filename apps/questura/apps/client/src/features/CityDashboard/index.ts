@@ -4,6 +4,7 @@ export { CityHomepagePayloadDebugLogger } from './components/CityHomepagePayload
 export {
   fetchCityHomepage,
   fetchMainHomepage,
+  fetchSectionPage,
   fetchNeighborhoodHomepage,
 } from './lib/fetchCityHomepage'
 export { curatedHomepage } from './lib/curatedHomepage'

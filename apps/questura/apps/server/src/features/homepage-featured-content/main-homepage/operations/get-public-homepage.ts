@@ -11,6 +11,7 @@ import {
   getPublishedPageBlocks,
   loadMainHomepage,
 } from '../lib/persistence'
+import type { CuratedPageKey } from '../pages'
 
 /**
  * The published main homepage, shaped exactly like a public city homepage so
@@ -23,8 +24,9 @@ import {
 export async function getPublicMainHomepage(
   payload: PayloadInstance,
   budget: PageReadBudgetOptions = {},
+  page: CuratedPageKey = 'main',
 ): Promise<{ status: number; body: unknown; stats: PageReadStats }> {
-  const doc = await loadMainHomepage(payload)
+  const doc = await loadMainHomepage(payload, page)
   const { blocks, stats } = await resolvePageBlocksWithReadStats(
     payload,
     getPublishedPageBlocks(doc),

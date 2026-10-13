@@ -71,3 +71,17 @@ export async function fetchMainHomepage(): Promise<CityHomepageResponse | null> 
     }
   }, logFallback('main homepage'))
 }
+
+export type SectionPageKey = 'eat' | 'stay' | 'itineraries'
+
+/** The published blocks of a navbar section page (/eat, /stay, /itineraries), same shape as a city's. */
+export async function fetchSectionPage(page: SectionPageKey): Promise<CityHomepageResponse | null> {
+  const url = `${config.backendUrl}/api/public/section-pages/${page}`
+  return lastGoodHomepages.read(url, async () => {
+    const res = await fetch(url, publicFetchOptions([publicCacheTags.sectionPage(page)]))
+    return {
+      value: await readPublicResponse<CityHomepageResponse>(res, `${page} page`),
+      validatedAt: validatedAtFrom(res),
+    }
+  }, logFallback(`${page} page`))
+}

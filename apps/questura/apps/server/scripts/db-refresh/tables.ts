@@ -58,8 +58,10 @@ export const CONTENT_TABLES = [
   'dining',
   'dining_gallery',
   'dining_instagram_gallery',
+  'eat_page',
   'instagram_posts',
   'ita',
+  'itineraries_page',
   'key_locations',
   'key_locations_gallery',
   'key_locations_instagram_gallery',
@@ -117,6 +119,7 @@ export const CONTENT_TABLES = [
   'single_type_listicles_blocks_data_dining',
   'single_type_listicles_blocks_data_nightlife',
   'single_type_listicles_rels',
+  'stay_page',
   'tours',
 ] as const
 
