@@ -38,8 +38,8 @@ export async function sectionPageMetadataFor(page: SectionPageKey): Promise<Meta
  * components. Until a page is published it is the masthead alone.
  *
  * The masthead sits on the block grid (BlockSection), so the <h1> lines up
- * with the first block's left edge. It opens on a double rule like a
- * newspaper section front; the first block's own hairline closes it.
+ * with the first block's left edge. It draws no rule of its own: the first
+ * block's hairline is the only line under it.
  */
 export async function SectionPage({ copy, page }: { copy: SectionPageCopy; page?: SectionPageKey }) {
   const data = page ? curatedHomepage(await fetchSectionPage(page)) : null
@@ -48,8 +48,8 @@ export async function SectionPage({ copy, page }: { copy: SectionPageCopy; page?
   return (
     <section aria-labelledby="section-page-title" className="min-h-[70vh] bg-background text-foreground">
       <JsonLd data={buildSectionPageJsonLd(copy, blocks, getPublicBaseUrl())} />
-      <BlockSection contentClassName="pt-6 768:pt-10">
-        <header className="grid gap-4 border-t-[3px] border-double border-foreground pb-8 pt-5 768:pb-10 768:pt-6 1024:grid-cols-[minmax(0,1fr)_minmax(0,26rem)] 1024:items-end 1024:gap-12 1280:grid-cols-[minmax(0,1fr)_minmax(0,30rem)]">
+      <BlockSection contentClassName="pt-10 768:pt-14 1024:pt-16">
+        <header className="grid gap-4 pb-8 768:pb-10 1024:grid-cols-[minmax(0,1fr)_minmax(0,26rem)] 1024:items-end 1024:gap-12 1280:grid-cols-[minmax(0,1fr)_minmax(0,30rem)]">
           <div>
             {copy.kicker ? <p className={`mb-3 768:mb-4 ${BLOCK_TYPE.kicker}`}>{copy.kicker}</p> : null}
             <h1
