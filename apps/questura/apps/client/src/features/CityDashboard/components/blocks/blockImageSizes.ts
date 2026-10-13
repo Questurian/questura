@@ -55,6 +55,13 @@ export const BLOCK_IMAGE_SIZES = {
   /** A maps carousel card: `w-[68vw] 380:w-[220px] 480:w-[245px]`. */
   mapCard: '(min-width: 480px) 245px, (min-width: 380px) 220px, 68vw',
 
+  /**
+   * A Questurian Maps card: three across from 1024, two across from 768. On a
+   * phone the lead card is the whole column and the rest are 104px rows.
+   */
+  mapsGridLead: '(min-width: 1024px) 450px, (min-width: 768px) 50vw, 100vw',
+  mapsGridRow: '(min-width: 1024px) 450px, (min-width: 768px) 50vw, 104px',
+
   /** The author portrait, 78% of its column. Measured at 386px. */
   portrait: '(min-width: 1024px) 400px, (min-width: 768px) 280px, 58vw',
 

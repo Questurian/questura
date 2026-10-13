@@ -1,13 +1,10 @@
-import type { Metadata } from 'next'
+import { SectionPage, sectionPageMetadataFor } from '@/features/sections/SectionPage'
+import { SECTION_PAGES } from '@/features/sections/lib/sectionPages'
 
-import { SectionPage } from '@/features/sections/SectionPage'
-
-export const metadata: Metadata = {
-  title: 'Stay — Questurian',
-  description: 'Where to stay, from Questurian.',
-  alternates: { canonical: '/stay' },
+export function generateMetadata() {
+  return sectionPageMetadataFor('stay')
 }
 
 export default function StayPage() {
-  return <SectionPage title="Stay" page="stay" />
+  return <SectionPage copy={SECTION_PAGES.stay} page="stay" />
 }

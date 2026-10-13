@@ -1,21 +1,21 @@
 import Link from '@/components/navigation/PublicLink'
 import type { JSX } from 'react'
 
+import { AuthorLink } from '@/features/authors/components/AuthorLink'
+import { cityLabelFromArticlePath } from '../../../lib/articlePathCity'
 import type {
   CityHomepageArticleBlock,
   FeaturedArticleTeaser,
   HomepageBlockLayoutProps,
 } from '../../../types'
 import { BlockSection } from '../BlockSection'
+import { BLOCK_IMAGE_SIZES } from '../blockImageSizes'
+import { BLOCK_TYPE } from '../blockType'
+import { EAGER_IMAGE, LAZY_IMAGE, isPriorityImage } from '../heroImagePriority'
 import { NavigableImageTarget } from '../NavigableImageTarget'
-import { PublicImage } from '@/components/media/PublicImage'
-import { isPriorityImage } from '../heroImagePriority'
+import { PhoneSquareImage } from '../PhoneSquareImage'
 
-/** 90px at phone width, 105px from 1024 up. */
-const THUMBNAIL_SIZES = '(min-width: 1024px) 105px, 90px'
-
-/** The navbar section-link face (EAT, STAY, …); every line of this block uses it. */
-const NAV_FONT = 'font-[family-name:var(--font-dm-sans)]'
+const DEFAULT_TITLE = 'Questurian Maps'
 
 function PinIcon({ className }: { className?: string }): JSX.Element {
   return (
@@ -28,46 +28,69 @@ function PinIcon({ className }: { className?: string }): JSX.Element {
   )
 }
 
-function MapRow({
+/**
+ * One map. From 768 every card is the same: wide photo, city, title, dek,
+ * byline. On a phone the first card keeps that shape (square photo, per the
+ * phone square rule) and the rest fold into rows with a 104px thumbnail, so
+ * six maps don't cost six screens.
+ */
+function MapCard({
   item,
+  isLead,
   isPriority,
 }: {
   item: FeaturedArticleTeaser
+  isLead: boolean
   isPriority: boolean
 }): JSX.Element {
-  const imgSrc = item.imageUrlSquare ?? item.imageUrl
-  const authorName = item.author?.name?.trim() || null
+  const href = item.articlePath ?? null
+  const kicker = cityLabelFromArticlePath(href) ?? item.articleType ?? DEFAULT_TITLE
+  const hasImage = Boolean(item.imageUrl ?? item.imageUrlSquare)
 
   return (
-    <article className="flex min-w-0 items-center gap-4 1024:gap-5">
-      <div className="relative size-[90px] shrink-0 overflow-hidden rounded-[2px] bg-paper 1024:size-[105px]">
-        {imgSrc ? (
-          <PublicImage
-            src={imgSrc}
-            alt={item.imageSquare?.alt ?? item.image?.alt ?? ''}
-            className="h-full w-full object-cover"
-            fetchPriority={isPriority ? 'high' : 'auto'}
-            loading={isPriority ? 'eager' : 'lazy'}
-            sizes={THUMBNAIL_SIZES}
+    <article className={`group ${isLead ? 'flex flex-col' : 'flex items-start gap-4 768:flex-col 768:gap-0'}`}>
+      <div
+        className={`relative shrink-0 overflow-hidden bg-background-warm ${
+          isLead ? 'aspect-square w-full' : 'size-[104px]'
+        } 768:aspect-[3/2] 768:h-auto 768:w-full`}
+      >
+        {hasImage ? (
+          <PhoneSquareImage
+            article={item}
+            className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
+            priority={isPriority ? EAGER_IMAGE : LAZY_IMAGE}
+            sizes={isLead ? BLOCK_IMAGE_SIZES.mapsGridLead : BLOCK_IMAGE_SIZES.mapsGridRow}
           />
         ) : null}
-        <NavigableImageTarget href={item.articlePath} label={`Open ${item.title}`} />
+        <NavigableImageTarget href={href} label={`Open ${item.title}`} />
       </div>
-      <div className="min-w-0">
-        <h3 className={`${NAV_FONT} text-[1.02rem] leading-[1.3] text-foreground 1024:text-[1.12rem]`}>
-          {item.articlePath ? (
-            <Link
-              href={item.articlePath}
-              className="outline-none hover:underline focus-visible:ring-2 focus-visible:ring-accent"
-            >
-              {item.title}
-            </Link>
-          ) : (
-            item.title
-          )}
+
+      <div className={`min-w-0 ${isLead ? 'pt-4' : 'flex-1 768:pt-4'}`}>
+        <p className={BLOCK_TYPE.kicker}>{kicker}</p>
+        <h3 className={`mt-2 ${BLOCK_TYPE.titleM}`}>
+          {href ? <Link href={href}>{item.title}</Link> : item.title}
         </h3>
-        {authorName ? (
-          <p className={`${NAV_FONT} mt-1 text-[0.78rem] text-foreground/55`}>By {authorName}</p>
+        {item.excerpt ? (
+          <p
+            data-article-dek
+            className={`mt-2 overflow-hidden [-webkit-box-orient:vertical] [-webkit-line-clamp:2] ${
+              isLead ? '[display:-webkit-box]' : 'hidden 768:[display:-webkit-box]'
+            } ${BLOCK_TYPE.dek}`}
+          >
+            {href ? <Link href={href}>{item.excerpt}</Link> : item.excerpt}
+          </p>
+        ) : null}
+        {item.author?.name ? (
+          <p className={`mt-3 ${BLOCK_TYPE.byline}`}>
+            By{' '}
+            <AuthorLink
+              authorSlug={item.author.slug}
+              authorId={item.author.id}
+              className="hover:underline"
+            >
+              {item.author.name}
+            </AuthorLink>
+          </p>
         ) : null}
       </div>
     </article>
@@ -75,9 +98,9 @@ function MapRow({
 }
 
 /**
- * Questurian Maps as a compact list on white: a pin-and-title header in the
- * site blue, then six small thumbnail rows, three across on desktop,
- * separated by hairline rules.
+ * Questurian Maps as a section of a food-and-travel front: a heading on a
+ * rule, then the maps as photo cards, three across on desktop and two on a
+ * tablet, on the warm paper band.
  */
 export function QuesturianMapsDarkPreview({
   block,
@@ -86,47 +109,49 @@ export function QuesturianMapsDarkPreview({
   const items = block.items ?? []
   if (items.length === 0) return null
 
-  const title = block.sectionHeading?.trim() || 'Questurian Maps'
-  const rows: FeaturedArticleTeaser[][] = []
-  for (let index = 0; index < items.length; index += 3) {
-    rows.push(items.slice(index, index + 3))
-  }
+  const heading = block.sectionHeading?.trim() || null
+  const title = heading ?? DEFAULT_TITLE
+  const subheading = block.sectionSubheading?.trim() || null
 
   return (
-    <BlockSection className="bg-white py-10 768:py-12" aria-label={title}>
-      <h2
-        className={`${NAV_FONT} flex items-center justify-center gap-2.5 whitespace-nowrap text-[1.45rem] font-bold uppercase leading-none tracking-[0.08em] text-accent 480:text-[1.9rem] 768:text-[2.3rem]`}
-      >
-        <PinIcon className="size-6 shrink-0 480:size-8 768:size-9" />
-        {title}
-      </h2>
-
-      <div className="mt-8 768:mt-10">
-        {rows.map((row, rowIndex) => (
-          <div
-            key={rowIndex}
-            className={`grid 768:grid-cols-3 ${
-              rowIndex > 0 ? 'mt-6 border-t border-foreground/12 pt-6 768:mt-7 768:pt-7' : ''
-            }`}
-          >
-            {row.map((item, columnIndex) => {
-              const index = rowIndex * 3 + columnIndex
-              return (
-                <div
-                  key={`${item.articlePath ?? item.title}-${index}`}
-                  className={`min-w-0 ${
-                    columnIndex > 0
-                      ? 'mt-6 border-t border-foreground/12 pt-6 768:mt-0 768:border-l 768:border-t-0 768:pl-6 768:pt-0 1024:pl-8'
-                      : ''
-                  } ${columnIndex < 2 ? '768:pr-6 1024:pr-8' : ''}`}
-                >
-                  <MapRow item={item} isPriority={isPriorityImage(blockIndex, index)} />
-                </div>
-              )
-            })}
-          </div>
-        ))}
+    <BlockSection
+      className="border-y border-foreground/10 bg-paper py-12 768:py-16"
+      aria-label={title}
+    >
+      <div className="border-b border-foreground/20 pb-4 768:pb-5">
+        {/* A custom heading keeps the series name above it; the default
+            heading is the series name, so it carries the pin itself. */}
+        {heading ? (
+          <p className={`mb-2.5 flex items-center gap-1.5 ${BLOCK_TYPE.kicker}`}>
+            <PinIcon className="size-3.5 shrink-0" />
+            {DEFAULT_TITLE}
+          </p>
+        ) : null}
+        <h2 className={`flex items-center gap-2.5 ${BLOCK_TYPE.sectionHeading}`}>
+          {heading ? null : <PinIcon className="size-[0.8em] shrink-0 text-accent" />}
+          {title}
+        </h2>
+        {subheading ? <p className={BLOCK_TYPE.sectionSubheading}>{subheading}</p> : null}
       </div>
+
+      <ul className="mt-6 grid 768:mt-8 768:grid-cols-2 768:gap-x-8 768:gap-y-10 1024:grid-cols-3 1024:gap-x-10 1024:gap-y-12">
+        {items.map((item, index) => (
+          <li
+            key={`${item.articlePath ?? item.title}-${index}`}
+            className={
+              index === 0
+                ? 'pb-5 768:pb-0'
+                : 'border-t border-foreground/12 py-5 last:pb-0 768:border-t-0 768:py-0'
+            }
+          >
+            <MapCard
+              item={item}
+              isLead={index === 0}
+              isPriority={isPriorityImage(blockIndex, index)}
+            />
+          </li>
+        ))}
+      </ul>
     </BlockSection>
   )
 }

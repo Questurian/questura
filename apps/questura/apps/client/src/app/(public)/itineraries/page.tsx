@@ -1,13 +1,10 @@
-import type { Metadata } from 'next'
+import { SectionPage, sectionPageMetadataFor } from '@/features/sections/SectionPage'
+import { SECTION_PAGES } from '@/features/sections/lib/sectionPages'
 
-import { SectionPage } from '@/features/sections/SectionPage'
-
-export const metadata: Metadata = {
-  title: 'Itineraries — Questurian',
-  description: 'Day-by-day itineraries from Questurian.',
-  alternates: { canonical: '/itineraries' },
+export function generateMetadata() {
+  return sectionPageMetadataFor('itineraries')
 }
 
 export default function ItinerariesPage() {
-  return <SectionPage title="Itineraries" page="itineraries" />
+  return <SectionPage copy={SECTION_PAGES.itineraries} page="itineraries" />
 }
