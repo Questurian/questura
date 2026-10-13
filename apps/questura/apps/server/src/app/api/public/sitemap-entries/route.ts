@@ -4,8 +4,10 @@ import { getPayload } from 'payload'
 import config from '@/payload.config'
 import { publicRead } from '@/shared/http/public-read'
 import { DEFAULT_LANG } from '@/shared/i18n/languageField'
-import { authorsWithPublishedContent, readAllPages } from '@/features/articles/public/sitemap-reads'
+import { authorsWithPublishedContent, locationKeysWithContent, readAllPages } from '@/features/articles/public/sitemap-reads'
 import type { ArticleTypeKey } from '@/features/articles/public/scope'
+import { getPublishedPageBlocks } from '@/features/homepage-featured-content/location-homepages/lib/persistence'
+import type { LocationHomepageDoc } from '@/features/homepage-featured-content/resolve-page-blocks/types/resolve-page-blocks.types'
 
 export const dynamic = 'force-dynamic'
 
@@ -15,6 +17,10 @@ type SitemapEntry = {
   url: string
   lastModified: string | null
 }
+
+// A hub whose page shows only "coming soon". It stays in the list because the
+// client build pre-renders every hub; sitemap.xml leaves it out.
+type HubEntry = SitemapEntry & { comingSoon?: true }
 
 function parseScopeFromLocationKey(
   locationKey: string,
@@ -50,9 +56,9 @@ export async function GET(req: Request) {
       const find = payload.find.bind(payload) as unknown as Parameters<typeof readAllPages>[0]
       const published = { and: [{ status: { equals: 'published' } }, { language: { equals: lang } }] }
       const contentSelect = { slug: true, location: true, canonicalPath: true, updatedAt: true }
-      const locationSelect = { country: true, city: true, updatedAt: true }
+      const locationSelect = { country: true, city: true, locationKey: true, updatedAt: true }
 
-      const [countries, cities, articles, maps, itineraries, authors] = await Promise.all([
+      const [countries, cities, articles, maps, itineraries, authors, homepages] = await Promise.all([
         readAllPages(find, { collection: 'locations', where: { level: { equals: 'country' } }, select: locationSelect }),
         readAllPages(find, { collection: 'locations', where: { level: { equals: 'city' } }, select: locationSelect }),
         readAllPages(find, { collection: 'articles', where: published, select: contentSelect }),
@@ -63,9 +69,32 @@ export async function GET(req: Request) {
           where: { slug: { exists: true } },
           select: { slug: true, updatedAt: true },
         }),
+        readAllPages(find, {
+          collection: 'location-homepages',
+          where: { isEnabled: { equals: true } },
+          select: { location: true, publishedPageBlocks: true, pageBlocks: true },
+        }),
       ])
 
-      const hubEntries: SitemapEntry[] = []
+      const locationKeyById = new Map<string, string>()
+      for (const raw of [...countries, ...cities]) {
+        const location = raw as unknown as Record<string, unknown>
+        if (typeof location.locationKey === 'string') locationKeyById.set(String(location.id), location.locationKey)
+      }
+      const withContent = locationKeysWithContent(
+        [articles, maps, itineraries].flatMap((docs) =>
+          docs.map((doc) => (doc as unknown as Record<string, unknown>).location).filter((key): key is string => typeof key === 'string'),
+        ),
+        // An enabled homepage with no blocks renders the "coming soon" fallback
+        // (/mexico/mexico-city, 2026-10-13), so it does not count.
+        homepages.flatMap((doc) => {
+          if (getPublishedPageBlocks(doc as unknown as LocationHomepageDoc).length === 0) return []
+          const key = locationKeyById.get(String((doc as unknown as Record<string, unknown>).location))
+          return key ? [key] : []
+        }),
+      )
+
+      const hubEntries: HubEntry[] = []
 
       for (const rawCountry of countries) {
         const country = rawCountry as unknown as Record<string, unknown>
@@ -74,6 +103,7 @@ export async function GET(req: Request) {
         hubEntries.push({
           url: `/${slug}`,
           lastModified: typeof country.updatedAt === 'string' ? country.updatedAt : null,
+          ...(withContent.has(slug.toLowerCase()) ? {} : { comingSoon: true as const }),
         })
       }
 
@@ -85,6 +115,7 @@ export async function GET(req: Request) {
         hubEntries.push({
           url: `/${countrySlug}/${citySlug}`,
           lastModified: typeof city.updatedAt === 'string' ? city.updatedAt : null,
+          ...(withContent.has(`${countrySlug}|${citySlug}`.toLowerCase()) ? {} : { comingSoon: true as const }),
         })
       }
 

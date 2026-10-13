@@ -13,7 +13,8 @@ type SitemapEntry = {
 
 type SitemapEntriesResponse = {
   lang: string
-  hubs: SitemapEntry[]
+  // `comingSoon`: the page shows only "coming soon"; kept out of the sitemap.
+  hubs: Array<SitemapEntry & { comingSoon?: boolean }>
   indexes: SitemapEntry[]
   content: SitemapEntry[]
 }
@@ -49,7 +50,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   return [
     home,
-    ...data.hubs.map((entry) => toEntry(entry, SITEMAP_PRIORITY.hub)),
+    ...data.hubs.filter((entry) => !entry.comingSoon).map((entry) => toEntry(entry, SITEMAP_PRIORITY.hub)),
     ...data.indexes.map((entry) => toEntry(entry, SITEMAP_PRIORITY.index)),
     ...data.content.map((entry) => toEntry(entry, SITEMAP_PRIORITY.content)),
   ]

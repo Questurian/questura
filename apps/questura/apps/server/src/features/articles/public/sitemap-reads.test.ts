@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 
 import { TYPE_TO_COLLECTION } from './scope'
-import { AUTHOR_TABLES, authorsWithPublishedContent, readAllPages } from './sitemap-reads'
+import { AUTHOR_TABLES, authorsWithPublishedContent, locationKeysWithContent, readAllPages } from './sitemap-reads'
 
 function pagedFind(total: number) {
   return vi.fn(async (args: Record<string, unknown>) => {
@@ -54,5 +54,26 @@ describe('authorsWithPublishedContent', () => {
     for (const [type, collection] of Object.entries(TYPE_TO_COLLECTION)) {
       expect(AUTHOR_TABLES[type as keyof typeof AUTHOR_TABLES]).toBe(collection.replaceAll('-', '_'))
     }
+  })
+})
+
+describe('locationKeysWithContent', () => {
+  it('counts a location and every ancestor of a published item', () => {
+    const keys = locationKeysWithContent(['peru|lima|miraflores'])
+    expect([...keys].sort()).toEqual(['peru', 'peru|lima', 'peru|lima|miraflores'])
+  })
+
+  it('counts a city with an enabled homepage, and its country', () => {
+    const keys = locationKeysWithContent([], ['colombia|medellin'])
+    expect(keys.has('colombia|medellin')).toBe(true)
+    expect(keys.has('colombia')).toBe(true)
+  })
+
+  // /brazil/sao-paulo rendered "coming soon" and was still in sitemap.xml.
+  it('leaves out locations with nothing under them', () => {
+    const keys = locationKeysWithContent(['peru|lima', ''])
+    expect(keys.has('brazil')).toBe(false)
+    expect(keys.has('brazil|sao-paulo')).toBe(false)
+    expect(keys.has('')).toBe(false)
   })
 })

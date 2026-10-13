@@ -75,3 +75,22 @@ export async function authorsWithPublishedContent(
   const result = await pool.query(sql)
   return new Set(result.rows.map((row) => String(row.author_id)))
 }
+
+/**
+ * Location keys ("peru", "peru|lima") whose public page shows something other
+ * than "coming soon": a published item at or under the location (the same
+ * key-or-descendant rule as the location feed), or a city with an enabled
+ * homepage that has blocks (the caller filters those). A country counts once any city in it does. The sitemap leaves the
+ * rest out until they have content.
+ */
+export function locationKeysWithContent(
+  contentLocationKeys: Iterable<string>,
+  homepageLocationKeys: Iterable<string> = [],
+): Set<string> {
+  const keys = new Set<string>()
+  for (const raw of [...contentLocationKeys, ...homepageLocationKeys]) {
+    const parts = raw.toLowerCase().split('|').filter(Boolean)
+    for (let i = 1; i <= parts.length; i++) keys.add(parts.slice(0, i).join('|'))
+  }
+  return keys
+}

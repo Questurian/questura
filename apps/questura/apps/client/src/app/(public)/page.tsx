@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import { SuspenseBoundary } from '@/components/shared/SuspenseBoundary'
 import { SignInPromptFromLink } from '@/features/Auth/components/SignInPromptFromLink'
 import {
@@ -5,6 +6,14 @@ import {
   curatedHomepage,
   fetchMainHomepage,
 } from '@/features/CityDashboard'
+
+// Only the homepage's. The root layout's shorter one stays for the pages that
+// inherit it; this one was short enough that Google padded the snippet with
+// navbar text.
+export const metadata: Metadata = {
+  description:
+    'Curated city guides, travel maps and itineraries: where to eat, drink, stay and explore in Lima and across Latin America, with new cities on the way.',
+}
 
 /**
  * The homepage. It used to redirect every visitor to /peru/lima (and the
