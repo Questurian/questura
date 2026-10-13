@@ -5,6 +5,7 @@ export type {
   EmailVerificationLinkParams,
   GoogleAccountLinkedEmailData,
   MembershipConfirmationEmailData,
+  NewsletterConfirmationEmailData,
   PasswordChangedEmailData,
   PasswordResetLinkEmailData,
   SubscriptionCancelledEmailData,

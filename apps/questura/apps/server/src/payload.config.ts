@@ -35,6 +35,7 @@ import { ArticleRedirects } from './features/articles/redirects/collections'
 import { CuratedPageGlobals, LocationHomepages } from './features/homepage-featured-content'
 import { VisitorProfiles } from './features/visitor-auth'
 import { Bookmarks } from './features/bookmarks'
+import { NewsletterSubscribers } from './features/newsletter'
 import { StripeWebhookEvents } from './features/payments/collections/StripeWebhookEvents'
 import { APP_CONFIG, APP_URLS } from './shared/config'
 import { RefreshJobs } from './features/refresh-outbox/collection'
@@ -60,7 +61,7 @@ export default buildConfig({
   serverURL: APP_URLS.backendLocal,
   cors: APP_CONFIG.CORS_ORIGINS,
   csrf: APP_CONFIG.CORS_ORIGINS,
-  collections: [Users, ServiceAccounts, Authors, EmailLogs, VisitorProfiles, Bookmarks, MediaAsset, MediaSet, Articles, SingleTypeListicles, ListicleItineraries, ArticleRedirects, Locations, Categories, Tags, Accommodations, Dining, Attractions, Tours, Airbnbs, Nightlife, KeyLocations, AffiliateProducts, InstagramPosts, PerfectForTags, Currencies, LocationHomepages, StripeWebhookEvents, RefreshJobs],
+  collections: [Users, ServiceAccounts, Authors, EmailLogs, VisitorProfiles, Bookmarks, NewsletterSubscribers, MediaAsset, MediaSet, Articles, SingleTypeListicles, ListicleItineraries, ArticleRedirects, Locations, Categories, Tags, Accommodations, Dining, Attractions, Tours, Airbnbs, Nightlife, KeyLocations, AffiliateProducts, InstagramPosts, PerfectForTags, Currencies, LocationHomepages, StripeWebhookEvents, RefreshJobs],
   globals: CuratedPageGlobals,
   // Payload answers its own errors, so a 500 from its REST or GraphQL
   // handlers would otherwise reach the logs and never Sentry.

@@ -65,6 +65,7 @@ type Case = {
 }
 
 const resetUrl = `${API}/api/visitor-auth/reset-password/tok123?callbackURL=${encodeURIComponent(`${SITE}/auth/reset-password`)}`
+const newsletterConfirmUrl = `${SITE}/newsletters/confirm?token=tok789`
 const verifyUrl = `${API}/api/visitor-auth/verify-email?token=tok456&callbackURL=${encodeURIComponent('/')}`
 
 const CASES: Case[] = [
@@ -141,6 +142,15 @@ const CASES: Case[] = [
     to: 'reader@example.com',
     subject: /subscription is active/i,
     contains: ['January 31, 2030'],
+  },
+  {
+    name: 'sendNewsletterConfirmationEmail',
+    // Not `member`: a newsletter signup carries no name, so the hostile-name
+    // check below has nothing to render.
+    send: (e) => e.sendNewsletterConfirmationEmail(payload, { email: 'subscriber@example.com', url: newsletterConfirmUrl }),
+    to: 'subscriber@example.com',
+    subject: /confirm your questurian newsletter/i,
+    contains: [newsletterConfirmUrl],
   },
 ]
 
