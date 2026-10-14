@@ -85,6 +85,10 @@ A manually authored homepage feature containing a Feature kicker, title, descrip
 
 The short custom label above an Editorial feature panel title, such as “Featured Destination.” It is distinct from an Article category.
 
+### Feature flag / Feature theme
+
+Two optional Editorial feature panel settings. The **Feature flag** is one of a fixed set of country codes (`EDITORIAL_FEATURE_FLAGS`: Peru, Colombia, Mexico) shown above the Feature kicker; the client serves each as `/flags/<code>.svg`. The **Feature theme** is `light` (page ground) or `dark` (the panel inverted onto an ink band). The studio editor mirrors both lists; adding a flag touches both repos.
+
 ### Editorial Feature
 
 A page block combining one Editorial feature panel with a Related article rail. It may frame any editorial theme or destination and may optionally link its panel to a selected Location with a public Location Homepage.

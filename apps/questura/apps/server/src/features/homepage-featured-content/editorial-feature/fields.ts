@@ -1,7 +1,12 @@
 import {
   EDITORIAL_FEATURE_DESCRIPTION_MAX,
+  EDITORIAL_FEATURE_FLAGS,
   EDITORIAL_FEATURE_KICKER_MAX,
+  EDITORIAL_FEATURE_THEMES,
   EDITORIAL_FEATURE_TITLE_MAX,
+  editorialFeatureFlag,
+  type EditorialFeatureFlag,
+  type EditorialFeatureTheme,
 } from './constants'
 
 export type ParsedEditorialFeatureField<T> =
@@ -43,6 +48,31 @@ function parseRelationshipField(
   return { ok: true, omit: false, value }
 }
 
+function parseFlagField(
+  body: Record<string, unknown>,
+): ParsedEditorialFeatureField<EditorialFeatureFlag | null> {
+  if (!Object.prototype.hasOwnProperty.call(body, 'featureFlag')) return { ok: true, omit: true }
+  const raw = body.featureFlag
+  if (raw === null || raw === '') return { ok: true, omit: false, value: null }
+  const value = editorialFeatureFlag(raw)
+  if (!value) {
+    const allowed = EDITORIAL_FEATURE_FLAGS.map((flag) => flag.value).join(', ')
+    return { ok: false, message: `featureFlag must be one of ${allowed}, or null.` }
+  }
+  return { ok: true, omit: false, value }
+}
+
+function parseThemeField(
+  body: Record<string, unknown>,
+): ParsedEditorialFeatureField<EditorialFeatureTheme> {
+  if (!Object.prototype.hasOwnProperty.call(body, 'featureTheme')) return { ok: true, omit: true }
+  const raw = body.featureTheme
+  if (!EDITORIAL_FEATURE_THEMES.includes(raw as EditorialFeatureTheme)) {
+    return { ok: false, message: `featureTheme must be one of ${EDITORIAL_FEATURE_THEMES.join(', ')}.` }
+  }
+  return { ok: true, omit: false, value: raw as EditorialFeatureTheme }
+}
+
 export function parseEditorialFeatureFields(body: Record<string, unknown>) {
   return {
     featureKicker: parseTextField(body, 'featureKicker', EDITORIAL_FEATURE_KICKER_MAX),
@@ -55,6 +85,8 @@ export function parseEditorialFeatureFields(body: Record<string, unknown>) {
     ),
     featureMediaSet: parseRelationshipField(body, 'featureMediaSet'),
     linkedLocation: parseRelationshipField(body, 'linkedLocation'),
+    featureFlag: parseFlagField(body),
+    featureTheme: parseThemeField(body),
   }
 }
 

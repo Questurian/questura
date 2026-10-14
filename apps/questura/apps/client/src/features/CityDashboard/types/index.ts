@@ -112,6 +112,10 @@ export type EditorialFeatureBlock = {
   featureDescription: string | null;
   featureImagePortrait: EditorialFeatureImage | null;
   featureImageWide: EditorialFeatureImage | null;
+  /** ISO country code of the flag above the kicker; null shows none. */
+  featureFlag?: "PE" | "CO" | "MX" | null;
+  /** `dark` inverts the panel onto an ink band. Absent from older payloads. */
+  featureTheme?: "light" | "dark";
   linkedLocation: {
     id: number | null;
     label: string | null;

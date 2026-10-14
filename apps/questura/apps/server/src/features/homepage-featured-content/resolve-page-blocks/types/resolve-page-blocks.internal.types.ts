@@ -16,6 +16,8 @@ export type ApiCuratedBlock = {
   featureDescription?: unknown
   featureMediaSet?: unknown
   linkedLocation?: unknown
+  featureFlag?: unknown
+  featureTheme?: unknown
   imageStyle?: unknown
   motionStyle?: unknown
   descriptionMode?: unknown

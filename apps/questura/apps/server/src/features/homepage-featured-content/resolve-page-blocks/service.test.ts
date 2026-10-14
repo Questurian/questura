@@ -415,6 +415,21 @@ describe('formatPublicLocationHomepageDoc', () => {
     })
   })
 
+  it('sends the editorial feature flag and theme, defaulting to no flag on light', () => {
+    const selection = { totalSlots: 2, isComplete: true, items: [] }
+    const response = formatPublicLocationHomepageDoc([
+      { blockType: 'editorial-feature', featureFlag: 'PE', featureTheme: 'dark', selection },
+      { blockType: 'editorial-feature', selection },
+      { blockType: 'editorial-feature', featureFlag: 'BR', featureTheme: 'neon', selection },
+    ] as never)
+
+    expect(response.pageBlocks).toMatchObject([
+      { featureFlag: 'PE', featureTheme: 'dark' },
+      { featureFlag: null, featureTheme: 'light' },
+      { featureFlag: null, featureTheme: 'light' },
+    ])
+  })
+
   it('builds main-homepage listicle links from each item location', () => {
     const response = formatPublicLocationHomepageDoc([
       {

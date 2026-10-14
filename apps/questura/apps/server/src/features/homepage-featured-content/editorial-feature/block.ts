@@ -2,8 +2,11 @@ import type { Block } from 'payload'
 
 import { HOMEPAGE_FEATURED_CONTENT_COLLECTIONS } from '../types'
 import {
+  DEFAULT_EDITORIAL_FEATURE_THEME,
   EDITORIAL_FEATURE_DESCRIPTION_MAX,
+  EDITORIAL_FEATURE_FLAGS,
   EDITORIAL_FEATURE_KICKER_MAX,
+  EDITORIAL_FEATURE_THEMES,
   EDITORIAL_FEATURE_SLOT_COUNTS,
   EDITORIAL_FEATURE_TITLE_MAX,
 } from './constants'
@@ -56,6 +59,19 @@ export const EditorialFeatureBlock: Block = {
       type: 'relationship',
       relationTo: 'locations',
       admin: { description: 'Optional enabled, published Location Homepage destination.' },
+    },
+    {
+      name: 'featureFlag',
+      type: 'select',
+      options: EDITORIAL_FEATURE_FLAGS.map(({ value, label }) => ({ value, label })),
+      admin: { description: 'Optional country flag shown above the kicker.' },
+    },
+    {
+      name: 'featureTheme',
+      type: 'select',
+      defaultValue: DEFAULT_EDITORIAL_FEATURE_THEME,
+      options: EDITORIAL_FEATURE_THEMES.map((value) => ({ value, label: value })),
+      admin: { description: 'light: page ground. dark: inverted ink band.' },
     },
     {
       name: 'items',

@@ -1,6 +1,7 @@
 import type { PayloadInstance } from '@/types'
 import { resolveMediaSetForPlacement } from '@/features/media/lib/resolve-public-image'
 import { isNotFoundError } from '@/shared/lib/not-found-error'
+import { editorialFeatureFlag, editorialFeatureTheme } from './constants'
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null
@@ -128,5 +129,7 @@ export async function resolveEditorialFeatureFields(
     linkedLocationId,
     linkedLocation,
     linkWarning,
+    featureFlag: editorialFeatureFlag(block.featureFlag),
+    featureTheme: editorialFeatureTheme(block.featureTheme),
   }
 }
