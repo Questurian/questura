@@ -5,6 +5,7 @@ import {
   publicFeaturedArticlesSlot5Layout,
 } from '../../featured-articles/lib/slot-layouts'
 import { publicCreatorKicker } from '../../featured-creator-article/creator-kicker'
+import { editorialFeatureFlag, editorialFeatureTheme } from '../../editorial-feature/constants'
 import { PUBLIC_ARTICLE_BLOCK_TYPES } from '../constants'
 import { formatPublicArticleItem } from './format-public-article'
 import { isRecord } from './guards'
@@ -51,6 +52,8 @@ export function formatPublicHomepageBlock(block: unknown, location?: LocationCon
       featureDescription: stringOrNull(block.featureDescription),
       featureImagePortrait: block.featureImagePortrait ?? null,
       featureImageWide: block.featureImageWide ?? null,
+      featureFlag: editorialFeatureFlag(block.featureFlag),
+      featureTheme: editorialFeatureTheme(block.featureTheme),
       linkedLocation,
     }
   }
