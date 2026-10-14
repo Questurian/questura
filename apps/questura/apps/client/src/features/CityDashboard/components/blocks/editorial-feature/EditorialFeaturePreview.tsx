@@ -1,3 +1,5 @@
+import { ExternalLink } from 'lucide-react'
+
 import Link from '@/components/navigation/PublicLink'
 
 import type {
@@ -32,6 +34,7 @@ const TONES = {
     imageGround: 'bg-paper',
     flagRing: 'ring-foreground/15',
     focus: 'focus-visible:ring-accent',
+    titleLink: 'decoration-current',
   },
   dark: {
     band: 'bg-foreground py-10 768:py-12',
@@ -45,6 +48,7 @@ const TONES = {
     imageGround: 'bg-white/5',
     flagRing: 'ring-background/25',
     focus: 'focus-visible:ring-accent-soft',
+    titleLink: 'decoration-current',
   },
 } as const
 
@@ -193,9 +197,28 @@ export function EditorialFeaturePreview({
           ) : null}
           {block.featureTitle ? (
             <h2 className={`font-display text-[2.65rem] font-medium leading-[0.95] ${tone.title} 768:text-[3.35rem]`}>
-              <Linked href={featureHref} className={`outline-none focus-visible:ring-2 ${tone.focus}`}>
-                {block.featureTitle}
-              </Linked>
+              {featureHref ? (
+                // The destination link is the block's main way into a city or
+                // country page, so it reads as a link at rest: underlined,
+                // with the external-link mark. Offset and thickness match the global
+                // headline hover rule so hovering only changes the colour.
+                <Link
+                  href={featureHref}
+                  className={`group/title underline decoration-from-font underline-offset-[0.14em] transition-colors outline-none focus-visible:ring-2 ${tone.titleLink} ${tone.focus}`}
+                >
+                  {block.featureTitle}
+                  <ExternalLink
+                    aria-hidden
+                    strokeWidth={2}
+                    // Same colour as the title (currentColor). Centred on the
+                    // underlined word: halfway from the top of the capitals
+                    // to the bottom of the underline.
+                    className="relative -top-[0.025em] ml-[0.16em] inline-block size-[0.3em] align-middle"
+                  />
+                </Link>
+              ) : (
+                block.featureTitle
+              )}
             </h2>
           ) : null}
           {block.featureDescription ? (

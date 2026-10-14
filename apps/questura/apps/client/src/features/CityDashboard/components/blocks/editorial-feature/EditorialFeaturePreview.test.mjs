@@ -33,3 +33,16 @@ test('the feature image never grows past its grid track', () => {
   assert.doesNotMatch(source, /768:aspect-\[4\/5\]/)
   assert.match(source, /aspect-\[16\/10\] min-w-0 [^"`]*768:aspect-auto/)
 })
+
+test('a linked destination title reads as a link at rest: underline plus link mark', () => {
+  assert.match(source, /import \{ ExternalLink \} from 'lucide-react'/)
+  // Resting underline in the title's own colour (both themes); offset and
+  // thickness match the global headline hover rule, so hover changes nothing.
+  assert.match(source, /group\/title underline decoration-from-font underline-offset-\[0\.14em\]/)
+  assert.equal(source.match(/titleLink: 'decoration-current'/g)?.length, 2)
+  // The mark takes the title's own colour, centred on the underlined word.
+  assert.match(source, /<ExternalLink[\s\S]*?className="relative -top-\[0\.025em\] [^"]*align-middle"/)
+  assert.doesNotMatch(source, /titleIcon/)
+  // No href, no link styling: the title renders as plain text.
+  assert.match(source, /\{featureHref \? \([\s\S]*?<ExternalLink[\s\S]*?\) : \(\s*block\.featureTitle\s*\)\}/)
+})
