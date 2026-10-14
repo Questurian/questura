@@ -17,6 +17,7 @@ import { fetchStandardArticleSidebar } from '@/features/articles/lib/fetchArticl
 import { ArticleBlockStream } from '@/features/articles/components/ArticleBlockStream'
 import { ArticleByline } from '@/features/articles/components/ArticleByline'
 import { ArticleAuthorBanner } from '@/features/articles/components/ArticleAuthorBanner'
+import { NewsletterArticleBand } from '@/features/newsletter/components/NewsletterArticleBand'
 import { getPublicBaseUrl } from '@/lib/seo/publicBaseUrl'
 import { Article, type ArticleDisplayLayout } from './types'
 import { formatArticleDate } from '@/lib/dates'
@@ -104,6 +105,8 @@ function ArticleBody({ article, path, adPlan }: { article: Article; path?: strin
       ) : null}
 
       {article.author ? <ArticleAuthorBanner author={article.author} /> : null}
+
+      <NewsletterArticleBand className="pt-4 sm:pt-6" />
     </div>
   )
 }

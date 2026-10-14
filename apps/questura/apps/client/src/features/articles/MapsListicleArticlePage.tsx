@@ -12,6 +12,7 @@ import {
   listicleMomentHeadingId,
 } from '@/features/articles/lib/listicleMomentGroups'
 import { ADS_ENABLED } from '@/features/articles/lib/ads'
+import { NewsletterArticleBand } from '@/features/newsletter/components/NewsletterArticleBand'
 import type { MapsListicleArticle } from '@/features/articles/types/mapsListicle'
 
 type MapsListicleArticlePageProps = {
@@ -117,6 +118,10 @@ export function MapsListicleArticlePage({
             )
           })}
         </ListicleMapRegion>
+      </div>
+
+      <div className="px-3 pt-14 pb-12 380:px-4 480:px-5 480:pt-16 550:px-6 sm:px-8 sm:pt-20 768:px-10">
+        <NewsletterArticleBand />
       </div>
     </article>
   )

@@ -138,6 +138,7 @@ export const PRIVATE_TABLES = [
   'visitor_profiles',
   'identity_email_owners',
   'bookmarks',
+  'newsletter_subscribers',
   // Payments and mail.
   'stripe_webhook_events',
   'email_logs',

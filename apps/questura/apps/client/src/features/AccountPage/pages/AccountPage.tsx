@@ -9,6 +9,7 @@ import { PasswordSection } from "../components/Password/PasswordSection";
 import { ConnectedAccountsSection } from "../components/ConnectedAccounts/ConnectedAccountsSection";
 import { MembershipSection } from "../components/Membership/MembershipSection";
 import { BookmarksSection } from "../components/Bookmarks/BookmarksSection";
+import { NewsletterSection } from "../components/Newsletter/NewsletterSection";
 import { DevicesAndDataSection } from "../components/Devices/DevicesAndDataSection";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
@@ -102,6 +103,8 @@ function AccountContent() {
           />
 
           <MembershipSection user={user} />
+
+          <NewsletterSection />
 
           <BookmarksSection />
 

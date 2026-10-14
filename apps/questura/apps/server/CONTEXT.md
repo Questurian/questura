@@ -117,6 +117,7 @@ Identity + general-purpose taxonomy.
 - `features/auth/` — Users + access.
 - `features/payments/` — Stripe flow.
 - `features/emails/` — transactional email templates + `EmailLogs` delivery log (append-only, admin-read-only; written by `recordEmailLog` from `sendEmail` and the Users `afterForgotPassword` hook; `EMAIL_TRACKING=false` disables recording).
+- `features/newsletter/` — `NewsletterSubscribers` list (Payload owns it; the sending service holds a copy). Anonymous double opt-in via `/api/newsletter/subscribe` → mailed link → website page POSTs `/api/newsletter/confirm`. Confirmation sends are capped per day so they cannot starve password-reset mail on the shared Resend account.
 - `features/places/` — Places (Google) integration utilities.
 - `features/admin/` — Payload admin customisations.
 - `features/public-revalidation/` — Payload-write → Next.js cache invalidation hooks.

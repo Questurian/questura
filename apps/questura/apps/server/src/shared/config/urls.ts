@@ -17,7 +17,8 @@ export const APP_URLS = {
    */
   frontendUrl(path: string): string {
     const normalizedPath = path.startsWith('/') ? path : `/${path}`
-    return `${this.frontend}${normalizedPath}`
+    // An env value written with a trailing slash must not produce `//path`.
+    return `${this.frontend.replace(/\/+$/, '')}${normalizedPath}`
   },
 
   /**
@@ -27,6 +28,6 @@ export const APP_URLS = {
    */
   backendUrl(path: string): string {
     const normalizedPath = path.startsWith('/') ? path : `/${path}`
-    return `${this.backend}${normalizedPath}`
+    return `${this.backend.replace(/\/+$/, '')}${normalizedPath}`
   }
 } as const

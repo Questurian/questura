@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import type { ReactNode } from 'react'
 
 import { JsonLd } from '@/components/seo/JsonLd'
 import {
@@ -41,7 +42,16 @@ export async function sectionPageMetadataFor(page: SectionPageKey): Promise<Meta
  * with the first block's left edge. It draws no rule of its own: the first
  * block's hairline is the only line under it.
  */
-export async function SectionPage({ copy, page }: { copy: SectionPageCopy; page?: SectionPageKey }) {
+export async function SectionPage({
+  copy,
+  page,
+  children,
+}: {
+  copy: SectionPageCopy
+  page?: SectionPageKey
+  /** Page-specific content under the masthead (the Newsletters signup). */
+  children?: ReactNode
+}) {
   const data = page ? curatedHomepage(await fetchSectionPage(page)) : null
   const blocks = data?.pageBlocks ?? []
 
@@ -66,6 +76,7 @@ export async function SectionPage({ copy, page }: { copy: SectionPageCopy; page?
           ) : null}
         </header>
       </BlockSection>
+      {children}
       {data ? <CityHomepageContent pageBlocks={data.pageBlocks} /> : null}
     </section>
   )

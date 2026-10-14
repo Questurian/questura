@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type JSX, type FormEvent } from "react";
+import type { JSX } from "react";
 
 import type {
   NewsletterSignupBlock,
@@ -10,6 +10,7 @@ import { BlockSection } from "../BlockSection";
 import { PublicImage } from "@/components/media/PublicImage";
 import { BLOCK_IMAGE_SIZES } from "../blockImageSizes";
 import { heroImagePriority } from "../heroImagePriority";
+import { NewsletterSignupForm } from "@/features/newsletter/components/NewsletterSignupForm";
 
 export function NewsletterSignupPreview({
   block,
@@ -17,19 +18,10 @@ export function NewsletterSignupPreview({
 }: HomepageBlockLayoutProps<NewsletterSignupBlock>): JSX.Element {
   const imagePriority = heroImagePriority(blockIndex);
 
-  const [email, setEmail] = useState("");
-  const [submitted, setSubmitted] = useState(false);
-
   const heading = block.sectionHeading?.trim() || "Newsletter";
   const subheading =
     block.sectionSubheading?.trim() ||
-    "Subscribe to the Questurian newsletter — your shortcut to the world’s most unforgettable places.";
-
-  function handleSubmit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    if (!email) return;
-    setSubmitted(true);
-  }
+    "Once a month, our newest guides, maps and itineraries, with a short note from the team. Your shortcut to the world’s most unforgettable places.";
 
   return (
     <BlockSection
@@ -76,42 +68,7 @@ export function NewsletterSignupPreview({
 
           {/* Right: signup form */}
           <div className="w-full 768:justify-self-end">
-            {submitted ? (
-              <p className="font-[family-name:var(--font-dm-sans)] text-[1rem] text-background">
-                You&rsquo;re on the list. We&rsquo;ll be in touch.
-              </p>
-            ) : (
-              <form onSubmit={handleSubmit} noValidate>
-                <label
-                  htmlFor="newsletter-email"
-                  className="block font-[family-name:var(--font-dm-sans)] text-[0.9rem] font-medium text-background"
-                >
-                  Your email address
-                </label>
-                <div className="mt-2 flex flex-col gap-3 1024:flex-row">
-                  <input
-                    id="newsletter-email"
-                    type="email"
-                    required
-                    placeholder="your.email@email.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="h-[56px] min-w-0 flex-1 border border-foreground/20 bg-paper px-4 font-[family-name:var(--font-dm-sans)] text-[0.95rem] text-foreground placeholder-foreground/40 outline-none focus:border-foreground"
-                  />
-                  <button
-                    type="submit"
-                    className="h-[56px] shrink-0 bg-foreground px-8 font-[family-name:var(--font-dm-sans)] text-[0.95rem] font-semibold text-background transition-colors hover:bg-black"
-                  >
-                    Sign up
-                  </button>
-                </div>
-
-                <p className="mt-4 max-w-[34rem] font-[family-name:var(--font-dm-sans)] text-[0.72rem] leading-relaxed text-background/65">
-                  By signing up you agree to receive updates from Questurian. No
-                  spam, ever.
-                </p>
-              </form>
-            )}
+            <NewsletterSignupForm source="homepage-block" tone="dark" />
           </div>
         </div>
       </div>

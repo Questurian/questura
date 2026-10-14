@@ -45,3 +45,9 @@ export interface SubscriptionReactivatedEmailData extends BaseEmailData {
   subscriptionType?: string
   renewsAt?: Date
 }
+
+/** The double opt-in mail; `url` carries the confirmation token. */
+export interface NewsletterConfirmationEmailData {
+  email: string
+  url: string
+}

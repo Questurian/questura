@@ -16,6 +16,9 @@ export { sendSubscriptionCancelledEmail } from './lib/subscription-cancelled'
 export { sendSubscriptionReactivatedEmail } from './lib/subscription-reactivated'
 export { sendMembershipConfirmationEmail } from './lib/membership-confirmation'
 
+// Newsletter, sent from newsletter/lib/service.ts
+export { sendNewsletterConfirmationEmail } from './lib/newsletter-confirmation'
+
 // Email delivery tracking (optional system — see EmailLogs collection docs)
 export { EmailLogs } from './collections/EmailLogs'
 export { recordEmailLog, isEmailTrackingEnabled } from './lib/email-log'

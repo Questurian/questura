@@ -59,12 +59,19 @@ What `--apply` does, in order:
 1. **Revokes every session**, in Redis and Postgres. Every device is signed
    out within about a second (the cookie cache is overridden by the
    revocation list, `session-revocations.ts`).
-2. **Deletes** the bookmarks, any outstanding reset link, and the visitor
+2. **Deletes** the bookmarks, the newsletter subscription row, any outstanding reset link, and the visitor
    profile. If the profile still names a Stripe customer (you kept it in
    step 2), it is **emptied** instead: name, address and billing address
    cleared, the Stripe linkage and membership dates kept.
 3. **Deletes the sign-in account**: the Google link, the password and the
    user row.
+4. **Deletes the newsletter contact in Resend** (needs
+   `RESEND_NEWSLETTER_API_KEY`; without it the output says to delete the
+   contact by hand in Resend → Audience).
+
+A newsletter subscriber **without an account** gets `ERASE none`. Delete their
+row in Payload admin (Newsletter subscribers → delete) and their contact in
+Resend → Audience.
 
 It never calls Stripe, and it is safe to run again if it stops halfway. Run it
 twice and the second run says `ERASE none`.
