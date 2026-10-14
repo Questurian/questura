@@ -16,8 +16,10 @@ import {
   resolveIssueItems,
   RESEND_UNSUBSCRIBE_PLACEHOLDER,
   type IssueDraft,
+  type IssueItem,
 } from './issue'
 import { createAndSendBroadcast, listBroadcasts, sendSingleEmail } from './resend-api'
+import { computeStats, STATS_ISSUES, type StatsIssueRow, type StatsSubscriberRow } from './stats'
 import { reconcileBeforeSend } from './sync'
 
 /**
@@ -50,7 +52,17 @@ const DEFAULT_LOOKBACK_DAYS = 31
 
 export type LastIssue = { sentAt: string; name: string | null } | null
 
+const ISSUES = 'newsletter-issues'
+
+/** The newest issue in `newsletter-issues`, else (for issues sent before it existed) Resend's broadcast list. */
 async function lastIssue(): Promise<LastIssue> {
+  const payload = await getPayload({ config })
+  const { docs } = await payload.find({ collection: ISSUES, sort: '-sentAt', limit: 1, depth: 0, select: { subject: true, sentAt: true } })
+  if (docs[0]) return { sentAt: docs[0].sentAt, name: docs[0].subject }
+  return lastBroadcast()
+}
+
+async function lastBroadcast(): Promise<LastIssue> {
   const settings = newsletterConfig()
   if (!canSyncContacts(settings)) return null
   try {
@@ -79,6 +91,26 @@ export async function overview() {
   ) as Record<NewsletterSubscriberStatus, number>
   const settings = newsletterConfig()
   return { counts, missing: missingForSend(settings), from: settings.from, lastIssue: await lastIssue() }
+}
+
+export async function stats() {
+  const payload = await getPayload({ config })
+  const [subscribers, issues] = await Promise.all([
+    payload.find({
+      collection: 'newsletter-subscribers',
+      pagination: false,
+      depth: 0,
+      select: { status: true, source: true, signedUpAt: true, confirmedAt: true, unsubscribedAt: true, suppressedAt: true },
+    }),
+    payload.find({
+      collection: ISSUES,
+      sort: '-sentAt',
+      limit: STATS_ISSUES,
+      depth: 0,
+      select: { subject: true, sentAt: true, recipients: true, items: true },
+    }),
+  ])
+  return computeStats(subscribers.docs as StatsSubscriberRow[], issues.docs as StatsIssueRow[])
 }
 
 export async function candidates(sinceParam: string | null) {
@@ -129,7 +161,7 @@ export async function sendTest(req: NextRequest, user: User, cors: Record<string
 /** One issue per ten minutes, across every server instance: a double click must not mail the list twice. */
 const SEND_LOCK_SECONDS = 10 * 60
 
-export async function sendIssue(req: NextRequest, cors: Record<string, string>) {
+export async function sendIssue(req: NextRequest, user: User, cors: Record<string, string>) {
   const draft = await draftFrom(req)
   if ('error' in draft) return NextResponse.json({ message: draft.error }, { status: 400, headers: cors })
 
@@ -170,5 +202,36 @@ export async function sendIssue(req: NextRequest, cors: Record<string, string>) 
     text,
   })
   logger.info('[newsletter] issue sent', { broadcastId: broadcast.id, recipients: report.recipients, items: items.length })
+  await recordIssue({ subject: draft.subject, broadcastId: broadcast.id, recipients: report.recipients, items, sentBy: user.id })
   return NextResponse.json({ broadcastId: broadcast.id, report }, { headers: cors })
+}
+
+/**
+ * Keeps the record the stats read. The issue is already on its way, so a
+ * failure here is logged, never answered as a failed send: a retry would
+ * mail the list twice.
+ */
+async function recordIssue(issue: {
+  subject: string
+  broadcastId: string
+  recipients: number
+  items: IssueItem[]
+  sentBy: User['id']
+}) {
+  try {
+    const payload = await getPayload({ config })
+    await payload.create({
+      collection: ISSUES,
+      data: {
+        subject: issue.subject,
+        sentAt: new Date().toISOString(),
+        recipients: issue.recipients,
+        broadcastId: issue.broadcastId,
+        items: issue.items.map(({ type, id }) => ({ type, id })),
+        sentBy: issue.sentBy,
+      },
+    })
+  } catch (error) {
+    logger.error('[newsletter] issue sent but not recorded', { broadcastId: issue.broadcastId, error })
+  }
 }

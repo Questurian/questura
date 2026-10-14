@@ -250,7 +250,9 @@ describe('suppress', () => {
     expect(mocks.update).not.toHaveBeenCalled()
 
     mocks.find.mockResolvedValue(rows({ id: 1, email: 'reader@example.com', status: 'bounced' }))
-    await suppress('reader@example.com', 'complained')
-    expect(mocks.update).toHaveBeenCalledWith(expect.objectContaining({ data: { status: 'complained' } }))
+    await suppress('reader@example.com', 'complained', NOW)
+    expect(mocks.update).toHaveBeenCalledWith(
+      expect.objectContaining({ data: { status: 'complained', suppressedAt: NOW.toISOString() } }),
+    )
   })
 })

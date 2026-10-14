@@ -44,6 +44,27 @@ Studio → **Newsletter**:
    Resend segment match Payload exactly, then sends. A second send is refused
    for ten minutes, so a double click cannot mail the list twice.
 
+Each sent issue is recorded in Payload `newsletter-issues` (subject, time,
+recipient count, articles, who sent it).
+
+## How it's doing
+
+Studio → Newsletter → **How it's doing** reads
+`GET /api/newsletter/admin/stats`: confirmations per week, current subscribers
+by signup form, the confirm rate, and the unsubscribes and bounces/spam reports
+after each issue. Everything is counted from Payload, not Resend. There is no
+open or click tracking, on purpose: the privacy page says readers are not
+tracked, so do not turn it on in Resend.
+
+- **Which form** is the form of a reader's *latest* signup: a re-signup
+  overwrites `source` and `signedUpAt`.
+- **Confirm rate** looks at signups 7–90 days old (a confirm link lives 7
+  days) and leaves out verified account holders, who are confirmed without a
+  mail. A low rate means the confirm mail is landing in spam.
+- **After each issue** counts readers who had confirmed and then unsubscribed
+  (`unsubscribedAt`) or bounced / reported spam (`suppressedAt`) between that
+  issue and the next.
+
 ## Erasure requests
 
 An account holder: `scripts/erase-visitor-account.ts` deletes the row and the
