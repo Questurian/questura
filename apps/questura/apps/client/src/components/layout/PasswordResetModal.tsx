@@ -2,6 +2,17 @@
 
 import { useEffect, useState, type FormEvent } from 'react';
 import { usePasswordResetRequest } from '@/features/Auth/hooks/usePasswordResetRequest';
+import {
+  AuthBackButton,
+  AuthNotice,
+  Spinner,
+  authLabel,
+  authModalPanel,
+  authModalPlacement,
+  authModalSubtitle,
+  authModalTitle,
+  authPrimaryButton,
+} from '@/features/Auth/components/form/authFormParts';
 
 interface PasswordResetModalProps {
   isOpen: boolean;
@@ -25,89 +36,92 @@ export default function PasswordResetModal({
     }
   }, [isOpen, reset]);
 
+  // Opens over the sign-in modal, so Escape closes this one and leaves the
+  // sign-in modal where it was (LoginModal stops listening while this is open).
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [isOpen, onClose]);
+
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    await resetRequest.mutateAsync({ email });
-    setSent(true);
+    try {
+      await resetRequest.mutateAsync({ email });
+      setSent(true);
+    } catch {
+      // Shown through `resetRequest.error` below.
+    }
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center p-5">
+    <div className="fixed inset-0 z-[60] overflow-y-auto">
       <button
         type="button"
-        className="absolute inset-0 bg-[#1A1A1A]/60"
+        className="fixed inset-0 cursor-default bg-[#1A1A1A]/50"
         onClick={onClose}
         aria-label="Close password reset"
       />
 
-      <div
-        className="bg-[#f7f6f2] border border-[#d7d4ce] rounded-sm max-w-md w-full p-6 480:p-8 relative"
-        role="dialog"
-      >
-        <button
-          type="button"
-          className="absolute top-4 right-4 text-[#9a9894] hover:text-[#1A1A1A] transition-colors cursor-pointer"
-          onClick={onClose}
+      <div className={authModalPlacement}>
+        <div
+          className={authModalPanel}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="reset-password-title"
         >
-          <span className="sr-only">Close</span>
-          <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
+          {/* Same Back control as the sign-in modal: it returns to it. */}
+          <AuthBackButton onClick={onClose}>Back to sign in</AuthBackButton>
 
-        <h3 className="font-display text-[1.15rem] text-[#1A1A1A] mb-2 768:text-[1.25rem]">
-          Reset Password
-        </h3>
-        <p className="text-[0.88rem] text-[#6b6a68] leading-[1.65] mb-6">
-          {sent
-            ? "Check your email for a password reset link."
-            : "We'll email you a secure link to choose a new password."}
-        </p>
-
-        {sent ? (
-          <button
-            type="button"
-            className="
-              w-full bg-[#2C2C2C] hover:bg-[#1A1A1A]
-              text-white text-center py-3 rounded
-              text-[0.88rem] font-medium transition-colors
-            "
-            onClick={onClose}
-          >
-            Done
-          </button>
-        ) : (
-          <form className="space-y-4" onSubmit={handleSubmit}>
-            <input
-              type="email"
-              value={email}
-              readOnly
-              className="
-                w-full px-3.5 py-2.5 border border-[#e5e2dc] rounded-sm
-                text-[0.88rem] text-[#1A1A1A] bg-white
-              "
-            />
-            {resetRequest.error && (
-              <p className="text-[0.84rem] text-[#c62828]">
-                {resetRequest.error.message}
-              </p>
+          <h2 id="reset-password-title" className={`mt-5 480:mt-6 ${authModalTitle}`}>
+            {sent ? 'Check Your Inbox' : 'Reset Password'}
+          </h2>
+          <p className={authModalSubtitle}>
+            {sent ? (
+              <>
+                We sent a link to <span className="break-all font-medium text-foreground">{email}</span>.
+                Open it to choose a new password.
+              </>
+            ) : (
+              "We'll email you a secure link to choose a new password."
             )}
-            <button
-              type="submit"
-              disabled={resetRequest.isPending}
-              className="
-                w-full bg-[#2C2C2C] hover:bg-[#1A1A1A]
-                text-white text-center py-3 rounded
-                text-[0.88rem] font-medium transition-colors
-                disabled:opacity-50 disabled:cursor-not-allowed
-              "
-            >
-              {resetRequest.isPending ? 'Sending...' : 'Send reset link'}
+          </p>
+
+          {sent ? (
+            <button type="button" className={`mt-7 ${authPrimaryButton}`} onClick={onClose}>
+              Done
             </button>
-          </form>
-        )}
+          ) : (
+            <form className="mt-7 space-y-6" onSubmit={handleSubmit}>
+              {resetRequest.error && <AuthNotice messages={[resetRequest.error.message]} />}
+              <div>
+                <p className={authLabel}>Email</p>
+                <p className="mt-2 h-12 w-full truncate rounded-[3px] border border-foreground/15 bg-paper px-3.5 text-[0.95rem] leading-[46px] text-foreground">
+                  {email}
+                </p>
+              </div>
+              <button
+                type="submit"
+                disabled={resetRequest.isPending}
+                className={authPrimaryButton}
+              >
+                {resetRequest.isPending ? (
+                  <>
+                    <Spinner />
+                    <span>Sending…</span>
+                  </>
+                ) : (
+                  'Send reset link'
+                )}
+              </button>
+            </form>
+          )}
+        </div>
       </div>
     </div>
   );

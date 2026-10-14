@@ -4,6 +4,7 @@
  */
 
 import type { AuthFormLayoutProps } from '../../types';
+import { AuthNotice } from './authFormParts';
 
 export default function AuthFormLayout({
   children,
@@ -11,15 +12,14 @@ export default function AuthFormLayout({
   title,
   subtitle,
   generalErrors,
-  isSignUp
 }: AuthFormLayoutProps) {
   const containerClasses = inModal
-    ? "w-full space-y-6"
+    ? "w-full"
     : "min-h-screen flex items-center justify-center px-5 py-12";
 
   const contentClasses = inModal
-    ? "w-full space-y-4"
-    : "max-w-xl w-full bg-[#f7f6f2] border border-[#d7d4ce] rounded-sm p-6 480:p-8 space-y-6";
+    ? "w-full space-y-6"
+    : "max-w-xl w-full bg-paper border border-foreground/15 rounded-[3px] p-6 480:p-8 space-y-6";
 
   return (
     <div className={containerClasses}>
@@ -35,24 +35,7 @@ export default function AuthFormLayout({
           </div>
         )}
 
-        {generalErrors.length > 0 && (
-          <div className="rounded-sm bg-[#fce4ec] p-3.5 border border-[#f8bbd0]">
-            <div className="flex">
-              <div className="ml-3">
-                <h3 className="text-[0.84rem] font-medium text-[#c62828]">
-                  {isSignUp ? 'Sign up failed' : 'Sign in failed'}
-                </h3>
-                <div className="mt-2 text-[0.84rem] text-[#c62828]">
-                  <ul className="list-disc pl-5 space-y-1">
-                    {generalErrors.map((error, index) => (
-                      <li key={index}>{error}</li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+        <AuthNotice messages={generalErrors} />
 
         {children}
       </div>

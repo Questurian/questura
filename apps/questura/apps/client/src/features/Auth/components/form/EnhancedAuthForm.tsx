@@ -1,5 +1,6 @@
 "use client";
 
+import { useImperativeHandle } from 'react';
 import { validateEmail, getFormTitle, getFormSubtitle } from '../../lib/auth-utils';
 import { useAuthForm } from '../../hooks/useAuthForm';
 import { useAuthSubmit } from '../../hooks/useAuthSubmit';
@@ -16,11 +17,14 @@ export default function EnhancedAuthForm({
   subtitle,
   errorMessage,
   prefillEmail,
-  onModeChange
+  onModeChange,
+  ref
 }: EnhancedAuthFormProps = {}) {
   // Initialize hooks
   const authForm = useAuthForm({ prefillEmail, onModeChange });
   const authSubmit = useAuthSubmit({ inModal, onSuccess });
+
+  useImperativeHandle(ref, () => ({ backToEmail: authForm.handleBackToEmail }), [authForm.handleBackToEmail]);
 
   // Handle email step submission
   const handleEmailContinue = async (e: React.FormEvent) => {
@@ -115,7 +119,9 @@ export default function EnhancedAuthForm({
       inModal={inModal}
       title={displayTitle}
       subtitle={displaySubtitle}
-      generalErrors={authForm.getGeneralErrors()}
+      // `errorMessage` says why the form was opened (a Google sign-in that
+      // came back with an error), so it leads, above anything this form adds.
+      generalErrors={[...(errorMessage ? [errorMessage] : []), ...authForm.getGeneralErrors()]}
       isSignUp={authForm.isSignUp}
     >
       {!authForm.showPasswordStep ? (
@@ -129,7 +135,6 @@ export default function EnhancedAuthForm({
           loading={authForm.loading}
           canContinue={authForm.canContinueFromEmail()}
           inModal={inModal}
-          errorMessage={errorMessage}
         />
       ) : (
         <PasswordStep
@@ -146,7 +151,6 @@ export default function EnhancedAuthForm({
           showPassword={authForm.showPassword}
           onTogglePassword={() => authForm.setShowPassword(!authForm.showPassword)}
           inModal={inModal}
-          errorMessage={errorMessage}
         />
       )}
     </AuthFormLayout>
