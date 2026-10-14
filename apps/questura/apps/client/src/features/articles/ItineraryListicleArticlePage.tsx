@@ -13,11 +13,13 @@ import { ItineraryMomentBadge } from "@/features/articles/components/ItineraryMo
 import { ListicleMapRegion } from "@/features/articles/components/ListicleMapRegion";
 import { ListicleSeparator } from "@/features/articles/components/ListicleSeparator";
 import { ListicleVenueEntry } from "@/features/articles/components/ListicleVenueEntry";
+import { PhotoCreditLine } from "@/features/articles/components/PhotoCreditLine";
 import {
   isTourAgencyBlock,
   populatedVenueStops,
   venueRowFromBlock,
 } from "@/features/articles/lib/itineraryDays";
+import { photoCredit } from "@/features/articles/lib/photoCredit";
 import {
   formatPriceTier,
   isHttpUrl,
@@ -105,20 +107,29 @@ function TourAgencyCard({
         <ItineraryMomentBadge moment={block.moment} label={block.momentLabel} />
 
         {imageUrl ? (
-          <div className="overflow-hidden rounded-sm bg-foreground/[0.04]">
-            <div className="aspect-[16/10] w-full 380:aspect-[4/3] 480:aspect-[3/2] sm:aspect-[16/9]">
-              <ShimmerImage
-                src={imageUrl}
-                alt={image?.alt_text ?? block.title}
-                width={1200}
-                height={750}
-                sizes="(min-width: 768px) 700px, 100vw"
-                className="h-full w-full object-cover"
-                wrapperClassName="h-full w-full"
-                loading="lazy"
-                decoding="async"
-              />
+          <div>
+            <div className="overflow-hidden rounded-sm bg-foreground/[0.04]">
+              <div className="aspect-[16/10] w-full 380:aspect-[4/3] 480:aspect-[3/2] sm:aspect-[16/9]">
+                <ShimmerImage
+                  src={imageUrl}
+                  alt={image?.alt_text ?? block.title}
+                  width={1200}
+                  height={750}
+                  sizes="(min-width: 768px) 700px, 100vw"
+                  className="h-full w-full object-cover"
+                  wrapperClassName="h-full w-full"
+                  loading="lazy"
+                  decoding="async"
+                />
+              </div>
             </div>
+            <PhotoCreditLine
+              credit={photoCredit(
+                typeof image?.mediaSet === "object" ? image.mediaSet : null,
+                image,
+              )}
+              className="pt-2"
+            />
           </div>
         ) : null}
 

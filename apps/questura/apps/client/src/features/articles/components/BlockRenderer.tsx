@@ -8,6 +8,8 @@ import {
 import { InlineMarkdown } from './InlineMarkdown'
 import { AirbnbCardBlockRenderer } from './AirbnbCardBlock'
 import { HotelCardBlockRenderer } from './HotelCardBlock'
+import { PhotoCreditLine } from './PhotoCreditLine'
+import { blockPhotoCredit, photoCredit } from '../lib/photoCredit'
 import {
   ContentBlock,
   FaqBlock,
@@ -61,6 +63,10 @@ function ImageBlockRenderer({ block }: { block: ImageBlock }) {
         sizes="(min-width: 1024px) 880px, (min-width: 768px) 760px, 100vw"
         className="w-full object-cover"
       />
+      <PhotoCreditLine
+        credit={photoCredit(block.image.mediaSet, block.image)}
+        className="px-4 pt-2 1024:px-0"
+      />
       {block.caption && (
         <figcaption className="px-4 pt-2 text-[11px] italic text-foreground/50 1024:px-0 sm:text-[12px]">
           {block.caption}
@@ -94,6 +100,13 @@ function ImgPairBlockRenderer({ block }: { block: ImgPairBlock }) {
           className="w-1/2 aspect-[3/4] object-cover"
         />
       </div>
+      <PhotoCreditLine
+        credit={blockPhotoCredit([
+          { heading: 'Left', carriers: [block.imageOne.mediaSet, block.imageOne] },
+          { heading: 'Right', carriers: [block.imageTwo.mediaSet, block.imageTwo] },
+        ])}
+        className="px-4 pt-2 1024:px-0"
+      />
       {block.caption && (
         <figcaption className="px-4 pt-2 text-[11px] italic text-foreground/50 1024:px-0 sm:text-[12px]">
           {block.caption}
@@ -123,6 +136,15 @@ function ImgTrioBlockRenderer({ block }: { block: ImgTrioBlock }) {
           />
         ))}
       </div>
+      <PhotoCreditLine
+        credit={blockPhotoCredit(
+          images.map((image, index) => ({
+            heading: `Photo ${index + 1}`,
+            carriers: [image.mediaSet, image],
+          })),
+        )}
+        className="px-4 pt-2 1024:px-0"
+      />
       {block.caption && (
         <figcaption className="px-4 pt-2 text-[11px] italic text-foreground/50 1024:px-0 sm:text-[12px]">
           {block.caption}

@@ -54,7 +54,18 @@ type PlacementConfig = {
 
 type ResolveOptions = {
   allowMigrationFallback?: boolean
+  /** Carry the photo credit and sources, for placements that print a credit line. */
+  includeAttribution?: boolean
 }
+
+export type PublicImageAttribution = Pick<PublicImage, 'photographer_credit' | 'edit_credit' | 'sources'>
+
+/** The credit fields of a resolved image, leaving out the ones it does not have. */
+export const publicImageAttribution = (image: PublicImage): PublicImageAttribution => ({
+  ...(image.photographer_credit ? { photographer_credit: image.photographer_credit } : {}),
+  ...(image.edit_credit ? { edit_credit: image.edit_credit } : {}),
+  ...(image.sources ? { sources: image.sources } : {}),
+})
 
 const PLACEMENT_CONFIG: Record<MediaPlacement, PlacementConfig> = {
   card: { required: 'thumbnail', migrationFallbacks: [] },
@@ -263,10 +274,11 @@ export const resolveMediaSetForPlacement = (
   if (!mediaSet || !isRecord(mediaSet)) return MISSING_IMAGE
 
   const config = PLACEMENT_CONFIG[placement]
+  const withAttribution = placement === 'article-header' || options.includeAttribution === true
   const requiredAsset = getVariantAsset(mediaSet, config.required)
 
   if (requiredAsset) {
-    const image = assetToPublicImage(requiredAsset, config.required, 'ready', mediaSet, placement === 'article-header')
+    const image = assetToPublicImage(requiredAsset, config.required, 'ready', mediaSet, withAttribution)
     if (image.status === 'ready') return image
   }
 
@@ -274,7 +286,7 @@ export const resolveMediaSetForPlacement = (
     for (const fallbackVariant of config.migrationFallbacks) {
       const fallbackAsset = getVariantAsset(mediaSet, fallbackVariant)
       if (!fallbackAsset) continue
-      const image = assetToPublicImage(fallbackAsset, fallbackVariant, 'legacy_fallback', mediaSet, placement === 'article-header')
+      const image = assetToPublicImage(fallbackAsset, fallbackVariant, 'legacy_fallback', mediaSet, withAttribution)
       if (image.status === 'legacy_fallback') return image
     }
   }
