@@ -10,7 +10,7 @@ import { BlockSection } from "../BlockSection";
 import { PublicImage } from "@/components/media/PublicImage";
 import { BLOCK_IMAGE_SIZES } from "../blockImageSizes";
 import { heroImagePriority } from "../heroImagePriority";
-import { NewsletterSignupForm } from "@/features/newsletter/components/NewsletterSignupForm";
+import { LazyNewsletterSignupForm as NewsletterSignupForm } from "@/features/newsletter/components/LazyNewsletterSignupForm";
 
 export function NewsletterSignupPreview({
   block,

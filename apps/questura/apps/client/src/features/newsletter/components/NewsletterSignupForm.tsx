@@ -127,7 +127,10 @@ export function NewsletterSignupForm({
       <div className="mt-2 flex flex-col gap-3 1024:flex-row">
         <input
           id={`${id}-email`}
-          name="email"
+          // Not `email`: the sign-in modal's field is `input[name=email]`, and a
+          // second one on the page sends autofill (and the e2e sign-in helper)
+          // to the wrong box.
+          name="newsletter-email"
           type="email"
           autoComplete="email"
           required

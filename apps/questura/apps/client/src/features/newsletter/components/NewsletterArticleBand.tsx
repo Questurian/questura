@@ -1,7 +1,7 @@
 import type { JSX } from 'react'
 
 import { EditorialLabelRule } from '@/features/articles/components/EditorialRule'
-import { NewsletterSignupForm } from './NewsletterSignupForm'
+import { LazyNewsletterSignupForm as NewsletterSignupForm } from './LazyNewsletterSignupForm'
 
 /**
  * The newsletter ask at the end of an article, where a reader who liked the

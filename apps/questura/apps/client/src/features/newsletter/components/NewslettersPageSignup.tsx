@@ -2,7 +2,7 @@ import type { JSX } from 'react'
 
 import { BlockSection } from '@/features/CityDashboard/components/blocks/BlockSection'
 import { EditorialLabelRule, EditorialTick } from '@/features/articles/components/EditorialRule'
-import { NewsletterSignupForm } from './NewsletterSignupForm'
+import { LazyNewsletterSignupForm as NewsletterSignupForm } from './LazyNewsletterSignupForm'
 
 const WHAT_ARRIVES = [
   'The guides, food maps and itineraries we published that month, in one place.',
