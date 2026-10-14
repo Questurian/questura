@@ -32,6 +32,12 @@ export type PublicLocationMenuResponse = {
   countries: PublicLocationMenuCountry[]
 }
 
+/**
+ * Countries left out of the nav by owner choice. Their pages stay online and
+ * reachable by URL; only the menu skips them. Match by country slug.
+ */
+export const MENU_HIDDEN_COUNTRIES: ReadonlySet<string> = new Set(['brazil', 'panama'])
+
 function stringOrNull(value: unknown): string | null {
   if (typeof value !== 'string') return null
   const trimmed = value.trim()
@@ -114,7 +120,9 @@ export function buildPublicLocationMenu(
     })
   }
 
-  const countries = [...countriesByKey.values()]
+  const countries = [...countriesByKey.values()].filter(
+    (country) => !MENU_HIDDEN_COUNTRIES.has(country.locationKey),
+  )
   for (const country of countries) {
     country.cities.sort((a, b) => a.label.localeCompare(b.label))
   }

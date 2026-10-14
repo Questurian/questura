@@ -128,4 +128,34 @@ describe('buildPublicLocationMenu', () => {
 
     expect(menu.countries[0]?.countryCode).toBeNull()
   })
+
+  it('leaves hidden countries and their cities out of the menu', () => {
+    const menu = buildPublicLocationMenu(
+      [
+        { level: 'country', locationKey: 'brazil', country: 'brazil', countryName: 'Brazil' },
+        { level: 'country', locationKey: 'panama', country: 'panama', countryName: 'Panama' },
+        { level: 'country', locationKey: 'peru', country: 'peru', countryName: 'Peru' },
+      ],
+      [
+        {
+          level: 'city',
+          locationKey: 'brazil|sao-paulo',
+          country: 'brazil',
+          city: 'sao-paulo',
+          countryName: 'Brazil',
+          cityName: 'Sao Paulo',
+        },
+        {
+          level: 'city',
+          locationKey: 'panama|panama',
+          country: 'panama',
+          city: 'panama',
+          countryName: 'Panama',
+          cityName: 'Panama',
+        },
+      ],
+    )
+
+    expect(menu.countries.map((country) => country.locationKey)).toEqual(['peru'])
+  })
 })
