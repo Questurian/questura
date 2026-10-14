@@ -36,7 +36,7 @@ const RESULT: Record<NewsletterConfirmStatus, { title: string; body: string }> =
 export function NewsletterConfirm(): JSX.Element {
   // Read in the browser: public pages are pre-built, so the server render
   // never sees the query string.
-  const token = useSearchParams().get("token");
+  const token = useSearchParams()?.get("token") ?? null;
   const [state, setState] = useState<State>(token ? { kind: "idle" } : { kind: "done", status: "invalid" });
 
   async function confirm() {
