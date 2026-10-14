@@ -61,6 +61,7 @@ import * as migration_20261010_040409_article_display_layout from './20261010_04
 import * as migration_20261013_132021_articles_location_optional from './20261013_132021_articles_location_optional';
 import * as migration_20261013_201348_section_pages_curated_blocks from './20261013_201348_section_pages_curated_blocks';
 import * as migration_20261013_232446_newsletter_subscribers from './20261013_232446_newsletter_subscribers';
+import * as migration_20261014_012448_newsletter_issues_and_suppressed_at from './20261014_012448_newsletter_issues_and_suppressed_at';
 
 export const migrations = [
   {
@@ -376,6 +377,11 @@ export const migrations = [
   {
     up: migration_20261013_232446_newsletter_subscribers.up,
     down: migration_20261013_232446_newsletter_subscribers.down,
-    name: '20261013_232446_newsletter_subscribers'
+    name: '20261013_232446_newsletter_subscribers',
+  },
+  {
+    up: migration_20261014_012448_newsletter_issues_and_suppressed_at.up,
+    down: migration_20261014_012448_newsletter_issues_and_suppressed_at.down,
+    name: '20261014_012448_newsletter_issues_and_suppressed_at'
   },
 ];

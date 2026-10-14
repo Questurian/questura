@@ -109,6 +109,15 @@ export const NewsletterSubscribers: CollectionConfig = {
       },
     },
     {
+      name: 'suppressedAt',
+      type: 'date',
+      admin: {
+        readOnly: true,
+        date: { pickerAppearance: 'dayAndTime' },
+        description: 'When the address hard-bounced or reported spam.',
+      },
+    },
+    {
       // sha256 of the token mailed in the confirmation link. The token itself
       // is never stored, so a database read cannot confirm anyone.
       name: 'confirmTokenHash',

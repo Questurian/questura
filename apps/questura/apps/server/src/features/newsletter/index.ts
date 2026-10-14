@@ -1,3 +1,4 @@
+export { NewsletterIssues } from './collections/NewsletterIssues'
 export { NewsletterSubscribers } from './collections/NewsletterSubscribers'
 export {
   NEWSLETTER_SIGNUP_SOURCES,

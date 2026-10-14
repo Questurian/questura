@@ -222,9 +222,9 @@ export async function unsubscribe(email: string, from: 'site' | 'resend', now = 
  * A hard bounce or a spam complaint. Terminal for mail: no confirmation and
  * no issue goes to the address again. A complaint outranks a bounce.
  */
-export async function suppress(email: string, reason: 'bounced' | 'complained'): Promise<void> {
+export async function suppress(email: string, reason: 'bounced' | 'complained', now = new Date()): Promise<void> {
   const payload = await getPayload({ config })
   const row = await findByEmail(payload, email)
   if (!row || row.status === 'complained' || row.status === reason) return
-  await payload.update({ collection: COLLECTION, id: row.id, data: { status: reason } })
+  await payload.update({ collection: COLLECTION, id: row.id, data: { status: reason, suppressedAt: now.toISOString() } })
 }
