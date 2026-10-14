@@ -68,6 +68,9 @@ export const BLOCK_IMAGE_SIZES = {
   /** The fixed 120/150/180px thumbnail beside an article row. */
   listThumbnail: '(min-width: 1024px) 180px, (min-width: 768px) 150px, 120px',
 
+  /** The square in an article list's square-with-ad layout. */
+  listSquare: '(min-width: 1280px) 300px, (min-width: 1024px) 240px, (min-width: 768px) 220px, 112px',
+
   /** The 38%-of-column thumbnail in a side list. Measured at 114-174px. */
   sideThumbnail: '(min-width: 1024px) 180px, (min-width: 768px) 120px, 40vw',
 

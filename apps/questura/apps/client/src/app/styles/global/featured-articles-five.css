@@ -100,7 +100,11 @@
     max-width: var(--block-max-width);
     margin-inline: auto;
     padding: 24px var(--block-gutter) 56px;
-    border-top: 1px solid rgba(95, 89, 82, 0.18);
+    /* The rule spans the content, gutter to gutter, like every other
+       rule in the block; a border on the padded box ran 24px past both
+       edges. */
+    background: linear-gradient(rgba(95, 89, 82, 0.18), rgba(95, 89, 82, 0.18))
+      no-repeat var(--block-gutter) 0 / calc(100% - 2 * var(--block-gutter)) 1px;
   }
 
   .city-featured-five-hero {
@@ -249,7 +253,9 @@
     column-gap: 32px;
     padding-top: 24px;
     padding-bottom: 56px;
-    border-top: 1px solid rgba(95, 89, 82, 0.18);
+    /* Content-width rule (gutter to gutter), not a border on the padded box. */
+    background: linear-gradient(rgba(95, 89, 82, 0.18), rgba(95, 89, 82, 0.18))
+      no-repeat var(--block-gutter) 0 / calc(100% - 2 * var(--block-gutter)) 1px;
   }
 
   .city-five-cl-center {

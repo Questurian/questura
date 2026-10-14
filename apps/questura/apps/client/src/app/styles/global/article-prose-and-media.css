@@ -2,17 +2,19 @@
 
 .article-prose p {
   font-family: var(--font-display);
-  font-size: 15px;
-  line-height: 1.72;
+  /* 17px on phones: 15px Playfair read a size small next to every other
+     travel publication's phone body text (17-18px). */
+  font-size: 17px;
+  line-height: 1.7;
   color: #1A1A1A;
   margin-bottom: 1rem;
 }
 
 .article-prose h2 {
   font-family: var(--font-display);
-  font-size: 22px;
+  font-size: 24px;
   font-weight: 600;
-  line-height: 1.25;
+  line-height: 1.22;
   color: #1A1A1A;
   margin-top: 2rem;
   margin-bottom: 0.75rem;
@@ -20,9 +22,9 @@
 
 .article-prose h3 {
   font-family: var(--font-display);
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 600;
-  line-height: 1.3;
+  line-height: 1.28;
   color: #1A1A1A;
   margin-top: 1.5rem;
   margin-bottom: 0.5rem;
@@ -42,7 +44,7 @@
 
 .article-prose li {
   font-family: var(--font-display);
-  font-size: 15px;
+  font-size: 17px;
   line-height: 1.65;
   color: #1A1A1A;
   margin-bottom: 0.25rem;
@@ -119,7 +121,7 @@
 }
 
 .maps-listicle-intro p {
-  font-size: 14px;
+  font-size: 16px;
   line-height: 1.65;
   margin-bottom: 0.85rem;
 }
@@ -129,7 +131,7 @@
 }
 
 .maps-listicle-blurb p {
-  font-size: 14px;
+  font-size: 16px;
   line-height: 1.62;
   margin-bottom: 0.72rem;
 }
@@ -152,13 +154,13 @@
 
 @media (min-width: 380px) {
   .maps-listicle-intro p {
-    font-size: 15px;
+    font-size: 16px;
     line-height: 1.7;
     margin-bottom: 1rem;
   }
 
   .maps-listicle-blurb p {
-    font-size: 15px;
+    font-size: 16px;
     line-height: 1.7;
     margin-bottom: 0.85rem;
   }
@@ -178,7 +180,7 @@
   }
 
   .maps-listicle-blurb p {
-    font-size: 15px;
+    font-size: 16px;
     line-height: 1.72;
     margin-bottom: 0.9rem;
   }

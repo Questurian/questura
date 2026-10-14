@@ -36,7 +36,7 @@ function LocationCard({
         <PublicImage
           src={item.coverImageUrl}
           alt={item.coverImageAlt ?? item.title}
-          className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover/guide:scale-[1.025]"
+          className="absolute inset-0 h-full w-full object-cover"
           fetchPriority={isPriority ? 'high' : 'auto'}
           loading={isPriority ? 'eager' : 'lazy'}
           sizes={BLOCK_IMAGE_SIZES.quarterColumn}

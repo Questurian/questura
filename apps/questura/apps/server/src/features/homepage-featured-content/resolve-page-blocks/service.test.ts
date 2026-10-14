@@ -157,7 +157,7 @@ describe('formatPublicLocationHomepageDoc', () => {
     ] as never)
 
     expect(response.pageBlocks[0]).toMatchObject({
-      items: [{ articleType: 'Questurian Maps' }, { articleType: 'Itinerary' }],
+      items: [{ articleType: 'Maps' }, { articleType: 'Itinerary' }],
     })
   })
 

@@ -19,7 +19,7 @@
     "@googlemaps/js-api-loader": "^2.0.2",
     "@tanstack/react-query": "^5.90.3",
     "@tanstack/react-query-devtools": "^5.90.2",
-    "country-flag-icons": "^1.6.20",
+    "flag-icons": "7.5.0",
     "lucide-react": "^0.553.0",
     "next": "15.5.27",
     "next-intl": "^4.11.2",

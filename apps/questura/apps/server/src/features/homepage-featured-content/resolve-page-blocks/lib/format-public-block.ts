@@ -1,4 +1,5 @@
 import { publicArticleGridFourLayout } from '../../article-grid/service'
+import { normalizeArticleListLayout } from '../../article-list/service'
 import {
   publicFeaturedArticlesSlot3Layout,
   publicFeaturedArticlesSlot4Layout,
@@ -82,6 +83,10 @@ export function formatPublicHomepageBlock(block: unknown, location?: LocationCon
     if (slot4Layout) return { ...base, slot4Layout }
     if (slot5Layout) return { ...base, slot5Layout }
     return base
+  }
+
+  if (blockType === 'article-list') {
+    return { ...base, articleListLayout: normalizeArticleListLayout(block.articleListLayout) }
   }
 
   const articleGridFourLayout =

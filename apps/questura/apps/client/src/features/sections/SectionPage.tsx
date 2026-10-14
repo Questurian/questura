@@ -13,7 +13,8 @@ import type { SectionPageKey } from '@/features/CityDashboard/lib/fetchCityHomep
 import { getPublicBaseUrl } from '@/lib/seo/publicBaseUrl'
 
 import { buildSectionPageJsonLd, sectionPageShareImage } from './lib/sectionPageJsonLd'
-import { SECTION_PAGES, sectionPageMetadata, type SectionPageCopy } from './lib/sectionPages'
+import { SECTION_PAGES, sectionPageMetadata, type SectionKey, type SectionPageCopy } from './lib/sectionPages'
+import { SectionIcon } from './SectionIcon'
 
 /**
  * A curated section's metadata, with the first teaser photo as its share
@@ -41,6 +42,10 @@ export async function sectionPageMetadataFor(page: SectionPageKey): Promise<Meta
  * The masthead sits on the block grid (BlockSection), so the <h1> lines up
  * with the first block's left edge. It draws no rule of its own: the first
  * block's hairline is the only line under it.
+ *
+ * The <h1> is set in the editorial serif's italic, not the display face: the
+ * one-word title in the same Playfair as every headline read as a label. The
+ * kicker carries the section's line icon in the accent blue.
  */
 export async function SectionPage({
   copy,
@@ -53,6 +58,7 @@ export async function SectionPage({
   children?: ReactNode
 }) {
   const data = page ? curatedHomepage(await fetchSectionPage(page)) : null
+  const section = copy.path.slice(1) as SectionKey
   const blocks = data?.pageBlocks ?? []
 
   return (
@@ -61,10 +67,19 @@ export async function SectionPage({
       <BlockSection contentClassName="pt-10 768:pt-14 1024:pt-16">
         <header className="grid gap-4 pb-8 768:pb-10 1024:grid-cols-[minmax(0,1fr)_minmax(0,26rem)] 1024:items-end 1024:gap-12 1280:grid-cols-[minmax(0,1fr)_minmax(0,30rem)]">
           <div>
-            {copy.kicker ? <p className={`mb-3 768:mb-4 ${BLOCK_TYPE.kicker}`}>{copy.kicker}</p> : null}
+            {copy.kicker ? (
+              <p className={`mb-3 flex items-center gap-2.5 768:mb-4 ${BLOCK_TYPE.kicker}`}>
+                {section in SECTION_PAGES ? (
+                  <SectionIcon section={section} className="size-[1.75em] shrink-0" />
+                ) : null}
+                {copy.kicker}
+              </p>
+            ) : null}
+            {/* -0.03em pulls the italic's left side-bearing back so the first
+                letter's ink, not its box, sits on the kicker icon's edge. */}
             <h1
               id="section-page-title"
-              className="font-display text-[4rem] font-medium leading-[0.86] tracking-[-0.02em] text-foreground 480:text-[5rem] 768:text-[6.5rem] 1024:text-[7.5rem]"
+              className="-ml-[0.03em] font-[family-name:var(--font-editorial-serif)] text-[4.75rem] font-medium italic leading-[0.86] tracking-[-0.015em] text-foreground 480:text-[5.75rem] 768:text-[7.5rem] 1024:text-[8.75rem]"
             >
               {copy.name}
             </h1>

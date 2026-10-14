@@ -84,6 +84,9 @@ export function applyBlockFieldUpdates(block: RawBlock, fields: ParsedBlockUpdat
   if (!fields.articleGridFourLayout.omit) {
     next = { ...next, articleGridFourLayout: fields.articleGridFourLayout.value }
   }
+  if (!fields.articleListLayout.omit) {
+    next = { ...next, articleListLayout: fields.articleListLayout.value }
+  }
   if (!fields.creatorKicker.omit) {
     next = { ...next, creatorKicker: fields.creatorKicker.value }
   }

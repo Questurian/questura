@@ -15,6 +15,8 @@ import { PublicImage } from '@/components/media/PublicImage'
 import { BLOCK_IMAGE_SIZES } from '../blockImageSizes'
 import { heroImagePriority, type ImagePriority } from '../heroImagePriority'
 import { FeaturedArticlesFiveCenterLead } from './FeaturedArticlesFiveCenterLead'
+import { ArticleKickerLabel } from '../ArticleKickerLabel'
+import { CardDek } from '../CardDek'
 
 function getArticleTypeLabel(article: FeaturedArticleTeaser): string {
   return article.articleType ?? article.category?.name ?? 'Article'
@@ -58,9 +60,11 @@ function MagazineHeroCard({ article, imagePriority }: MagazineHeroCardProps): JS
         <NavigableImageTarget href={articlePath} label={`Read ${article.title}`} />
       </div>
 
-      <div className="city-article-content flex w-full flex-col justify-start px-[var(--block-gutter)] py-3">
+      {/* No inline padding: the copy starts on the photo's left edge. The
+          card is already inset by the block gutter. */}
+      <div className="city-article-content flex w-full flex-col justify-start py-3">
         <p className={BLOCK_TYPE.kicker}>
-          {articleTypeLabel}
+          <ArticleKickerLabel label={articleTypeLabel} />
         </p>
 
         <h2 className={`mt-2.5 ${BLOCK_TYPE.titleL}`} data-title-length={blockTitleLength(article.title)}>
@@ -124,7 +128,7 @@ function SidebarMediaCard({ article }: SidebarMediaCardProps): JSX.Element {
       </div>
 
       <div className="city-five-side-copy">
-        <p className={`city-five-side-type ${BLOCK_TYPE.kicker}`}>{articleTypeLabel}</p>
+        <p className={`city-five-side-type ${BLOCK_TYPE.kicker}`}><ArticleKickerLabel label={articleTypeLabel} /></p>
         <h3 className={`city-five-side-title ${BLOCK_TYPE.titleM}`}>
           {articlePath ? (
             <Link href={articlePath} className="hover:underline">
@@ -134,6 +138,7 @@ function SidebarMediaCard({ article }: SidebarMediaCardProps): JSX.Element {
             article.title
           )}
         </h3>
+        <CardDek excerpt={article.excerpt} href={articlePath} className="city-five-side-dek" />
         <p className={`city-five-side-author ${BLOCK_TYPE.byline}`}>
           <AuthorLink
             authorSlug={article.author?.slug}
@@ -161,7 +166,7 @@ function SidebarTextRow({ article }: SidebarTextRowProps): JSX.Element {
 
   return (
     <section className="city-five-side-text">
-      <p className={`city-five-side-type ${BLOCK_TYPE.kicker}`}>{articleTypeLabel}</p>
+      <p className={`city-five-side-type ${BLOCK_TYPE.kicker}`}><ArticleKickerLabel label={articleTypeLabel} /></p>
       <h3 className={`city-five-side-title ${BLOCK_TYPE.titleS}`}>
         {articlePath ? (
           <Link href={articlePath} className="hover:underline">

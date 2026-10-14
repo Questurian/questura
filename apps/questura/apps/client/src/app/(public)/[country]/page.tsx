@@ -70,7 +70,7 @@ export default async function CountryHubPage({ params }: Props) {
   const cities = data?.cities ?? []
 
   return (
-    <section className="min-h-[70vh] bg-background px-5 py-16 text-foreground 768:px-10 1024:px-16">
+    <section className="min-h-[70vh] bg-background px-[var(--block-gutter)] py-16 text-foreground">
       <div className="mx-auto max-w-3xl">
         <h1 className="font-display text-[48px] font-medium leading-[0.95] text-foreground 480:text-[64px] 768:text-[84px]">
           {countryName}

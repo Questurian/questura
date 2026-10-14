@@ -12,6 +12,7 @@ import { PublicImage, PublicSource } from '@/components/media/PublicImage'
 import { BLOCK_IMAGE_SIZES } from '../blockImageSizes'
 import { isPriorityImage } from '../heroImagePriority'
 import { BLOCK_TYPE, blockTitleLength } from '../blockType'
+import { ArticleKickerLabel } from '../ArticleKickerLabel'
 
 const PREVIEW_ARTICLE_COUNT = 3
 
@@ -83,7 +84,7 @@ function FeaturedArticlePreviewCard({
 
       <div className="city-article-content flex w-full flex-col justify-start py-0">
         <p className={BLOCK_TYPE.kicker}>
-          {articleTypeLabel}
+          <ArticleKickerLabel label={articleTypeLabel} />
         </p>
 
         <h2

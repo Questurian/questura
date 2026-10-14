@@ -26,6 +26,7 @@ export type RawBlock = {
   itemKickers?: unknown
   itemDescriptions?: unknown
   articleGridFourLayout?: string
+  articleListLayout?: string
   featureKicker?: string | null
   featureTitle?: string | null
   featureDescription?: string | null

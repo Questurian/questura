@@ -3,6 +3,7 @@ import type { Payload } from 'payload'
 import type { PayloadInstance } from '@/types'
 
 import { normalizeArticleGridFourLayout } from '../article-grid/service'
+import { normalizeArticleListLayout } from '../article-list/service'
 import {
   assertAuthorFeatureItemsMatchAuthors,
   authorIdsFromAuthorFeatureBlock,
@@ -347,5 +348,13 @@ export const CURATED_BLOCK_BEHAVIORS: Record<string, CuratedBlockBehavior> = {
   }),
   'newsletter-signup': newsletterSignupBehavior,
   'page-hero': pageHeroBehavior,
-  'article-list': featuredBehavior,
+  'article-list': {
+    ...featuredBehavior,
+    prepareRecord(block) {
+      block.articleListLayout = normalizeArticleListLayout(block.articleListLayout)
+    },
+    // The square layout crops every row to a square, so it needs that crop.
+    requiredImageField: (block) =>
+      normalizeArticleListLayout(block.articleListLayout) === 'square-with-ad' ? 'imageSquare' : 'image',
+  },
 }

@@ -48,16 +48,18 @@ function MapCard({
   const hasImage = Boolean(item.imageUrl ?? item.imageUrlSquare)
 
   return (
-    <article className={`group ${isLead ? 'flex flex-col' : 'flex items-start gap-4 768:flex-col 768:gap-0'}`}>
+    <article className={`${isLead ? 'flex flex-col' : 'flex items-start gap-4 768:flex-col 768:gap-0'}`}>
+      {/* No zoom on hover: like every other block, the photo only takes the
+          light tint from NavigableImageTarget. */}
       <div
-        className={`relative shrink-0 overflow-hidden bg-background-warm ${
+        className={`city-article-image-shell relative shrink-0 overflow-hidden bg-background-warm ${
           isLead ? 'aspect-square w-full' : 'size-[104px]'
         } 768:aspect-[3/2] 768:h-auto 768:w-full`}
       >
         {hasImage ? (
           <PhoneSquareImage
             article={item}
-            className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
+            className="relative z-10 h-full w-full object-cover"
             priority={isPriority ? EAGER_IMAGE : LAZY_IMAGE}
             sizes={isLead ? BLOCK_IMAGE_SIZES.mapsGridLead : BLOCK_IMAGE_SIZES.mapsGridRow}
           />
@@ -66,7 +68,10 @@ function MapCard({
       </div>
 
       <div className={`min-w-0 ${isLead ? 'pt-4' : 'flex-1 768:pt-4'}`}>
-        <p className={BLOCK_TYPE.kicker}>{kicker}</p>
+        <p className={`flex items-center gap-[0.3em] ${BLOCK_TYPE.kicker}`}>
+          <PinIcon className="h-[1.15em] w-auto shrink-0" />
+          {kicker}
+        </p>
         <h3 className={`mt-2 ${BLOCK_TYPE.titleM}`}>
           {href ? <Link href={href}>{item.title}</Link> : item.title}
         </h3>
@@ -118,20 +123,22 @@ export function QuesturianMapsDarkPreview({
       className="py-12 768:py-16"
       aria-label={title}
     >
-      <div className="border-b border-foreground/20 pb-4 768:pb-5">
-        {/* A custom heading keeps the series name above it; the default
-            heading is the series name, so it carries the pin itself. */}
-        {heading ? (
-          <p className={`mb-2.5 flex items-center gap-1.5 ${BLOCK_TYPE.kicker}`}>
-            <PinIcon className="size-3.5 shrink-0" />
-            {DEFAULT_TITLE}
+      {/* The series announces itself: a solid blue pin badge and a blue rule
+          under the heading, where the blocks around it use a grey hairline. */}
+      <div className="flex items-center gap-4 border-b-2 border-accent pb-4 768:gap-5 768:pb-5">
+        <span
+          aria-hidden="true"
+          className="flex size-12 shrink-0 items-center justify-center rounded-full bg-accent text-white 768:size-14 1024:size-16"
+        >
+          <PinIcon className="size-[55%]" />
+        </span>
+        <div className="min-w-0">
+          <p className={`mb-1.5 ${BLOCK_TYPE.kicker}`}>
+            {heading ? DEFAULT_TITLE : 'Interactive maps'}
           </p>
-        ) : null}
-        <h2 className={`flex items-center gap-2.5 ${BLOCK_TYPE.sectionHeading}`}>
-          {heading ? null : <PinIcon className="size-[0.8em] shrink-0 text-accent" />}
-          {title}
-        </h2>
-        {subheading ? <p className={BLOCK_TYPE.sectionSubheading}>{subheading}</p> : null}
+          <h2 className={BLOCK_TYPE.sectionHeading}>{title}</h2>
+          {subheading ? <p className={BLOCK_TYPE.sectionSubheading}>{subheading}</p> : null}
+        </div>
       </div>
 
       <ul className="mt-6 grid 768:mt-8 768:grid-cols-2 768:gap-x-8 768:gap-y-10 1024:grid-cols-3 1024:gap-x-10 1024:gap-y-12">

@@ -338,6 +338,14 @@ export type FeaturedArticlesBlock = CityHomepageArticleBlock & {
 
 export type ArticleGridFourLayout = "four-across" | "two-by-two";
 
+/** Matches the server's ARTICLE_LIST_LAYOUT_VALUES. Missing means "standard". */
+export type ArticleListLayout = "standard" | "square-with-ad";
+
+export type ArticleListBlock = CityHomepageArticleBlock & {
+  blockType: "article-list";
+  articleListLayout?: ArticleListLayout | null;
+};
+
 export type ArticleGridBlock = CityHomepageArticleBlock & {
   blockType: "article-grid";
   /** Present when totalSlots === 4; picks the wide strip vs the 2×2 square grid. */

@@ -112,17 +112,18 @@ export function FeaturedArticleOneArticlePreview({
   const articlePath = article.articlePath ?? null
   const titleLength = blockTitleLength(article.title)
 
+  // Phone: the photo runs edge to edge on the page ground, and the black band
+  // starts under it, holding only the copy. Inset in black, the photo read as
+  // a letterboxed frame with a black strip cut off at the top.
   const mobileContent = (
     <>
       {mobileImageUrl ? (
-        <div className="city-article-image-shell relative mx-[var(--block-gutter)] aspect-square overflow-hidden bg-[#1a1a1a]">
+        <div className="city-article-image-shell relative aspect-square overflow-hidden bg-[#1a1a1a]">
           <ArticleImage src={mobileImageUrl} priority={imagePriority} className="h-full w-full object-cover" />
           <NavigableImageTarget href={articlePath} label={`Read ${article.title}`} />
         </div>
-      ) : (
-        <div className="mx-[var(--block-gutter)] aspect-square bg-[#1a1a1a]" />
-      )}
-      <div className="relative">
+      ) : null}
+      <div className="relative bg-[#0a0a0a]">
         <div className={`city-article-content px-[var(--block-gutter)] py-9 ${showAuthorAvatar ? 'text-center' : ''}`}>
           {creatorKicker ? (
             <p className={`mb-6 text-center text-accent-soft ${BLOCK_TYPE.kicker}`}>
@@ -142,7 +143,7 @@ export function FeaturedArticleOneArticlePreview({
               {articlePath ? <Link href={articlePath}>{excerpt}</Link> : excerpt}
             </p>
           ) : null}
-          <p className={`mt-7 text-center text-[#6a635c] ${BLOCK_TYPE.byline}`}>
+          <p className={`mt-6 text-[#8a8178] ${showAuthorAvatar ? 'text-center' : ''} ${BLOCK_TYPE.byline}`}>
             BY <AuthorLink authorSlug={article.author?.slug} authorId={article.author?.id} className="hover:underline">{authorLabel}</AuthorLink>
           </p>
         </div>
@@ -183,7 +184,9 @@ export function FeaturedArticleOneArticlePreview({
           </p>
         </div>
       </div>
-      <div className="768:w-1/2 768:py-10 768:pr-8 1024:py-14 1024:pr-12 1280:py-16 1280:pr-16 flex items-center">
+      {/* No right padding: the photo ends on the page's right content edge,
+          like every block above and below it. */}
+      <div className="768:w-1/2 768:py-10 1024:py-14 1280:py-16 flex items-center">
         <div className="city-article-image-shell relative ml-auto w-[96%] aspect-[3/2] overflow-hidden bg-[#1a1a1a]">
           {desktopImageUrl ? (
             <ArticleImage src={desktopImageUrl} priority={imagePriority} className="h-full w-full object-cover" />
@@ -195,14 +198,14 @@ export function FeaturedArticleOneArticlePreview({
   )
 
   return (
-    <section className="bg-[#0a0a0a] text-white">
+    <section className="text-white 768:bg-[#0a0a0a]">
       {sectionHeading && !showAuthorAvatar ? (
         <BlockSectionHeader
           heading={sectionHeading}
           subheading={sectionSubheading}
           className={`${BLOCK_MAX_WIDTH_CLASS} ${BLOCK_GUTTER_CLASS} pt-8 pb-2`}
-          headingClassName="text-white"
-          subheadingClassName="text-[#b0a89e]"
+          headingClassName="768:text-white"
+          subheadingClassName="768:text-[#b0a89e]"
         />
       ) : null}
 

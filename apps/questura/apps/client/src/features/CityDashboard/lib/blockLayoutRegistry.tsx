@@ -2,6 +2,7 @@ import type { ComponentType } from "react";
 
 import type {
   ArticleGridBlock,
+  ArticleListBlock,
   AuthorFeatureBlock,
   EditorialFeatureBlock,
   CityHomepageBlock,
@@ -190,7 +191,7 @@ const homepageBlockFallbackLayouts: HomepageBlockLayoutFallbackDefinition[] = [
     blockType: "page-hero",
     Component: PageHeroPreview,
   }),
-  defineHomepageBlockLayoutAnySlots<CityHomepageArticleBlock>({
+  defineHomepageBlockLayoutAnySlots<ArticleListBlock>({
     blockType: "article-list",
     Component: ArticleListPreview,
   }),

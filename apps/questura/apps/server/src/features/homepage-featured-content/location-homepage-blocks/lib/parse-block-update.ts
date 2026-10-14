@@ -1,4 +1,5 @@
 import { parseArticleGridFourLayoutBodyField } from '../../article-grid/service'
+import { parseArticleListLayoutBodyField } from '../../article-list/service'
 import {
   hasAuthorFeatureFieldUpdates,
   parseAuthorFeatureCardsBodyField,
@@ -35,6 +36,7 @@ type Slot4LayoutParse = ReturnType<typeof parseSlot4LayoutBodyField>
 type Slot5LayoutParse = ReturnType<typeof parseSlot5LayoutBodyField>
 type MediaAspectParse = ReturnType<typeof parseLocationGridMediaAspectBodyField>
 type ArticleGridFourLayoutParse = ReturnType<typeof parseArticleGridFourLayoutBodyField>
+type ArticleListLayoutParse = ReturnType<typeof parseArticleListLayoutBodyField>
 type CreatorKickerParse = ReturnType<typeof parseCreatorKickerBodyField>
 type EditorialFeatureFieldsParse = ReturnType<typeof parseEditorialFeatureFields>
 type PageHeroFieldsParse = ReturnType<typeof parsePageHeroFields>
@@ -57,6 +59,7 @@ export type ParsedBlockUpdateFields = {
   slot5Layout: Extract<Slot5LayoutParse, { ok: true }>
   mediaAspect: Extract<MediaAspectParse, { ok: true }>
   articleGridFourLayout: Extract<ArticleGridFourLayoutParse, { ok: true }>
+  articleListLayout: Extract<ArticleListLayoutParse, { ok: true }>
   creatorKicker: Extract<CreatorKickerParse, { ok: true }>
   editorialFeature: {
     [K in keyof EditorialFeatureFieldsParse]: Extract<EditorialFeatureFieldsParse[K], { ok: true }>
@@ -128,6 +131,11 @@ export function parseBlockUpdateBody(body: unknown): ParseBlockUpdateResult {
     return { ok: false, status: 400, message: articleGridFourLayout.message }
   }
 
+  const articleListLayout = parseArticleListLayoutBodyField(bodyRecord)
+  if (!articleListLayout.ok) {
+    return { ok: false, status: 400, message: articleListLayout.message }
+  }
+
   const creatorKicker = parseCreatorKickerBodyField(bodyRecord)
   if (!creatorKicker.ok) {
     return { ok: false, status: 400, message: creatorKicker.message }
@@ -163,6 +171,7 @@ export function parseBlockUpdateBody(body: unknown): ParseBlockUpdateResult {
     slot5Layout,
     mediaAspect,
     articleGridFourLayout,
+    articleListLayout,
     creatorKicker,
     editorialFeature: editorialFeature as ParsedBlockUpdateFields['editorialFeature'],
     pageHero: pageHero as ParsedBlockUpdateFields['pageHero'],
@@ -208,6 +217,7 @@ export function hasBlockFieldUpdates(fields: ParsedBlockUpdateFields): boolean {
     !fields.slot5Layout.omit ||
     !fields.mediaAspect.omit ||
     !fields.articleGridFourLayout.omit ||
+    !fields.articleListLayout.omit ||
     !fields.creatorKicker.omit ||
     hasEditorialFeatureFieldUpdates(fields.editorialFeature) ||
     hasPageHeroFieldUpdates(fields.pageHero) ||
@@ -252,6 +262,10 @@ export function validateBlockUpdateFields(
         message: 'articleGridFourLayout is only supported for article-grid blocks with 4 slots.',
       }
     }
+  }
+
+  if (!fields.articleListLayout.omit && block.blockType !== 'article-list') {
+    return { message: 'articleListLayout is only supported for article-list blocks.' }
   }
 
   if (!fields.sectionHeading.omit && !homepageBlockSupportsSectionHeading(block.blockType)) {

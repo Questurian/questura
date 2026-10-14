@@ -1,4 +1,5 @@
 import { publicArticleGridFourLayout } from '../../article-grid/service'
+import { normalizeArticleListLayout } from '../../article-list/service'
 import {
   publicFeaturedArticlesSlot3Layout,
   publicFeaturedArticlesSlot4Layout,
@@ -51,6 +52,12 @@ export function curatedBlockApiPayload(
       return {
         ...base,
         mediaAspect: publicLocationGridMediaAspect(block),
+      }
+    }
+    if (block.blockType === 'article-list') {
+      return {
+        ...base,
+        articleListLayout: normalizeArticleListLayout(block.articleListLayout),
       }
     }
     if (block.blockType === 'article-grid') {
