@@ -102,8 +102,8 @@ function ImgPairBlockRenderer({ block }: { block: ImgPairBlock }) {
       </div>
       <PhotoCreditLine
         credit={blockPhotoCredit([
-          { heading: 'Left', carriers: [block.imageOne.mediaSet, block.imageOne] },
-          { heading: 'Right', carriers: [block.imageTwo.mediaSet, block.imageTwo] },
+          [block.imageOne.mediaSet, block.imageOne],
+          [block.imageTwo.mediaSet, block.imageTwo],
         ])}
         className="px-4 pt-2 1024:px-0"
       />
@@ -137,12 +137,7 @@ function ImgTrioBlockRenderer({ block }: { block: ImgTrioBlock }) {
         ))}
       </div>
       <PhotoCreditLine
-        credit={blockPhotoCredit(
-          images.map((image, index) => ({
-            heading: `Photo ${index + 1}`,
-            carriers: [image.mediaSet, image],
-          })),
-        )}
+        credit={blockPhotoCredit(images.map((image) => [image.mediaSet, image]))}
         className="px-4 pt-2 1024:px-0"
       />
       {block.caption && (

@@ -3,81 +3,77 @@ import test from 'node:test'
 
 import { HOUSE_CREDIT, blockPhotoCredit, photoCredit } from './photoCredit.ts'
 
-test('a four-photo composite credits its editor and lists every original in order', () => {
+const sources = (...credits) => credits.map((credit, index) => ({ position: `Spot ${index}`, credit }))
+
+test('a plain photo is credited to its photographer, on the right, with nothing on the left', () => {
+  assert.deepEqual(photoCredit({ photographer_credit: 'Alvaro / Airbnb', sources: [] }), {
+    createdBy: null,
+    credit: 'Alvaro / Airbnb',
+    sources: ['Alvaro / Airbnb'],
+  })
+})
+
+test('a composite of one platform reads "Photos courtesy of" it, created by its editor', () => {
   const credit = photoCredit({
     edit_credit: 'Questurian',
-    photographer_credit: 'Photos: Maria, Alex · Composite / edit: Questurian',
-    sources: ['Top left', 'Top right', 'Bottom left', 'Bottom right'].map((position, index) => ({
-      position,
-      title: `Photo ${index + 1}`,
-      credit: index < 2 ? 'Maria' : 'Alex',
-      url: 'https://photos.example/original',
-    })),
+    photographer_credit: 'Photos: Roxana / Airbnb, Ana / Airbnb · Composite / edit: Questurian',
+    sources: sources('Roxana / Airbnb', 'Ana / Airbnb', 'Juan Manuel / Airbnb', 'Javier / Airbnb'),
   })
-  assert.equal(credit.holder, 'Questurian')
-  assert.equal(credit.groups.length, 1)
-  const [group] = credit.groups
-  assert.equal(group.editCredit, 'Questurian')
-  assert.deepEqual(
-    group.sources.map((source) => source.position),
-    ['Top left', 'Top right', 'Bottom left', 'Bottom right'],
-  )
-  assert.equal(group.sources[3].url, 'https://photos.example/original')
+  assert.deepEqual(credit, { createdBy: 'Questurian', credit: 'Photos courtesy of Airbnb', sources: ['Airbnb'] })
 })
 
-test('one photographer behind every source is the holder', () => {
-  const credit = photoCredit({ sources: [{ position: 'Photo', credit: 'El Rey del Lomo' }] })
-  assert.equal(credit.holder, 'El Rey del Lomo')
+test('a composite of mixed sources says "Sources" and lists each name once, no positions', () => {
+  const credit = photoCredit({
+    edit_credit: 'Questurian',
+    sources: sources('Carlos Vargas', 'Canta Rana', 'Carlos Vargas', 'Questurian', 'Pedro / Airbnb', 'Ana / Airbnb'),
+  })
+  assert.equal(credit.createdBy, 'Questurian')
+  assert.equal(credit.credit, null)
+  assert.deepEqual(credit.sources, ['Carlos Vargas', 'Canta Rana', 'Questurian', 'Airbnb'])
 })
 
-test('unsafe source links are dropped, the credit stays', () => {
-  for (const url of ['javascript:alert(1)', 'data:text/html,test', 'https://secret@photos.example/x']) {
-    const [source] = photoCredit({ sources: [{ position: 'Left', credit: 'Maria', url }] }).groups[0].sources
-    assert.equal(source.credit, 'Maria')
-    assert.equal(source.url, null)
-  }
+test('one photographer behind every original is the credit, not "Sources"', () => {
+  const credit = photoCredit({ edit_credit: 'Questurian', sources: sources('El Rey del Lomo', 'El Rey del Lomo') })
+  assert.deepEqual(credit, { createdBy: 'Questurian', credit: 'El Rey del Lomo', sources: ['El Rey del Lomo'] })
 })
 
-test('a plain photographer credit is the holder and the only source', () => {
-  const credit = photoCredit({ photographer_credit: 'Alvaro / Airbnb', sources: [] })
-  assert.equal(credit.holder, 'Alvaro / Airbnb')
-  assert.deepEqual(credit.groups[0].sources, [
-    { position: null, credit: 'Alvaro / Airbnb', title: null, url: null },
-  ])
+test('several originals with no editor were still put together by Questurian', () => {
+  assert.equal(photoCredit({ sources: sources('A', 'B') }).createdBy, HOUSE_CREDIT)
 })
 
-test('a composed credit line without sources is read as an editor plus a photographers line', () => {
+test('our own photo, edited by us, names us once', () => {
+  assert.deepEqual(photoCredit({ photographer_credit: 'Questurian', edit_credit: 'Questurian' }), {
+    createdBy: null,
+    credit: 'Questurian',
+    sources: ['Questurian'],
+  })
+})
+
+test('a composed credit line without sources is read as its editor plus a photographers line', () => {
   const credit = photoCredit({ photographer_credit: 'Photos: Wa Lok · Composite / edit: Questurian' })
-  assert.equal(credit.holder, 'Questurian')
-  assert.equal(credit.groups[0].editCredit, 'Questurian')
-  assert.equal(credit.groups[0].sources[0].credit, 'Wa Lok')
+  assert.deepEqual(credit, { createdBy: 'Questurian', credit: 'Wa Lok', sources: ['Wa Lok'] })
 })
 
 test('the media set wins over its asset copy; an empty set falls through to the asset', () => {
-  assert.equal(photoCredit({ photographer_credit: 'Set' }, { photographer_credit: 'Asset' }).holder, 'Set')
-  assert.equal(photoCredit({ photographer_credit: null, sources: [] }, { photographer_credit: 'Asset' }).holder, 'Asset')
-  assert.equal(photoCredit(370, { photographer_credit: 'Asset' }).holder, 'Asset')
+  assert.equal(photoCredit({ photographer_credit: 'Set' }, { photographer_credit: 'Asset' }).credit, 'Set')
+  assert.equal(photoCredit({ photographer_credit: null, sources: [] }, { photographer_credit: 'Asset' }).credit, 'Asset')
+  assert.equal(photoCredit(370, { photographer_credit: 'Asset' }).credit, 'Asset')
 })
 
 test('a photo with no credit at all is credited to Questurian', () => {
   for (const carriers of [[], [null], [{}], [{ photographer_credit: '  ', sources: [] }]]) {
-    const credit = photoCredit(...carriers)
-    assert.equal(credit.holder, HOUSE_CREDIT)
-    assert.equal(credit.groups[0].sources[0].credit, HOUSE_CREDIT)
+    assert.deepEqual(photoCredit(...carriers), { createdBy: null, credit: HOUSE_CREDIT, sources: [HOUSE_CREDIT] })
   }
 })
 
-test('a photo pair names each holder once and lists each photo under its heading', () => {
-  const credit = blockPhotoCredit([
-    { heading: 'Left', carriers: [{ photographer_credit: 'Questurian' }] },
-    { heading: 'Right', carriers: [{ photographer_credit: '27 Tapas' }] },
-  ])
-  assert.equal(credit.holder, 'Questurian, 27 Tapas')
-  assert.deepEqual(credit.groups.map((group) => group.heading), ['Left', 'Right'])
+test('a photo pair by one photographer shows one credit; by two, "Sources"', () => {
+  const same = blockPhotoCredit([[{}], [{ photographer_credit: 'Questurian' }]])
+  assert.deepEqual(same, { createdBy: null, credit: 'Questurian', sources: ['Questurian'] })
 
-  const same = blockPhotoCredit([
-    { heading: 'Left', carriers: [{}] },
-    { heading: 'Right', carriers: [{ photographer_credit: 'Questurian' }] },
-  ])
-  assert.equal(same.holder, 'Questurian')
+  const mixed = blockPhotoCredit([[{ photographer_credit: 'Questurian' }], [{ photographer_credit: '27 Tapas' }]])
+  assert.deepEqual(mixed, { createdBy: null, credit: null, sources: ['Questurian', '27 Tapas'] })
+
+  // An uncredited photo is ours, not the other photographer's.
+  const uncredited = blockPhotoCredit([[{}], [{ photographer_credit: '27 Tapas' }]])
+  assert.deepEqual(uncredited.sources, ['Questurian', '27 Tapas'])
 })
