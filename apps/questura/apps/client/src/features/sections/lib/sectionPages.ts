@@ -54,7 +54,7 @@ export const SECTION_PAGES = {
     metaTitle: 'The Questurian Newsletter: Monthly Travel Guides — Questurian',
     description:
       'Sign up for the free Questurian newsletter: once a month, our newest travel guides, food maps and itineraries for Latin America, with a short note from the team.',
-    kicker: 'Monthly, free',
+    kicker: 'Free, in your inbox',
     // No dek: at 1024px the one-word title is wider than its grid column, so
     // a dek beside it would collide. The page opens its signup with that line.
   },

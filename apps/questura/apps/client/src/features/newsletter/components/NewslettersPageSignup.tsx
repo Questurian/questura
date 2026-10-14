@@ -1,45 +1,49 @@
 import type { JSX } from 'react'
 
 import { BlockSection } from '@/features/CityDashboard/components/blocks/BlockSection'
-import { EditorialLabelRule, EditorialTick } from '@/features/articles/components/EditorialRule'
-import { LazyNewsletterSignupForm as NewsletterSignupForm } from './LazyNewsletterSignupForm'
+import { EditorialLabelRule } from '@/features/articles/components/EditorialRule'
+import { NewsletterCard, type NewsletterListing } from './NewsletterCard'
 
-const WHAT_ARRIVES = [
-  'The guides, food maps and itineraries we published that month, in one place.',
-  'A short note from the team: what we found, where we went, what is next.',
-  'Nothing else. No daily emails, no sales pitches, and one click to leave.',
+/**
+ * Every newsletter, grouped by topic. One today; a second is one more entry
+ * (and one more list on the server), and the grid takes it.
+ */
+const NEWSLETTER_GROUPS: { topic: string; newsletters: NewsletterListing[] }[] = [
+  {
+    topic: 'Travel',
+    newsletters: [
+      {
+        name: 'The Questurian Newsletter',
+        frequency: 'Monthly',
+        description:
+          'Our newest guides, food maps and itineraries for Latin America, with a short note from the team.',
+        image: '/images/newsletter/lima-pier-greyscale.webp',
+        source: 'newsletters-page',
+      },
+    ],
+  },
 ]
 
-/** The /newsletters page under its masthead: what the reader gets, and the form. */
+/** The /newsletters page under its masthead: a catalogue of newsletters, each with its own Sign up. */
 export function NewslettersPageSignup(): JSX.Element {
   return (
     <BlockSection contentClassName="pb-16 768:pb-24">
-      <div className="grid gap-10 border-t border-foreground/18 pt-8 768:pt-10 1024:grid-cols-[minmax(0,1fr)_minmax(0,30rem)] 1024:gap-16">
-        <div>
-          <p className="mb-8 max-w-[36rem] font-[family-name:var(--font-editorial-serif)] text-[1.2rem] leading-[1.45] text-foreground/80 768:text-[1.3rem]">
-            Once a month, our newest guides, maps and itineraries in your inbox, with a short note
-            from the team.
-          </p>
-          <EditorialLabelRule>What arrives</EditorialLabelRule>
-          <ul className="mt-6 space-y-4">
-            {WHAT_ARRIVES.map((line) => (
-              <li key={line} className="flex gap-3 text-accent">
-                <EditorialTick />
-                <span className="font-[family-name:var(--font-editorial-serif)] text-[1.08rem] leading-[1.5] text-foreground/85 768:text-[1.15rem]">
-                  {line}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </div>
-        <div className="bg-paper px-5 py-7 480:px-7 768:px-8 768:py-9">
-          <h2 className="font-display text-[1.6rem] font-medium leading-[1.1] tracking-[-0.02em] text-foreground 768:text-[1.9rem]">
-            Get the next issue
-          </h2>
-          <div className="mt-5">
-            <NewsletterSignupForm source="newsletters-page" tone="light" />
-          </div>
-        </div>
+      <div className="border-t border-foreground/18 pt-8 768:pt-10">
+        <p className="max-w-[40rem] font-[family-name:var(--font-editorial-serif)] text-[1.15rem] leading-[1.45] text-foreground/80 768:text-[1.25rem]">
+          The best of Questurian, in your inbox. Every newsletter is free, and every email has a
+          one-click unsubscribe.
+        </p>
+
+        {NEWSLETTER_GROUPS.map((group) => (
+          <section key={group.topic} aria-label={group.topic} className="mt-10 768:mt-12">
+            <EditorialLabelRule>{group.topic}</EditorialLabelRule>
+            <div className="mt-6 grid gap-6 768:grid-cols-2 1024:grid-cols-3 1024:gap-8">
+              {group.newsletters.map((newsletter) => (
+                <NewsletterCard key={newsletter.name} newsletter={newsletter} />
+              ))}
+            </div>
+          </section>
+        ))}
       </div>
     </BlockSection>
   )

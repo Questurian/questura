@@ -62,10 +62,13 @@ export function NewsletterSignupForm({
   source,
   tone = "light",
   buttonLabel = "Sign up",
+  autoFocus = false,
 }: {
   source: NewsletterSignupSource;
   tone?: Tone;
   buttonLabel?: string;
+  /** Only for forms that appear on a click (the /newsletters card), never on page load. */
+  autoFocus?: boolean;
 }): JSX.Element {
   const id = useId();
   const [email, setEmail] = useState("");
@@ -133,6 +136,7 @@ export function NewsletterSignupForm({
           name="newsletter-email"
           type="email"
           autoComplete="email"
+          autoFocus={autoFocus}
           required
           placeholder="you@example.com"
           value={email}
