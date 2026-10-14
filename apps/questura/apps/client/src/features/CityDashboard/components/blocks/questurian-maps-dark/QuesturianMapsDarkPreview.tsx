@@ -100,7 +100,7 @@ function MapCard({
 /**
  * Questurian Maps as a section of a food-and-travel front: a heading on a
  * rule, then the maps as photo cards, three across on desktop and two on a
- * tablet, on the warm paper band.
+ * tablet, on the page ground like the blocks around it.
  */
 export function QuesturianMapsDarkPreview({
   block,
@@ -115,7 +115,7 @@ export function QuesturianMapsDarkPreview({
 
   return (
     <BlockSection
-      className="border-y border-foreground/10 bg-paper py-12 768:py-16"
+      className="py-12 768:py-16"
       aria-label={title}
     >
       <div className="border-b border-foreground/20 pb-4 768:pb-5">
