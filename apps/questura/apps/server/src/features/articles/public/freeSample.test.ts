@@ -206,12 +206,26 @@ describe('applySampleRule — single-type listicles', () => {
     ...extra,
   })
 
-  it('keeps the first three places and withholds the rest', () => {
-    const doc: Record<string, unknown> = { items: Array.from({ length: 7 }, (_, i) => place(i)) }
+  // Owner's choice for now: header and intro only.
+  const three = { ...DEFAULT_SAMPLE_LIMITS, listicleItems: 3 }
+
+  it('shows no place by default', () => {
+    const doc: Record<string, unknown> = { items: Array.from({ length: 4 }, (_, i) => place(i)) }
 
     const outcome = applySampleRule('single-type-listicles', doc)
 
-    expect(DEFAULT_SAMPLE_LIMITS.listicleItems).toBe(3)
+    expect(DEFAULT_SAMPLE_LIMITS.listicleItems).toBe(0)
+    expect(outcome).toMatchObject({ applied: true, unit: 'items', shown: 0, total: 4 })
+    expect(doc.items).toEqual([])
+    expect(outcome.pins).toHaveLength(4)
+    expect(JSON.stringify(doc)).not.toContain('Place')
+  })
+
+  it('keeps the leading places when the limit allows some', () => {
+    const doc: Record<string, unknown> = { items: Array.from({ length: 7 }, (_, i) => place(i)) }
+
+    const outcome = applySampleRule('single-type-listicles', doc, three)
+
     expect(outcome).toMatchObject({ applied: true, unit: 'items', shown: 3, total: 7 })
     expect((doc.items as Array<{ item: { title: string } }>).map((row) => row.item.title)).toEqual([
       'Place 0',
@@ -225,7 +239,7 @@ describe('applySampleRule — single-type listicles', () => {
       items: [place(0), place(1), place(2), place(3), { blockType: 'data-dining', item: { title: 'No coordinates' } }],
     }
 
-    const outcome = applySampleRule('single-type-listicles', doc)
+    const outcome = applySampleRule('single-type-listicles', doc, three)
 
     expect(outcome.pins).toEqual([{ lat: -12.3, lng: -77.3 }])
     expect(JSON.stringify(outcome)).not.toContain('Place 3')
@@ -262,7 +276,7 @@ describe('applySampleRule — single-type listicles', () => {
   it('cuts nothing from a list no longer than the sample, but still reports it', () => {
     const doc: Record<string, unknown> = { items: [place(0), place(1)] }
 
-    const outcome = applySampleRule('single-type-listicles', doc)
+    const outcome = applySampleRule('single-type-listicles', doc, three)
 
     expect(outcome).toMatchObject({ applied: false, unit: 'items', shown: 2, total: 2, pins: [] })
     expect(doc.items).toHaveLength(2)

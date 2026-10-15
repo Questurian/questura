@@ -73,7 +73,7 @@ describe('gatePublicArticle', () => {
     expect(doc.whereStaying).toHaveLength(1)
   })
 
-  it('locks a member single-type listicle after its first three places', () => {
+  it('locks a member single-type listicle down to its header', () => {
     const doc: Record<string, unknown> = {
       access: 'member',
       items: Array.from({ length: 5 }, (_, i) => ({
@@ -89,15 +89,12 @@ describe('gatePublicArticle', () => {
       access: 'member',
       locked: true,
       unit: 'items',
-      shown: 3,
+      shown: 0,
       total: 5,
-      mapPins: [
-        { lat: 3, lng: 3 },
-        { lat: 4, lng: 4 },
-      ],
+      mapPins: [0, 1, 2, 3, 4].map((n) => ({ lat: n, lng: n })),
       itemMoments: [null, null, null, null, 'late-night'],
     })
-    expect(doc.items).toHaveLength(3)
+    expect(doc.items).toEqual([])
   })
 
   it('leaves a free single-type listicle whole', () => {

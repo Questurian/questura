@@ -21,8 +21,10 @@ import type { ArticleCollectionSlug } from './serializeArticleBlocks'
  *   about the withheld stops is where each sits on the map (owner decision,
  *   2026-10-06): a locked itinerary whose map showed only the hotel read as an
  *   empty one. Coordinates only -- no name, photo, text or day.
- * - A single-type listicle shows its first three places (owner decision,
- *   2026-10-15, replacing the 2026-08-15 rule that left them ungated for ads).
+ * - A single-type listicle shows none of its places for now: header and
+ *   intro only (owner decision, 2026-10-15, replacing the 2026-08-15 rule
+ *   that left them ungated for ads). The owner may open the first place or
+ *   two later; `listicleItems` is the one number to change.
  *   As with itineraries, each withheld place keeps only its map position, and
  *   the moment each place sits under, so a member's full list can be headed
  *   by the server-rendered moment headings. Its stored JSON-LD is dropped
@@ -47,7 +49,7 @@ export type SampleLimits = {
  */
 export const DEFAULT_SAMPLE_LIMITS: SampleLimits = {
   articleTextBlocks: 2,
-  listicleItems: 3,
+  listicleItems: 0,
 }
 
 /**
