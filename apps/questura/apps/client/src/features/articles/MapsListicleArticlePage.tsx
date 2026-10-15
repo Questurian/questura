@@ -13,7 +13,7 @@ import {
 } from '@/features/articles/lib/listicleMomentGroups'
 import { ADS_ENABLED } from '@/features/articles/lib/ads'
 import { NewsletterArticleBand } from '@/features/newsletter/components/NewsletterArticleBand'
-import { PaywallFade } from '@/features/articles/components/PaywallNotice'
+import { PaywallFade } from '@/features/articles/components/PaywallFade'
 import type { MapsListicleArticle } from '@/features/articles/types/mapsListicle'
 
 type MapsListicleArticlePageProps = {

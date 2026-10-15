@@ -8,7 +8,7 @@ import { NewsletterArticleBand } from "@/features/newsletter/components/Newslett
 import { ArticlePageHeader } from "@/features/articles/components/ArticlePageHeader";
 import { InstagramEmbedBlock } from "@/features/articles/components/InstagramEmbedBlock";
 import { ItineraryStayCard } from "@/features/articles/components/ItineraryStayCard";
-import { PaywallFade } from "@/features/articles/components/PaywallNotice";
+import { PaywallFade } from "@/features/articles/components/PaywallFade";
 import { ItineraryMomentBadge } from "@/features/articles/components/ItineraryMomentBadge";
 import { ListicleMapRegion } from "@/features/articles/components/ListicleMapRegion";
 import { ListicleSeparator } from "@/features/articles/components/ListicleSeparator";

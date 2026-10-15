@@ -1,5 +1,6 @@
 import Link from '@/components/navigation/PublicLink'
 
+import { PaywallFade } from '@/features/articles/components/PaywallFade'
 import { PAYWALL_CLASS, describeLock, type GateState } from '@/features/articles/lib/gate'
 
 type PaywallNoticeProps = {
@@ -12,22 +13,6 @@ type PaywallNoticeProps = {
    * something other than prose can sit inside that distance.
    */
   fade?: boolean
-}
-
-/**
- * Dissolves the tail of the sample into the page ground. Positioned by the
- * caller; the solid end is the bottom edge.
- */
-export function PaywallFade({ className = '' }: { className?: string }) {
-  return (
-    <div
-      aria-hidden="true"
-      className={`pointer-events-none absolute inset-x-0 z-10 ${className}`}
-      style={{
-        background: 'linear-gradient(to bottom, transparent 0%, color-mix(in srgb, var(--background) 45%, transparent) 35%, color-mix(in srgb, var(--background) 85%, transparent) 70%, var(--background) 100%)',
-      }}
-    />
-  )
 }
 
 /**
