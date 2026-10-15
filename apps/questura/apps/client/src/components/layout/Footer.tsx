@@ -54,6 +54,7 @@ function FooterColumn({ heading, links }: { heading: string; links: FooterLink[]
           <li key={link.href}>
             <Link
               href={link.href}
+              prefetch={false}
               className="font-[family-name:var(--font-dm-sans)] text-[0.75rem] font-medium uppercase leading-none tracking-[0.12em] text-nav-link hover:text-nav-link-hover"
             >
               {link.label}
@@ -65,6 +66,15 @@ function FooterColumn({ heading, links }: { heading: string; links: FooterLink[]
   );
 }
 
+/**
+ * Every link here has `prefetch={false}`. Next prefetches a link's page as
+ * soon as the link scrolls into view, and the footer now holds a dozen links
+ * or more (destinations, sections, about, legal) at the end of every page, so
+ * reaching the bottom of any page fetched a dozen other pages. On a slow
+ * phone link that traffic queues in front of the page's own images (e2e
+ * journey 12, Slow 3G: about 42 s before the bigger footer, 48 s after). A
+ * click still navigates as a client-side transition; it just fetches then.
+ */
 export default function Footer({
   locationMenu = null,
 }: {
@@ -83,6 +93,7 @@ export default function Footer({
                 lift puts its caps on the column headings' cap line from 768. */}
             <Link
               href="/"
+              prefetch={false}
               className="inline-flex text-[1.5rem] 768:-mt-[0.125em] 1024:text-[1.75rem]"
               data-no-hover-underline
             >
@@ -93,6 +104,7 @@ export default function Footer({
             </p>
             <Link
               href="/newsletters"
+              prefetch={false}
               className="mt-5 inline-flex h-9 items-center rounded-sm bg-accent px-4 font-[family-name:var(--font-dm-sans)] text-[0.72rem] font-bold uppercase tracking-[0.12em] text-white hover:bg-[#3150c7]"
             >
               Get the newsletter
@@ -123,7 +135,7 @@ export default function Footer({
           <p>&copy; {year} Questurian. All rights reserved.</p>
           <nav aria-label="Legal" className="flex gap-6">
             {LEGAL_LINKS.map((link) => (
-              <Link key={link.href} href={link.href} className="font-semibold text-nav-link hover:text-nav-link-hover">
+              <Link key={link.href} href={link.href} prefetch={false} className="font-semibold text-nav-link hover:text-nav-link-hover">
                 {link.label}
               </Link>
             ))}
