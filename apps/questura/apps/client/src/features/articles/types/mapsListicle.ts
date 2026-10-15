@@ -1,11 +1,12 @@
 /** Public API payload for `single-type-listicles` (served under `/maps/[slug]`). */
 import type { ArticleAuthor, SeoSection, ImageAttributionData } from '@/features/articles/types'
 
-export type MediaVariant = {
+export type MediaVariant = ImageAttributionData & {
   url?: string
 }
 
-export type ListicleSelectedPhoto = {
+/** A media set picked for a row; its own credit fields win over a variant's copy. */
+export type ListicleSelectedPhoto = ImageAttributionData & {
   url?: string
   alt_text?: string
   variants?: Partial<Record<string, MediaVariant>>

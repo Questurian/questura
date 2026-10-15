@@ -10,7 +10,8 @@ export type MediaAsset = ImageAttributionData & {
   id: number
   url: string
   alt_text?: string
-  mediaSet?: { alt_text?: string }
+  /** The set this variant belongs to; its credit fields win over the asset's copy. */
+  mediaSet?: ImageAttributionData & { alt_text?: string }
 }
 
 export type TextBlock = {
@@ -96,7 +97,7 @@ export type AirbnbCard = {
   price: string | null
   rating: number | null
   reviewCount: number | null
-  image: { url: string; alt: string; width: number | null; height: number | null } | null
+  image: (ImageAttributionData & { url: string; alt: string; width: number | null; height: number | null }) | null
 }
 
 /** `airbnb` is null when the Airbnb is unpublished or gone; the card is then skipped. */
@@ -115,7 +116,7 @@ export type HotelCard = {
   district: string | null
   /** Dollar ticks, for example "$$$". */
   price: string | null
-  image: { url: string; alt: string; width: number | null; height: number | null } | null
+  image: (ImageAttributionData & { url: string; alt: string; width: number | null; height: number | null }) | null
 }
 
 /** `hotel` is null when the accommodation is unpublished or gone; the card is then skipped. */

@@ -1,8 +1,13 @@
 import type { Payload } from 'payload'
 
-import { resolveMediaSetForPlacement } from '@/features/media/lib/resolve-public-image'
+import {
+  publicImageAttribution,
+  resolveMediaSetForPlacement,
+  type PublicImageAttribution,
+} from '@/features/media/lib/resolve-public-image'
 
-export type PublicHotelCardImage = {
+/** Carries the photo's credit and sources for the credit line under it. */
+export type PublicHotelCardImage = PublicImageAttribution & {
   url: string
   alt: string
   width: number | null
@@ -142,6 +147,7 @@ export async function sanitizeHotelCards(
     if (typeof doc.id !== 'number') continue
     const resolved = resolveMediaSetForPlacement(doc, 'wide-card', {
       allowMigrationFallback: true,
+      includeAttribution: true,
     })
     if (!resolved.url) continue
     resolvedById.set(doc.id, {
@@ -149,6 +155,7 @@ export async function sanitizeHotelCards(
       alt: resolved.alt,
       width: resolved.width,
       height: resolved.height,
+      ...publicImageAttribution(resolved),
     })
   }
 

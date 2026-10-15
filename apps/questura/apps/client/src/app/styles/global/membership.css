@@ -462,14 +462,16 @@
 }
 
 .listicle-tour-card:hover .listicle-tour-ring-progress,
-.listicle-tour-card:focus-visible .listicle-tour-ring-progress {
+.listicle-tour-card:focus-visible .listicle-tour-ring-progress,
+.listicle-tour-card:has(a:focus-visible) .listicle-tour-ring-progress {
   animation: join-plan-arrow-ring-draw 620ms cubic-bezier(0.22, 1, 0.36, 1)
     forwards;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .listicle-tour-card:hover .listicle-tour-ring-progress,
-  .listicle-tour-card:focus-visible .listicle-tour-ring-progress {
+  .listicle-tour-card:focus-visible .listicle-tour-ring-progress,
+  .listicle-tour-card:has(a:focus-visible) .listicle-tour-ring-progress {
     animation: none;
     stroke-dashoffset: 0;
   }

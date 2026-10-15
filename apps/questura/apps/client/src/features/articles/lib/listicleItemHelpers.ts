@@ -1,9 +1,11 @@
 import type { ListicleItemRow } from '@/features/articles/types/mapsListicle'
 import { isListicleVenue } from '@/features/articles/types/mapsListicle'
+import { photoCredit, type PhotoCredit } from './photoCredit'
 
 export type ListicleItemImage = {
   url: string
   alt: string
+  credit: PhotoCredit
 }
 
 /** Images for a listicle row from editor-selected photos (public API depth). */
@@ -15,12 +17,10 @@ export function listicleItemImagesFromRow(row: ListicleItemRow): ListicleItemIma
 
   return photos.flatMap((photo) => {
     const variants = photo.variants
-    const url =
-      variants?.wide?.url ??
-      variants?.editorial?.url ??
-      variants?.hero?.url ??
-      variants?.square?.url ??
-      photo.url
+    const variant = [variants?.wide, variants?.editorial, variants?.hero, variants?.square].find(
+      (candidate) => candidate?.url,
+    )
+    const url = variant?.url ?? photo.url
 
     if (!url) return []
 
@@ -31,7 +31,7 @@ export function listicleItemImagesFromRow(row: ListicleItemRow): ListicleItemIma
           ? row.item.title
           : ''
 
-    return [{ url, alt }]
+    return [{ url, alt, credit: photoCredit(photo, variant) }]
   })
 }
 

@@ -66,6 +66,24 @@ describe('sanitizeAirbnbCards', () => {
     expect(blocks[1].airbnb).not.toHaveProperty('createdBy')
   })
 
+  it('carries the host photo credit for the credit line', async () => {
+    const blocks: Array<Record<string, unknown>> = [{ blockType: 'airbnb-card', airbnb: airbnbDoc() }]
+    const { payload } = payloadWithMediaSets([
+      {
+        id: 41,
+        photographer_credit: 'Alvaro / Airbnb',
+        variants: { wide: { url: 'https://cdn.example/41_wide.webp', width: 1600, height: 900 } },
+      },
+    ])
+
+    await sanitizeAirbnbCards(blocks, payload)
+
+    const image = (blocks[0].airbnb as { image: Record<string, unknown> }).image
+    expect(image.photographer_credit).toBe('Alvaro / Airbnb')
+    expect(image).not.toHaveProperty('sources')
+    expect(image).not.toHaveProperty('edit_credit')
+  })
+
   it('hides a draft, missing or unpopulated Airbnb instead of leaking it', async () => {
     const blocks: Array<Record<string, unknown>> = [
       { blockType: 'airbnb-card', airbnb: airbnbDoc({ status: 'draft' }) },

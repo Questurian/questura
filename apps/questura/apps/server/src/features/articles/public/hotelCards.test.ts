@@ -68,6 +68,32 @@ describe('sanitizeHotelCards', () => {
     })
   })
 
+  it('carries the photo credit and sources for the credit line, never the source graph', async () => {
+    const blocks: Array<Record<string, unknown>> = [{ blockType: 'hotel-card', hotel: hotelDoc() }]
+    const { payload } = payloadWithMediaSets([
+      {
+        id: 41,
+        photographer_credit: 'JW Marriott Hotel Lima',
+        edit_credit: 'Questurian',
+        sources: [
+          { id: 'a', position: 'Left', credit: 'JW Marriott Hotel Lima', url: 'https://jw.example/lobby', mediaSet: 7 },
+          { id: 'b', position: 'Right', credit: 'Questurian', url: 'javascript:alert(1)' },
+        ],
+        variants: { wide: { url: 'https://cdn.example/41_wide.webp', width: 1600, height: 900 } },
+      },
+    ])
+
+    await sanitizeHotelCards(blocks, payload)
+
+    const image = (blocks[0].hotel as { image: Record<string, unknown> }).image
+    expect(image.photographer_credit).toBe('JW Marriott Hotel Lima')
+    expect(image.edit_credit).toBe('Questurian')
+    expect(image.sources).toEqual([
+      { position: 'Left', credit: 'JW Marriott Hotel Lima', url: 'https://jw.example/lobby' },
+      { position: 'Right', credit: 'Questurian' },
+    ])
+  })
+
   it('falls back through website, map link and profile fields', async () => {
     const blocks: Array<Record<string, unknown>> = [
       {

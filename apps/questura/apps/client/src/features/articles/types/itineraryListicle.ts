@@ -1,4 +1,8 @@
-import type { ArticleAuthor, SeoSection } from "@/features/articles/types";
+import type {
+  ArticleAuthor,
+  ImageAttributionData,
+  SeoSection,
+} from "@/features/articles/types";
 import type {
   ListicleInstagramPost,
   ListicleSelectedPhoto,
@@ -102,10 +106,11 @@ export type ItineraryTourAgencyBlock = {
   };
   keyLocations?: ItineraryTourAgencyKeyLocation[] | null;
   image?:
-    | {
+    | (ImageAttributionData & {
         url?: string | null;
         alt_text?: string | null;
-      }
+        mediaSet?: ImageAttributionData | number | null;
+      })
     | number
     | null;
   instagramPost?: ListicleInstagramPost | number | string | null;

@@ -17,6 +17,8 @@ import { fetchStandardArticleSidebar } from '@/features/articles/lib/fetchArticl
 import { ArticleBlockStream } from '@/features/articles/components/ArticleBlockStream'
 import { ArticleByline } from '@/features/articles/components/ArticleByline'
 import { ArticleAuthorBanner } from '@/features/articles/components/ArticleAuthorBanner'
+import { PhotoCreditLine } from '@/features/articles/components/PhotoCreditLine'
+import { photoCredit } from '@/features/articles/lib/photoCredit'
 import { NewsletterArticleBand } from '@/features/newsletter/components/NewsletterArticleBand'
 import { getPublicBaseUrl } from '@/lib/seo/publicBaseUrl'
 import { Article, type ArticleDisplayLayout } from './types'
@@ -58,17 +60,17 @@ function ArticleShareRow({
   )
 }
 
-/** The article's lead photo. Every layout shows the same image and caption. */
+/** The article's lead photo. Every layout shows the same image and credit line. */
 function ArticleHeroFigure({
   article,
   sizes,
   frameClassName,
-  captionClassName,
+  tone = 'light',
 }: {
   article: Article
   sizes: string
   frameClassName: string
-  captionClassName: string
+  tone?: 'light' | 'dark'
 }) {
   const featuredImage = article.headerSection?.featuredImage
   if (!featuredImage?.url) return null
@@ -86,9 +88,9 @@ function ArticleHeroFigure({
           priority
         />
       </div>
-      {featuredImage.alt_text ? (
-        <figcaption className={captionClassName}>{featuredImage.alt_text}</figcaption>
-      ) : null}
+      <figcaption className="px-4 pt-2 1024:px-0">
+        <PhotoCreditLine credit={photoCredit(featuredImage)} tone={tone} />
+      </figcaption>
     </figure>
   )
 }
@@ -220,7 +222,6 @@ function ClassicArticleLayout({ article, path, shareUrl, adPlan, sidebar }: Layo
             article={article}
             sizes="(min-width: 1024px) 780px, 100vw"
             frameClassName="aspect-[16/10]"
-            captionClassName="px-4 pt-2 font-mono text-[11px] text-foreground/45 1024:px-0"
           />
 
           <div className="px-4 pt-8 pb-16 1024:px-0 1024:pt-10 1024:pb-20">
@@ -258,7 +259,7 @@ function DarkHeroArticleLayout({ article, path, shareUrl, adPlan, sidebar }: Lay
             article={article}
             sizes="(min-width: 1152px) 1088px, (min-width: 1024px) calc(100vw - 64px), 100vw"
             frameClassName="aspect-[16/10] 768:aspect-[2/1]"
-            captionClassName="px-4 pt-2 text-right font-mono text-[11px] text-white/50 1024:px-0"
+            tone="dark"
           />
 
           <div className="mx-auto mt-8 flex max-w-[46rem] flex-col items-center px-4 text-center 1024:mt-12">
@@ -347,7 +348,6 @@ function CenteredArticleLayout({ article, path, shareUrl, adPlan, sidebar }: Lay
         article={article}
         sizes="(min-width: 1152px) 1088px, (min-width: 1024px) calc(100vw - 64px), 100vw"
         frameClassName="aspect-[16/10] 768:aspect-[2/1]"
-        captionClassName="px-4 pt-2 text-right font-mono text-[11px] text-foreground/45 1024:px-0"
       />
 
       <div className="mx-auto max-w-[42rem] px-4">
