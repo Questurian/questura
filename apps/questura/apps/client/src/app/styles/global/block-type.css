@@ -50,6 +50,19 @@
     color: var(--accent);
   }
 
+  /* The pin in front of a "Maps" kicker (ArticleKickerLabel). It is exactly
+     one cap tall and its tip sits on the baseline, so it reads as a letter
+     of the word: top flush with the caps, bottom flush with the baseline.
+     `1cap` is the kicker font's own cap height; 0.7em is DM Sans's. */
+  .kicker-pin {
+    display: inline-block;
+    height: 0.7em;
+    height: 1cap;
+    width: auto;
+    margin-right: 0.3em;
+    vertical-align: baseline;
+  }
+
   /* Lead story in any block. Phone size follows title length
      (data-title-length, from blockTitleLength()). */
   .block-type-title-l {

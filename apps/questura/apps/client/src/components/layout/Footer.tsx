@@ -86,7 +86,9 @@ export default function Footer({
   return (
     <footer className="site-footer w-full border-t border-nav-rule bg-nav-bg text-nav-ink">
       <div className="mx-auto w-full max-w-[var(--block-max-width)] px-[var(--block-gutter)] pb-8 pt-12 1024:pb-10 1024:pt-16">
-        <div className="grid grid-cols-2 gap-x-6 gap-y-10 768:grid-cols-4 1024:gap-x-10">
+        {/* From 768 the brand column (last track) is never narrower than its
+            one-line newsletter button; the link columns give up the room. */}
+        <div className="grid grid-cols-2 gap-x-6 gap-y-10 768:grid-cols-[repeat(3,minmax(0,1fr))_minmax(min-content,1fr)] 1024:gap-x-10">
           {/* Brand column: first on phones, last (right) from 768. */}
           <div className="col-span-2 768:order-last 768:col-span-1">
             {/* The wordmark's cap height sits 0.125em below its box top; the
@@ -102,10 +104,12 @@ export default function Footer({
             <p className="mt-3 max-w-[22rem] font-[family-name:var(--font-editorial-serif)] text-[1.05rem] leading-snug text-nav-subtitle">
               Curated city guides, maps and itineraries across Latin America.
             </p>
+            {/* One line wherever there is room; on a screen too narrow for
+                that it wraps, centred, and grows taller instead of clipping. */}
             <Link
               href="/newsletters"
               prefetch={false}
-              className="mt-5 inline-flex h-9 items-center rounded-sm bg-accent px-4 font-[family-name:var(--font-dm-sans)] text-[0.72rem] font-bold uppercase tracking-[0.12em] text-white hover:bg-[#3150c7]"
+              className="mt-5 inline-flex min-h-9 max-w-full items-center justify-center rounded-sm bg-accent px-4 py-2 text-center font-[family-name:var(--font-dm-sans)] text-[0.72rem] font-bold uppercase tracking-[0.12em] text-white hover:bg-[#3150c7] 768:whitespace-nowrap"
             >
               Get the newsletter
             </Link>

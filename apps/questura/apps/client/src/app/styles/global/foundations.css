@@ -248,7 +248,11 @@ html[data-identity="member"] .nav-subscribe[data-pending] {
    always gets the light values. Dark is scoped to `.site-nav`, the navbar's
    own root, and `.site-footer`, which wears the same palette so the page is
    framed by one colour top and bottom. Nothing else on the page changes. Every token must appear in both blocks
-   (navThemeTokens.test.mjs checks). */
+   (navThemeTokens.test.mjs checks).
+
+   An article with a blacked-out top (the `dark-hero` layout) always gets the
+   dark bar, whatever the reader picked, so the bar and the ink header band
+   read as one black top. */
 :root {
   --nav-bg: #F5F0E8;
   --nav-ink: #000000;
@@ -269,6 +273,7 @@ html[data-identity="member"] .nav-subscribe[data-pending] {
   --nav-avatar-glyph: #1c1917;
 }
 
+html:has([data-display-layout="dark-hero"]) .site-nav,
 html[data-nav-theme="dark"] .site-nav,
 html[data-nav-theme="dark"] .site-footer {
   --nav-bg: #16181b;
@@ -288,4 +293,10 @@ html[data-nav-theme="dark"] .site-footer {
   --nav-avatar-to: #383b40;
   --nav-avatar-ring: rgb(255 255 255 / 0.08);
   --nav-avatar-glyph: #e8e3da;
+}
+
+/* On a dark-hero article the bar takes the header band's own ink, so there
+   is no seam between them. */
+html:has([data-display-layout="dark-hero"]) .site-nav {
+  --nav-bg: var(--foreground);
 }
