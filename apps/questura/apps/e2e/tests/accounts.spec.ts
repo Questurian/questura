@@ -108,7 +108,7 @@ test('journey 5: a password reset signs out every session, its link works once, 
   const since = new Date().toISOString()
   await signInButton(phone).click()
   await phone.locator('input[name=email]').fill(email)
-  await phone.getByRole('button', { name: /continue/i }).click()
+  await phone.getByRole('button', { name: 'Continue', exact: true }).click()
   await phone.getByRole('button', { name: 'Forgot password?' }).click()
   await phone.getByRole('button', { name: 'Send reset link' }).click()
 
@@ -146,7 +146,7 @@ test('journey 5: a password reset signs out every session, its link works once, 
   await phone.goto(HOME_PATH)
   await signInButton(phone).click()
   await phone.locator('input[name=email]').fill(email)
-  await phone.getByRole('button', { name: /continue/i }).click()
+  await phone.getByRole('button', { name: 'Continue', exact: true }).click()
   await phone.getByRole('button', { name: 'Forgot password?' }).click()
   await phone.getByRole('button', { name: 'Send reset link' }).click()
   const late = (await mailTo(email, /reset/i, again)).links.find((href) => href.includes('reset-password'))!
