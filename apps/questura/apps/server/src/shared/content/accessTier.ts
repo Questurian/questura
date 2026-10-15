@@ -12,11 +12,20 @@ export const ACCESS_TIERS = ['free', 'member'] as const
 export type AccessTier = (typeof ACCESS_TIERS)[number]
 
 /**
- * New and pre-existing documents are `free`. The safe direction is the one
- * where forgetting to think about a document leaves it readable rather than
- * silently paywalled, and it is what makes the field's first deploy inert.
+ * What a stored value that is missing or unrecognised reads as. Kept `free` to
+ * agree with `isGatedItem` below: a bad tier string must never make a document
+ * unreadable to a paying member.
  */
 export const DEFAULT_ACCESS_TIER: AccessTier = 'free'
+
+/**
+ * What a newly created document starts as. `member` because the site launches
+ * with every article and itinerary behind the paywall (owner decision,
+ * 2026-10-15); making one free is the deliberate act. This only fills the
+ * field on create -- it never reinterprets a stored value, which is
+ * `DEFAULT_ACCESS_TIER`'s job.
+ */
+export const NEW_DOCUMENT_ACCESS_TIER: AccessTier = 'member'
 
 export function isAccessTier(value: unknown): value is AccessTier {
   return typeof value === 'string' && (ACCESS_TIERS as readonly string[]).includes(value)
@@ -40,7 +49,7 @@ export const accessTierField: Field = {
   name: 'access',
   type: 'select',
   required: true,
-  defaultValue: DEFAULT_ACCESS_TIER,
+  defaultValue: NEW_DOCUMENT_ACCESS_TIER,
   options: [
     { label: 'Free — the whole item is public', value: 'free' },
     { label: 'Members only — free sample, then paywall', value: 'member' },
