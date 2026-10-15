@@ -19,6 +19,13 @@ export interface EnhancedAuthFormProps {
   errorMessage?: string;
   prefillEmail?: string;
   onModeChange?: (isSignUp: boolean, showPasswordStep: boolean) => void;
+  /** Lets a host (the sign-in modal's Back control) step the form back. */
+  ref?: React.Ref<EnhancedAuthFormHandle>;
+}
+
+export interface EnhancedAuthFormHandle {
+  /** Return from the password step to the email step. */
+  backToEmail: () => void;
 }
 
 /**

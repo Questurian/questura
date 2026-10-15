@@ -62,9 +62,13 @@ export default function GoogleSignInButton({
       // had not already filled the form in.
       type="button"
       onClick={handleSignIn}
-      className={`flex items-center justify-center gap-3 bg-white border border-gray-300 hover:bg-gray-50 text-black px-6 py-3 rounded-lg transition-colors shadow-sm cursor-pointer ${className}`}
+      // Google's light-theme button (white fill, #747775 stroke, Roboto
+      // Medium, #1F1F1F text) is the one white surface in the sign-in form on
+      // purpose: Google's branding rules fix its fill, so it cannot take the
+      // page ground the way the rest of the form does.
+      className={`flex h-12 items-center justify-center gap-3 rounded-[3px] border border-[#747775] bg-white px-4 font-roboto text-[0.875rem] font-medium text-[#1F1F1F] transition-colors hover:bg-[#F2F2F2] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:transition-none ${className}`}
     >
-      <svg className="w-5 h-5" viewBox="0 0 24 24">
+      <svg aria-hidden="true" className="h-[18px] w-[18px] shrink-0" viewBox="0 0 24 24">
         <path
           fill="#4285F4"
           d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"

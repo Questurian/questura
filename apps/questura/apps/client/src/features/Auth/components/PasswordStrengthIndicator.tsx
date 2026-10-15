@@ -1,5 +1,6 @@
 "use client";
 
+import { Check } from 'lucide-react';
 import { PasswordRequirements } from '../lib/auth-utils';
 
 interface PasswordStrengthIndicatorProps {
@@ -8,38 +9,35 @@ interface PasswordStrengthIndicatorProps {
 
 export default function PasswordStrengthIndicator({ requirements }: PasswordStrengthIndicatorProps) {
   const requirementsList = [
-    { key: 'hasMinLength', label: '8+ Characters', met: requirements.hasMinLength },
-    { key: 'hasNumber', label: 'Number Character', met: requirements.hasNumber },
-    { key: 'hasUppercase', label: 'Uppercase Letter', met: requirements.hasUppercase },
-    { key: 'hasSymbol', label: 'Supported Symbol', met: requirements.hasSymbol },
+    { key: 'hasMinLength', label: '8+ characters', met: requirements.hasMinLength },
+    { key: 'hasNumber', label: 'A number', met: requirements.hasNumber },
+    { key: 'hasUppercase', label: 'An uppercase letter', met: requirements.hasUppercase },
+    { key: 'hasSymbol', label: 'A symbol', met: requirements.hasSymbol },
   ];
 
   return (
-    <div className="mt-3 space-y-2">
+    <ul className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2" aria-label="Password requirements">
       {requirementsList.map((requirement) => (
-        <div key={requirement.key} className="flex items-center gap-2">
-          <div className={`flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center ${
-            requirement.met
-              ? 'bg-[#e8f5e9]'
-              : 'bg-[#f0efeb]'
-          }`}>
-            {requirement.met ? (
-              <svg className="w-3 h-3 text-[#2e7d32]" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-              </svg>
-            ) : (
-              <div className="w-2 h-2 rounded-full bg-[#9a9894]"></div>
-            )}
-          </div>
-          <span className={`text-sm ${
-            requirement.met
-              ? 'text-[#2e7d32] font-medium'
-              : 'text-[#6b6a68]'
-          }`}>
-            {requirement.label}
+        <li
+          key={requirement.key}
+          className={`flex items-center gap-2 text-[0.8rem] transition-colors ${
+            requirement.met ? 'text-forest' : 'text-foreground/55'
+          }`}
+        >
+          <span
+            aria-hidden="true"
+            className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full border transition-colors ${
+              requirement.met ? 'border-forest bg-forest text-white' : 'border-foreground/25'
+            }`}
+          >
+            {requirement.met && <Check className="h-2.5 w-2.5" strokeWidth={3.5} />}
           </span>
-        </div>
+          <span>
+            {requirement.label}
+            <span className="sr-only">{requirement.met ? ' (met)' : ' (not yet)'}</span>
+          </span>
+        </li>
       ))}
-    </div>
+    </ul>
   );
 }
