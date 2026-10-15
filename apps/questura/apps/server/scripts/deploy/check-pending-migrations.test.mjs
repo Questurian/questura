@@ -132,7 +132,6 @@ test('still blocks every other column change, even beside a DROP NOT NULL', () =
   const rewrites = [
     'ALTER TABLE "articles" ALTER COLUMN "location" SET NOT NULL;',
     'ALTER TABLE "articles" ALTER COLUMN "location" SET DATA TYPE varchar(40);',
-    'ALTER TABLE "articles" ALTER COLUMN "location" SET DEFAULT \'peru\';',
     // Chained in one statement: the guard cannot vouch for the rest.
     'ALTER TABLE "articles" ALTER COLUMN "location" DROP NOT NULL, ALTER COLUMN "slug" SET NOT NULL;',
     'ALTER TABLE "articles" ALTER COLUMN "slug" SET NOT NULL, ALTER COLUMN "location" DROP NOT NULL;',
@@ -147,6 +146,46 @@ test('still blocks every other column change, even beside a DROP NOT NULL', () =
   assert.ok(assessMigration(migrationRunning(chainedDrop), 'example').includes('destructive SQL'))
   const besideDrop = 'ALTER TABLE "a" ALTER COLUMN "b" DROP NOT NULL; DROP TABLE "c";'
   assert.ok(assessMigration(migrationRunning(besideDrop), 'example').includes('destructive SQL'))
+})
+
+test('allows changing a column default to a constant', async () => {
+  const defaults = [
+    'ALTER TABLE "articles" ALTER COLUMN "location" SET DEFAULT \'peru\';',
+    'alter table if exists only public.articles alter access set default \'member\'',
+    'ALTER TABLE "a" ALTER COLUMN "b" SET DEFAULT \'x\'::"public"."enum_a_b";',
+    'ALTER TABLE "a" ALTER COLUMN "n" SET DEFAULT -2.5;',
+    'ALTER TABLE "a" ALTER COLUMN "flag" SET DEFAULT false;',
+    'ALTER TABLE "a" ALTER COLUMN "b" SET DEFAULT \'x\';\n  ALTER TABLE "c" ALTER COLUMN "d" DROP NOT NULL;',
+  ]
+  for (const sql of defaults) {
+    assert.deepEqual(assessMigration(migrationRunning(sql), 'example'), [], sql)
+  }
+
+  const name = '20261015_075516_access_default_member'
+  const source = await fs.readFile(path.join(migrationsRoot, `${name}.ts`), 'utf8')
+  assert.deepEqual(assessMigration(source, name), [])
+})
+
+test('still blocks a default the guard cannot read, or anything chained to one', () => {
+  const rewrites = [
+    // Expressions: the guard cannot say what they do.
+    'ALTER TABLE "a" ALTER COLUMN "b" SET DEFAULT now();',
+    'ALTER TABLE "a" ALTER COLUMN "b" SET DEFAULT nextval(\'a_b_seq\');',
+    'ALTER TABLE "a" ALTER COLUMN "b" SET DEFAULT \'x\' || now();',
+    // Chained in one statement, either order.
+    'ALTER TABLE "a" ALTER COLUMN "b" SET DEFAULT \'x\', ALTER COLUMN "c" SET NOT NULL;',
+    'ALTER TABLE "a" ALTER COLUMN "c" SET NOT NULL, ALTER COLUMN "b" SET DEFAULT \'x\';',
+    // A safe statement does not wave through the one beside it.
+    'ALTER TABLE "a" ALTER COLUMN "b" SET DEFAULT \'x\'; ALTER TABLE "a" RENAME COLUMN "b" TO "c";',
+  ]
+  for (const sql of rewrites) {
+    assert.ok(assessMigration(migrationRunning(sql), 'example').includes('column or table rewrite'), sql)
+  }
+
+  const besideUpdate = 'ALTER TABLE "a" ALTER COLUMN "b" SET DEFAULT \'x\'; UPDATE "a" SET "b" = \'x\';'
+  assert.ok(assessMigration(migrationRunning(besideUpdate), 'example').includes('data rewrite'))
+  const dropDefault = 'ALTER TABLE "a" ALTER COLUMN "b" DROP DEFAULT;'
+  assert.ok(assessMigration(migrationRunning(dropDefault), 'example').length > 0)
 })
 
 test('fails closed when db.execute SQL cannot be statically inspected', () => {

@@ -27,14 +27,29 @@ const ENUM_ADD_VALUE = new RegExp(
 )
 
 // Letting a column hold NULL rewrites no row and breaks no code already
-// running (that code never writes NULL there), so it is the one ALTER COLUMN
-// the guard lets through. The statement has to be exactly that, alone: one
-// column, DROP NOT NULL, nothing chained after a comma. SET NOT NULL, a type
-// change, a default and every other ALTER COLUMN stay a column rewrite.
+// running (that code never writes NULL there), so it is one of the two ALTER
+// COLUMN forms the guard lets through. The statement has to be exactly that,
+// alone: one column, DROP NOT NULL, nothing chained after a comma. SET NOT
+// NULL, a type change and every other ALTER COLUMN stay a column rewrite.
+const ALTER_ONE_COLUMN = String.raw`(?:^|(?<=;))\s*ALTER\s+TABLE\s+(?:IF\s+EXISTS\s+)?(?:ONLY\s+)?` +
+  String.raw`${SQL_NAME}(?:\s*\.\s*${SQL_NAME})?\s+ALTER\s+(?:COLUMN\s+)?${SQL_NAME}`
 const COLUMN_DROP_NOT_NULL = new RegExp(
-  String.raw`(?:^|(?<=;))\s*ALTER\s+TABLE\s+(?:IF\s+EXISTS\s+)?(?:ONLY\s+)?` +
-    String.raw`${SQL_NAME}(?:\s*\.\s*${SQL_NAME})?\s+ALTER\s+(?:COLUMN\s+)?${SQL_NAME}` +
-    String.raw`\s+DROP\s+NOT\s+NULL\s*(?=;|$)`,
+  ALTER_ONE_COLUMN + String.raw`\s+DROP\s+NOT\s+NULL\s*(?=;|$)`,
+  'gi',
+)
+
+// Changing a column's default is the other one. Postgres records it in the
+// catalog and applies it to future inserts only, so no row is rewritten, and
+// code already running is unaffected because Payload always writes the field's
+// value itself rather than leaning on the column default. Same shape rules as
+// above, and the new default has to be a constant: a quoted literal (optionally
+// cast), a number, or true/false. An expression such as now() or nextval(...)
+// stays a column rewrite, because the guard cannot say what it does.
+const SQL_CONSTANT =
+  String.raw`(?:${SQL_LITERAL}(?:\s*::\s*${SQL_NAME}(?:\s*\.\s*${SQL_NAME})?)?` +
+  String.raw`|-?\d+(?:\.\d+)?|TRUE|FALSE)`
+const COLUMN_SET_CONSTANT_DEFAULT = new RegExp(
+  ALTER_ONE_COLUMN + String.raw`\s+SET\s+DEFAULT\s+${SQL_CONSTANT}\s*(?=;|$)`,
   'gi',
 )
 
@@ -177,7 +192,9 @@ export function inspectMigration(migrationSource, migrationName) {
 
   const risks = new Set()
   for (const sqlText of sqlStatements) {
-    const statement = sqlText.replace(COLUMN_DROP_NOT_NULL, '')
+    const statement = sqlText
+      .replace(COLUMN_DROP_NOT_NULL, '')
+      .replace(COLUMN_SET_CONSTANT_DEFAULT, '')
     for (const [label, detector] of RISK_RULES) {
       const detected = typeof detector === 'function'
         ? detector(statement)
