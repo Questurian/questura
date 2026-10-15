@@ -13,7 +13,10 @@ import type { SectionPageKey } from '@/features/CityDashboard/lib/fetchCityHomep
 import { getPublicBaseUrl } from '@/lib/seo/publicBaseUrl'
 
 import { buildSectionPageJsonLd, sectionPageShareImage } from './lib/sectionPageJsonLd'
-import { SECTION_PAGES, sectionPageMetadata, type SectionPageCopy } from './lib/sectionPages'
+import { SECTION_PAGES, sectionPageMetadata, type SectionKey, type SectionPageCopy } from './lib/sectionPages'
+import { photoPileOf } from './lib/photoPile'
+import { SectionIcon } from './SectionIcon'
+import { SectionMasthead } from './SectionMasthead'
 
 /**
  * A curated section's metadata, with the first teaser photo as its share
@@ -33,6 +36,42 @@ export async function sectionPageMetadataFor(page: SectionPageKey): Promise<Meta
 }
 
 /**
+ * The masthead of a section without photos (Newsletters): the name in the
+ * editorial serif's italic with the kicker and its line icon above.
+ */
+function PlainMasthead({ copy, section }: { copy: SectionPageCopy; section: SectionKey }) {
+  return (
+    <BlockSection contentClassName="pt-10 768:pt-14 1024:pt-16">
+      <header className="grid gap-4 pb-8 768:pb-10 1024:grid-cols-[minmax(0,1fr)_minmax(0,26rem)] 1024:items-end 1024:gap-12 1280:grid-cols-[minmax(0,1fr)_minmax(0,30rem)]">
+        <div>
+          {copy.kicker ? (
+            <p className={`mb-3 flex items-center gap-2.5 768:mb-4 ${BLOCK_TYPE.kicker}`}>
+              {section in SECTION_PAGES ? (
+                <SectionIcon section={section} className="size-[1.75em] shrink-0" />
+              ) : null}
+              {copy.kicker}
+            </p>
+          ) : null}
+          {/* -0.03em pulls the italic's left side-bearing back so the first
+              letter's ink, not its box, sits on the kicker icon's edge. */}
+          <h1
+            id="section-page-title"
+            className="-ml-[0.03em] font-[family-name:var(--font-editorial-serif)] text-[4.75rem] font-medium italic leading-[0.86] tracking-[-0.015em] text-foreground 480:text-[5.75rem] 768:text-[7.5rem] 1024:text-[8.75rem]"
+          >
+            {copy.name}
+          </h1>
+        </div>
+        {copy.dek ? (
+          <p className="max-w-[34rem] font-[family-name:var(--font-editorial-serif)] text-[1.08rem] leading-[1.45] text-foreground/75 768:text-[1.2rem] 1024:pb-2 1024:text-[1.25rem]">
+            {copy.dek}
+          </p>
+        ) : null}
+      </header>
+    </BlockSection>
+  )
+}
+
+/**
  * A navbar section's page (Eat, Stay, Itineraries, Newsletters). Eat, Stay and
  * Itineraries are curated in the ABW homepage tool like the main homepage:
  * their published blocks render under the masthead with the city homepage's
@@ -41,6 +80,10 @@ export async function sectionPageMetadataFor(page: SectionPageKey): Promise<Meta
  * The masthead sits on the block grid (BlockSection), so the <h1> lines up
  * with the first block's left edge. It draws no rule of its own: the first
  * block's hairline is the only line under it.
+ *
+ * A page whose blocks open with a Photo Pile (picked in the homepage tool)
+ * shows it as a shuffling pile of photos under the page's name
+ * (SectionMasthead); without one it keeps PlainMasthead.
  */
 export async function SectionPage({
   copy,
@@ -53,31 +96,19 @@ export async function SectionPage({
   children?: ReactNode
 }) {
   const data = page ? curatedHomepage(await fetchSectionPage(page)) : null
-  const blocks = data?.pageBlocks ?? []
+  const section = copy.path.slice(1) as SectionKey
+  const { photos, blocks } = photoPileOf(data?.pageBlocks ?? [])
 
   return (
     <section aria-labelledby="section-page-title" className="min-h-[70vh] bg-background text-foreground">
       <JsonLd data={buildSectionPageJsonLd(copy, blocks, getPublicBaseUrl())} />
-      <BlockSection contentClassName="pt-10 768:pt-14 1024:pt-16">
-        <header className="grid gap-4 pb-8 768:pb-10 1024:grid-cols-[minmax(0,1fr)_minmax(0,26rem)] 1024:items-end 1024:gap-12 1280:grid-cols-[minmax(0,1fr)_minmax(0,30rem)]">
-          <div>
-            {copy.kicker ? <p className={`mb-3 768:mb-4 ${BLOCK_TYPE.kicker}`}>{copy.kicker}</p> : null}
-            <h1
-              id="section-page-title"
-              className="font-display text-[4rem] font-medium leading-[0.86] tracking-[-0.02em] text-foreground 480:text-[5rem] 768:text-[6.5rem] 1024:text-[7.5rem]"
-            >
-              {copy.name}
-            </h1>
-          </div>
-          {copy.dek ? (
-            <p className="max-w-[34rem] font-[family-name:var(--font-editorial-serif)] text-[1.08rem] leading-[1.45] text-foreground/75 768:text-[1.2rem] 1024:pb-2 1024:text-[1.25rem]">
-              {copy.dek}
-            </p>
-          ) : null}
-        </header>
-      </BlockSection>
+      {photos.length > 0 ? (
+        <SectionMasthead copy={copy} photos={photos} />
+      ) : (
+        <PlainMasthead copy={copy} section={section} />
+      )}
       {children}
-      {data ? <CityHomepageContent pageBlocks={data.pageBlocks} /> : null}
+      {blocks.length > 0 ? <CityHomepageContent pageBlocks={blocks} /> : null}
     </section>
   )
 }

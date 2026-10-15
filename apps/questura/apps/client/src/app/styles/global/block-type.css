@@ -31,7 +31,7 @@
   .block-type-section-subheading {
     margin-top: 6px;
     font-family: var(--font-dm-sans);
-    font-size: 0.68rem;
+    font-size: 0.72rem;
     font-weight: 600;
     letter-spacing: 0.1em;
     line-height: 1.5;
@@ -42,7 +42,7 @@
   /* Category / article-type label on a card, and feature labels. */
   .block-type-kicker {
     font-family: var(--font-dm-sans);
-    font-size: 0.66rem;
+    font-size: 0.72rem;
     font-weight: 700;
     letter-spacing: 0.12em;
     line-height: 1;
@@ -93,11 +93,13 @@
     color: #111111;
   }
 
-  /* Card description. `--lead` is the dek under a lead title. */
+  /* Card description. `--lead` is the dek under a lead title.
+     Cormorant's x-height is small (~0.4em), so it needs about 2px more than a
+     sans to read at the same size; at 14px it read like 11px body text. */
   .block-type-dek,
   .block-type-dek-lead {
     font-family: var(--font-editorial-serif);
-    font-size: 0.88rem;
+    font-size: 1rem;
     font-weight: 400;
     line-height: 1.35;
     color: #3f3a35;
@@ -110,7 +112,7 @@
   /* Author line. */
   .block-type-byline {
     font-family: var(--font-dm-sans);
-    font-size: 0.62rem;
+    font-size: 0.7rem;
     font-weight: 700;
     letter-spacing: 0.12em;
     line-height: 1;
@@ -138,7 +140,7 @@
     }
 
     .block-type-kicker {
-      font-size: 0.68rem;
+      font-size: 0.75rem;
     }
 
     .block-type-title-l,
@@ -156,17 +158,17 @@
     }
 
     .block-type-dek {
-      font-size: 0.9rem;
+      font-size: 1.05rem;
       line-height: 1.38;
     }
 
     .block-type-dek-lead {
-      font-size: 1rem;
+      font-size: 1.15rem;
       line-height: 1.45;
     }
 
     .block-type-byline {
-      font-size: 0.66rem;
+      font-size: 0.72rem;
     }
   }
 
@@ -190,7 +192,7 @@
     }
 
     .block-type-dek-lead {
-      font-size: 1.05rem;
+      font-size: 1.2rem;
     }
   }
 }

@@ -1,6 +1,7 @@
 import type { Block } from 'payload'
 
 import { HOMEPAGE_QUESTURIAN_MAPS_DARK_SLOT_COUNT } from '../constants'
+import { DEFAULT_MAPS_THEME } from './constants'
 import {
   HOMEPAGE_FEATURED_ARTICLES_SECTION_HEADING_MAX,
   HOMEPAGE_FEATURED_ARTICLES_SECTION_SUBHEADING_MAX,
@@ -45,6 +46,20 @@ export const QuesturianMapsDarkBlock: Block = {
       maxLength: HOMEPAGE_FEATURED_ARTICLES_SECTION_SUBHEADING_MAX,
       admin: {
         description: 'Optional supporting line under the section heading.',
+      },
+    },
+    {
+      name: 'mapsTheme',
+      dbName: 'maps_theme',
+      type: 'select',
+      required: false,
+      defaultValue: DEFAULT_MAPS_THEME,
+      options: [
+        { label: 'Blue: cream type on a blue field', value: 'blue' },
+        { label: 'Inverted: blue type on the page', value: 'inverted' },
+      ],
+      admin: {
+        description: 'How the block is coloured on the public homepage.',
       },
     },
     {

@@ -3,7 +3,7 @@
 /**
  * Flag for an ISO 3166-1 alpha-2 country code.
  *
- * SVGs are served straight from `public/flags` (synced from `country-flag-icons`
+ * SVGs are served straight from `public/flags` (synced from `flag-icons`
  * by `pnpm run sync:flags`) — no runtime API call, one cacheable request per
  * flag actually shown. An unknown or missing code renders nothing so callers can
  * pass the server's nullable `countryCode` through unguarded.

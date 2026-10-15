@@ -1,4 +1,6 @@
 import { parseArticleGridFourLayoutBodyField } from '../../article-grid/service'
+import { parseArticleListLayoutBodyField } from '../../article-list/service'
+import { parseMapsThemeBodyField } from '../../questurian-maps-dark/service'
 import {
   hasAuthorFeatureFieldUpdates,
   parseAuthorFeatureCardsBodyField,
@@ -20,6 +22,7 @@ import {
   parseEditorialFeatureFields,
 } from '../../editorial-feature/service'
 import { hasPageHeroFieldUpdates, parsePageHeroFields } from '../../page-hero/service'
+import { hasPhotoPileFieldUpdates, parsePhotoPileFields } from '../../photo-pile/service'
 import {
   homepageBlockSupportsSectionHeading,
   parseSectionHeadingBodyField,
@@ -35,9 +38,12 @@ type Slot4LayoutParse = ReturnType<typeof parseSlot4LayoutBodyField>
 type Slot5LayoutParse = ReturnType<typeof parseSlot5LayoutBodyField>
 type MediaAspectParse = ReturnType<typeof parseLocationGridMediaAspectBodyField>
 type ArticleGridFourLayoutParse = ReturnType<typeof parseArticleGridFourLayoutBodyField>
+type ArticleListLayoutParse = ReturnType<typeof parseArticleListLayoutBodyField>
+type MapsThemeParse = ReturnType<typeof parseMapsThemeBodyField>
 type CreatorKickerParse = ReturnType<typeof parseCreatorKickerBodyField>
 type EditorialFeatureFieldsParse = ReturnType<typeof parseEditorialFeatureFields>
 type PageHeroFieldsParse = ReturnType<typeof parsePageHeroFields>
+type PhotoPileFieldsParse = ReturnType<typeof parsePhotoPileFields>
 type AuthorFeatureCardsParse = ReturnType<typeof parseAuthorFeatureCardsBodyField>
 type AuthorFeatureDescriptionModeParse = ReturnType<
   typeof parseAuthorFeatureDescriptionModeBodyField
@@ -57,12 +63,17 @@ export type ParsedBlockUpdateFields = {
   slot5Layout: Extract<Slot5LayoutParse, { ok: true }>
   mediaAspect: Extract<MediaAspectParse, { ok: true }>
   articleGridFourLayout: Extract<ArticleGridFourLayoutParse, { ok: true }>
+  articleListLayout: Extract<ArticleListLayoutParse, { ok: true }>
+  mapsTheme: Extract<MapsThemeParse, { ok: true }>
   creatorKicker: Extract<CreatorKickerParse, { ok: true }>
   editorialFeature: {
     [K in keyof EditorialFeatureFieldsParse]: Extract<EditorialFeatureFieldsParse[K], { ok: true }>
   }
   pageHero: {
     [K in keyof PageHeroFieldsParse]: Extract<PageHeroFieldsParse[K], { ok: true }>
+  }
+  photoPile: {
+    [K in keyof PhotoPileFieldsParse]: Extract<PhotoPileFieldsParse[K], { ok: true }>
   }
   authorFeature: {
     authorCards: Extract<AuthorFeatureCardsParse, { ok: true }>
@@ -128,6 +139,16 @@ export function parseBlockUpdateBody(body: unknown): ParseBlockUpdateResult {
     return { ok: false, status: 400, message: articleGridFourLayout.message }
   }
 
+  const articleListLayout = parseArticleListLayoutBodyField(bodyRecord)
+  if (!articleListLayout.ok) {
+    return { ok: false, status: 400, message: articleListLayout.message }
+  }
+
+  const mapsTheme = parseMapsThemeBodyField(bodyRecord)
+  if (!mapsTheme.ok) {
+    return { ok: false, status: 400, message: mapsTheme.message }
+  }
+
   const creatorKicker = parseCreatorKickerBodyField(bodyRecord)
   if (!creatorKicker.ok) {
     return { ok: false, status: 400, message: creatorKicker.message }
@@ -140,6 +161,11 @@ export function parseBlockUpdateBody(body: unknown): ParseBlockUpdateResult {
 
   const pageHero = parsePageHeroFields(bodyRecord)
   for (const field of Object.values(pageHero)) {
+    if (!field.ok) return { ok: false, status: 400, message: field.message }
+  }
+
+  const photoPile = parsePhotoPileFields(bodyRecord)
+  for (const field of Object.values(photoPile)) {
     if (!field.ok) return { ok: false, status: 400, message: field.message }
   }
 
@@ -163,9 +189,12 @@ export function parseBlockUpdateBody(body: unknown): ParseBlockUpdateResult {
     slot5Layout,
     mediaAspect,
     articleGridFourLayout,
+    articleListLayout,
+    mapsTheme,
     creatorKicker,
     editorialFeature: editorialFeature as ParsedBlockUpdateFields['editorialFeature'],
     pageHero: pageHero as ParsedBlockUpdateFields['pageHero'],
+    photoPile: photoPile as ParsedBlockUpdateFields['photoPile'],
     authorFeature: authorFeature as ParsedBlockUpdateFields['authorFeature'],
   }
   const rawItems = bodyRecord.items
@@ -208,9 +237,12 @@ export function hasBlockFieldUpdates(fields: ParsedBlockUpdateFields): boolean {
     !fields.slot5Layout.omit ||
     !fields.mediaAspect.omit ||
     !fields.articleGridFourLayout.omit ||
+    !fields.articleListLayout.omit ||
+    !fields.mapsTheme.omit ||
     !fields.creatorKicker.omit ||
     hasEditorialFeatureFieldUpdates(fields.editorialFeature) ||
     hasPageHeroFieldUpdates(fields.pageHero) ||
+    hasPhotoPileFieldUpdates(fields.photoPile) ||
     hasAuthorFeatureFieldUpdates(fields.authorFeature)
   )
 }
@@ -254,6 +286,14 @@ export function validateBlockUpdateFields(
     }
   }
 
+  if (!fields.articleListLayout.omit && block.blockType !== 'article-list') {
+    return { message: 'articleListLayout is only supported for article-list blocks.' }
+  }
+
+  if (!fields.mapsTheme.omit && block.blockType !== 'questurian-maps-dark') {
+    return { message: 'mapsTheme is only supported for questurian-maps-dark blocks.' }
+  }
+
   if (!fields.sectionHeading.omit && !homepageBlockSupportsSectionHeading(block.blockType)) {
     return { message: 'sectionHeading is not supported for this block type.' }
   }
@@ -275,6 +315,10 @@ export function validateBlockUpdateFields(
 
   if (hasPageHeroFieldUpdates(fields.pageHero) && block.blockType !== 'page-hero') {
     return { message: 'Page hero fields are only supported for page-hero blocks.' }
+  }
+
+  if (hasPhotoPileFieldUpdates(fields.photoPile) && block.blockType !== 'photo-pile') {
+    return { message: 'Photo pile fields are only supported for photo-pile blocks.' }
   }
 
   if (hasAuthorFeatureFieldUpdates(fields.authorFeature) && block.blockType !== 'author-feature') {

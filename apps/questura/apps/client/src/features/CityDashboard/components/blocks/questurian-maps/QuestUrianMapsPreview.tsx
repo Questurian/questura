@@ -13,6 +13,7 @@ import { NavigableImageTarget } from '../NavigableImageTarget'
 import { PublicImage } from '@/components/media/PublicImage'
 import { BLOCK_IMAGE_SIZES } from '../blockImageSizes'
 import { isPriorityImage } from '../heroImagePriority'
+import { ArticleKickerLabel } from '../ArticleKickerLabel'
 
 function MapPinIcon(): JSX.Element {
   return (
@@ -52,7 +53,7 @@ function MapCarouselCard({
       className={`flex-none snap-start flex flex-col w-[68vw] 380:w-[220px] 480:w-[245px]${!isLast ? ' mr-5 border-r border-[rgba(95,89,82,0.15)]' : ''}`}
     >
       <p className="font-[family-name:var(--font-dm-sans)] text-[0.62rem] font-semibold uppercase tracking-[0.1em] text-[#1e3599] mb-2 leading-none">
-        Questurian Maps
+        <ArticleKickerLabel label="Maps" />
       </p>
 
       <div className="relative aspect-square overflow-hidden bg-[#d7dcde]">
@@ -105,7 +106,7 @@ function MapGridCard({
         <NavigableImageTarget href={item.articlePath} label={`Open ${item.title}`} />
       </div>
       <div className="city-four-side-copy">
-        <p className="city-four-side-type">Questurian Maps</p>
+        <p className="city-four-side-type"><ArticleKickerLabel label="Maps" /></p>
         <h3 className="city-four-side-title">
           {item.articlePath ? <Link href={item.articlePath}>{item.title}</Link> : item.title}
         </h3>

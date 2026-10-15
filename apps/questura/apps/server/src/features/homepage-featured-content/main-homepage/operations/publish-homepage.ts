@@ -39,6 +39,12 @@ export async function publishMainHomepage(
       },
     }
   }
+  if (page !== 'main' && draftBlocks[0]?.blockType !== 'photo-pile') {
+    return {
+      status: 400,
+      body: { message: `The ${CURATED_PAGES[page].label} opens with a Photo Pile block. Add one at the top to publish.` },
+    }
+  }
   const resolvedDraftBlocks = await resolveMainBlocks(payload, draftBlocks)
   assertPublishableResolvedBlocks(resolvedDraftBlocks)
 

@@ -24,6 +24,12 @@ export async function addLocationHomepageBlock(
   if (!parsed.ok) {
     return { status: parsed.status, body: { message: parsed.message } }
   }
+  if (parsed.blockType === 'photo-pile') {
+    return {
+      status: 400,
+      body: { message: 'Photo Pile blocks open the Eat, Stay and Itineraries pages only.' },
+    }
+  }
 
   const payload = await getLocationHomepagePayload()
   const doc = await loadLocationHomepage(payload, id, 0)

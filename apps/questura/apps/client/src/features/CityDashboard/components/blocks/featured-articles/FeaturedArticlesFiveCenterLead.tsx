@@ -1,5 +1,6 @@
 import Link from '@/components/navigation/PublicLink'
 import type { JSX } from 'react'
+import { ArticleKickerLabel } from '../ArticleKickerLabel'
 
 import type { FeaturedArticleTeaser } from '../../../types'
 import { AuthorLink } from '@/features/authors/components/AuthorLink'
@@ -54,7 +55,7 @@ function CenterLeadCard({ article, lead, imagePriority }: CenterLeadCardProps): 
       </div>
 
       <div className="city-five-cl-copy">
-        <p className={BLOCK_TYPE.kicker}>{getArticleTypeLabel(article)}</p>
+        <p className={BLOCK_TYPE.kicker}><ArticleKickerLabel label={getArticleTypeLabel(article)} /></p>
         <h3
           className={`city-five-cl-title ${lead ? BLOCK_TYPE.titleL : BLOCK_TYPE.titleM}`}
           data-title-length={lead ? blockTitleLength(article.title) : undefined}

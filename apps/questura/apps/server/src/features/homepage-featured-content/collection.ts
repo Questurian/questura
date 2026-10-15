@@ -6,6 +6,7 @@ import {
   revalidateLocationHomepageAfterDelete,
 } from '@/features/public-revalidation/revalidate-client'
 import { curatedBlockRegistry } from './block-registry'
+import { PhotoPileBlock } from './photo-pile/block'
 import {
   resolveLocationGridScopeFromLocation,
 } from './location-grid/service'
@@ -13,6 +14,13 @@ import { normalizePageBlocksArrayInPlace } from './resolve-page-blocks/operation
 import { withSourceBlockKey } from './resolve-page-blocks/lib/source-block-key-field'
 import { signedInRead } from '@/features/auth/lib/signed-in-read'
 
+
+// The Photo Pile opens a navbar section page only. Those pages keep their
+// blocks in a JSON field; leaving it out here keeps city homepages from
+// holding one and gives it no table.
+const LOCATION_HOMEPAGE_BLOCKS = curatedBlockRegistry.blocks.filter(
+  (block) => block.slug !== PhotoPileBlock.slug,
+)
 export const LocationHomepages: CollectionConfig = {
   slug: 'location-homepages',
   labels: {
@@ -67,7 +75,7 @@ export const LocationHomepages: CollectionConfig = {
     {
       name: 'pageBlocks',
       type: 'blocks',
-      blocks: withSourceBlockKey(curatedBlockRegistry.blocks),
+      blocks: withSourceBlockKey(LOCATION_HOMEPAGE_BLOCKS),
       label: 'Page blocks',
       admin: {
         description: 'Legacy live blocks. Migrated into draft/published page blocks.',
@@ -77,7 +85,7 @@ export const LocationHomepages: CollectionConfig = {
     {
       name: 'draftPageBlocks',
       type: 'blocks',
-      blocks: withSourceBlockKey(curatedBlockRegistry.blocks),
+      blocks: withSourceBlockKey(LOCATION_HOMEPAGE_BLOCKS),
       label: 'Draft page blocks',
       admin: {
         description: 'Private working copy for editors.',
@@ -86,7 +94,7 @@ export const LocationHomepages: CollectionConfig = {
     {
       name: 'publishedPageBlocks',
       type: 'blocks',
-      blocks: withSourceBlockKey(curatedBlockRegistry.blocks),
+      blocks: withSourceBlockKey(LOCATION_HOMEPAGE_BLOCKS),
       label: 'Published page blocks',
       admin: {
         description: 'Public snapshot served when this homepage is enabled.',

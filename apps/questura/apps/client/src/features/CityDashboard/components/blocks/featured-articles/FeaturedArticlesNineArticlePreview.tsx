@@ -14,6 +14,8 @@ import { NavigableImageTarget } from '../NavigableImageTarget'
 import { PublicImage, PublicSource } from '@/components/media/PublicImage'
 import { BLOCK_IMAGE_SIZES } from '../blockImageSizes'
 import { heroImagePriority, type ImagePriority } from '../heroImagePriority'
+import { ArticleKickerLabel } from '../ArticleKickerLabel'
+import { CardDek } from '../CardDek'
 
 function getArticleTypeLabel(article: FeaturedArticleTeaser): string {
   return article.articleType ?? article.category?.name ?? 'Article'
@@ -68,7 +70,7 @@ function WideCard({ article }: SlotCardProps): JSX.Element {
 
       <div className="city-article-content flex w-full flex-col justify-start py-0">
         <p className={BLOCK_TYPE.kicker}>
-          {articleTypeLabel}
+          <ArticleKickerLabel label={articleTypeLabel} />
         </p>
 
         <h2 className={`mt-2.5 ${BLOCK_TYPE.titleM}`}>
@@ -136,7 +138,7 @@ function CenterHeroCard({ article, imagePriority }: CenterHeroCardProps): JSX.El
 
       <div className="city-article-content flex w-full flex-col justify-start py-0">
         <p className={BLOCK_TYPE.kicker}>
-          {articleTypeLabel}
+          <ArticleKickerLabel label={articleTypeLabel} />
         </p>
 
         <h2 className={`mt-2.5 ${BLOCK_TYPE.titleL}`} data-title-length={blockTitleLength(article.title)}>
@@ -181,7 +183,7 @@ function HorizontalCard({ article }: SlotCardProps): JSX.Element {
     <section className="city-article-card city-nine-horiz-card px-[var(--block-gutter)] py-4">
       <div className="city-article-content flex w-full flex-col justify-start py-0">
         <p className={BLOCK_TYPE.kicker}>
-          {articleTypeLabel}
+          <ArticleKickerLabel label={articleTypeLabel} />
         </p>
 
         <h2 className={`mt-2 ${BLOCK_TYPE.titleM}`}>
@@ -193,6 +195,8 @@ function HorizontalCard({ article }: SlotCardProps): JSX.Element {
             article.title
           )}
         </h2>
+
+        <CardDek excerpt={article.excerpt} href={article.articlePath} className="mt-2" />
 
         <p className={`mt-2.5 ${BLOCK_TYPE.byline}`}>
           <AuthorLink

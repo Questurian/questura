@@ -15,6 +15,7 @@ import { EAGER_IMAGE, LAZY_IMAGE, isPriorityImage } from '../heroImagePriority'
 import { BlockSectionHeader } from '../BlockSectionHeader'
 import { BLOCK_TYPE } from '../blockType'
 import { PhoneSquareImage } from '../PhoneSquareImage'
+import { ArticleKickerLabel } from '../ArticleKickerLabel'
 
 function getArticleTypeLabel(article: FeaturedArticleTeaser): string {
   return article.articleType ?? article.category?.name ?? 'Article'
@@ -47,7 +48,7 @@ function ThreeArticleCard({
         {imageUrl ? (
           <PhoneSquareImage
             article={article}
-            className="relative z-10 h-full w-full object-cover transition-transform duration-300 ease-out motion-reduce:transition-none group-hover:scale-[1.015]"
+            className="relative z-10 h-full w-full object-cover"
             priority={isPriority ? EAGER_IMAGE : LAZY_IMAGE}
             sizes={BLOCK_IMAGE_SIZES.thirdColumn}
           />
@@ -58,9 +59,10 @@ function ThreeArticleCard({
         />
       </div>
 
-      <div className="flex min-h-[13.5rem] flex-1 flex-col pb-7 pt-5 768:px-4 1024:px-5 1024:pb-8">
+      {/* Copy starts on the photo's left edge, like every other card. */}
+      <div className="flex min-h-[13.5rem] flex-1 flex-col pb-7 pt-5 1024:pb-8">
         <p className={BLOCK_TYPE.kicker}>
-          {getArticleTypeLabel(article)}
+          <ArticleKickerLabel label={getArticleTypeLabel(article)} />
         </p>
         <h3 className={`mt-3 ${BLOCK_TYPE.titleM}`}>
           {articlePath ? (
@@ -143,7 +145,7 @@ function GridArticleCard({
 
       <div className="city-article-content flex flex-1 flex-col pt-4">
         <p className={BLOCK_TYPE.kicker}>
-          {articleTypeLabel}
+          <ArticleKickerLabel label={articleTypeLabel} />
         </p>
 
         <h3 className={`mt-2 ${BLOCK_TYPE.titleM}`}>

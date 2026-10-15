@@ -66,7 +66,7 @@ export function formatPublicArticleType(
   const relationTo = stringOrNull(item.relationTo)
 
   if (relationTo === 'single-type-listicles') {
-    return 'Questurian Maps'
+    return 'Maps'
   }
 
   if (relationTo === 'listicle-itineraries') {

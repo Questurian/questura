@@ -15,6 +15,8 @@ import { PublicImage, PublicSource } from '@/components/media/PublicImage'
 import { BLOCK_IMAGE_SIZES } from '../blockImageSizes'
 import { LAZY_IMAGE, heroImagePriority, type ImagePriority } from '../heroImagePriority'
 import { PhoneSquareImage } from '../PhoneSquareImage'
+import { ArticleKickerLabel } from '../ArticleKickerLabel'
+import { CardDek } from '../CardDek'
 
 function joinClassNames(...classes: Array<string | false | null | undefined>): string {
   return classes.filter(Boolean).join(' ')
@@ -82,9 +84,11 @@ function HeroArticleCard({ article, imagePriority }: HeroArticleCardProps): JSX.
         <NavigableImageTarget href={article.articlePath} label={`Read ${article.title}`} />
       </div>
 
-      <div className="city-article-content flex w-full flex-col justify-start px-[var(--block-gutter)] py-3">
+      {/* No inline padding: the copy starts on the photo's left edge. The
+          card is already inset by the block gutter. */}
+      <div className="city-article-content flex w-full flex-col justify-start py-3">
         <p className={BLOCK_TYPE.kicker}>
-          {articleTypeLabel}
+          <ArticleKickerLabel label={articleTypeLabel} />
         </p>
 
         <h2 className={`mt-2.5 ${BLOCK_TYPE.titleL}`} data-title-length={blockTitleLength(article.title)}>
@@ -139,10 +143,11 @@ function StackedWideCard({ article, variant = 'stack' }: StackedWideCardProps): 
       </div>
 
       <div className="city-three-stack-copy">
-        <p className={`city-three-stack-type ${BLOCK_TYPE.kicker}`}>{articleTypeLabel}</p>
+        <p className={`city-three-stack-type ${BLOCK_TYPE.kicker}`}><ArticleKickerLabel label={articleTypeLabel} /></p>
         <h3 className={`city-three-stack-title ${BLOCK_TYPE.titleM}`}>
           <ArticleTitleLink article={article} />
         </h3>
+        <CardDek excerpt={article.excerpt} href={article.articlePath} className="city-three-stack-dek" />
         <p className={`city-three-stack-author ${BLOCK_TYPE.byline}`}>
           <AuthorLink
             authorSlug={article.author?.slug}
@@ -198,7 +203,7 @@ function CenterFeatureCard({ article, imagePriority }: CenterFeatureCardProps): 
       </div>
 
       <div className="city-three-stack-copy">
-        <p className={`city-three-stack-type ${BLOCK_TYPE.kicker}`}>{articleTypeLabel}</p>
+        <p className={`city-three-stack-type ${BLOCK_TYPE.kicker}`}><ArticleKickerLabel label={articleTypeLabel} /></p>
         <h3
           className={`city-three-stack-title city-three-fc-center-title ${BLOCK_TYPE.titleL}`}
           data-title-length={blockTitleLength(article.title)}

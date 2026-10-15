@@ -84,6 +84,12 @@ export function applyBlockFieldUpdates(block: RawBlock, fields: ParsedBlockUpdat
   if (!fields.articleGridFourLayout.omit) {
     next = { ...next, articleGridFourLayout: fields.articleGridFourLayout.value }
   }
+  if (!fields.articleListLayout.omit) {
+    next = { ...next, articleListLayout: fields.articleListLayout.value }
+  }
+  if (!fields.mapsTheme.omit) {
+    next = { ...next, mapsTheme: fields.mapsTheme.value }
+  }
   if (!fields.creatorKicker.omit) {
     next = { ...next, creatorKicker: fields.creatorKicker.value }
   }
@@ -91,6 +97,9 @@ export function applyBlockFieldUpdates(block: RawBlock, fields: ParsedBlockUpdat
     if (!field.omit) next = { ...next, [key]: field.value }
   }
   for (const [key, field] of Object.entries(fields.pageHero)) {
+    if (!field.omit) next = { ...next, [key]: field.value }
+  }
+  for (const [key, field] of Object.entries(fields.photoPile)) {
     if (!field.omit) next = { ...next, [key]: field.value }
   }
   for (const [key, field] of Object.entries(fields.authorFeature)) {

@@ -16,6 +16,7 @@ import { BLOCK_IMAGE_SIZES } from '../blockImageSizes'
 import { EAGER_IMAGE, LAZY_IMAGE, isPriorityImage, type ImagePriority } from '../heroImagePriority'
 import { BLOCK_TYPE } from '../blockType'
 import { PhoneSquareImage } from '../PhoneSquareImage'
+import { ArticleKickerLabel } from '../ArticleKickerLabel'
 
 function getArticleTypeLabel(article: FeaturedArticleTeaser): string {
   return article.articleType ?? article.category?.name ?? 'Article'
@@ -64,7 +65,7 @@ function CarouselArticleCard({ article, isPriority, isLast }: CarouselArticleCar
 
       <div className="pt-4 flex flex-col flex-1">
         <p className={BLOCK_TYPE.kicker}>
-          {articleTypeLabel}
+          <ArticleKickerLabel label={articleTypeLabel} />
         </p>
 
         <h3 className={`mt-2 ${BLOCK_TYPE.titleM}`}>

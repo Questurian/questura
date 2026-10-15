@@ -28,6 +28,7 @@ import { LOCATION_GRID_MAX_SLOTS, LOCATION_GRID_MIN_SLOTS } from '../location-gr
 import { LocationGridBlock } from '../location-grid/block'
 import { NewsletterSignupBlock } from '../newsletter-signup/block'
 import { PageHeroBlock } from '../page-hero/block'
+import { PhotoPileBlock } from '../photo-pile/block'
 import { QuesturianMapsBlock } from '../questurian-maps/block'
 import { QuesturianMapsDarkBlock } from '../questurian-maps-dark/block'
 import { ThingsToDoAttractionsBlock } from '../things-to-do-attractions/block'
@@ -245,6 +246,12 @@ const CURATED_BLOCK_DEFINITIONS: readonly CuratedBlockDefinition[] = [
   }),
   defineCuratedBlock({
     block: PageHeroBlock,
+    slotCounts: { min: 0, max: 0, default: 0 },
+    convertibleWhenEmpty: false,
+    publicPayloadKind: REFERENCE_PUBLIC_PAYLOAD,
+  }),
+  defineCuratedBlock({
+    block: PhotoPileBlock,
     slotCounts: { min: 0, max: 0, default: 0 },
     convertibleWhenEmpty: false,
     publicPayloadKind: REFERENCE_PUBLIC_PAYLOAD,

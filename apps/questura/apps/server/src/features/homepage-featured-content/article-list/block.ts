@@ -24,6 +24,20 @@ export const ArticleListBlock: Block = {
       },
     },
     {
+      name: 'articleListLayout',
+      dbName: 'al_layout',
+      type: 'select',
+      required: false,
+      defaultValue: 'standard',
+      options: [
+        { label: 'Standard: copy left, small image right', value: 'standard' },
+        { label: 'Square image left, ad space right', value: 'square-with-ad' },
+      ],
+      admin: {
+        description: 'How each row is laid out on the public homepage.',
+      },
+    },
+    {
       name: 'sectionHeading',
       type: 'text',
       required: false,

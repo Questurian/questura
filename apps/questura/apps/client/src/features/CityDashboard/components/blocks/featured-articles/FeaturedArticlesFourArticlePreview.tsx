@@ -15,6 +15,7 @@ import { PublicImage, PublicSource } from '@/components/media/PublicImage'
 import { BLOCK_IMAGE_SIZES } from '../blockImageSizes'
 import { heroImagePriority, type ImagePriority } from '../heroImagePriority'
 import { FeaturedArticlesFourOneOverThree } from './FeaturedArticlesFourOneOverThree'
+import { ArticleKickerLabel } from '../ArticleKickerLabel'
 
 function getArticleTypeLabel(article: FeaturedArticleTeaser): string {
   return article.articleType ?? article.category?.name ?? 'Article'
@@ -69,9 +70,11 @@ function HeroArticleCard({ article, imagePriority }: HeroArticleCardProps): JSX.
         <NavigableImageTarget href={articlePath} label={`Read ${article.title}`} />
       </div>
 
-      <div className="city-article-content flex w-full flex-col justify-start px-[var(--block-gutter)] py-3">
+      {/* No inline padding: the copy starts on the photo's left edge. The
+          card is already inset by the block gutter. */}
+      <div className="city-article-content flex w-full flex-col justify-start py-3">
         <p className={BLOCK_TYPE.kicker}>
-          {articleTypeLabel}
+          <ArticleKickerLabel label={articleTypeLabel} />
         </p>
 
         <h2 className={`mt-2.5 ${BLOCK_TYPE.titleL}`} data-title-length={blockTitleLength(article.title)}>
@@ -135,7 +138,7 @@ function SideListArticleCard({ article }: SideListArticleCardProps): JSX.Element
       </div>
 
       <div className="city-four-side-copy">
-        <p className={`city-four-side-type ${BLOCK_TYPE.kicker}`}>{articleTypeLabel}</p>
+        <p className={`city-four-side-type ${BLOCK_TYPE.kicker}`}><ArticleKickerLabel label={articleTypeLabel} /></p>
         <h3 className={`city-four-side-title ${BLOCK_TYPE.titleM}`}>
           {articlePath ? (
             <Link href={articlePath} className="hover:underline">

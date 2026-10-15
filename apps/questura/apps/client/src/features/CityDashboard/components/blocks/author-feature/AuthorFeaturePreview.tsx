@@ -11,6 +11,8 @@ import { PublicImage, PublicSource } from "@/components/media/PublicImage";
 import { BLOCK_IMAGE_SIZES } from "../blockImageSizes";
 import { BLOCK_TYPE } from "../blockType";
 import { PHONE_SQUARE_MEDIA } from "../PhoneSquareImage";
+import { ArticleKickerLabel } from '../ArticleKickerLabel'
+import { CardDek } from '../CardDek'
 
 function Linked({
   href,
@@ -168,7 +170,7 @@ function RelatedArticle({
         </div>
         <div className="pt-5">
           <p className={`mb-2 ${BLOCK_TYPE.kicker}`}>
-            {article.category?.name ?? article.articleType ?? "Article"}
+            <ArticleKickerLabel label={article.category?.name ?? article.articleType ?? 'Article'} />
           </p>
           <h3 className={BLOCK_TYPE.titleM}>
             <Linked
@@ -208,7 +210,7 @@ function RelatedArticle({
       )}
       <div className="min-w-0 self-start">
         <p className={`mb-1 ${BLOCK_TYPE.kicker}`}>
-          {article.category?.name ?? article.articleType ?? "Article"}
+          <ArticleKickerLabel label={article.category?.name ?? article.articleType ?? 'Article'} />
         </p>
         <h3 className={BLOCK_TYPE.titleM}>
           <Linked
@@ -218,6 +220,7 @@ function RelatedArticle({
             {article.title}
           </Linked>
         </h3>
+        <CardDek excerpt={article.excerpt} href={article.articlePath} className="mt-1.5" />
       </div>
     </article>
   );

@@ -14,6 +14,8 @@ import { PHONE_SQUARE_MEDIA } from '../PhoneSquareImage'
 import { heroImagePriority } from '../heroImagePriority'
 import { BLOCK_TYPE } from '../blockType'
 import CountryFlag from '@/components/shared/ui/CountryFlag'
+import { ArticleKickerLabel } from '../ArticleKickerLabel'
+import { CardDek } from '../CardDek'
 
 const FLAG_COUNTRY_NAMES = { PE: 'Peru', CO: 'Colombia', MX: 'Mexico' } as const
 
@@ -31,6 +33,7 @@ const TONES = {
     railRule: 'border-foreground/70',
     itemRule: 'border-foreground/25',
     itemTitle: '',
+    itemDek: '',
     imageGround: 'bg-paper',
     flagRing: 'ring-foreground/15',
     focus: 'focus-visible:ring-accent',
@@ -45,6 +48,7 @@ const TONES = {
     railRule: 'border-background/50',
     itemRule: 'border-background/20',
     itemTitle: 'text-background',
+    itemDek: 'text-background/70',
     imageGround: 'bg-white/5',
     flagRing: 'ring-background/25',
     focus: 'focus-visible:ring-accent-soft',
@@ -126,7 +130,7 @@ function RelatedArticle({ article, count, index, tone }: {
             href={article.articlePath}
             className={`outline-none focus-visible:ring-2 ${tone.focus}`}
           >
-            {article.category?.name ?? article.articleType ?? 'Article'}
+            <ArticleKickerLabel label={article.category?.name ?? article.articleType ?? 'Article'} />
           </Linked>
         </p>
         <h3 className={`${tone.itemTitle} ${BLOCK_TYPE.titleM}`}>
@@ -134,6 +138,7 @@ function RelatedArticle({ article, count, index, tone }: {
             {article.title}
           </Linked>
         </h3>
+        <CardDek excerpt={article.excerpt} href={article.articlePath} className={`mt-1.5 ${tone.itemDek}`} />
       </div>
     </article>
   )

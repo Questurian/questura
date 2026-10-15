@@ -51,8 +51,10 @@ export async function ArticleIndexPage({ scope, type, page, lang }: Props) {
   if (!data || data.items.length === 0) notFound()
 
   return (
-    <section className="min-h-[70vh] bg-background px-5 py-16 text-foreground 768:px-10 1024:px-16">
-      <div className="mx-auto max-w-6xl">
+    // On the page grid (--block-max-width, --block-gutter), so the index's
+    // edges line up with the navbar and footer like the homepage blocks.
+    <section className="min-h-[70vh] bg-background px-[var(--block-gutter)] py-16 text-foreground">
+      <div className="mx-auto max-w-[calc(var(--block-max-width)-2*var(--block-gutter))]">
         <header className="mb-12 max-w-3xl">
           <p className="mb-5 text-[11px] font-semibold uppercase leading-none tracking-[0.28em] text-foreground/55">
             Questurian
@@ -81,7 +83,7 @@ export async function ArticleIndexPage({ scope, type, page, lang }: Props) {
                       width={600}
                       height={450}
                       sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
-                      className="h-full w-full object-cover transition group-hover:scale-105"
+                      className="h-full w-full object-cover"
                     />
                   </div>
                 )}

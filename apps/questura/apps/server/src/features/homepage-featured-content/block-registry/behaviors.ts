@@ -3,6 +3,8 @@ import type { Payload } from 'payload'
 import type { PayloadInstance } from '@/types'
 
 import { normalizeArticleGridFourLayout } from '../article-grid/service'
+import { normalizeArticleListLayout } from '../article-list/service'
+import { normalizeMapsTheme } from '../questurian-maps-dark/service'
 import {
   assertAuthorFeatureItemsMatchAuthors,
   authorIdsFromAuthorFeatureBlock,
@@ -35,6 +37,7 @@ import {
 } from '../location-grid/service'
 import type { LocationGridScope } from '../location-grid/types'
 import { getPageHeroPublishBlockers, resolvePageHeroFields } from '../page-hero/service'
+import { getPhotoPilePublishBlockers, resolvePhotoPileFields } from '../photo-pile/service'
 import {
   buildQuesturianMapsGlobalData,
   getQuesturianMapsSelectionFromItems,
@@ -256,6 +259,16 @@ const pageHeroBehavior: CuratedBlockBehavior = {
   getPublishBlockers: getPageHeroPublishBlockers,
 }
 
+const photoPileBehavior: CuratedBlockBehavior = {
+  isArticleBlock: false,
+  clearsItems: true,
+  resolveSelection() {
+    return getNewsletterSignupPlaceholderSelection()
+  },
+  resolveFields: (block, ctx) => resolvePhotoPileFields(ctx.payload, block),
+  getPublishBlockers: getPhotoPilePublishBlockers,
+}
+
 const newsletterSignupBehavior: CuratedBlockBehavior = {
   isArticleBlock: false,
   clearsItems: true,
@@ -312,7 +325,12 @@ export const CURATED_BLOCK_BEHAVIORS: Record<string, CuratedBlockBehavior> = {
   },
   'location-grid': locationGridBehavior,
   'questurian-maps': questurianMapsBehavior,
-  'questurian-maps-dark': questurianMapsBehavior,
+  'questurian-maps-dark': {
+    ...questurianMapsBehavior,
+    prepareRecord(block) {
+      block.mapsTheme = normalizeMapsTheme(block.mapsTheme)
+    },
+  },
   'hotel-grid': gridBehavior({
     normalize: normalizeHotelGridInput,
     validate: validateHotelGridItems,
@@ -347,5 +365,14 @@ export const CURATED_BLOCK_BEHAVIORS: Record<string, CuratedBlockBehavior> = {
   }),
   'newsletter-signup': newsletterSignupBehavior,
   'page-hero': pageHeroBehavior,
-  'article-list': featuredBehavior,
+  'photo-pile': photoPileBehavior,
+  'article-list': {
+    ...featuredBehavior,
+    prepareRecord(block) {
+      block.articleListLayout = normalizeArticleListLayout(block.articleListLayout)
+    },
+    // The square layout crops every row to a square, so it needs that crop.
+    requiredImageField: (block) =>
+      normalizeArticleListLayout(block.articleListLayout) === 'square-with-ad' ? 'imageSquare' : 'image',
+  },
 }

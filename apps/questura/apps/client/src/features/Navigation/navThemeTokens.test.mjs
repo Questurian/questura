@@ -22,7 +22,9 @@ const tokens = (text) => [...text.matchAll(/(--nav-[a-z-]+):/g)].map((m) => m[1]
  */
 test('light and dark define the same navbar tokens', () => {
   const light = tokens(block(':root'))
-  const dark = tokens(block('html[data-nav-theme="dark"] .site-nav'))
+  // The footer wears the navbar palette, so the dark block names both roots.
+  assert.match(css, /html\[data-nav-theme="dark"\] \.site-nav,\nhtml\[data-nav-theme="dark"\] \.site-footer \{/)
+  const dark = tokens(block('html[data-nav-theme="dark"] .site-footer'))
   assert.ok(light.length > 10)
   assert.deepEqual(dark, light)
 })

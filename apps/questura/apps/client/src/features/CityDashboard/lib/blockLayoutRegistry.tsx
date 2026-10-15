@@ -2,6 +2,7 @@ import type { ComponentType } from "react";
 
 import type {
   ArticleGridBlock,
+  ArticleListBlock,
   AuthorFeatureBlock,
   EditorialFeatureBlock,
   CityHomepageBlock,
@@ -12,6 +13,7 @@ import type {
   LocationGridBlock,
   NewsletterSignupBlock,
   PageHeroBlock,
+  PhotoPileBlock,
   ThingsToDoAttractionsBlock,
   HomepageBlockLayoutDefinition,
   HomepageBlockLayoutFallbackDefinition,
@@ -190,7 +192,13 @@ const homepageBlockFallbackLayouts: HomepageBlockLayoutFallbackDefinition[] = [
     blockType: "page-hero",
     Component: PageHeroPreview,
   }),
-  defineHomepageBlockLayoutAnySlots<CityHomepageArticleBlock>({
+  // The section page lifts its Photo Pile out of the block list and draws it
+  // as the masthead (SectionMasthead), so in the list it is nothing.
+  defineHomepageBlockLayoutAnySlots<PhotoPileBlock>({
+    blockType: "photo-pile",
+    Component: () => null,
+  }),
+  defineHomepageBlockLayoutAnySlots<ArticleListBlock>({
     blockType: "article-list",
     Component: ArticleListPreview,
   }),

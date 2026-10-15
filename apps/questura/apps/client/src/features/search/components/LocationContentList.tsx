@@ -35,7 +35,7 @@ export function ContentRow({ item }: { item: LocationContentItem }) {
               width={288}
               height={216}
               sizes="144px"
-              className="h-full w-full object-cover transition group-hover:scale-105"
+              className="h-full w-full object-cover"
             />
           </div>
         )}

@@ -20,7 +20,7 @@ export default async function MainLayout({
         <AffiliateTracking />
         <Navbar />
         <main className="flex-1 ">{children}</main>
-        <Footer />
+        <Footer locationMenu={locationMenu} />
       </ClientInteractionProvider>
     </SiteFonts>
   );

@@ -1,4 +1,6 @@
 import { publicArticleGridFourLayout } from '../../article-grid/service'
+import { normalizeArticleListLayout } from '../../article-list/service'
+import { normalizeMapsTheme } from '../../questurian-maps-dark/service'
 import {
   publicFeaturedArticlesSlot3Layout,
   publicFeaturedArticlesSlot4Layout,
@@ -52,6 +54,15 @@ export function curatedBlockApiPayload(
         ...base,
         mediaAspect: publicLocationGridMediaAspect(block),
       }
+    }
+    if (block.blockType === 'article-list') {
+      return {
+        ...base,
+        articleListLayout: normalizeArticleListLayout(block.articleListLayout),
+      }
+    }
+    if (block.blockType === 'questurian-maps-dark') {
+      return { ...base, mapsTheme: normalizeMapsTheme(block.mapsTheme) }
     }
     if (block.blockType === 'article-grid') {
       const totalSlots =

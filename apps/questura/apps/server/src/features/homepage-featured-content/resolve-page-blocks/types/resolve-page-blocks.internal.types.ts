@@ -11,6 +11,8 @@ export type ApiCuratedBlock = {
   itemKickers?: unknown
   itemDescriptions?: unknown
   articleGridFourLayout?: unknown
+  articleListLayout?: unknown
+  mapsTheme?: unknown
   featureKicker?: unknown
   featureTitle?: unknown
   featureDescription?: unknown
