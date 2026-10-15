@@ -1,7 +1,8 @@
 import { notFound } from 'next/navigation'
 import { JsonLd } from '@/components/seo/JsonLd'
+import { PaywallNotice } from '@/features/articles/components/PaywallNotice'
 import { buildArticlePageJsonLd } from '@/features/articles/lib/articlePageJsonLd'
-import { isLocked } from '@/features/articles/lib/gate'
+import { readGate } from '@/features/articles/lib/gate'
 import { articleHrefForScope } from '@/features/articles/lib/articleScope'
 import { fetchArticle } from '@/features/articles/lib/fetchArticle'
 import { fetchListicleFooterLinks } from '@/features/articles/lib/fetchListicleFooterLinks'
@@ -38,17 +39,20 @@ export async function renderItineraryArticleRoute({
   }
 
   const path = articleHrefForScope(scope, 'itineraries', slug)
+  const gate = readGate(article)
+  const locked = gate?.locked === true
 
   return (
     <>
-      <JsonLd data={buildArticlePageJsonLd({ article, path, locked: isLocked(article) })} />
+      <JsonLd data={buildArticlePageJsonLd({ article, path, locked })} />
       <ItineraryArticleLayout
         article={article}
         relatedArticles={relatedArticles}
         footerLinks={footerLinks}
         country={scope.country}
         city={scope.city}
-        path={path}
+        gate={gate}
+        paywallNotice={locked && gate ? <PaywallNotice gate={gate} returnTo={path} fade={false} /> : null}
       />
     </>
   )
