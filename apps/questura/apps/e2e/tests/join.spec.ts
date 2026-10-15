@@ -67,7 +67,7 @@ test('journey 2: a new reader signs up, verifies, pays and lands back on the ope
 
   // Sign up inside the purchase page.
   await page.locator('input[name=email]').fill(email)
-  await page.getByRole('button', { name: /continue/i }).click()
+  await page.getByRole('button', { name: 'Continue', exact: true }).click()
   await page.locator('input[name=password]').fill(NEW_PASSWORD)
   await page.getByRole('button', { name: 'Create account' }).click()
   await expectSignedIn(page)

@@ -219,7 +219,7 @@ export function signInButton(page: Page) {
 export async function signIn(page: Page, account: { email: string; password: string }) {
   await signInButton(page).click()
   await page.locator('input[name=email]').fill(account.email)
-  await page.getByRole('button', { name: /continue/i }).click()
+  await page.getByRole('button', { name: 'Continue', exact: true }).click()
   await page.locator('input[name=password]').fill(account.password)
   await page.getByRole('button', { name: 'Sign in', exact: true }).last().click()
 }
@@ -228,7 +228,7 @@ export async function signIn(page: Page, account: { email: string; password: str
 export async function signUp(page: Page, email: string, password = NEW_PASSWORD) {
   await signInButton(page).click()
   await page.locator('input[name=email]').fill(email)
-  await page.getByRole('button', { name: /continue/i }).click()
+  await page.getByRole('button', { name: 'Continue', exact: true }).click()
   await page.locator('input[name=password]').fill(password)
   await page.getByRole('button', { name: 'Create account' }).click()
   await expectSignedIn(page)
