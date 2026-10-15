@@ -21,8 +21,12 @@ import type { ArticleCollectionSlug } from './serializeArticleBlocks'
  *   about the withheld stops is where each sits on the map (owner decision,
  *   2026-10-06): a locked itinerary whose map showed only the hotel read as an
  *   empty one. Coordinates only -- no name, photo, text or day.
- * - A single-type listicle is never gated at all. Those earn from ads, and ad
- *   revenue needs the whole page reachable.
+ * - A single-type listicle shows its first three places (owner decision,
+ *   2026-10-15, replacing the 2026-08-15 rule that left them ungated for ads).
+ *   As with itineraries, each withheld place keeps only its map position, and
+ *   the moment each place sits under, so a member's full list can be headed
+ *   by the server-rendered moment headings. Its stored JSON-LD is dropped
+ *   whole: it is an ItemList naming every place.
  *
  * This module only derives; it does not decide who gets the sample. Callers
  * pair it with the Access tier and the reader's Membership entitlement.
@@ -33,6 +37,8 @@ export type SampleUnit = 'blocks' | 'items' | 'days'
 export type SampleLimits = {
   /** Leading `text` blocks kept on a standard article. */
   articleTextBlocks: number
+  /** Leading places kept on a single-type listicle. */
+  listicleItems: number
 }
 
 /**
@@ -41,6 +47,7 @@ export type SampleLimits = {
  */
 export const DEFAULT_SAMPLE_LIMITS: SampleLimits = {
   articleTextBlocks: 2,
+  listicleItems: 3,
 }
 
 /**
@@ -62,8 +69,14 @@ export type SampleOutcome = {
   unit: SampleUnit
   shown: number
   total: number
-  /** Itineraries only: one pin per withheld stop that has coordinates. */
+  /** Itineraries and listicles: one pin per withheld stop that has coordinates. */
   pins?: SamplePin[]
+  /**
+   * Listicles only: the moment of every place in the full list, in order, or
+   * null where a place has none. Kept so the page can render the moment
+   * headings a member's full list needs; it names no place.
+   */
+  itemMoments?: Array<string | null>
 }
 
 function asArray(value: unknown): unknown[] | null {
@@ -182,10 +195,43 @@ export function applySampleRule(
     return collection === 'articles' ? sampleArticle(doc, limits) : sampleItinerary(doc)
   }
 
-  // Single-type listicles are never gated. Reached only if a caller ignores
-  // that, so it removes nothing rather than inventing a rule for a collection
-  // that has no paid tier.
-  return { applied: false, unit: 'items', shown: 0, total: 0 }
+  dropStoredStructuredData(doc)
+  return sampleListicle(doc, limits)
+}
+
+/**
+ * A listicle's stored JSON-LD is an ItemList naming every place, short strings
+ * all, so `stripLockedProseFromStructuredData` would leave the withheld names
+ * in it. Nothing reads it on a locked page either: the website builds its own
+ * paywall markup there (`buildArticlePageJsonLd`).
+ */
+function dropStoredStructuredData(doc: Record<string, unknown>): void {
+  const seo = doc.seoSection
+  if (!seo || typeof seo !== 'object') return
+  delete (seo as Record<string, unknown>).structuredData
+}
+
+function momentOf(row: unknown): string | null {
+  if (!row || typeof row !== 'object') return null
+  const moment = (row as { moment?: unknown }).moment
+  return typeof moment === 'string' && moment !== '' ? moment : null
+}
+
+function sampleListicle(doc: Record<string, unknown>, limits: SampleLimits): SampleOutcome {
+  const items = asArray(doc.items) ?? []
+  const kept = items.slice(0, limits.listicleItems)
+  const withheld = items.slice(limits.listicleItems)
+
+  doc.items = kept
+
+  return {
+    applied: withheld.length > 0,
+    unit: 'items',
+    shown: kept.length,
+    total: items.length,
+    pins: pinsForStops(withheld),
+    itemMoments: items.map(momentOf),
+  }
 }
 
 function sampleArticle(doc: Record<string, unknown>, limits: SampleLimits): SampleOutcome {

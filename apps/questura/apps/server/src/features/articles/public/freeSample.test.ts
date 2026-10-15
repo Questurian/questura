@@ -199,12 +199,72 @@ describe('applySampleRule — listicle itineraries', () => {
 })
 
 describe('applySampleRule — single-type listicles', () => {
-  it('removes nothing, because they are never gated', () => {
-    const doc: Record<string, unknown> = { items: [{ blockType: 'dining' }, { blockType: 'bar' }] }
+  const place = (i: number, extra: Record<string, unknown> = {}) => ({
+    blockType: 'data-dining',
+    item: { title: `Place ${i}`, latitude: -12 - i / 10, longitude: -77 - i / 10 },
+    blurb: `Why place ${i} is worth it`,
+    ...extra,
+  })
+
+  it('keeps the first three places and withholds the rest', () => {
+    const doc: Record<string, unknown> = { items: Array.from({ length: 7 }, (_, i) => place(i)) }
 
     const outcome = applySampleRule('single-type-listicles', doc)
 
-    expect(outcome.applied).toBe(false)
+    expect(DEFAULT_SAMPLE_LIMITS.listicleItems).toBe(3)
+    expect(outcome).toMatchObject({ applied: true, unit: 'items', shown: 3, total: 7 })
+    expect((doc.items as Array<{ item: { title: string } }>).map((row) => row.item.title)).toEqual([
+      'Place 0',
+      'Place 1',
+      'Place 2',
+    ])
+  })
+
+  it('pins each withheld place by position only', () => {
+    const doc: Record<string, unknown> = {
+      items: [place(0), place(1), place(2), place(3), { blockType: 'data-dining', item: { title: 'No coordinates' } }],
+    }
+
+    const outcome = applySampleRule('single-type-listicles', doc)
+
+    expect(outcome.pins).toEqual([{ lat: -12.3, lng: -77.3 }])
+    expect(JSON.stringify(outcome)).not.toContain('Place 3')
+    expect(JSON.stringify(outcome)).not.toContain('No coordinates')
+  })
+
+  it('reports the moment of every place, so a full list can be headed', () => {
+    const doc: Record<string, unknown> = {
+      items: [place(0, { moment: 'rooftop' }), place(1), place(2), place(3, { moment: 'late-night' })],
+    }
+
+    expect(applySampleRule('single-type-listicles', doc).itemMoments).toEqual([
+      'rooftop',
+      null,
+      null,
+      'late-night',
+    ])
+  })
+
+  it('drops the stored JSON-LD, which names every place', () => {
+    const doc: Record<string, unknown> = {
+      items: [place(0), place(1), place(2), place(3)],
+      seoSection: {
+        metaDescription: 'Kept',
+        structuredData: { '@type': 'ItemList', itemListElement: [{ name: 'Place 3' }] },
+      },
+    }
+
+    applySampleRule('single-type-listicles', doc)
+
+    expect(doc.seoSection).toEqual({ metaDescription: 'Kept' })
+  })
+
+  it('cuts nothing from a list no longer than the sample, but still reports it', () => {
+    const doc: Record<string, unknown> = { items: [place(0), place(1)] }
+
+    const outcome = applySampleRule('single-type-listicles', doc)
+
+    expect(outcome).toMatchObject({ applied: false, unit: 'items', shown: 2, total: 2, pins: [] })
     expect(doc.items).toHaveLength(2)
   })
 })

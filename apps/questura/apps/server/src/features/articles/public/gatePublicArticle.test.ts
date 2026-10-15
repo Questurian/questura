@@ -73,19 +73,41 @@ describe('gatePublicArticle', () => {
     expect(doc.whereStaying).toHaveLength(1)
   })
 
-  it('never locks a single-type listicle, even with a stale member tier', () => {
-    // The field is removed from that collection, but the column can still hold
-    // a value set before removal. Ad revenue needs the whole page reachable.
+  it('locks a member single-type listicle after its first three places', () => {
     const doc: Record<string, unknown> = {
       access: 'member',
-      items: [{ blockType: 'dining' }, { blockType: 'bar' }],
+      items: Array.from({ length: 5 }, (_, i) => ({
+        blockType: 'data-dining',
+        moment: i === 4 ? 'late-night' : null,
+        item: { title: `Place ${i}`, latitude: i, longitude: i },
+      })),
     }
 
     const state = gatePublicArticle('single-type-listicles', doc)
 
-    expect(state.locked).toBe(false)
-    expect(state.access).toBe('free')
-    expect(doc.items).toHaveLength(2)
+    expect(state).toEqual({
+      access: 'member',
+      locked: true,
+      unit: 'items',
+      shown: 3,
+      total: 5,
+      mapPins: [
+        { lat: 3, lng: 3 },
+        { lat: 4, lng: 4 },
+      ],
+      itemMoments: [null, null, null, null, 'late-night'],
+    })
+    expect(doc.items).toHaveLength(3)
+  })
+
+  it('leaves a free single-type listicle whole', () => {
+    const doc: Record<string, unknown> = {
+      access: 'free',
+      items: Array.from({ length: 5 }, () => ({ blockType: 'data-dining' })),
+    }
+
+    expect(gatePublicArticle('single-type-listicles', doc).locked).toBe(false)
+    expect(doc.items).toHaveLength(5)
   })
 
   it('always attaches gate state, so the client never infers lock from absence', () => {

@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload'
 import { revalidateArticleCollection } from '@/features/public-revalidation/revalidate-client'
 import { syncSearchIndexForCollection } from '@/features/articles/public/search-index/hooks'
+import { gateExternalApiRead } from '@/features/articles/public/gateExternalApiRead'
 import {
   syncSharedNeighborhoodsField,
 } from '@/shared/location/server/articleLocationScope'
@@ -30,4 +31,5 @@ export const singleTypeListicleHooks: CollectionConfig['hooks'] = {
   beforeDelete: [preventSingleTypeListicleDelete],
   afterChange: [articleRevalidation.afterChange, searchIndexSync.afterChange],
   afterDelete: [articleRevalidation.afterDelete, searchIndexSync.afterDelete],
+  afterRead: [gateExternalApiRead('single-type-listicles')],
 }
