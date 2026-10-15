@@ -1,5 +1,6 @@
 import { publicArticleGridFourLayout } from '../../article-grid/service'
 import { normalizeArticleListLayout } from '../../article-list/service'
+import { normalizeMapsTheme } from '../../questurian-maps-dark/service'
 import {
   publicFeaturedArticlesSlot3Layout,
   publicFeaturedArticlesSlot4Layout,
@@ -87,6 +88,10 @@ export function formatPublicHomepageBlock(block: unknown, location?: LocationCon
 
   if (blockType === 'article-list') {
     return { ...base, articleListLayout: normalizeArticleListLayout(block.articleListLayout) }
+  }
+
+  if (blockType === 'questurian-maps-dark') {
+    return { ...base, mapsTheme: normalizeMapsTheme(block.mapsTheme) }
   }
 
   const articleGridFourLayout =

@@ -27,6 +27,7 @@ export type RawBlock = {
   itemDescriptions?: unknown
   articleGridFourLayout?: string
   articleListLayout?: string
+  mapsTheme?: string
   featureKicker?: string | null
   featureTitle?: string | null
   featureDescription?: string | null
@@ -73,3 +74,4 @@ export type CuratedBlockType =
   | 'things-to-do-attractions'
   | 'newsletter-signup'
   | 'article-list'
+  | 'photo-pile'

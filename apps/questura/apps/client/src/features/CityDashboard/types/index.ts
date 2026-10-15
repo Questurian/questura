@@ -299,6 +299,29 @@ export type PageHeroBlock = {
   };
 };
 
+/** One photo in a Photo Pile, at its wide (16:9) crop. */
+export type PhotoPilePhoto = {
+  mediaSetId: number;
+  url: string | null;
+  alt: string;
+  status: "ready" | "missing" | "legacy_fallback";
+};
+
+/**
+ * The photos that open a navbar section page (Eat, Stay, Itineraries). The
+ * section page draws it as its masthead (SectionMasthead); the block list
+ * itself renders nothing for it.
+ */
+export type PhotoPileBlock = {
+  id: string;
+  blockType: "photo-pile";
+  pilePhotos: PhotoPilePhoto[];
+  selection?: {
+    items: unknown[];
+    totalSlots: number;
+  };
+};
+
 export type NewsletterSignupBlock = {
   id: string;
   blockType: "newsletter-signup";
@@ -320,6 +343,7 @@ export type CityHomepageBlock<TItem = unknown> =
   | ThingsToDoAttractionsBlock
   | NewsletterSignupBlock
   | PageHeroBlock
+  | PhotoPileBlock
   | CityHomepageLegacyBlock<TItem>;
 
 export type FeaturedArticlesSlot3Layout = "hero-left" | "featured-center";
@@ -344,6 +368,14 @@ export type ArticleListLayout = "standard" | "square-with-ad";
 export type ArticleListBlock = CityHomepageArticleBlock & {
   blockType: "article-list";
   articleListLayout?: ArticleListLayout | null;
+};
+
+/** Matches the server's MAPS_THEME_VALUES. Missing means "blue". */
+export type MapsTheme = "blue" | "inverted";
+
+export type QuesturianMapsDarkBlock = CityHomepageArticleBlock & {
+  blockType: "questurian-maps-dark";
+  mapsTheme?: MapsTheme | null;
 };
 
 export type ArticleGridBlock = CityHomepageArticleBlock & {
