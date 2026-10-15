@@ -52,6 +52,7 @@ export function MapsArticleLayout({
   })
 
   const effectiveArticle = locked && phase === 'ready' && data ? data : article
+  const paywalled = Boolean(locked && gate) && (phase === 'identifying' || phase === 'anonymous')
   // Places the server withheld, as positions only. Dropped the moment the full
   // list is in, because that list draws the same places as real pins.
   const lockedPins = locked && effectiveArticle === article ? gate?.mapPins : undefined
@@ -100,6 +101,7 @@ export function MapsArticleLayout({
         <MapsListicleArticlePage
           article={effectiveArticle}
           momentHeadings={momentHeadings}
+          paywalled={paywalled}
           lockedSlot={
             locked && gate ? (
               phase === 'identifying' || phase === 'anonymous' ? (
