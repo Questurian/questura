@@ -95,7 +95,7 @@
     "capKb": 170,
     "growth": 0.1,
     "baselineKb": {
-      "/": 141.2,
+      "/": 155.4,
       "/[country]": 141.7,
       "/[country]/[city]": 153.3,
       "/[country]/[city]/[category]": 165.1,
@@ -125,7 +125,9 @@
       "/auth-error": 144.3,
       "/auth/reset-password": 146.8,
       "/authors/[slug]": 143,
+      "/eat": 156.2,
       "/faq": 141.7,
+      "/itineraries": 156.2,
       "/join": 140.7,
       "/newsletters": 154.9,
       "/newsletters/confirm": 144.8,
@@ -133,6 +135,7 @@
       "/purchase/monthly": 155.1,
       "/purchase/yearly": 155.1,
       "/search": 141.7,
+      "/stay": 156.2,
       "/subscription/cancel": 143.8,
       "/subscription/success": 147,
       "/terms": 141.7
