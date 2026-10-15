@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState, type FormEvent, type JSX } from "react";
+import { useState, type FormEvent, type JSX } from "react";
 
 import Link from "@/components/navigation/PublicLink";
 import { rateLimitedMessage, RequestError } from "@/lib/api";
@@ -59,18 +59,24 @@ function errorMessage(error: unknown): string {
  * "check your inbox", never "you're subscribed".
  */
 export function NewsletterSignupForm({
+  idPrefix: id,
   source,
   tone = "light",
   buttonLabel = "Sign up",
   autoFocus = false,
 }: {
+  /**
+   * Prefix for the field ids, from a `useId()` the caller runs outside this
+   * form's chunk (`LazyNewsletterSignupForm`). A `useId()` in here comes out
+   * different on the client: see that file.
+   */
+  idPrefix: string;
   source: NewsletterSignupSource;
   tone?: Tone;
   buttonLabel?: string;
   /** Only for forms that appear on a click (the /newsletters card), never on page load. */
   autoFocus?: boolean;
 }): JSX.Element {
-  const id = useId();
   const [email, setEmail] = useState("");
   const [website, setWebsite] = useState("");
   const [state, setState] = useState<State>({ kind: "idle" });
