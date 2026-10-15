@@ -24,9 +24,20 @@ export type GateState = {
    * that is not a locked itinerary.
    */
   mapPins: GateMapPin[]
+  /**
+   * Locked listicles: the moment of every place in the full list, null where a
+   * place has none. Lets the server render the moment headings a member's full
+   * list needs. Empty for everything else.
+   */
+  itemMoments: Array<string | null>
 }
 
 export type GateMapPin = { lat: number; lng: number }
+
+function readItemMoments(value: unknown): Array<string | null> {
+  if (!Array.isArray(value)) return []
+  return value.map((entry) => (typeof entry === 'string' && entry !== '' ? entry : null))
+}
 
 function readMapPins(value: unknown): GateMapPin[] {
   if (!Array.isArray(value)) return []
@@ -58,6 +69,7 @@ export function readGate(article: unknown): GateState | null {
     shown: Number.isFinite(candidate.shown) ? Number(candidate.shown) : 0,
     total: Number.isFinite(candidate.total) ? Number(candidate.total) : 0,
     mapPins: readMapPins(candidate.mapPins),
+    itemMoments: readItemMoments(candidate.itemMoments),
   }
 }
 

@@ -1,4 +1,4 @@
-import { Fragment, type JSX } from 'react'
+import { Fragment, type JSX, type ReactNode } from 'react'
 import { ArticlePageHeader } from '@/features/articles/components/ArticlePageHeader'
 import { ListicleMapRegion } from '@/features/articles/components/ListicleMapRegion'
 import { ListicleSeparator } from '@/features/articles/components/ListicleSeparator'
@@ -19,6 +19,11 @@ type MapsListicleArticlePageProps = {
   article: MapsListicleArticle
   /** Moment headings rendered on the server, keyed by the run they open. */
   momentHeadings?: ListicleMomentHeadings
+  /**
+   * What stands after the last place on a locked list: the paywall notice, or
+   * the loading and error states while a member's full list is fetched.
+   */
+  lockedSlot?: ReactNode
 }
 
 const NO_MOMENT_HEADINGS: ListicleMomentHeadings = {}
@@ -26,6 +31,7 @@ const NO_MOMENT_HEADINGS: ListicleMomentHeadings = {}
 export function MapsListicleArticlePage({
   article,
   momentHeadings = NO_MOMENT_HEADINGS,
+  lockedSlot = null,
 }: MapsListicleArticlePageProps): JSX.Element {
   const featuredImage = article.header?.featuredImage
   const introRaw = article.header?.intro
@@ -118,6 +124,7 @@ export function MapsListicleArticlePage({
             )
           })}
         </ListicleMapRegion>
+        {lockedSlot ? <div className="pt-10 480:pt-12 sm:pt-14">{lockedSlot}</div> : null}
       </div>
 
       <div className="px-3 pt-14 pb-12 380:px-4 480:px-5 480:pt-16 550:px-6 sm:px-8 sm:pt-20 768:px-10">

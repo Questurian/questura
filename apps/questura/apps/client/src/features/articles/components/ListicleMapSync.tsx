@@ -78,7 +78,7 @@ export type ListicleMapPoint = {
   preview?: ListicleMapPointPreview
   /**
    * The pin has no entry on the page to travel to -- a locked itinerary's
-   * withheld stops. It is drawn and framed like any other, but it is not
+   * withheld stops, or a locked listicle's withheld places. It is drawn and framed like any other, but it is not
    * clickable and the stepper walks past it.
    */
   inert?: boolean

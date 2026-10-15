@@ -30,7 +30,25 @@ test('readGate: reads a well-formed gate as sent', () => {
     shown: 2,
     total: 12,
     mapPins: [],
+    itemMoments: [],
   })
+})
+
+test('readGate: reads a locked listicle\'s moments, keeping their order and gaps', () => {
+  const gate = readGate({
+    gate: {
+      access: 'member',
+      locked: true,
+      unit: 'items',
+      shown: 3,
+      total: 5,
+      mapPins: [{ lat: 1, lng: 2 }],
+      itemMoments: ['rooftop', null, '', 7, 'late-night'],
+    },
+  })
+  assert.deepEqual(gate?.itemMoments, ['rooftop', null, null, null, 'late-night'])
+  assert.deepEqual(gate?.mapPins, [{ lat: 1, lng: 2 }])
+  assert.equal(gate?.unit, 'items')
 })
 
 test('readGate: returns null rather than guessing when locked is not a boolean', () => {
