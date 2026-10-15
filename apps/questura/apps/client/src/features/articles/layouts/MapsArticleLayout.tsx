@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, type JSX } from 'react'
+import { useMemo, type JSX, type ReactNode } from 'react'
 import { MapsListicleArticlePage } from '@/features/articles/MapsListicleArticlePage'
 import {
   ListicleMapSyncProvider,
@@ -8,9 +8,8 @@ import {
 } from '@/features/articles/components/ListicleMapSync'
 import type { ListicleMomentHeadings } from '@/features/articles/components/ListicleMomentHeading'
 import { GatedBodySkeleton, GatedLoadError } from '@/features/articles/components/GatedStates'
-import { PaywallNotice } from '@/features/articles/components/PaywallNotice'
 import { ListicleArticleLayout } from '@/features/articles/layouts/ListicleArticleLayout'
-import { readGate } from '@/features/articles/lib/gate'
+import type { GateState } from '@/features/articles/lib/gate'
 import { mapPointPreviewFromRow } from '@/features/articles/lib/listicleMapPreview'
 import { useGatedFullArticle } from '@/features/articles/lib/useGatedFullArticle'
 import type { ListicleFooterLinks } from '@/features/articles/lib/fetchListicleFooterLinks'
@@ -24,8 +23,14 @@ interface MapsArticleLayoutProps {
   footerLinks?: ListicleFooterLinks | null
   country: string
   city?: string | null
-  /** Path the reader is on, so checkout can return them to it. */
-  path?: string
+  /** `readGate(article)`, read on the server. */
+  gate: GateState | null
+  /**
+   * The paywall notice for a locked list, rendered on the server: it does not
+   * depend on who is reading, and its code stays out of this page's first-load
+   * JavaScript, which is over the cap (perf/budgets.json).
+   */
+  paywallNotice?: ReactNode
 }
 
 export function MapsArticleLayout({
@@ -35,11 +40,12 @@ export function MapsArticleLayout({
   footerLinks,
   country,
   city,
-  path,
+  gate,
+  paywallNotice = null,
 }: MapsArticleLayoutProps): JSX.Element {
-  // Memoised because the map's points depend on `gate.mapPins`: a fresh array
-  // every render would rebuild every marker and re-frame the camera each time.
-  const gate = useMemo(() => readGate(article), [article])
+  // `gate` comes from the server once, so `gate.mapPins` keeps one identity
+  // across renders: a fresh array would rebuild every marker and re-frame the
+  // camera each time the points are derived.
   const locked = gate?.locked === true
 
   // A locked list arrives cut to its first places. A member's full list
@@ -105,7 +111,7 @@ export function MapsArticleLayout({
           lockedSlot={
             locked && gate ? (
               phase === 'identifying' || phase === 'anonymous' ? (
-                <PaywallNotice gate={gate} returnTo={path ?? '/'} fade={false} />
+                paywallNotice
               ) : phase === 'unverified' ? (
                 <GatedLoadError onRetry={retry} reason="access" />
               ) : phase === 'loading' ? (

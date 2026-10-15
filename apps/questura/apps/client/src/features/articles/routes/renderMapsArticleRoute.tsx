@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 import { JsonLd } from '@/components/seo/JsonLd'
 import { renderListicleMomentHeadings } from '@/features/articles/components/ListicleMomentHeading'
+import { PaywallNotice } from '@/features/articles/components/PaywallNotice'
 import { buildArticleBreadcrumbJsonLd } from '@/features/articles/lib/articleBreadcrumbJsonLd'
 import { buildArticlePageJsonLd } from '@/features/articles/lib/articlePageJsonLd'
 import { articleHrefForScope } from '@/features/articles/lib/articleScope'
@@ -70,7 +71,8 @@ export async function renderMapsArticleRoute({
         footerLinks={footerLinks}
         country={scope.country}
         city={scope.city}
-        path={path}
+        gate={gate}
+        paywallNotice={locked && gate ? <PaywallNotice gate={gate} returnTo={path} fade={false} /> : null}
       />
     </>
   )
