@@ -8,6 +8,12 @@ export interface CityDashboardProps {
 export interface CityHomepageContentProps {
   location?: CityHomepageLocation | null;
   pageBlocks: CityHomepageBlock[];
+  /**
+   * The blocks are the first thing under the navbar, with no masthead between.
+   * Below 1024 an opening featured block then gets back the top inset it has
+   * on desktop (featured-articles-shared-and-seven.css, "Opening block").
+   */
+  opensPage?: boolean;
 }
 
 export type CityHomepageLocation = {

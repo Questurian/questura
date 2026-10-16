@@ -70,6 +70,7 @@ export default async function CountryCategoryArticlePage({ params }: Props) {
         <CityHomepageContent
           pageBlocks={neighborhood.pageBlocks}
           location={neighborhood.location}
+          opensPage
         />
         <CityDashboardPage citySlug={city} countrySlug={country} />
       </>

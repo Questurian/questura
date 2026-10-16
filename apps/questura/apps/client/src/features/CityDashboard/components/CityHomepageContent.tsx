@@ -9,7 +9,11 @@ function getBlockKey(block: CityHomepageContentProps['pageBlocks'][number], inde
     : `${block.blockType}-${index}`
 }
 
-export function CityHomepageContent({ location = null, pageBlocks }: CityHomepageContentProps) {
+export function CityHomepageContent({
+  location = null,
+  pageBlocks,
+  opensPage = false,
+}: CityHomepageContentProps) {
   const renderedBlocks = pageBlocks
     .map((block, index) => {
       const layout = getHomepageBlockLayout(block)
@@ -50,7 +54,10 @@ export function CityHomepageContent({ location = null, pageBlocks }: CityHomepag
   // page's one <main>.
   return createElement(
     'div',
-    { className: 'bg-[#f5f0e8] text-[#1a1a1a]' },
+    {
+      className: 'bg-[#f5f0e8] text-[#1a1a1a]',
+      'data-blocks-open-page': opensPage || undefined,
+    },
     heading,
     renderedBlocks,
   )

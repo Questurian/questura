@@ -33,7 +33,7 @@ export default async function HomePage() {
       <SuspenseBoundary fallback={null}>
         <SignInPromptFromLink />
       </SuspenseBoundary>
-      {data ? <CityHomepageContent pageBlocks={data.pageBlocks} /> : null}
+      {data ? <CityHomepageContent pageBlocks={data.pageBlocks} opensPage /> : null}
     </section>
   )
 }

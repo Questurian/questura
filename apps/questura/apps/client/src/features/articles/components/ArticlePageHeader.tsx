@@ -67,10 +67,16 @@ export function ArticlePageHeader({
   })()
 
   return (
+    // The frame sits as far below the navbar as it sits from the sides; it
+    // used to touch the bar. The mt-* ladder matches the side margin the frame
+    // really gets, which is 32px from 640 to 1023: Tailwind emits the rem
+    // `sm:` after the px breakpoints, so `sm:mx-8` outranks `768:mx-10`. That
+    // is also why this ladder says `640:`, so `1024:mt-0` can win. From 1024
+    // the maps column supplies the space (ListicleArticleLayout, pt-[25px]).
     <section
       aria-labelledby="article-magazine-title"
       data-article-header
-      className="overflow-hidden rounded-none border-[3px] border-double border-foreground bg-background mx-3 px-4 pt-7 pb-7 380:mx-4 380:px-6 380:pt-9 380:pb-8 480:mx-5 480:px-7 480:pt-10 480:pb-9 550:mx-6 sm:mx-8 sm:px-10 sm:pt-12 sm:pb-10 768:mx-10 768:px-12 768:pt-14 768:pb-11 1024:mx-10 1024:p-0"
+      className="overflow-hidden rounded-none border-[3px] border-double border-foreground bg-background mx-3 mt-3 px-4 pt-7 pb-7 380:mx-4 380:mt-4 380:px-6 380:pt-9 380:pb-8 480:mx-5 480:mt-5 480:px-7 480:pt-10 480:pb-9 550:mx-6 550:mt-6 640:mt-8 sm:mx-8 sm:px-10 sm:pt-12 sm:pb-10 768:mx-10 768:px-12 768:pt-14 768:pb-11 1024:mx-10 1024:mt-0 1024:p-0"
     >
       <div className="text-center">
         {featuredImage?.url ? (
