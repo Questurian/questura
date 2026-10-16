@@ -15,12 +15,16 @@ export const useAuthSubmit = ({ inModal = false, onSuccess }: UseAuthSubmitOptio
   const loginMutation = useLoginMutation();
   const signupMutation = useSignupMutation();
 
-  const attemptSignIn = async (formData: AuthFormData): Promise<{ success: boolean; errors?: Array<{ message: string }> }> => {
+  const attemptSignIn = async (
+    formData: AuthFormData,
+    captchaToken: string | null = null
+  ): Promise<{ success: boolean; errors?: Array<{ message: string }> }> => {
     return new Promise((resolve) => {
       loginMutation.mutate(
         {
           email: formData.email,
           password: formData.password,
+          captchaToken,
         },
         {
           onSuccess: async (data) => {
@@ -53,7 +57,7 @@ export const useAuthSubmit = ({ inModal = false, onSuccess }: UseAuthSubmitOptio
     });
   };
 
-  const attemptSignUp = async (formData: AuthFormData): Promise<SignUpResult> => {
+  const attemptSignUp = async (formData: AuthFormData, captchaToken: string | null = null): Promise<SignUpResult> => {
     return new Promise((resolve) => {
       signupMutation.mutate(
         {
@@ -61,6 +65,7 @@ export const useAuthSubmit = ({ inModal = false, onSuccess }: UseAuthSubmitOptio
           password: formData.password,
           firstName: formData.firstName,
           lastName: formData.lastName,
+          captchaToken,
         },
         {
           onSuccess: async (data) => {

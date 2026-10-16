@@ -2,6 +2,8 @@
 
 import { useEffect, useState, type FormEvent } from 'react';
 import { usePasswordResetRequest } from '@/features/Auth/hooks/usePasswordResetRequest';
+import { useCaptcha } from '@/features/Auth/hooks/useCaptcha';
+import TurnstileWidget from '@/features/Auth/components/form/TurnstileWidget';
 import {
   AuthBackButton,
   AuthNotice,
@@ -26,12 +28,16 @@ export default function PasswordResetModal({
   email
 }: PasswordResetModalProps) {
   const [sent, setSent] = useState(false);
+  const [checking, setChecking] = useState(false);
+  const [captchaError, setCaptchaError] = useState<string | null>(null);
   const resetRequest = usePasswordResetRequest();
   const { reset } = resetRequest;
+  const captcha = useCaptcha('password-reset');
 
   useEffect(() => {
     if (!isOpen) {
       setSent(false);
+      setCaptchaError(null);
       reset();
     }
   }, [isOpen, reset]);
@@ -49,13 +55,31 @@ export default function PasswordResetModal({
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setCaptchaError(null);
+
+    // Waits (the button spinning) if Cloudflare has not answered yet.
+    let captchaToken: string | null;
+    setChecking(true);
     try {
-      await resetRequest.mutateAsync({ email });
+      captchaToken = await captcha.take();
+    } catch (error) {
+      setCaptchaError(error instanceof Error ? error.message : 'Please try again.');
+      return;
+    } finally {
+      setChecking(false);
+    }
+
+    try {
+      await resetRequest.mutateAsync({ email, captchaToken });
       setSent(true);
     } catch {
-      // Shown through `resetRequest.error` below.
+      // Shown through `resetRequest.error` below. The token is spent.
+      captcha.refresh();
     }
   };
+
+  const errorMessage = captchaError ?? resetRequest.error?.message;
+  const busy = checking || resetRequest.isPending;
 
   if (!isOpen) return null;
 
@@ -98,27 +122,28 @@ export default function PasswordResetModal({
             </button>
           ) : (
             <form className="mt-7 space-y-6" onSubmit={handleSubmit}>
-              {resetRequest.error && <AuthNotice messages={[resetRequest.error.message]} />}
+              {errorMessage && <AuthNotice messages={[errorMessage]} />}
               <div>
                 <p className={authLabel}>Email</p>
                 <p className="mt-2 h-12 w-full truncate rounded-[3px] border border-foreground/15 bg-paper px-3.5 text-[0.95rem] leading-[46px] text-foreground">
                   {email}
                 </p>
               </div>
-              <button
-                type="submit"
-                disabled={resetRequest.isPending}
-                className={authPrimaryButton}
-              >
-                {resetRequest.isPending ? (
-                  <>
-                    <Spinner />
-                    <span>Sending…</span>
-                  </>
-                ) : (
-                  'Send reset link'
-                )}
-              </button>
+              {/* The bot check sits on the button: no room until Cloudflare
+                  asks the reader to tick it. */}
+              <div>
+                {captcha.widget && <TurnstileWidget {...captcha.widget} />}
+                <button type="submit" disabled={busy} className={authPrimaryButton}>
+                  {busy ? (
+                    <>
+                      <Spinner />
+                      <span>Sending…</span>
+                    </>
+                  ) : (
+                    'Send reset link'
+                  )}
+                </button>
+              </div>
             </form>
           )}
         </div>

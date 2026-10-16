@@ -6,8 +6,9 @@
  * policy (`request-policy.ts`), because only a read is safe to repeat.
  */
 
-import { getApiHeaders, getBackendUrl } from './api-config';
-import { executeRequest } from './request-policy';
+// Extensions spelled out so node's test runner can load this file as is.
+import { getApiHeaders, getBackendUrl } from './api-config.ts';
+import { executeRequest } from './request-policy.ts';
 
 export type ApiRequestOptions = RequestInit & {
   /** Give up after this long. Defaults to `DEFAULT_TIMEOUT_MS` (10 s). */

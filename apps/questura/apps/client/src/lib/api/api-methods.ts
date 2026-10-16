@@ -2,7 +2,7 @@
  * HTTP method wrappers around apiRequest.
  */
 
-import { apiRequest } from './api-client';
+import { apiRequest } from './api-client.ts';
 
 /**
  * Make a GET request. `signal` cancels it; a cancelled read is reported as
@@ -13,15 +13,18 @@ export async function get<T = unknown>(endpoint: string, options: { signal?: Abo
 }
 
 /**
- * Make a POST request.
+ * Make a POST request. `headers` are added to the usual ones (the bot
+ * check's token, `captcha.ts`).
  */
 export async function post<T = unknown>(
   endpoint: string,
-  body?: Record<string, unknown>
+  body?: Record<string, unknown>,
+  options: { headers?: Record<string, string> } = {}
 ): Promise<T> {
   return apiRequest<T>(endpoint, {
     method: 'POST',
     body: body ? JSON.stringify(body) : undefined,
+    headers: options.headers,
   });
 }
 

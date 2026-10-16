@@ -200,6 +200,8 @@ jobs:
           NEXT_PUBLIC_ENDORSELY_ENABLED: ${{ vars.ENDORSELY_ENABLED }}
           NEXT_PUBLIC_ENDORSELY_ORG_ID: ${{ vars.ENDORSELY_ORG_ID }}
           NEXT_PUBLIC_IMAGE_CDN_ORIGIN: ${{ vars.IMAGE_CDN_ORIGIN }}
+          # Unset = no bot check on the sign-in forms (docs/procedures/turnstile.md).
+          NEXT_PUBLIC_TURNSTILE_SITE_KEY: ${{ vars.TURNSTILE_SITE_KEY }}
         run: |
           set -euo pipefail
           [[ "$NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY" == pk_live_* ]] || { echo "::error::vars.STRIPE_PUBLISHABLE_KEY must be the pk_live_ key"; exit 1; }
