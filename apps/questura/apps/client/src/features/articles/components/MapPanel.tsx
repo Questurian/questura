@@ -288,6 +288,10 @@ export function MapPanel({
 }: MapPanelProps = {}) {
   const mapRef = useRef<HTMLDivElement>(null)
   const { points, activeId, scrollToEntry } = useListicleMapSync()
+  // Withheld places arrive as inert pins, so any inert pin means the reader is
+  // not a member. They get to see that the places exist, not where they are:
+  // the map holds its overview and cannot be zoomed or dragged.
+  const locked = points.some((point) => point.inert)
 
   const mapInstance = useRef<google.maps.Map | null>(null)
   const markerLib = useRef<google.maps.MarkerLibrary | null>(null)
@@ -375,7 +379,11 @@ export function MapPanel({
     const map = mapInstance.current
     if (!ready || !map || paused || !mapRef.current) return
 
-    const active = points.find((point) => point.id === activeId)
+    // A free stop above the paywall would fly the camera to street level, and
+    // the withheld pins around it with it.
+    const active = locked
+      ? undefined
+      : points.find((point) => point.id === activeId)
     const camera = active
       ? {
           center: shiftCenterSouthByPixels(
@@ -405,11 +413,18 @@ export function MapPanel({
       map.moveCamera(camera)
     }
     hasFramedPoints.current = true
-  }, [ready, activeId, points, paused, viewportInsetBottomPx, activeZoom, fitPadding])
+  }, [ready, activeId, points, locked, paused, viewportInsetBottomPx, activeZoom, fitPadding])
 
   useEffect(() => {
-    if (ready) mapInstance.current?.setOptions({ gestureHandling })
-  }, [ready, gestureHandling])
+    if (!ready) return
+    // 'none' also hands touches and the scroll wheel back to the page, so a
+    // drag across a locked map scrolls the article instead.
+    mapInstance.current?.setOptions({
+      gestureHandling: locked ? 'none' : gestureHandling,
+      disableDoubleClickZoom: locked,
+      keyboardShortcuts: !locked,
+    })
+  }, [ready, gestureHandling, locked])
 
   useEffect(() => {
     const animation = cameraAnimation.current
