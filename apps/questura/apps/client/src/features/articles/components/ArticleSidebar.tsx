@@ -106,7 +106,7 @@ export function ArticlePartners({ partners }: { partners: ArticleIndexItem[] }) 
   return (
     <section aria-labelledby="article-partners-heading" className="pt-12 pb-16 1024:pt-16 1024:pb-20">
       <SectionHeading id="article-partners-heading">More from Questurian</SectionHeading>
-      <ul className="mt-6 grid grid-cols-2 gap-x-5 gap-y-8 sm:grid-cols-3 1024:grid-cols-5">
+      <ul className="mt-6 grid grid-cols-2 gap-x-5 gap-y-8 sm:grid-cols-3">
         {partners.map((item) => (
           <li key={item.id}>
             <Link href={item.href} className="group block">

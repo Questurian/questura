@@ -178,7 +178,7 @@ function StandardArticleHeader({
         ) : null}
       </div>
 
-      <h1 className="font-display text-[32px] font-normal leading-[1.08] text-foreground sm:text-[40px] 1024:text-[44px]">
+      <h1 className="font-display text-[32px] font-normal leading-[1.08] text-foreground sm:text-[40px]">
         {title}
       </h1>
 
@@ -264,7 +264,7 @@ function DarkHeroArticleLayout({ article, path, shareUrl, adPlan, sidebar }: Lay
 
           <div className="mx-auto mt-8 flex max-w-[46rem] flex-col items-center px-4 text-center 1024:mt-12">
             <ArticleKicker path={path} className="text-accent-soft" />
-            <h1 className="mt-4 font-display text-[34px] font-normal leading-[1.06] text-white sm:text-[44px] 1024:text-[54px]">
+            <h1 className="mt-4 font-display text-[34px] font-normal leading-[1.06] text-white sm:text-[44px]">
               {title}
             </h1>
             {description ? (
@@ -326,7 +326,7 @@ function CenteredArticleLayout({ article, path, shareUrl, adPlan, sidebar }: Lay
     <div className="mx-auto w-full max-w-6xl px-0 1024:px-8">
       <header className="mx-auto flex max-w-[48rem] flex-col items-center px-4 pt-10 pb-8 text-center 1024:pt-14 1024:pb-10">
         <ArticleKicker path={path} className="text-accent" />
-        <h1 className="mt-4 font-display text-[34px] font-normal leading-[1.06] text-foreground sm:text-[46px] 1024:text-[56px]">
+        <h1 className="mt-4 font-display text-[34px] font-normal leading-[1.06] text-foreground sm:text-[46px]">
           {title}
         </h1>
         {description ? (

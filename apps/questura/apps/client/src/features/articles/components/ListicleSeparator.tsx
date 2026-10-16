@@ -4,7 +4,7 @@ export function ListicleSeparator(): JSX.Element {
   return (
     <div
       aria-hidden="true"
-      className="mx-3 flex items-center gap-1 text-foreground 380:mx-4 480:mx-5 550:mx-6 sm:mx-8 768:mx-10"
+      className="mx-3 flex items-center gap-1 text-foreground 380:mx-4 480:mx-5 550:mx-6 sm:mx-8"
     >
       <div className="box-border min-h-[3px] flex-1 border-x-0 border-b-0 border-t-[3px] border-double border-t-accent/70" />
       {/* The rotated square's bounding box is 14px × √2 ≈ 20px; the wrapper

@@ -102,7 +102,7 @@ function TourAgencyCard({
   const price = formatPriceTier(block.price);
 
   return (
-    <li className="scroll-mt-4 border-t-[3px] border-double border-accent/60 first:border-t-0 first:pt-0 pt-7 pb-7 last:pb-1 max-[379px]:pt-6 max-[379px]:pb-6 480:pt-9 480:pb-9 550:pt-11 550:pb-11 sm:pt-12 sm:pb-12 768:pt-14 768:pb-14">
+    <li className="scroll-mt-4 border-t-[3px] border-double border-accent/60 first:border-t-0 first:pt-0 pt-7 pb-7 last:pb-1 max-[379px]:pt-6 max-[379px]:pb-6 480:pt-9 480:pb-9 550:pt-11 550:pb-11 sm:pt-12 sm:pb-12">
       <div className="min-w-0 space-y-3 380:space-y-3.5 480:space-y-4 sm:space-y-5">
         <ItineraryMomentBadge moment={block.moment} label={block.momentLabel} />
 
@@ -134,7 +134,7 @@ function TourAgencyCard({
         ) : null}
 
         <div className="space-y-2 480:space-y-2.5 sm:space-y-3">
-          <h2 className="font-display text-[1.15rem] font-semibold leading-[1.2] text-foreground 380:text-[1.35rem] 480:text-[1.5rem] 550:text-[1.55rem] sm:text-[1.7rem] 768:text-[1.8rem]">
+          <h2 className="font-display text-[1.15rem] font-semibold leading-[1.2] text-foreground 380:text-[1.35rem] 480:text-[1.5rem] 550:text-[1.55rem] sm:text-[1.7rem]">
             {block.title}
           </h2>
 
@@ -153,7 +153,7 @@ function TourAgencyCard({
 
         <div className="overflow-hidden rounded-sm border border-foreground/12 bg-foreground/[0.07] sm:rounded">
           <div className="grid grid-cols-1 gap-px bg-foreground/12 480:grid-cols-2">
-            <div className="maps-listicle-utility-cell flex items-center gap-2.5 px-3 py-2.5 380:px-3.5 480:gap-3 480:px-4 480:py-3 sm:px-4 sm:py-3.5 768:px-5 768:py-3.5">
+            <div className="maps-listicle-utility-cell flex items-center gap-2.5 px-3 py-2.5 380:px-3.5 480:gap-3 480:px-4 480:py-3 sm:px-4 sm:py-3.5">
               <Clock
                 className="maps-listicle-info-icon text-[var(--maps-listicle-accent)] shrink-0 size-[15px] 480:size-[16px] sm:size-[17px]"
                 strokeWidth={1.75}
@@ -165,7 +165,7 @@ function TourAgencyCard({
             </div>
 
             {startingPoint ? (
-              <div className="maps-listicle-utility-cell flex items-center gap-2.5 px-3 py-2.5 380:px-3.5 480:gap-3 480:px-4 480:py-3 sm:px-4 sm:py-3.5 768:px-5 768:py-3.5">
+              <div className="maps-listicle-utility-cell flex items-center gap-2.5 px-3 py-2.5 380:px-3.5 480:gap-3 480:px-4 480:py-3 sm:px-4 sm:py-3.5">
                 <MapPin
                   className="maps-listicle-info-icon text-[var(--maps-listicle-accent)] shrink-0 size-[15px] 480:size-[16px] sm:size-[17px]"
                   strokeWidth={1.75}
@@ -178,7 +178,7 @@ function TourAgencyCard({
             ) : null}
 
             {href ? (
-              <div className="maps-listicle-utility-cell flex items-center gap-2.5 px-3 py-2.5 380:px-3.5 480:col-span-2 480:gap-3 480:px-4 480:py-3 sm:px-4 sm:py-3.5 768:px-5 768:py-3.5">
+              <div className="maps-listicle-utility-cell flex items-center gap-2.5 px-3 py-2.5 380:px-3.5 480:col-span-2 480:gap-3 480:px-4 480:py-3 sm:px-4 sm:py-3.5">
                 <ExternalLink
                   className="maps-listicle-info-icon text-[var(--maps-listicle-accent)] shrink-0 size-[15px] 480:size-[16px] sm:size-[17px]"
                   strokeWidth={1.75}
@@ -292,7 +292,7 @@ export function ItineraryListicleArticlePage({
   const description = article.seoSection?.metaDescription;
 
   return (
-    <article className="maps-listicle-article itinerary-article min-h-screen bg-background sm:max-w-[600px] sm:mx-auto 1024:max-w-none 1024:mx-0">
+    <article className="maps-listicle-article itinerary-article min-h-screen bg-background sm:max-w-[600px] sm:mx-auto">
       <ArticlePageHeader
         title={article.title}
         description={description}
@@ -309,7 +309,7 @@ export function ItineraryListicleArticlePage({
       />
 
       {introHtml ? (
-        <div className="relative px-3 pt-6 pb-2 380:px-4 380:pt-8 380:pb-3 480:px-5 480:pt-10 480:pb-4 550:px-6 sm:px-8 sm:pt-10 sm:pb-5 768:px-10">
+        <div className="relative px-3 pt-6 pb-2 380:px-4 380:pt-8 380:pb-3 480:px-5 480:pt-10 480:pb-4 550:px-6 sm:px-8 sm:pt-10 sm:pb-5">
           <div
             className="article-prose maps-listicle-intro max-w-none"
             dangerouslySetInnerHTML={{ __html: introHtml }}
@@ -327,7 +327,7 @@ export function ItineraryListicleArticlePage({
       {days.length > 1 ? (
         <div
           data-listicle-sticky-chrome=""
-          className="sticky top-[var(--navbar-height,0px)] z-10 bg-background px-3 380:px-4 480:px-5 550:px-6 sm:px-8 768:px-10"
+          className="sticky top-[var(--navbar-height,0px)] z-10 bg-background px-3 380:px-4 480:px-5 550:px-6 sm:px-8"
         >
           <div
             role="tablist"
@@ -358,10 +358,10 @@ export function ItineraryListicleArticlePage({
         </div>
       ) : null}
 
-      <div className="px-3 pb-20 pt-6 380:px-4 380:pt-7 480:px-5 480:pt-8 480:pb-24 550:px-6 550:pt-10 sm:px-8 sm:pt-8 sm:pb-32 768:px-10">
+      <div className="px-3 pb-20 pt-6 380:px-4 380:pt-7 480:px-5 480:pt-8 480:pb-24 550:px-6 550:pt-10 sm:px-8 sm:pt-8 sm:pb-32">
         <ListicleMapRegion>
           {whereStaying.length > 0 && !paywalled ? (
-            <div className="mb-7 space-y-8 border-b-[3px] border-double border-accent/60 pb-7 max-[379px]:mb-6 max-[379px]:pb-6 480:mb-9 480:space-y-10 480:pb-9 550:mb-11 550:pb-11 sm:mb-12 sm:space-y-12 sm:pb-12 768:mb-14 768:pb-14">
+            <div className="mb-7 space-y-8 border-b-[3px] border-double border-accent/60 pb-7 max-[379px]:mb-6 max-[379px]:pb-6 480:mb-9 480:space-y-10 480:pb-9 550:mb-11 550:pb-11 sm:mb-12 sm:space-y-12 sm:pb-12">
               {whereStaying.map((row) => (
                 <ItineraryStayCard key={row.id} row={row} />
               ))}

@@ -168,7 +168,7 @@ export function ListicleVenueInfoGrid({
               {cells.map((c, i) => (
                 <div
                   key={c.key}
-                  className={`maps-listicle-utility-cell group flex items-center gap-2.5 px-3 py-2.5 380:px-3.5 480:gap-3 480:px-4 480:py-3 sm:px-4 sm:py-3.5 768:px-5 768:py-3.5 ${
+                  className={`maps-listicle-utility-cell group flex items-center gap-2.5 px-3 py-2.5 380:px-3.5 480:gap-3 480:px-4 480:py-3 sm:px-4 sm:py-3.5 ${
                     lastSolo && i === cells.length - 1 ? 'col-span-2' : ''
                   }`}
                 >
