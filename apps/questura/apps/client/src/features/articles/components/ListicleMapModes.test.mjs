@@ -1,55 +1,58 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import {
+  coveredHeight,
   hiddenBelowFold,
+  INITIAL_LISTICLE_MAP_MODE,
   sheetHeightPx,
-  translateForVisibleHeight,
-  visibleHeightForMode,
+  sheetTopForMode,
+  splitVisibleHeight,
 } from './ListicleMapModes.ts'
 
-const VIEWPORT = 800
+// An iPhone in Safari: 80px of toolbars that hide while scrolling down.
+const PHONE = { small: 720, large: 800 }
+const DESKTOP = { small: 800, large: 800 }
+const NAVBAR = 64
 
-test('list hides the sheet, map fills the viewport', () => {
-  assert.equal(visibleHeightForMode('list', VIEWPORT), 0)
-  assert.equal(visibleHeightForMode('split', VIEWPORT), 416)
-  assert.equal(visibleHeightForMode('map', VIEWPORT), VIEWPORT)
+test('phones land in split, so the map is on screen from the start', () => {
+  assert.equal(INITIAL_LISTICLE_MAP_MODE, 'split')
 })
 
-test('the sheet never resizes - only its offset changes', () => {
-  for (const mode of ['list', 'split', 'map']) {
-    const visible = visibleHeightForMode(mode, VIEWPORT)
-    assert.equal(
-      translateForVisibleHeight(visible, VIEWPORT) + visible,
-      sheetHeightPx(VIEWPORT),
-    )
+test('the sheet is the large viewport tall, so hiding the toolbars never uncovers the page under it', () => {
+  assert.equal(sheetHeightPx(PHONE), PHONE.large)
+  for (const mode of ['split', 'map']) {
+    assert.ok(sheetTopForMode(mode, PHONE, NAVBAR) + sheetHeightPx(PHONE) >= PHONE.large)
   }
 })
 
-test('list parks the whole sheet below the fold', () => {
-  assert.equal(
-    translateForVisibleHeight(visibleHeightForMode('list', VIEWPORT), VIEWPORT),
-    VIEWPORT,
-  )
+test('list parks the whole sheet below even the tallest viewport', () => {
+  assert.equal(sheetTopForMode('list', PHONE), PHONE.large)
+  assert.equal(coveredHeight('list', PHONE), 0)
 })
 
-test('the takeover hides nothing; split hides the rest', () => {
-  assert.equal(hiddenBelowFold(visibleHeightForMode('map', VIEWPORT), VIEWPORT), 0)
-  assert.equal(hiddenBelowFold(visibleHeightForMode('split', VIEWPORT), VIEWPORT), 384)
+test('split shows the same slice of map with the toolbars showing', () => {
+  assert.equal(splitVisibleHeight(PHONE), 374)
+  assert.equal(PHONE.small - sheetTopForMode('split', PHONE), 374)
+  assert.equal(sheetTopForMode('split', DESKTOP), 800 - 416)
 })
 
 test('the takeover stops under the navbar so it is always reachable', () => {
-  const NAVBAR = 55
-  assert.equal(visibleHeightForMode('map', VIEWPORT, NAVBAR), VIEWPORT - NAVBAR)
+  assert.equal(sheetTopForMode('map', PHONE, NAVBAR), NAVBAR)
+  // Split is low enough to clear the navbar on its own.
   assert.equal(
-    translateForVisibleHeight(
-      visibleHeightForMode('map', VIEWPORT, NAVBAR),
-      VIEWPORT,
-    ),
-    NAVBAR,
+    sheetTopForMode('split', PHONE, NAVBAR),
+    sheetTopForMode('split', PHONE),
   )
-  // Split is short enough to clear the navbar on its own.
-  assert.equal(
-    visibleHeightForMode('split', VIEWPORT, NAVBAR),
-    visibleHeightForMode('split', VIEWPORT),
-  )
+})
+
+test('the camera aims above what the toolbars hide', () => {
+  // Desktop has no toolbars: the takeover hides only the navbar's worth.
+  assert.equal(hiddenBelowFold('map', DESKTOP, NAVBAR), NAVBAR)
+  assert.equal(hiddenBelowFold('map', PHONE, NAVBAR), NAVBAR + 80)
+  assert.equal(hiddenBelowFold('split', PHONE), PHONE.large - 374)
+})
+
+test('split pads the page by the most the sheet can ever cover', () => {
+  assert.equal(coveredHeight('split', PHONE), 374 + 80)
+  assert.equal(coveredHeight('split', DESKTOP), 416)
 })
