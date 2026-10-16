@@ -74,7 +74,11 @@ export function ListicleMapGuidesMenu({
   }, [open])
 
   const hubHref = city ? `/${country}/${city}` : `/${country}`
-  const hubLabel = `All ${city ?? country} guides`.replace(/-/g, ' ')
+  // Shown as "More"; the full name is what a screen reader announces.
+  const hubPlace = (city ?? country)
+    .replace(/-/g, ' ')
+    .replace(/\b\w/g, (letter) => letter.toUpperCase())
+  const hubLabel = `All ${hubPlace} guides`
 
   return (
     <div ref={rootRef} className="pointer-events-auto relative">
@@ -149,10 +153,11 @@ export function ListicleMapGuidesMenu({
           <Link
             href={hubHref}
             role="menuitem"
+            aria-label={hubLabel}
             onClick={() => setOpen(false)}
             className="mt-1 flex shrink-0 items-center justify-between gap-2 border-t border-foreground/12 px-2 pb-1.5 pt-2.5 text-[11px] font-bold uppercase leading-none tracking-[0.12em] text-accent"
           >
-            <span className="truncate capitalize">{hubLabel}</span>
+            <span className="truncate">More</span>
             <ChevronDown className="size-3.5 shrink-0 -rotate-90" aria-hidden="true" />
           </Link>
         </div>
