@@ -32,16 +32,13 @@ const FLOOR_MARGIN = 8
  *
  * Desktop reads that shelf under the map column, but the phone's takeover
  * covers the page, so without this the map is a room with no other door: the
- * reader can step between pins and nowhere else. The menu ends with the
- * city (or country) hub so there is always a way out to more places, not just
- * to the handful of guides the article happens to link.
+ * reader can step between pins and nowhere else.
  *
  * Beside the stepper the trigger's height is pinned to the stepper's button
  * size so the two pills sit level in the chrome cluster. Alone in split it is
  * `compact`: smaller to the eye, with its tap area grown back out to 44px.
  *
- * The open menu ends above the floating switch whatever the map's height, and
- * the hub link stays pinned under the scrolling list.
+ * The open menu ends above the floating switch whatever the map's height.
  */
 export function ListicleMapGuidesMenu({
   articles,
@@ -72,13 +69,6 @@ export function ListicleMapGuidesMenu({
     window.addEventListener('resize', measure)
     return () => window.removeEventListener('resize', measure)
   }, [open])
-
-  const hubHref = city ? `/${country}/${city}` : `/${country}`
-  // Shown as "More"; the full name is what a screen reader announces.
-  const hubPlace = (city ?? country)
-    .replace(/-/g, ' ')
-    .replace(/\b\w/g, (letter) => letter.toUpperCase())
-  const hubLabel = `All ${hubPlace} guides`
 
   return (
     <div ref={rootRef} className="pointer-events-auto relative">
@@ -149,17 +139,6 @@ export function ListicleMapGuidesMenu({
               )
             })}
           </div>
-
-          <Link
-            href={hubHref}
-            role="menuitem"
-            aria-label={hubLabel}
-            onClick={() => setOpen(false)}
-            className="mt-1 flex shrink-0 items-center justify-between gap-2 border-t border-foreground/12 px-2 pb-1.5 pt-2.5 text-[11px] font-bold uppercase leading-none tracking-[0.12em] text-accent"
-          >
-            <span className="truncate">More</span>
-            <ChevronDown className="size-3.5 shrink-0 -rotate-90" aria-hidden="true" />
-          </Link>
         </div>
       ) : null}
     </div>
