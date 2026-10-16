@@ -6,6 +6,17 @@
  * is on screen. Keeping the height fixed means the map inside never resizes -
  * switching modes is a transform, not a layout pass.
  *
+ * "The viewport" is two numbers on a phone, not one. Mobile browsers hide
+ * their toolbars as the reader scrolls down and bring them back on the way up,
+ * and every change fires `resize` with a new `innerHeight`. Geometry built on
+ * `innerHeight` therefore moved on every scroll: the sheet slid, the map
+ * resized and the camera re-aimed, which reads as the map shaking. Everything
+ * here is built from the small viewport (toolbars showing) and the large one
+ * (toolbars hidden) instead. Both are fixed for a given window, so scrolling
+ * moves nothing. The sheet hangs from the top of the screen and is the large
+ * viewport tall, so whatever the toolbars do, its top edge stays put and its
+ * bottom still reaches the bottom of the screen.
+ *
  * Even the takeover leaves the navbar uncovered: a map with no way back to
  * the rest of the site is a trap.
  *
@@ -35,40 +46,79 @@ export const LISTICLE_MAP_MODE_LABELS: Record<ListicleMapMode, string> = {
   map: 'Map',
 }
 
-/** Visible height at the split mode, as a fraction of the viewport. */
+/**
+ * The mode a phone reader lands in. Split, not list: with the map parked off
+ * screen the only sign that the article is a map of places is a small switch
+ * at the bottom, and readers did not notice it.
+ */
+export const INITIAL_LISTICLE_MAP_MODE: ListicleMapMode = 'split'
+
+/** Visible height at the split mode, as a fraction of the small viewport. */
 export const SPLIT_VISIBLE_FRACTION = 0.52
 
-export function sheetHeightPx(viewportHeight: number): number {
-  return viewportHeight
+/**
+ * The viewport heights that stay fixed while the reader scrolls: `small` with
+ * the browser's toolbars showing, `large` with them hidden. On a desktop
+ * browser the two are equal.
+ */
+export interface ViewportHeights {
+  small: number
+  large: number
+}
+
+export function sheetHeightPx(viewport: ViewportHeights): number {
+  return viewport.large
+}
+
+/** Map visible in split while the toolbars are showing. */
+export function splitVisibleHeight(viewport: ViewportHeights): number {
+  return Math.round(viewport.small * SPLIT_VISIBLE_FRACTION)
 }
 
 /**
+ * How far below the top of the screen the sheet's top edge sits.
+ *
  * @param chromeTopHeight Height of page chrome the sheet must not cover - the
  * navbar. The takeover stops under it so the reader can always leave the
- * article; `split` is already short enough to clear it.
+ * article; `split` is already low enough to clear it.
  */
-export function visibleHeightForMode(
+export function sheetTopForMode(
   mode: ListicleMapMode,
-  viewportHeight: number,
+  viewport: ViewportHeights,
   chromeTopHeight = 0,
 ): number {
-  if (mode === 'list') return 0
-  if (mode === 'map') return Math.max(viewportHeight - chromeTopHeight, 0)
-  return Math.round(viewportHeight * SPLIT_VISIBLE_FRACTION)
+  // Past the bottom of even the tallest viewport.
+  if (mode === 'list') return viewport.large
+  if (mode === 'map') return chromeTopHeight
+  return viewport.small - splitVisibleHeight(viewport)
 }
 
-/** How far down the sheet sits for a given amount of visible height. */
-export function translateForVisibleHeight(
-  visibleHeight: number,
-  viewportHeight: number,
-): number {
-  return Math.max(sheetHeightPx(viewportHeight) - visibleHeight, 0)
-}
-
-/** Map pixels hidden below the fold at a given visible height. */
+/**
+ * Map pixels below the bottom of the screen while the toolbars are showing,
+ * which is when the most of it is hidden. The camera aims above them, so the
+ * active stop stays in view when the toolbars come back; hiding them only
+ * uncovers more map underneath.
+ */
 export function hiddenBelowFold(
-  visibleHeight: number,
-  viewportHeight: number,
+  mode: ListicleMapMode,
+  viewport: ViewportHeights,
+  chromeTopHeight = 0,
 ): number {
-  return translateForVisibleHeight(visibleHeight, viewportHeight)
+  const top = sheetTopForMode(mode, viewport, chromeTopHeight)
+  return Math.min(
+    Math.max(top + sheetHeightPx(viewport) - viewport.small, 0),
+    sheetHeightPx(viewport),
+  )
+}
+
+/**
+ * The most of the page the sheet can ever cover: its top edge to the bottom
+ * of the screen with the toolbars hidden.
+ */
+export function coveredHeight(
+  mode: ListicleMapMode,
+  viewport: ViewportHeights,
+  chromeTopHeight = 0,
+): number {
+  return Math.max(viewport.large - sheetTopForMode(mode, viewport, chromeTopHeight), 0)
 }

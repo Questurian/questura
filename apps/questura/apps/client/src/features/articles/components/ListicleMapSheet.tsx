@@ -13,14 +13,16 @@ import {
 } from '@/features/articles/components/ListicleMapSwipe'
 import { useOneFingerSwipe } from '@/features/articles/components/useOneFingerSwipe'
 import {
+  coveredHeight,
   hiddenBelowFold,
+  INITIAL_LISTICLE_MAP_MODE,
   LISTICLE_MAP_PILL_CLEARANCE,
   sheetHeightPx,
-  translateForVisibleHeight,
-  visibleHeightForMode,
+  sheetTopForMode,
   LISTICLE_MAP_MODES,
   LISTICLE_MAP_MODE_LABELS,
   type ListicleMapMode,
+  type ViewportHeights,
 } from '@/features/articles/components/ListicleMapModes'
 
 /**
@@ -49,6 +51,24 @@ const MODE_ICONS: Record<ListicleMapMode, typeof List> = {
 }
 
 /**
+ * Reads the small and large viewport heights (`svh` / `lvh`). Unlike
+ * `innerHeight` they do not change when the browser's toolbars slide in and
+ * out, so a `resize` fired by a scroll measures the same numbers again.
+ * A browser without the units measures zero and falls back to `innerHeight`.
+ */
+function measureViewport(): ViewportHeights {
+  const probe = document.createElement('div')
+  probe.style.cssText =
+    'position:fixed;top:0;left:0;width:0;visibility:hidden;pointer-events:none;height:100svh'
+  document.body.appendChild(probe)
+  const small = probe.offsetHeight || window.innerHeight
+  probe.style.height = '100lvh'
+  const large = Math.max(probe.offsetHeight || window.innerHeight, small)
+  probe.remove()
+  return { small, large }
+}
+
+/**
  * The phone counterpart to the desktop map column: a full-viewport sheet that
  * slides up behind a floating three-way switch.
  *
@@ -65,12 +85,13 @@ const MODE_ICONS: Record<ListicleMapMode, typeof List> = {
  * sheet's top edge, which in the takeover is the top of the screen - exactly
  * where a downward drag opens the phone's notification shade instead.
  *
- * The sheet is always the full viewport tall and only its transform changes,
- * so the map never resizes. What that costs is framing: in `split` the map's
- * own centre sits below the fold, so MapPanel is told how much of itself is
- * hidden and aims at the visible slice instead. Live drag offsets move the
- * sheet but deliberately do not reach MapPanel - the camera settles once per
- * mode, not once per frame.
+ * The sheet is always the large viewport tall and only its transform
+ * changes, so the map never resizes - not between modes, and not when the
+ * browser's toolbars come and go as the reader scrolls (ListicleMapModes says
+ * why that matters). What that costs is framing: in `split` the map's own
+ * centre sits below the fold, so MapPanel is told how much of itself is
+ * hidden and aims at the visible slice instead. The camera settles once per
+ * mode, not once per scroll.
  */
 export function ListicleMapSheet({
   guides,
@@ -78,11 +99,11 @@ export function ListicleMapSheet({
   guides?: ListicleMapGuides
 }): JSX.Element | null {
   const { points, activeId, scrollToEntry } = useListicleMapSync()
-  const [mode, setMode] = useState<ListicleMapMode>('list')
+  const [mode, setMode] = useState<ListicleMapMode>(INITIAL_LISTICLE_MAP_MODE)
   // The map is mounted the first time the reader asks for it and then kept,
   // so going back and forth never pays for a second billed map load.
-  const [hasOpened, setHasOpened] = useState(false)
-  const [viewportHeight, setViewportHeight] = useState(0)
+  const [hasOpened, setHasOpened] = useState(INITIAL_LISTICLE_MAP_MODE !== 'list')
+  const [viewport, setViewport] = useState<ViewportHeights | null>(null)
   // The takeover stops under the navbar, so its height is part of the sheet's
   // geometry. Read from the variable the navbar keeps in sync rather than
   // hard-coding it.
@@ -96,7 +117,14 @@ export function ListicleMapSheet({
 
   useEffect(() => {
     const sync = () => {
-      setViewportHeight(window.innerHeight)
+      const next = measureViewport()
+      // Keep the old object when nothing moved, so a toolbar resize does not
+      // re-render the sheet at all.
+      setViewport((previous) =>
+        previous?.small === next.small && previous.large === next.large
+          ? previous
+          : next,
+      )
       const declared = parseFloat(
         getComputedStyle(document.documentElement).getPropertyValue('--navbar-height'),
       )
@@ -163,15 +191,15 @@ export function ListicleMapSheet({
    * the page stops with its last line resting on the sheet's top edge.
    */
   useEffect(() => {
-    if (mode !== 'split' || viewportHeight === 0) return
+    if (mode !== 'split' || !viewport) return
 
     const body = document.body
     const previous = body.style.paddingBottom
-    body.style.paddingBottom = `${visibleHeightForMode('split', viewportHeight)}px`
+    body.style.paddingBottom = `${coveredHeight('split', viewport)}px`
     return () => {
       body.style.paddingBottom = previous
     }
-  }, [mode, viewportHeight])
+  }, [mode, viewport])
 
   const overlayRef = useCallback((node: HTMLDivElement | null) => {
     if (!node) return
@@ -204,12 +232,11 @@ export function ListicleMapSheet({
     setMode('list')
   }, [activeId, scrollToEntry])
 
-  if (points.length === 0 || viewportHeight === 0) return null
+  if (points.length === 0 || !viewport) return null
 
-  const height = sheetHeightPx(viewportHeight)
-  const visibleHeight = visibleHeightForMode(mode, viewportHeight, navbarHeight)
-  const translateY = translateForVisibleHeight(visibleHeight, viewportHeight)
-  const mapInset = hiddenBelowFold(visibleHeight, viewportHeight) + overlayHeight
+  const height = sheetHeightPx(viewport)
+  const translateY = sheetTopForMode(mode, viewport, navbarHeight)
+  const mapInset = hiddenBelowFold(mode, viewport, navbarHeight) + overlayHeight
 
   const activeIndex = points.findIndex((point) => point.id === activeId)
   const activePoint = activeIndex >= 0 ? points[activeIndex] : null
@@ -224,7 +251,7 @@ export function ListicleMapSheet({
       <div
         data-listicle-map-sheet=""
         id="listicle-map-sheet-panel"
-        className={`fixed inset-x-0 bottom-0 z-50 flex flex-col bg-background 1024:hidden ${
+        className={`fixed inset-x-0 top-0 z-50 flex flex-col bg-background 1024:hidden ${
           mode === 'split' ? 'border-t-[3px] border-double border-foreground/55' : ''
         }`}
         style={{ height, transform: `translateY(${translateY}px)`, transition }}
