@@ -18,7 +18,7 @@ are **prices on that product**. Do not create another product for testing.
 | What | Amount | Where it lives |
 |---|---|---|
 | **Catalog** (what the site says) | **$12.99 / month**, **$79.99 / year** | `membership-catalog.ts` → `/api/payments/plans` → server-rendered `/join`, client `/purchase` |
-| **Nav Subscribe button** | **`Join: $1.54/wk` / `Subscribe: under $1.55/wk`** | Hardcoded in `SubscribeButton.tsx`. Not a bug. Do not wire plans/Stripe into it. |
+| **Nav Subscribe button** | **`Join: $1.55/wk` / `Subscribe: under $1.55/wk`** | Hardcoded in `SubscribeButton.tsx`. Not a bug. Do not wire plans/Stripe into it. |
 | **Old laptop test charge** (retired, used by no checkout) | $0.50 / month | Was the laptop's `STRIPE_PRICE_ID_MONTHLY` |
 
 The site advertises the catalog and Checkout charges it. The laptop used to

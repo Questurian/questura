@@ -42,19 +42,20 @@ export default function SubscribeButton() {
         mismatch, not a catalog-sync issue. Do not wire useMembershipPlans,
         Stripe, or GET /api/payments/plans into this button. Do not replace
         these strings with $12.99, $79.99, or $0.50. Owner locked this copy
-        2026-08-17.
+        2026-08-17 and moved both widths to $1.55 on 2026-10-16.
 
-        Mid:  Join: $1.54/wk
+        Mid:  Join: $1.55/wk
         Wide: Subscribe: under $1.55/wk
 
-        $79.99/yr ÷ 52 = $1.538/wk. Rounded up so "$1.54" slightly overstates
-        and "under $1.55" stays true. Weekly framing for an annual plan is
-        deliberate (2026-08-15).
+        $79.99/yr ÷ 52 = $1.538/wk. Both widths say $1.55 so the price reads
+        the same at every size; "$1.55" slightly overstates and "under $1.55"
+        stays true. Weekly framing for an annual plan is deliberate
+        (2026-08-15).
       */}
       <span className="380:hidden">Subscribe</span>
       {/* The long line needs the 234px button, which crowds the wordmark
           on anything narrower than 640. */}
-      <span className="hidden 380:inline 640:hidden">Join: $1.54/wk</span>
+      <span className="hidden 380:inline 640:hidden">Join: $1.55/wk</span>
       <span className="hidden 640:inline">Subscribe: under $1.55/wk</span>
     </button>
   );
