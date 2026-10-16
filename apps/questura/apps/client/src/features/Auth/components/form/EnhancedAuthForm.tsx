@@ -4,6 +4,7 @@ import { useImperativeHandle } from 'react';
 import { validateEmail, getFormTitle, getFormSubtitle } from '../../lib/auth-utils';
 import { useAuthForm } from '../../hooks/useAuthForm';
 import { useAuthSubmit } from '../../hooks/useAuthSubmit';
+import { useCaptcha } from '../../hooks/useCaptcha';
 import { isServiceUnavailableError, rateLimitedMessage, post } from '@/lib/api';
 import AuthFormLayout from './AuthFormLayout';
 import EmailStep from './EmailStep';
@@ -23,6 +24,8 @@ export default function EnhancedAuthForm({
   // Initialize hooks
   const authForm = useAuthForm({ prefillEmail, onModeChange });
   const authSubmit = useAuthSubmit({ inModal, onSuccess });
+  // Mounted with the password step: the token is ready while the reader types.
+  const captcha = useCaptcha(authForm.isSignUp ? 'sign-up' : 'sign-in');
 
   useImperativeHandle(ref, () => ({ backToEmail: authForm.handleBackToEmail }), [authForm.handleBackToEmail]);
 
@@ -80,16 +83,29 @@ export default function EnhancedAuthForm({
     authForm.setLoading(true);
     authForm.setErrors([]);
 
+    // Waits (the button spinning) if Cloudflare has not answered yet.
+    let captchaToken: string | null;
+    try {
+      captchaToken = await captcha.take();
+    } catch (error) {
+      authForm.setErrors([{ message: error instanceof Error ? error.message : 'Please try again.' }]);
+      authForm.setLoading(false);
+      return;
+    }
+
+    let succeeded = false;
     try {
       if (authForm.isSignUp) {
         // User doesn't exist, attempt signup
-        const result = await authSubmit.attemptSignUp(authForm.formData);
+        const result = await authSubmit.attemptSignUp(authForm.formData, captchaToken);
+        succeeded = result.success;
         if (!result.success && result.errors) {
           authForm.setErrors(result.errors);
         }
       } else {
         // User exists, attempt signin
-        const result = await authSubmit.attemptSignIn(authForm.formData);
+        const result = await authSubmit.attemptSignIn(authForm.formData, captchaToken);
+        succeeded = result.success;
         if (!result.success && result.errors) {
           authForm.setErrors(result.errors);
         }
@@ -106,6 +122,8 @@ export default function EnhancedAuthForm({
         authForm.setErrors([{ message: 'Network error. Please check your connection and try again.' }]);
       }
     } finally {
+      // The request spent the token: the next try (a mistyped password) needs a new one.
+      if (!succeeded) captcha.refresh();
       authForm.setLoading(false);
     }
   };
@@ -151,6 +169,7 @@ export default function EnhancedAuthForm({
           showPassword={authForm.showPassword}
           onTogglePassword={() => authForm.setShowPassword(!authForm.showPassword)}
           inModal={inModal}
+          captcha={captcha.widget}
         />
       )}
     </AuthFormLayout>

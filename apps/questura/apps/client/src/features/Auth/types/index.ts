@@ -4,6 +4,7 @@
  */
 
 import type { JSX } from 'react';
+import type { TurnstileWidgetProps } from '../components/form/TurnstileWidget';
 
 // Re-export auth-utils types
 export type { AuthFormData, AuthError } from '../lib/auth-utils';
@@ -72,6 +73,8 @@ export interface PasswordStepProps {
   onTogglePassword: () => void;
   inModal?: boolean;
   errorMessage?: string;
+  /** The bot check above the submit button; `null` when it is off. */
+  captcha?: TurnstileWidgetProps | null;
 }
 
 /**
@@ -103,4 +106,6 @@ export interface SignUpResult {
  */
 export interface PasswordResetRequest {
   email: string;
+  /** The bot check's token (`useCaptcha`); none when it is off. */
+  captchaToken?: string | null;
 }

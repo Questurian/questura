@@ -59,7 +59,8 @@ Re-run it to rotate a key. What it sets up, GitHub → repo Settings:
 - **Repository variables** (public values, they end up in the browser
   bundle): `STRIPE_PUBLISHABLE_KEY` (`pk_live_…`), `GOOGLE_MAPS_API_KEY`,
   `ENDORSELY_ENABLED` (`true`), `ENDORSELY_ORG_ID`, `IMAGE_CDN_ORIGIN`
-  (`https://questurian-cdn.b-cdn.net`).
+  (`https://questurian-cdn.b-cdn.net`), and optionally `TURNSTILE_SITE_KEY`
+  (the sign-in forms' bot check; unset means off: `turnstile.md`).
 
 Why tokens in GitHub are acceptable in a public repo: anyone who can push to
 `main` can already ship code that reads every production variable, which is

@@ -16,3 +16,4 @@ export type { RequestErrorCategory, RetryDecision } from './api/request-policy';
 export { getBackendUrl, getApiHeaders } from './api/api-config';
 export { apiRequest } from './api/api-client';
 export { get, post, put, del } from './api/api-methods';
+export { CAPTCHA_HEADER, captchaFailureMessage, captchaHeaders } from './api/captcha';

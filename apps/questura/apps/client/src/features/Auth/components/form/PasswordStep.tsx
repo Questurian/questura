@@ -5,6 +5,7 @@
 
 import { useResetPasswordModalStore } from '../../stores/resetPasswordModalStore';
 import PasswordStrengthIndicator from '../PasswordStrengthIndicator';
+import TurnstileWidget from './TurnstileWidget';
 import { validatePasswordRequirements } from '../../lib/auth-utils';
 import type { PasswordStepProps } from '../../types';
 import {
@@ -28,6 +29,7 @@ export default function PasswordStep({
   isSignUp,
   showPassword,
   onTogglePassword,
+  captcha,
 }: PasswordStepProps) {
   const openResetPasswordModal = useResetPasswordModalStore(state => state.openModal);
 
@@ -117,16 +119,21 @@ export default function PasswordStep({
         )}
       </div>
 
-      <button type="submit" disabled={loading} className={authPrimaryButton}>
-        {loading ? (
-          <>
-            <Spinner />
-            <span>{isSignUp ? 'Creating account…' : 'Signing in…'}</span>
-          </>
-        ) : (
-          isSignUp ? 'Create account' : 'Sign in'
-        )}
-      </button>
+      {/* The bot check sits on the button, so it takes no room until
+          Cloudflare asks the reader to tick it. */}
+      <div>
+        {captcha && <TurnstileWidget {...captcha} />}
+        <button type="submit" disabled={loading} className={authPrimaryButton}>
+          {loading ? (
+            <>
+              <Spinner />
+              <span>{isSignUp ? 'Creating account…' : 'Signing in…'}</span>
+            </>
+          ) : (
+            isSignUp ? 'Create account' : 'Sign in'
+          )}
+        </button>
+      </div>
 
       <OrContinueWithGoogle />
     </form>

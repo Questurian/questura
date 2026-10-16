@@ -3,7 +3,13 @@
  */
 
 import { useMutation } from '@tanstack/react-query';
-import { apiRequest, isServiceUnavailableError, rateLimitedMessage } from '@/lib/api';
+import {
+  apiRequest,
+  captchaFailureMessage,
+  captchaHeaders,
+  isServiceUnavailableError,
+  rateLimitedMessage,
+} from '@/lib/api';
 import type { PasswordResetRequest } from '../types';
 
 interface PasswordResetRequestResponse {
@@ -39,6 +45,7 @@ export const usePasswordResetRequest = () => {
               email: data.email,
               redirectTo,
             }),
+            headers: captchaHeaders(data.captchaToken),
             credentials: 'include',
           }
         );
@@ -63,6 +70,11 @@ export const usePasswordResetRequest = () => {
           const limited = rateLimitedMessage(error);
           if (limited) {
             throw new PasswordResetRequestError(limited, 'RATE_LIMITED', undefined);
+          }
+
+          const refused = captchaFailureMessage(error);
+          if (refused) {
+            throw new PasswordResetRequestError(refused, 'CAPTCHA_FAILED', undefined);
           }
 
           // Check if it's a service unavailability error

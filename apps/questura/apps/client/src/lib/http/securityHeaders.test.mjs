@@ -37,6 +37,15 @@ test('the report-only policy lets the site reach its API and embeds', () => {
   assert.match(directive('frame-src'), /https:\/\/www\.instagram\.com/)
 })
 
+// Turnstile's script draws its challenge in a frame from the same host
+// (Cloudflare's CSP guidance: script-src and frame-src).
+test('the report-only policy lets the sign-in forms load Turnstile', () => {
+  const policy = reportOnlyContentSecurityPolicy('https://api.questurian.com')
+  const directive = (name) => policy.split('; ').find((part) => part.startsWith(`${name} `)) ?? ''
+  assert.match(directive('script-src'), /https:\/\/challenges\.cloudflare\.com/)
+  assert.match(directive('frame-src'), /https:\/\/challenges\.cloudflare\.com/)
+})
+
 // The readiness sandbox and localhost serve photos over plain http. Live must
 // still allow https images only.
 test('only a plain-http build allows plain-http images', () => {

@@ -1,7 +1,14 @@
 import { useEffect } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-import { isServiceUnavailableError, isUnauthenticated, post, retryDecision } from '@/lib/api';
+import {
+  captchaFailureMessage,
+  captchaHeaders,
+  isServiceUnavailableError,
+  isUnauthenticated,
+  post,
+  retryDecision,
+} from '@/lib/api';
 import { queryKeys } from '@/lib/react-query';
 import { identityStore, takeIdentityMaxAgeMs } from '@/lib/user/currentIdentity';
 import { IdentitySuperseded } from '@/lib/user/identity';
@@ -98,6 +105,8 @@ export function useUserQuery() {
 interface LoginVariables {
   email: string;
   password: string;
+  /** The bot check's token (`useCaptcha`); none when it is off. */
+  captchaToken?: string | null;
 }
 
 interface LoginResponse {
@@ -108,14 +117,17 @@ export function useLoginMutation() {
   return useMutation({
     mutationFn: async (variables: LoginVariables): Promise<LoginResponse> => {
       try {
-        await post('/api/visitor-auth/sign-in/email', {
-          email: variables.email,
-          password: variables.password,
-        });
+        await post(
+          '/api/visitor-auth/sign-in/email',
+          { email: variables.email, password: variables.password },
+          { headers: captchaHeaders(variables.captchaToken) }
+        );
         const user = await getUserAfterSessionChange();
         if (!user) throw new Error('Sign in succeeded but no session was returned.');
         return { user };
       } catch (error) {
+        const refused = captchaFailureMessage(error);
+        if (refused) throw new Error(refused);
         if (isServiceUnavailableError(error)) {
           throw new Error('Service is unavailable. Please try again later.');
         }
@@ -187,6 +199,8 @@ interface SignupVariables {
   password: string;
   firstName?: string;
   lastName?: string;
+  /** The bot check's token (`useCaptcha`); none when it is off. */
+  captchaToken?: string | null;
 }
 
 interface SignupResponse {
@@ -200,18 +214,19 @@ export function useSignupMutation() {
       try {
         const name = [variables.firstName, variables.lastName].filter(Boolean).join(' ');
         const callbackURL = new URL('/', window.location.origin).toString();
-        await post('/api/visitor-auth/sign-up/email', {
-          email: variables.email,
-          password: variables.password,
-          name,
-          callbackURL,
-        });
+        await post(
+          '/api/visitor-auth/sign-up/email',
+          { email: variables.email, password: variables.password, name, callbackURL },
+          { headers: captchaHeaders(variables.captchaToken) }
+        );
         const user = await getUserAfterSessionChange();
         return {
           message: 'Account created. Check your email to verify before checkout or paid access.',
           user: user ?? undefined,
         };
       } catch (error) {
+        const refused = captchaFailureMessage(error);
+        if (refused) throw new Error(refused);
         if (isServiceUnavailableError(error)) {
           throw new Error('Service is unavailable. Please try again later.');
         }
