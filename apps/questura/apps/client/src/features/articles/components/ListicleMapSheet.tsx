@@ -278,6 +278,7 @@ export function ListicleMapSheet({
       <div
         ref={overlayRef}
         data-listicle-map-sheet=""
+        data-listicle-map-controls=""
         aria-hidden={!showControls}
         className="pointer-events-none fixed inset-x-0 bottom-0 z-[60] flex flex-col items-center gap-2.5 px-3 1024:hidden"
         style={{
