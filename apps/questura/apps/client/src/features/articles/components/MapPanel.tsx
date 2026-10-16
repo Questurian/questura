@@ -443,7 +443,9 @@ export function MapPanel({
       ) : null}
       <div className="pointer-events-none absolute right-3 top-3 z-10 flex items-center gap-2">
         {guides && guides.articles.length > 0 ? (
-          <ListicleMapGuidesMenu {...guides} />
+          // Alone in the corner it can be small; beside the stepper it
+          // matches the stepper's height.
+          <ListicleMapGuidesMenu {...guides} compact={!showArticleControls} />
         ) : null}
         {showArticleControls ? <ListicleMapStepper /> : null}
       </div>
