@@ -144,6 +144,7 @@ async function webhookChecks(pool: Pool): Promise<void> {
 
 const COOKIE_ROUTES: Array<[string, 'GET' | 'POST']> = [
   ['create-checkout-session', 'POST'],
+  ['confirm-checkout', 'POST'],
   ['create-portal-session', 'POST'],
   ['cancel-subscription', 'POST'],
   ['reactivate-subscription', 'POST'],

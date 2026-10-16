@@ -53,12 +53,14 @@ describe('payments routes and the session cookie cache', () => {
   })
 
   it('finds the routes it claims to scan', () => {
-    // Checkout, portal, cancel, reactivate and subscription details. Without
-    // this the test above passes just as happily when it finds nothing.
+    // Checkout, checkout confirm, portal, cancel, reactivate and subscription
+    // details. Without this the test above passes just as happily when it
+    // finds nothing.
     const routes = new Set(principalCalls().map(({ route }) => route))
 
     expect([...routes].sort()).toEqual([
       'cancel-subscription/route.ts',
+      'confirm-checkout/route.ts',
       'create-checkout-session/route.ts',
       'create-portal-session/route.ts',
       'reactivate-subscription/route.ts',

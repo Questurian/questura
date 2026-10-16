@@ -140,6 +140,7 @@ export const edgeRequest: EdgeRequest = async (url, init) => {
 
 const PAYMENT_POST_ROUTES = [
   'create-checkout-session',
+  'confirm-checkout',
   'create-portal-session',
   'cancel-subscription',
   'reactivate-subscription',

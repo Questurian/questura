@@ -61,6 +61,7 @@ Complete list of all backend API routes in this application.
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | `POST` | `/api/payments/create-checkout-session` | Create Stripe checkout session for subscription (requires auth) |
+| `POST` | `/api/payments/confirm-checkout` | Success page: sync membership from a completed Checkout Session the visitor owns, without waiting for the webhook (requires auth; body `{ "sessionId": "cs_..." }`) |
 | `POST` | `/api/payments/create-portal-session` | Create Stripe Customer Portal session for billing management (requires auth) |
 | `GET` | `/api/payments/subscription-details` | Get user's subscription details from Stripe (requires auth) |
 | `POST` | `/api/payments/cancel-subscription` | Cancel user's subscription at period end (requires auth) |

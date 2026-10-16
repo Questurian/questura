@@ -11,9 +11,9 @@ import { logger } from '@/shared/utils/logger'
 /**
  * Throttle for `/api/payments/*` except the Stripe webhook.
  *
- * Checkout, portal, cancel, and reactivate each call Stripe. An unbounded
- * visitor can burn the shared Stripe rate budget that webhook processing
- * also uses. Plans is public and was two Stripe reads per unauthenticated
+ * Checkout, portal, cancel, reactivate and checkout confirm each call
+ * Stripe. An unbounded visitor can burn the shared Stripe rate budget that
+ * webhook processing also uses. Plans is public and was two Stripe reads per unauthenticated
  * hit. Webhooks are excluded: Stripe retries must not 429.
  *
  * Two buckets, applied in order:
@@ -30,6 +30,9 @@ export const PAYMENTS_RATE_LIMITS = {
   portal: { ip: 40, visitor: 8 },
   cancel: { ip: 40, visitor: 8 },
   reactivate: { ip: 40, visitor: 8 },
+  // The success page calls once per load; a refresh or two is the most a buyer
+  // needs. Each call can reach Stripe and an advisory-lock connection.
+  confirm: { ip: 40, visitor: 8 },
   details: { ip: 60, visitor: 20 },
   plans: { ip: 30 },
 } as const
