@@ -108,6 +108,18 @@ html {
   --breakpoint-1024: 1024px;
   --breakpoint-1280: 1280px;
   --breakpoint-1536: 1536px;
+
+  /* Tailwind's own breakpoints, at their default widths but in px. Tailwind
+     orders breakpoints by unit before width, so while these were rem
+     (`sm` = 40rem) every `sm:` rule came after every px rule above, and
+     `sm:mx-8` beat `768:mx-10` at every width. In px they sort by width with
+     the custom ones. Don't put `sm:` and `640:` (or `md:` and `768:`, ...)
+     on the same property: they tie, and which one wins is not obvious. */
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1536px;
 }
 
 body {

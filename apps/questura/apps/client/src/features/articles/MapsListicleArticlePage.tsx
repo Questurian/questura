@@ -58,7 +58,7 @@ export function MapsListicleArticlePage({
   })
 
   return (
-    <article data-listicle-type="maps" className="maps-listicle-article min-h-screen bg-background sm:max-w-[600px] sm:mx-auto 1024:max-w-none 1024:mx-0">
+    <article data-listicle-type="maps" className="maps-listicle-article min-h-screen bg-background sm:max-w-[600px] sm:mx-auto">
       <ArticlePageHeader
         title={article.title}
         description={description}
@@ -74,7 +74,7 @@ export function MapsListicleArticlePage({
       />
 
       {introHtml ? (
-        <div className="maps-listicle-intro-wrap relative px-3 pt-6 pb-2 380:px-4 380:pt-8 380:pb-3 480:px-5 480:pt-10 480:pb-4 550:px-6 sm:px-8 sm:pt-10 sm:pb-5 768:px-10">
+        <div className="maps-listicle-intro-wrap relative px-3 pt-6 pb-2 380:px-4 380:pt-8 380:pb-3 480:px-5 480:pt-10 480:pb-4 550:px-6 sm:px-8 sm:pt-10 sm:pb-5">
           <div
             className="article-prose maps-listicle-intro max-w-none"
             dangerouslySetInnerHTML={{ __html: introHtml }}
@@ -88,7 +88,7 @@ export function MapsListicleArticlePage({
       ) : null}
 
       {ads.afterIntro ? (
-        <div className="px-3 pt-4 380:px-4 480:px-5 550:px-6 sm:px-8 768:px-10">
+        <div className="px-3 pt-4 380:px-4 480:px-5 550:px-6 sm:px-8">
           <InArticleAd slotId="listicle-intro" variant="rectangle" />
         </div>
       ) : null}
@@ -96,14 +96,14 @@ export function MapsListicleArticlePage({
       {headerOnly ? null : <ListicleSeparator />}
 
       {headerOnly ? (
-        <div className="px-3 pb-20 380:px-4 480:px-5 480:pb-24 550:px-6 sm:px-8 sm:pb-32 768:px-10">
+        <div className="px-3 pb-20 380:px-4 480:px-5 480:pb-24 550:px-6 sm:px-8 sm:pb-32">
           {/* Empty, but the phone map reads where the list ends from it, as on
               a locked itinerary. */}
           <ListicleMapRegion>{null}</ListicleMapRegion>
           {lockedSlot}
         </div>
       ) : (
-        <div className="maps-listicle-entries px-3 pb-20 pt-4 380:px-4 380:pt-6 480:px-5 480:pt-8 480:pb-24 550:px-6 550:pt-10 sm:px-8 sm:pt-8 sm:pb-32 768:px-10">
+        <div className="maps-listicle-entries px-3 pb-20 pt-4 380:px-4 380:pt-6 480:px-5 480:pt-8 480:pb-24 550:px-6 550:pt-10 sm:px-8 sm:pt-8 sm:pb-32">
           <ListicleMapRegion>
             {runs.map((run, runIndex) => {
               const heading = momentHeadings[run.start]
@@ -134,7 +134,7 @@ export function MapsListicleArticlePage({
                 <section
                   key={run.start}
                   aria-labelledby={hasHeading ? headingId : undefined}
-                  className={runIndex > 0 ? 'pt-12 480:pt-14 sm:pt-16 768:pt-20' : undefined}
+                  className={runIndex > 0 ? 'pt-12 480:pt-14 sm:pt-16' : undefined}
                 >
                   {hasHeading ? (
                     heading
@@ -152,7 +152,7 @@ export function MapsListicleArticlePage({
         </div>
       )}
 
-      <div className="px-3 pt-14 pb-12 380:px-4 480:px-5 480:pt-16 550:px-6 sm:px-8 sm:pt-20 768:px-10">
+      <div className="px-3 pt-14 pb-12 380:px-4 480:px-5 480:pt-16 550:px-6 sm:px-8 sm:pt-20">
         <NewsletterArticleBand />
       </div>
     </article>

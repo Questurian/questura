@@ -125,14 +125,14 @@ export function ListicleArticleFooter({
           movement, not a different object. */}
       <ListicleSeparator />
 
-      <div className="px-3 pt-6 380:px-4 480:px-5 480:pt-8 550:px-6 sm:px-8 768:px-10 1024:pt-10">
+      <div className="px-3 pt-6 380:px-4 480:px-5 480:pt-8 550:px-6 sm:px-8 1024:pt-10">
         {/* The pause between the list and what comes next is where a reader
             already expects to stop, so the deeper unit sits here and the thin
             one closes the page. Both are exact IAB boxes reserved before
             load, so nothing shifts under the reader. */}
         {ADS_ENABLED ? <InArticleAd slotId="listicle-foot-top" variant="rectangle" /> : null}
 
-        <div className="pt-8 480:pt-10 sm:pt-12 1024:pt-14 1024:grid 1024:grid-cols-[minmax(0,1fr)_320px] 1024:gap-x-10 1280:grid-cols-[minmax(0,1fr)_360px] 1280:gap-x-14">
+        <div className="pt-8 480:pt-10 sm:pt-12 1024:grid 1024:grid-cols-[minmax(0,1fr)_320px] 1024:gap-x-10 1280:grid-cols-[minmax(0,1fr)_360px] 1280:gap-x-14">
           <div className="min-w-0">
             {guides.length > 0 ? (
               <>

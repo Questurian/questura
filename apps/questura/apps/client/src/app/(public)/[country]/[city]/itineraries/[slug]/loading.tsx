@@ -12,14 +12,14 @@ export default function ItineraryArticleLoading(): JSX.Element {
       className="relative 1024:flex 1024:min-h-screen 1024:max-w-[1600px] 1024:mx-auto"
     >
       <div className="maps-article-column 1024:min-w-0 1024:pt-[25px]">
-        <article className="maps-listicle-article min-h-screen bg-background sm:mx-auto sm:max-w-[600px] 1024:mx-0 1024:max-w-none">
+        <article className="maps-listicle-article min-h-screen bg-background sm:mx-auto sm:max-w-[600px]">
           <section
             data-article-header
             aria-hidden="true"
-            className="mx-3 overflow-hidden rounded-none border-[3px] border-double border-foreground bg-background px-4 pb-7 pt-7 380:mx-4 380:px-6 380:pb-8 380:pt-9 480:mx-5 480:px-7 480:pb-9 480:pt-10 550:mx-6 sm:mx-8 sm:px-10 sm:pb-10 sm:pt-12 768:mx-10 768:px-12 768:pb-11 768:pt-14 1024:mx-10 1024:p-0"
+            className="mx-3 overflow-hidden rounded-none border-[3px] border-double border-foreground bg-background px-4 pb-7 pt-7 380:mx-4 380:px-6 380:pb-8 380:pt-9 480:mx-5 480:px-7 480:pb-9 480:pt-10 550:mx-6 sm:mx-8 sm:px-10 sm:pb-10 sm:pt-12"
           >
             <div className="flex flex-col items-center text-center">
-              <Block className="itinerary-skeleton-circle mb-5 size-20 380:size-24 480:size-28 sm:mb-6 sm:size-32 768:size-36" />
+              <Block className="itinerary-skeleton-circle mb-5 size-20 380:size-24 480:size-28 sm:mb-6 sm:size-32" />
 
               <div className="flex w-full max-w-[34rem] flex-col items-center gap-2.5 480:gap-3">
                 <Block className="h-7 w-[92%] 480:h-9 sm:h-10" />
@@ -48,7 +48,7 @@ export default function ItineraryArticleLoading(): JSX.Element {
             </div>
           </section>
 
-          <div aria-hidden="true" className="px-3 pb-2 pt-6 380:px-4 380:pb-3 380:pt-8 480:px-5 480:pb-4 480:pt-10 550:px-6 sm:px-8 sm:pb-5 sm:pt-10 768:px-10">
+          <div aria-hidden="true" className="px-3 pb-2 pt-6 380:px-4 380:pb-3 380:pt-8 480:px-5 480:pb-4 480:pt-10 550:px-6 sm:px-8 sm:pb-5 sm:pt-10">
             <div className="space-y-3">
               <Block className="h-4 w-full" />
               <Block className="h-4 w-[96%]" />
@@ -56,9 +56,9 @@ export default function ItineraryArticleLoading(): JSX.Element {
             </div>
           </div>
 
-          <div aria-hidden="true" className="mx-3 mt-5 border-t-[3px] border-double border-foreground/55 380:mx-4 480:mx-5 550:mx-6 sm:mx-8 768:mx-10" />
+          <div aria-hidden="true" className="mx-3 mt-5 border-t-[3px] border-double border-foreground/55 380:mx-4 480:mx-5 550:mx-6 sm:mx-8" />
 
-          <div aria-hidden="true" className="px-3 pb-20 pt-6 380:px-4 380:pt-7 480:px-5 480:pb-24 480:pt-8 550:px-6 550:pt-10 sm:px-8 sm:pb-32 sm:pt-8 768:px-10">
+          <div aria-hidden="true" className="px-3 pb-20 pt-6 380:px-4 380:pt-7 480:px-5 480:pb-24 480:pt-8 550:px-6 550:pt-10 sm:px-8 sm:pb-32 sm:pt-8">
             <div className="mb-5 flex gap-5 border-b border-foreground/15 pb-3">
               <Block className="h-3 w-14" />
               <Block className="h-3 w-14" />

@@ -68,20 +68,18 @@ export function ArticlePageHeader({
 
   return (
     // The frame sits as far below the navbar as it sits from the sides; it
-    // used to touch the bar. The mt-* ladder matches the side margin the frame
-    // really gets, which is 32px from 640 to 1023: Tailwind emits the rem
-    // `sm:` after the px breakpoints, so `sm:mx-8` outranks `768:mx-10`. That
-    // is also why this ladder says `640:`, so `1024:mt-0` can win. From 1024
-    // the maps column supplies the space (ListicleArticleLayout, pt-[25px]).
+    // used to touch the bar. So the mt-* ladder copies the mx-* one (`640:`
+    // is the same width as `sm:`). From 1024 the maps column supplies the
+    // space (ListicleArticleLayout, pt-[25px]), hence `1024:mt-0`.
     <section
       aria-labelledby="article-magazine-title"
       data-article-header
-      className="overflow-hidden rounded-none border-[3px] border-double border-foreground bg-background mx-3 mt-3 px-4 pt-7 pb-7 380:mx-4 380:mt-4 380:px-6 380:pt-9 380:pb-8 480:mx-5 480:mt-5 480:px-7 480:pt-10 480:pb-9 550:mx-6 550:mt-6 640:mt-8 sm:mx-8 sm:px-10 sm:pt-12 sm:pb-10 768:mx-10 768:px-12 768:pt-14 768:pb-11 1024:mx-10 1024:mt-0 1024:p-0"
+      className="overflow-hidden rounded-none border-[3px] border-double border-foreground bg-background mx-3 mt-3 px-4 pt-7 pb-7 380:mx-4 380:mt-4 380:px-6 380:pt-9 380:pb-8 480:mx-5 480:mt-5 480:px-7 480:pt-10 480:pb-9 550:mx-6 550:mt-6 640:mt-8 sm:mx-8 sm:px-10 sm:pt-12 sm:pb-10 1024:mt-0"
     >
       <div className="text-center">
         {featuredImage?.url ? (
           <div className="mx-auto mb-5 sm:mb-6">
-            <div className="listicle-header-image relative mx-auto h-20 w-20 overflow-hidden rounded-full ring-1 ring-foreground/10 380:h-24 380:w-24 480:h-28 480:w-28 sm:h-32 sm:w-32 768:h-36 768:w-36">
+            <div className="listicle-header-image relative mx-auto h-20 w-20 overflow-hidden rounded-full ring-1 ring-foreground/10 380:h-24 380:w-24 480:h-28 480:w-28 sm:h-32 sm:w-32">
               <ShimmerImage
                 src={featuredImage.url}
                 alt={featuredImage.alt ?? ''}
@@ -98,13 +96,13 @@ export function ArticlePageHeader({
 
         <h1
           id="article-magazine-title"
-          className="font-display font-bold text-foreground text-[26px] leading-[1.18] mb-3 max-[379px]:tracking-tight 380:text-[30px] 380:leading-[1.18] 380:mb-4 480:text-[34px] 550:text-[37px] sm:text-[40px] sm:leading-[1.12] sm:mb-5 768:text-[44px] 768:leading-[1.1]"
+          className="font-display font-bold text-foreground text-[26px] leading-[1.18] mb-3 max-[379px]:tracking-tight 380:text-[30px] 380:leading-[1.18] 380:mb-4 480:text-[34px] 550:text-[37px] sm:text-[40px] sm:leading-[1.12] sm:mb-5"
         >
           {title}
         </h1>
 
         {description ? (
-          <p className="mx-auto mb-5 max-w-[44ch] font-display text-[14px] leading-[1.4] text-foreground/85 380:text-[15px] 480:text-[16px] sm:mb-6 sm:text-[18px] 768:text-[19px]">
+          <p className="mx-auto mb-5 max-w-[44ch] font-display text-[14px] leading-[1.4] text-foreground/85 380:text-[15px] 480:text-[16px] sm:mb-6 sm:text-[18px]">
             {description}
           </p>
         ) : null}
@@ -113,7 +111,7 @@ export function ArticlePageHeader({
       </div>
 
       {(author || publishedLine) ? (
-        <div className="mt-4 flex flex-col gap-5 380:mt-5 380:gap-6 480:mt-6 sm:mt-7 768:mt-8">
+        <div className="mt-4 flex flex-col gap-5 380:mt-5 380:gap-6 480:mt-6 sm:mt-7">
           {author ? (
             <ArticleByline author={author} dateLine={publishedLine} variant={bylineVariant} />
           ) : (
