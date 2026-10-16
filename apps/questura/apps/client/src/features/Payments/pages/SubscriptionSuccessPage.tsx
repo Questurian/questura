@@ -2,13 +2,14 @@
 
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { SuspenseBoundary } from '@/components/shared/SuspenseBoundary';
 import { get } from '@/lib/api';
 import { queryKeys } from '@/lib/react-query';
 import type { CurrentPrincipalResponse } from '@/lib/user/types';
 import { getSafeRedirectPath } from '@/lib/validations';
+import { confirmCheckoutRequest } from '../services/subscription-mutations.service';
 
 const POLL_INTERVAL_MS = 1000;
 const POLL_TIMEOUT_MS = 8000;
@@ -25,6 +26,9 @@ function SubscriptionSuccessContent() {
   const returnTo = getSafeRedirectPath(searchParams?.get('returnTo') ?? null);
   const [mounted, setMounted] = useState(false);
   const [confirmation, setConfirmation] = useState<Confirmation>('checking');
+  // One confirm per page load, shared by every run of the effect below (Strict
+  // Mode runs it twice in development).
+  const confirmRequest = useRef<Promise<unknown> | null>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -36,8 +40,25 @@ function SubscriptionSuccessContent() {
     let cancelled = false;
     const startedAt = Date.now();
 
+    // Membership used to arrive only by webhook, and a burst of purchases can
+    // hold webhooks up for minutes. This asks the server to sync from the
+    // session the buyer just paid on, the same write the webhook makes. Its
+    // answer is not read: the poll below is still what decides, so a failed
+    // or refused confirm leaves the old behaviour, never a worse one.
+    if (sessionId && !confirmRequest.current) {
+      confirmRequest.current = confirmCheckoutRequest(sessionId).catch(() => undefined);
+    }
+    let confirmSettled = !confirmRequest.current;
+    void confirmRequest.current?.finally(() => {
+      confirmSettled = true;
+    });
+
     const poll = async () => {
-      while (!cancelled && Date.now() - startedAt < POLL_TIMEOUT_MS) {
+      while (!cancelled) {
+        // Taken before the read, so a confirm that lands while /api/me is in
+        // flight still gets one more look rather than the "pending" copy.
+        const confirmWasSettled = confirmSettled;
+
         try {
           const response = await get<CurrentPrincipalResponse>('/api/me');
           if (response.principal?.membership.active) {
@@ -59,6 +80,10 @@ function SubscriptionSuccessContent() {
           // Webhook delay and a transient /api/me failure look the same here.
         }
 
+        // The confirm can outlast the usual window when it is queued behind
+        // webhooks; it is bounded by the API client's own timeout.
+        if (confirmWasSettled && Date.now() - startedAt >= POLL_TIMEOUT_MS) break;
+
         await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL_MS));
       }
 
@@ -69,7 +94,7 @@ function SubscriptionSuccessContent() {
     return () => {
       cancelled = true;
     };
-  }, [mounted, queryClient, returnTo, router]);
+  }, [mounted, queryClient, returnTo, router, sessionId]);
 
   if (!mounted) {
     return (

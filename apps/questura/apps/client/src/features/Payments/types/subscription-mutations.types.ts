@@ -19,6 +19,12 @@ export interface CheckoutSessionResponse {
   url: string;
 }
 
+/** `POST /api/payments/confirm-checkout`: advisory; `/api/me` stays the answer. */
+export interface CheckoutConfirmationResponse {
+  status: 'confirmed' | 'pending';
+  membershipActive: boolean;
+}
+
 export interface CreateCheckoutSessionVariables {
   referralId?: string | null;
   /** Which Stripe price to buy; the server defaults to monthly. */

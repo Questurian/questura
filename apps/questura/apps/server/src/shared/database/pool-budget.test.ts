@@ -53,6 +53,33 @@ describe('poolBudget in production', () => {
     expect(budget.exceedsAllowance).toBe(false)
   })
 
+  // Live as declared on Railway (2026-10-16): Neon's 450, one replica, a
+  // surge of one, the nightly reconcile as the job. The advisory-lock pool is
+  // raised from 10 to 30 for purchase bursts (docs/capacity/advisory-lock-pool.md).
+  it("fits live's Railway fleet with the advisory-lock pool at 30", () => {
+    const live = {
+      NODE_ENV: 'production',
+      DATABASE_URI: DIRECT,
+      DATABASE_MAX_CONNECTIONS: '450',
+      APP_PROCESS_COUNT: '1',
+      APP_ROLLOUT_SURGE: '1',
+    }
+
+    // (1 serving + 1 surge + 1 job) × (20 + 10 + 30 + 1) + 5 reserve
+    const raised = poolBudget({ ...live, DATABASE_POOL_ADVISORY_LOCK_MAX: '30' })
+    expect(raised.lines).toEqual([expect.objectContaining({ demand: 188, allowed: 450, fits: true })])
+    expect(raised.problems).toEqual([])
+
+    // The deploy that raises it, with the old generation still on 10.
+    const rollout = poolBudget({
+      ...live,
+      DATABASE_POOL_ADVISORY_LOCK_MAX: '30',
+      APP_PREVIOUS_PER_PROCESS_CONNECTIONS: '41',
+    })
+    expect(rollout.exceedsAllowance).toBe(false)
+    expect(rollout.problems).toEqual([])
+  })
+
   // The regression this ticket exists for: an allowance of 0 (unset) used to
   // disable the check, and the process count silently defaulted to one.
   it('requires the allowance, the process ceiling and the rollout surge', () => {

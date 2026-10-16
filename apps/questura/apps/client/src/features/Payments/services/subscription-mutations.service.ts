@@ -6,6 +6,7 @@ import {
 } from '../constants/subscription.constants';
 import type {
   CancellationResult,
+  CheckoutConfirmationResponse,
   CheckoutSessionResponse,
   PortalSessionResponse,
   RenewalResult,
@@ -74,4 +75,14 @@ export async function createCheckoutSessionRequest(
   } catch (error) {
     throw mapSubscriptionError(error);
   }
+}
+
+/**
+ * Ask the server to sync membership from the Checkout Session the buyer just
+ * paid on, rather than waiting for Stripe's webhook to arrive.
+ */
+export async function confirmCheckoutRequest(
+  sessionId: string
+): Promise<CheckoutConfirmationResponse> {
+  return post<CheckoutConfirmationResponse>('/api/payments/confirm-checkout', { sessionId });
 }

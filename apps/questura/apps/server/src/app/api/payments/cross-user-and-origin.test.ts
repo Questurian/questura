@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { NextRequest } from 'next/server'
 
 /**
- * Launch harness A6, run against the five cookie-authenticated payment routes
+ * Launch harness A6, run against the six cookie-authenticated payment routes
  * through their real handlers.
  *
  * 1. **Cross-user.** A signed-in visitor A sends B's ids (subscription,
@@ -49,6 +49,9 @@ const B_IDS = {
 }
 const B_VALUES = [...new Set(Object.values(B_IDS))]
 
+/** A's own Checkout Session. Confirm needs one to get past body validation. */
+const A_SESSION_ID = 'cs_live_AaaaaaaaaaaaaaaA'
+
 const mocks = vi.hoisted(() => ({
   requireVisitorPrincipal: vi.fn(),
   checkPaymentsRateLimit: vi.fn(),
@@ -62,7 +65,9 @@ const mocks = vi.hoisted(() => ({
   reactivateUserSubscription: vi.fn(),
   getStripeSubscriptionDetails: vi.fn(),
   checkoutCreate: vi.fn(),
+  checkoutRetrieve: vi.fn(),
   portalCreate: vi.fn(),
+  resyncSubscription: vi.fn(),
 }))
 
 vi.mock('@/shared/config', () => ({
@@ -110,12 +115,17 @@ vi.mock('@/payments/lib/payment-service', () => ({
 
 vi.mock('@/payments/lib/stripe', () => ({
   stripe: {
-    checkout: { sessions: { create: mocks.checkoutCreate } },
+    checkout: { sessions: { create: mocks.checkoutCreate, retrieve: mocks.checkoutRetrieve } },
     billingPortal: { sessions: { create: mocks.portalCreate } },
   },
 }))
 
+vi.mock('@/payments/lib/subscription-resync', () => ({
+  resyncSubscription: mocks.resyncSubscription,
+}))
+
 import { POST as checkout } from './create-checkout-session/route'
+import { POST as confirmCheckout } from './confirm-checkout/route'
 import { POST as portal } from './create-portal-session/route'
 import { POST as cancel } from './cancel-subscription/route'
 import { POST as reactivate } from './reactivate-subscription/route'
@@ -123,8 +133,20 @@ import { GET as details } from './subscription-details/route'
 
 type Handler = (req: NextRequest) => Promise<Response>
 
-const ROUTES: Array<{ name: string; method: 'GET' | 'POST'; handler: Handler }> = [
+const ROUTES: Array<{
+  name: string
+  method: 'GET' | 'POST'
+  handler: Handler
+  /** Body fields the route needs before it acts at all. */
+  required?: Record<string, unknown>
+}> = [
   { name: 'create-checkout-session', method: 'POST', handler: checkout as Handler },
+  {
+    name: 'confirm-checkout',
+    method: 'POST',
+    handler: confirmCheckout as Handler,
+    required: { sessionId: A_SESSION_ID },
+  },
   { name: 'create-portal-session', method: 'POST', handler: portal as Handler },
   { name: 'cancel-subscription', method: 'POST', handler: cancel as Handler },
   { name: 'reactivate-subscription', method: 'POST', handler: reactivate as Handler },
@@ -156,7 +178,7 @@ function request(
       ? undefined
       : typeof options.body === 'string'
         ? options.body
-        : JSON.stringify(options.body ?? {})
+        : JSON.stringify({ ...route.required, ...(options.body ?? {}) })
 
   const req = new Request(url, { method: route.method, headers, body })
   // The routes read `nextUrl` nowhere today; give them one anyway so a future
@@ -195,6 +217,21 @@ beforeEach(() => {
   })
   mocks.checkoutCreate.mockResolvedValue({ id: 'cs_A', url: 'https://checkout.stripe.com/c/cs_A' })
   mocks.portalCreate.mockResolvedValue({ url: 'https://billing.stripe.com/p/A' })
+  // Checkout reads back the session it just made and needs it `open`; confirm
+  // reads A's paid one.
+  mocks.checkoutRetrieve.mockImplementation(async (id: string) =>
+    id === A_SESSION_ID
+      ? {
+          id,
+          mode: 'subscription',
+          status: 'complete',
+          customer: 'cus_A',
+          subscription: 'sub_A',
+          metadata: { visitorAuthUserId: A.id },
+        }
+      : { id, status: 'open' },
+  )
+  mocks.resyncSubscription.mockResolvedValue({ profileId: 'profile_A', state: null, transitions: [] })
 })
 
 describe.each(ROUTES)('$name', (route) => {

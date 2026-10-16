@@ -176,8 +176,13 @@ export async function POST(req: NextRequest) {
     // in-flight delivery.
     //
     // If lock-pool exhaustion is ever observed, in increasing order of risk:
-    //   1. Raise `DATABASE_POOL_ADVISORY_LOCK_MAX` (default 10). The boot
-    //      budget check (shared/database/pool-budget.ts) says whether it fits.
+    //   1. Raise `DATABASE_POOL_ADVISORY_LOCK_MAX` (default 10; live is sized
+    //      at 30 in docs/capacity/advisory-lock-pool.md). The boot budget
+    //      check (shared/database/pool-budget.ts) says whether it fits.
+    //
+    // A new buyer no longer depends on this route alone:
+    // `/api/payments/confirm-checkout` writes the same membership from the
+    // success page, under the same customer lock.
     //   2. Drop this outer lock and rely on the per-subscription lock inside
     //      `resyncSubscription` plus the unique `eventId`. Every handler
     //      currently funnels into resync, so this is plausible — but it is a

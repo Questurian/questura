@@ -22,7 +22,7 @@
  * of Stripe, and a scenario that passes here still has to hold against a
  * sandbox test clock.
  */
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { stripeInvalidRequestError } from './__fixtures__/stripe-errors'
 
 // ---------------------------------------------------------------------------
@@ -62,11 +62,21 @@ type Charge = {
   payment_intent: string | null
 }
 
+type CheckoutSession = {
+  id: string
+  mode: 'subscription' | 'payment' | 'setup'
+  status: 'open' | 'complete' | 'expired'
+  customer: string | null
+  subscription: string | null
+  metadata: Record<string, string>
+}
+
 const H = vi.hoisted(() => {
 const store = {
   subs: new Map<string, Sub>(),
   invoices: new Map<string, Invoice>(),
   charges: new Map<string, Charge>(),
+  sessions: new Map<string, CheckoutSession>(),
   refunds: [] as Array<{ key: string | undefined; target: string }>,
   cancelCalls: [] as string[],
   deletedCustomers: new Set<string>(),
@@ -94,6 +104,19 @@ const fakeStripe = {
   webhooks: {
     // Signature verification is covered elsewhere; here the body IS the event.
     constructEvent: (body: string) => JSON.parse(body),
+  },
+  checkout: {
+    sessions: {
+      retrieve: async (id: string) => {
+        const session = store.sessions.get(id)
+        if (!session) {
+          const err = stripeError(`No such checkout.session: ${id}`) as Error & { code?: string }
+          err.code = 'resource_missing'
+          throw err
+        }
+        return clone(session)
+      },
+    },
   },
   subscriptions: {
     retrieve: async (id: string, opts?: { expand?: string[] }) => {
@@ -284,13 +307,28 @@ vi.mock('@/emails', () => ({
 
 vi.mock('@/shared/config', () => ({
   APP_CONFIG: {
+    CORS_ORIGINS: ['https://www.questurian.com'],
     stripe: { webhookSecret: 'whsec_test' },
     features: { endorselyAffiliates: false },
   },
 }))
 
+// The checkout confirm route needs a signed-in visitor and a rate limiter.
+// Neither is what these scenarios test (both have their own suites), so the
+// visitor is whoever `signedIn` names and every request is allowed.
+const V = vi.hoisted(() => ({ signedIn: 'auth_1' }))
+vi.mock('@/features/visitor-auth/lib/current-principal', () => ({
+  requireVisitorPrincipal: async () => ({ principal: { id: V.signedIn }, error: null, status: 200 }),
+}))
+vi.mock('@/payments/lib/payments-rate-limit', () => ({
+  checkPaymentsRateLimit: async () => ({ allowed: true }),
+  checkPaymentsVisitorRateLimit: async () => ({ allowed: true }),
+  paymentsRateLimitResponse: () => new Response(null, { status: 429 }),
+}))
+
 import { headers as nextHeaders } from 'next/headers'
 import { POST as webhookRoute } from '@/app/api/payments/webhooks/stripe/route'
+import { POST as confirmRoute } from '@/app/api/payments/confirm-checkout/route'
 import { deriveVisitorMembership } from '@/features/visitor-auth/lib/membership-entitlement'
 import lifecycleFixture from './__fixtures__/membership-lifecycle.events.json'
 import incompleteFixture from './__fixtures__/membership-incomplete.events.json'
@@ -322,6 +360,29 @@ async function deliver(type: string, object: unknown, opts: { created?: number; 
     .mockResolvedValue(new Map([['stripe-signature', 'sig']]))
   const res = await webhookRoute(req as never)
   return { status: res.status, body: await res.json() }
+}
+
+/** The success page's one call: `POST /api/payments/confirm-checkout`, as `V.signedIn`. */
+async function confirm(sessionId: string) {
+  const req = new Request('https://cms.test/api/payments/confirm-checkout', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ sessionId }),
+  })
+  const res = await confirmRoute(req as never)
+  return { status: res.status, body: await res.json() }
+}
+
+function makeSession(id: string, over: Partial<CheckoutSession> = {}): CheckoutSession {
+  return {
+    id,
+    mode: 'subscription',
+    status: 'complete',
+    customer: 'cus_1',
+    subscription: 'sub_A',
+    metadata: { visitorAuthUserId: 'auth_1' },
+    ...over,
+  }
 }
 
 function profile() {
@@ -383,6 +444,8 @@ beforeEach(() => {
   store.subs.clear()
   store.invoices.clear()
   store.charges.clear()
+  store.sessions.clear()
+  V.signedIn = 'auth_1'
   store.refunds = []
   store.cancelCalls = []
   store.deletedCustomers.clear()
@@ -773,6 +836,183 @@ describe('duplicate checkout collapse', () => {
     expect(entitled()).toBe(true)
     expect(store.refunds).toHaveLength(0)
     expect(store.subs.get('sub_A')!.status).toBe('canceled')
+  })
+})
+
+// ---------------------------------------------------------------------------
+// The success page's confirm, racing the webhook
+// ---------------------------------------------------------------------------
+
+describe('checkout confirm from the success page', () => {
+  const SESSION = 'cs_test_a1B2c3D4e5F6'
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  function paidPurchase() {
+    store.invoices.set('in_1', makeInvoice('in_1'))
+    store.subs.set('sub_A', makeSub('sub_A', { latest_invoice: 'in_1' }))
+    store.sessions.set(SESSION, makeSession(SESSION))
+  }
+
+  /** What one purchase raises, in the order Stripe usually sends it. */
+  async function purchaseWebhooks() {
+    return [
+      await deliver('checkout.session.completed', {
+        id: SESSION, customer: 'cus_1', subscription: 'sub_A',
+        metadata: { visitorAuthUserId: 'auth_1' },
+        customer_details: { name: 'Ada L', email: 'buyer@test.com' },
+      }),
+      await deliver('customer.subscription.created', store.subs.get('sub_A')),
+      await deliver('invoice.payment_succeeded', store.invoices.get('in_1')),
+    ].map((delivery) => delivery.status)
+  }
+
+  it('C1: confirm before any webhook grants membership; the webhooks after it change nothing', async () => {
+    paidPurchase()
+
+    expect(await confirm(SESSION)).toEqual({
+      status: 200,
+      body: { status: 'confirmed', membershipActive: true },
+    })
+    expect(profile().stripeSubscriptionId).toBe('sub_A')
+    expect(entitled()).toBe(true)
+    expect(emails).toEqual(['confirmation'])
+
+    expect(await purchaseWebhooks()).toEqual([200, 200, 200])
+
+    expect(profile().stripeSubscriptionId).toBe('sub_A')
+    expect(entitled()).toBe(true)
+    // One welcome, sent by whichever write saw the transition first.
+    expect(emails).toEqual(['confirmation'])
+    // The checkout-only fields are still the webhook's to write.
+    expect(profile().firstName).toBe('Ada')
+  })
+
+  it('C2: confirm after the webhooks answers from the profile, off Stripe and off the lock pool', async () => {
+    paidPurchase()
+    expect(await purchaseWebhooks()).toEqual([200, 200, 200])
+    expect(emails).toEqual(['confirmation'])
+
+    const retrieve = vi.spyOn(fakeStripe.subscriptions, 'retrieve')
+    locks.clear()
+
+    expect(await confirm(SESSION)).toEqual({
+      status: 200,
+      body: { status: 'confirmed', membershipActive: true },
+    })
+    expect(retrieve).not.toHaveBeenCalled()
+    expect(locks.size).toBe(0)
+    expect(emails).toEqual(['confirmation'])
+  })
+
+  it('C3: confirm and a webhook racing take the same customer lock and mail once', async () => {
+    paidPurchase()
+
+    const [confirmed, created] = await Promise.all([
+      confirm(SESSION),
+      deliver('customer.subscription.created', store.subs.get('sub_A')),
+    ])
+
+    expect(confirmed).toEqual({ status: 200, body: { status: 'confirmed', membershipActive: true } })
+    expect(created.status).toBe(200)
+    expect(entitled()).toBe(true)
+    expect(emails).toEqual(['confirmation'])
+  })
+
+  it("C4: someone else's session id is refused exactly like a missing one, and nothing is written", async () => {
+    // The caller has never bought, so no customer linkage can refuse this for
+    // them: the session's own `visitorAuthUserId` is the only guard left.
+    db['visitor-profiles'][0].stripeCustomerId = null
+    db['visitor-profiles'].push({
+      id: 2,
+      authUserId: 'auth_2',
+      email: 'other@test.com',
+      stripeCustomerId: 'cus_2',
+      stripeSubscriptionId: null,
+      subscriptionStatus: 'none',
+      paidThroughAt: null,
+      dunningGraceUntil: null,
+      cancelAtPeriodEnd: false,
+    } as Row)
+    store.invoices.set('in_2', makeInvoice('in_2', { subscription: 'sub_B' }))
+    store.subs.set('sub_B', makeSub('sub_B', {
+      customer: 'cus_2', metadata: { visitorAuthUserId: 'auth_2' }, latest_invoice: 'in_2',
+    }))
+    store.sessions.set(SESSION, makeSession(SESSION, {
+      customer: 'cus_2', subscription: 'sub_B', metadata: { visitorAuthUserId: 'auth_2' },
+    }))
+    const retrieve = vi.spyOn(fakeStripe.subscriptions, 'retrieve')
+
+    const refused = await confirm(SESSION)
+
+    expect(refused).toEqual({ status: 404, body: { error: 'Checkout session not found' } })
+    expect(await confirm('cs_test_doesNotExist01')).toEqual(refused)
+    expect(retrieve).not.toHaveBeenCalled()
+    expect(db['visitor-profiles'].map((row) => row.stripeSubscriptionId)).toEqual([null, null])
+    expect(emails).toEqual([])
+
+    // The owner gets theirs.
+    V.signedIn = 'auth_2'
+    expect((await confirm(SESSION)).body).toEqual({ status: 'confirmed', membershipActive: true })
+    expect(db['visitor-profiles'][1].stripeSubscriptionId).toBe('sub_B')
+    expect(profile().stripeSubscriptionId).toBeNull()
+  })
+
+  it('C5: a session naming this visitor but billed to another customer is refused', async () => {
+    store.subs.set('sub_B', makeSub('sub_B', { customer: 'cus_2' }))
+    store.sessions.set(SESSION, makeSession(SESSION, { customer: 'cus_2', subscription: 'sub_B' }))
+
+    expect((await confirm(SESSION)).status).toBe(404)
+    expect(profile().stripeCustomerId).toBe('cus_1')
+    expect(profile().stripeSubscriptionId).toBeNull()
+    expect(emails).toEqual([])
+  })
+
+  it('C6: a session that is still open writes nothing and says so', async () => {
+    store.sessions.set(SESSION, makeSession(SESSION, { status: 'open', subscription: null }))
+
+    expect(await confirm(SESSION)).toEqual({
+      status: 200,
+      body: { status: 'pending', membershipActive: false },
+    })
+    expect(profile().stripeSubscriptionId).toBeNull()
+    expect(emails).toEqual([])
+  })
+
+  it('C7: a confirm for the duplicate the webhook cancelled cannot take the profile back', async () => {
+    // Two tabs, two paid sessions on one customer.
+    const first = 'cs_test_firstTab0001'
+    const second = 'cs_test_secondTab001'
+    store.subs.set('sub_A', makeSub('sub_A', { created: now() - 100, latest_invoice: 'in_A' }))
+    store.subs.set('sub_B', makeSub('sub_B', { created: now() - 50, latest_invoice: 'in_B' }))
+    store.invoices.set('in_A', makeInvoice('in_A', { subscription: 'sub_A' }))
+    store.invoices.set('in_B', makeInvoice('in_B', { subscription: 'sub_B' }))
+    store.sessions.set(first, makeSession(first, { subscription: 'sub_A' }))
+    store.sessions.set(second, makeSession(second, { subscription: 'sub_B' }))
+
+    // The first tab confirms before any webhook. sub_A is billing, so it owns the row.
+    expect((await confirm(first)).body.membershipActive).toBe(true)
+    expect(profile().stripeSubscriptionId).toBe('sub_A')
+
+    // The second session's webhook collapses the pair onto sub_B.
+    await deliver('checkout.session.completed', {
+      id: second, customer: 'cus_1', subscription: 'sub_B',
+      metadata: { visitorAuthUserId: 'auth_1' },
+      customer_details: {},
+    })
+    expect(profile().stripeSubscriptionId).toBe('sub_B')
+    expect(store.subs.get('sub_A')!.status).toBe('canceled')
+
+    // The first tab is refreshed. Its subscription is dead and must not be written back.
+    expect((await confirm(first)).body.membershipActive).toBe(true)
+    expect(profile().stripeSubscriptionId).toBe('sub_B')
+    expect(entitled()).toBe(true)
+    // Refunds and cancels are the collapse's alone; confirm moves no money.
+    expect(store.refunds).toHaveLength(1)
+    expect(store.cancelCalls).toEqual(['sub_A'])
+    expect(emails).toEqual(['confirmation'])
   })
 })
 

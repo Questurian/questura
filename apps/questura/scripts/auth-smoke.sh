@@ -154,6 +154,7 @@ PAYMENT_ROUTES=(
   "POST /api/payments/create-portal-session"
   "POST /api/payments/cancel-subscription"
   "POST /api/payments/reactivate-subscription"
+  "POST /api/payments/confirm-checkout"
 )
 
 # payment_matrix LABEL JAR EXPECTED... : one expected status per route above.
@@ -223,11 +224,12 @@ step "2b. Payment routes: anonymous, signed-in non-member, foreign origin"
 # ---------------------------------------------------------------------------
 NOBODY=$WORK/nobody.jar
 : > "$NOBODY"
-payment_matrix anonymous "$NOBODY" 401 401 401 401 401
+payment_matrix anonymous "$NOBODY" 401 401 401 401 401 401
 # Non-member, no Stripe customer: past the auth check, refused on billing state.
-# Checkout's 400 is the plan lookup failing closed with no Stripe key.
-payment_matrix "non-member" "$A" 404 400 400 400 400
-REQ_ORIGIN=https://evil.example payment_matrix "foreign origin" "$A" 403 403 403 403 403
+# Checkout's 400 is the plan lookup failing closed with no Stripe key; confirm's
+# is the missing session id.
+payment_matrix "non-member" "$A" 404 400 400 400 400 400
+REQ_ORIGIN=https://evil.example payment_matrix "foreign origin" "$A" 403 403 403 403 403 403
 
 # ---------------------------------------------------------------------------
 step "3. Sessions are in Postgres; flush the local Redis; still signed in"
@@ -316,7 +318,7 @@ rows=$(sql "select count(*) from visitor_auth_sessions where \"userId\" = '${USE
 REVOKED=$WORK/a-signed-out.jar
 req "$REVOKED" GET /api/me
 info "revoked session /api/me authenticated=$(jq -r .authenticated <<<"$BODY") (cookie cache)"
-payment_matrix revoked "$REVOKED" 401 401 401 401 401
+payment_matrix revoked "$REVOKED" 401 401 401 401 401 401
 
 # ---------------------------------------------------------------------------
 step "6b. Expired session"
@@ -332,7 +334,7 @@ redis FLUSHALL >/dev/null
 pass "session C expired in Postgres, local Redis flushed so the store reads it"
 req "$C" GET /api/me
 info "expired session /api/me authenticated=$(jq -r .authenticated <<<"$BODY") (cookie cache)"
-payment_matrix expired "$C" 401 401 401 401 401
+payment_matrix expired "$C" 401 401 401 401 401 401
 
 # ---------------------------------------------------------------------------
 step "7. No email left the machine"
