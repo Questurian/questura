@@ -53,8 +53,12 @@ export const LISTICLE_MAP_MODE_LABELS: Record<ListicleMapMode, string> = {
  */
 export const INITIAL_LISTICLE_MAP_MODE: ListicleMapMode = 'split'
 
-/** Visible height at the split mode, as a fraction of the small viewport. */
-export const SPLIT_VISIBLE_FRACTION = 0.52
+/**
+ * Map visible in split, as a fraction of the large viewport. Split is meant to
+ * say "there is a map" while the article's opening stays the first thing the
+ * reader sees, so the map takes well under half the screen.
+ */
+export const SPLIT_VISIBLE_FRACTION = 0.42
 
 /**
  * The viewport heights that stay fixed while the reader scrolls: `small` with
@@ -70,9 +74,13 @@ export function sheetHeightPx(viewport: ViewportHeights): number {
   return viewport.large
 }
 
-/** Map visible in split while the toolbars are showing. */
+/**
+ * Map visible in split with the toolbars hidden - the most it ever shows.
+ * Measured against the large viewport so that hiding the toolbars cannot
+ * grow the map past its share; with them showing it is that much less.
+ */
 export function splitVisibleHeight(viewport: ViewportHeights): number {
-  return Math.round(viewport.small * SPLIT_VISIBLE_FRACTION)
+  return Math.round(viewport.large * SPLIT_VISIBLE_FRACTION)
 }
 
 /**
@@ -90,7 +98,7 @@ export function sheetTopForMode(
   // Past the bottom of even the tallest viewport.
   if (mode === 'list') return viewport.large
   if (mode === 'map') return chromeTopHeight
-  return viewport.small - splitVisibleHeight(viewport)
+  return viewport.large - splitVisibleHeight(viewport)
 }
 
 /**
