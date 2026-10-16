@@ -44,6 +44,14 @@ type BlockSectionProps = {
   contentClassName?: string
   /** Skip the content gutter; the block applies BLOCK_GUTTER_CLASS internally. */
   flush?: boolean
+  /**
+   * The band paints its own colour edge to edge instead of the page's paper.
+   * Marks the section `data-block-band`, which tells the block after it that
+   * this band's padding is on another colour and it must bring its own (see
+   * "Opening block" in featured-articles-shared-and-seven.css). Any block
+   * whose root band is not the paper sets this, including raw <section>s.
+   */
+  band?: boolean
   'aria-label'?: string
 }
 
@@ -52,6 +60,7 @@ export function BlockSection({
   className,
   contentClassName,
   flush = false,
+  band = false,
   ...rest
 }: BlockSectionProps): JSX.Element {
   const contentClasses = [
@@ -63,7 +72,11 @@ export function BlockSection({
     .join(' ')
 
   return (
-    <section className={className ? `relative ${className}` : 'relative'} {...rest}>
+    <section
+      className={className ? `relative ${className}` : 'relative'}
+      data-block-band={band || undefined}
+      {...rest}
+    >
       <div className={contentClasses}>{children}</div>
     </section>
   )

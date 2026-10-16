@@ -162,6 +162,7 @@ export function EditorialFeaturePreview({
     <BlockSection
       aria-label={block.featureTitle ?? 'Featured destination'}
       className={tone.band}
+      band={tone === TONES.dark}
       data-feature-theme={block.featureTheme === 'dark' ? 'dark' : 'light'}
     >
       <div className="grid gap-8 768:grid-cols-[minmax(230px,0.82fr)_1.18fr] 768:items-stretch 1024:grid-cols-[minmax(260px,0.9fr)_minmax(280px,0.9fr)_minmax(330px,1.1fr)] 1024:gap-10">

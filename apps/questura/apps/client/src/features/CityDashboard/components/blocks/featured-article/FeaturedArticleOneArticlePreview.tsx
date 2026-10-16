@@ -198,7 +198,8 @@ export function FeaturedArticleOneArticlePreview({
   )
 
   return (
-    <section className="text-white 768:bg-[#0a0a0a]">
+    // A band: the dark card below 768, the section's own ink above it.
+    <section className="text-white 768:bg-[#0a0a0a]" data-block-band="">
       {sectionHeading && !showAuthorAvatar ? (
         <BlockSectionHeader
           heading={sectionHeading}
