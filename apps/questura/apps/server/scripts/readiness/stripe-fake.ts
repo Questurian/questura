@@ -50,6 +50,9 @@ const PRE_BASIL_INVOICE_FIELDS = ['paid', 'charge', 'payment_intent', 'subscript
 
 const now = () => Math.floor(Date.now() / 1000)
 const newId = (prefix: string) => `${prefix}_fake${randomBytes(9).toString('hex')}`
+// Checkout Session ids keep Stripe's real shape (`cs_test_` + letters and digits):
+// `/api/payments/confirm-checkout` refuses any other id before calling Stripe.
+const newSessionId = () => newId('cs_test')
 const DAY = 24 * 60 * 60
 
 export type FakeResponse = { status: number; body: unknown }
@@ -237,7 +240,7 @@ export class FakeStripeAccount {
       if (!this.prices[priceId]) {
         return remember({ status: 400, body: { error: { type: 'invalid_request_error', message: `No such price: '${priceId}'` } } })
       }
-      const id = newId('cs')
+      const id = newSessionId()
       const session: StripeObject = {
         id,
         object: 'checkout.session',
@@ -506,7 +509,7 @@ export class FakeStripeAccount {
   reopenCheckout(sessionId: string): StripeObject | null {
     const session = this.sessions.get(sessionId)
     if (!session) return null
-    const id = newId('cs')
+    const id = newSessionId()
     const reopened: StripeObject = {
       ...JSON.parse(JSON.stringify(session)),
       id,
