@@ -127,7 +127,7 @@ export default async function CityPage({ params }: Props) {
       {process.env.NODE_ENV === 'development' ? (
         <CityHomepagePayloadDebugLogger data={data} />
       ) : null}
-      <CityHomepageContent location={data.location} pageBlocks={data.pageBlocks} />
+      <CityHomepageContent location={data.location} pageBlocks={data.pageBlocks} opensPage />
       <CityDashboardPage citySlug={city} countrySlug={country} />
     </>
   );
