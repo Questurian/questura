@@ -131,7 +131,7 @@ export function QuestUrianMapsPreview({
   return (
     // Flush BlockSection: the mobile carousel bleeds to the wrapper edge, so
     // the gutter is applied per inner element via BLOCK_GUTTER_CLASS instead.
-    <BlockSection className="py-10 bg-[#fafaf8]" flush>
+    <BlockSection className="py-10 bg-[#fafaf8]" flush band>
       {/* Editorial rule-on-sides header */}
       <div className={`flex items-center gap-4 ${BLOCK_GUTTER_CLASS} mb-8`}>
         <div className="flex-1 h-px bg-[#d6d0ca]" aria-hidden="true" />

@@ -321,39 +321,56 @@
   }
 }
 
-/* ─── Opening block ──────────────────────────────────────────────────────────
+/* ─── Opening block, and the block after a band ─────────────────────────────
    A featured-articles block that is the first thing under the navbar (home,
-   city and neighbourhood pages; CityHomepageContent `opensPage`).
+   city and neighbourhood pages; CityHomepageContent `opensPage`), or that
+   comes straight after a band of another colour (`data-block-band`: a dark
+   editorial feature, the blue maps band, the single-article block).
 
    From 1024 every featured layout opens with a hairline and 24px of paper above
    its first picture. Below that the layouts drop the inset, because mid-page
-   the block above them already ends in padding. At the top of the page the
-   block above is the 64px phone navbar, which ends in a hairline and nothing
-   else, so the lead photo sat glued to it. These rules give the opening block
-   the desktop's 24px back, counted to the first picture.
+   the block above them already ends in padding. That only holds when the
+   padding is on the same paper. At the top of the page the block above is the
+   64px phone navbar, which ends in a hairline and nothing else; after a band,
+   its padding is on the band's own colour. Either way the lead photo sat
+   glued to the edge. These rules give the block the desktop's 24px back,
+   counted to the first picture.
 
    Blocks that are not here need nothing: the single-article and maps blocks
-   are full-bleed bands meant to meet the navbar, and the grid, list and
+   are full-bleed bands meant to meet the edge, and the grid, list and
    carousel blocks bring 32px of their own. */
 @media (max-width: 1023px) {
-  [data-blocks-open-page] > section:first-of-type > .city-featured-three-layout,
-  [data-blocks-open-page] > section:first-of-type > .city-featured-four-layout,
-  [data-blocks-open-page] > section:first-of-type > .city-featured-five-layout {
+  :is([data-blocks-open-page] > section:first-of-type, [data-block-band] + section) > .city-featured-three-layout,
+  :is([data-blocks-open-page] > section:first-of-type, [data-block-band] + section) > .city-featured-four-layout,
+  :is([data-blocks-open-page] > section:first-of-type, [data-block-band] + section) > .city-featured-five-layout {
     padding-top: var(--block-gutter);
   }
 
   /* These already sit 16px down: their first card is padded (py-4). */
-  [data-blocks-open-page] > section:first-of-type > .city-featured-three-fc-layout,
-  [data-blocks-open-page] > section:first-of-type > .city-featured-nine-layout,
-  [data-blocks-open-page] > section.city-featured-seven-layout:first-of-type {
+  :is([data-blocks-open-page] > section:first-of-type, [data-block-band] + section) > .city-featured-three-fc-layout,
+  :is([data-blocks-open-page] > section:first-of-type, [data-block-band] + section) > .city-featured-nine-layout,
+  :is([data-blocks-open-page] > section:first-of-type, [data-block-band] + section).city-featured-seven-layout {
     padding-top: calc(var(--block-gutter) - 16px);
+  }
+}
+
+/* The same edge from the other side: a band right after a featured block.
+   Below 1024 the featured layouts end on their last card's 16px, which is
+   enough before more paper (the next block adds its own) but sits close to
+   another colour. A margin on the band adds the gutter's remaining 8px of
+   paper (the blocks' container is paper) on top of whatever the layout
+   already ends with, so no layout loses space it had. */
+@media (max-width: 1023px) {
+  section:has(> [class*="city-featured-"]) + [data-block-band],
+  section.city-featured-seven-layout + [data-block-band] {
+    margin-top: calc(var(--block-gutter) - 16px);
   }
 }
 
 /* These two get their own 24px and hairline back at 768. */
 @media (max-width: 767px) {
-  [data-blocks-open-page] > section:first-of-type > .city-featured-four-o3-layout,
-  [data-blocks-open-page] > section:first-of-type > .city-featured-five-cl-layout {
+  :is([data-blocks-open-page] > section:first-of-type, [data-block-band] + section) > .city-featured-four-o3-layout,
+  :is([data-blocks-open-page] > section:first-of-type, [data-block-band] + section) > .city-featured-five-cl-layout {
     padding-top: var(--block-gutter);
   }
 }

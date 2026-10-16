@@ -157,7 +157,7 @@ export function QuesturianMapsDarkPreview({
   const tone = MODE[theme]
 
   return (
-    <BlockSection className={`py-14 768:py-20 ${tone.band}`} aria-label={title}>
+    <BlockSection className={`py-14 768:py-20 ${tone.band}`} band={theme === 'blue'} aria-label={title}>
       <div className={`flex flex-col items-center border-b pb-8 text-center 768:pb-10 ${tone.rule}`}>
         <h2 className="font-[family-name:var(--font-editorial-serif)] text-[2.5rem] font-medium leading-none tracking-[-0.01em] 768:text-[3.4rem]">
           <TitlePin />
