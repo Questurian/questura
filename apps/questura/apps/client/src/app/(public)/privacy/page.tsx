@@ -1,7 +1,5 @@
 import type { Metadata } from 'next';
 
-import { AdChoice } from '@/features/ads/components/AdChoice';
-import { ADS_LIVE } from '@/features/ads/lib/adUnits';
 
 import {
   ACCOUNT_DELETION_DAYS,
@@ -19,10 +17,9 @@ export const metadata: Metadata = {
  * when the code changes. The deletion line is decision D2 of the launch fix
  * plan (by email at launch, handled within 30 days).
  *
- * The advertising lines follow `ADS_LIVE`: they appear in the same deploy that
- * turns the first ad unit on, so the page never claims "no advertising" while
- * ads run, nor describes an ad network that is not running. Bump "Last
- * updated" in that deploy.
+ * No ad network runs on the site (features/ads/lib/adUnits.ts). Wiring one in
+ * means rewriting the opening line and adding an Advertising section in the
+ * same deploy, and bumping "Last updated".
  */
 export default function PrivacyPage() {
   const heading = 'font-display text-[1.15rem] 480:text-[1.3rem] text-foreground mt-10 mb-3';
@@ -37,9 +34,8 @@ export default function PrivacyPage() {
         <p className="text-[0.85rem] text-foreground/60 mt-2">Last updated 17 October 2026</p>
 
         <p className={`${body} mt-6`}>
-          {ADS_LIVE
-            ? 'You can read Questurian without an account. Some pages show ads from one ad network, and we run no tracking scripts of our own. This page lists what we keep when you do sign up, and why.'
-            : 'You can read Questurian without an account, and we do not run advertising or tracking scripts. This page lists what we keep when you do sign up, and why.'}
+          You can read Questurian without an account, and we do not run advertising or tracking
+          scripts. This page lists what we keep when you do sign up, and why.
         </p>
 
         <h2 className={heading}>Your account</h2>
@@ -85,34 +81,6 @@ export default function PrivacyPage() {
           When something breaks, we record the error so we can fix it. Email addresses, cookies
           and passwords are removed from those reports before they are stored.
         </p>
-
-        {ADS_LIVE ? (
-          <>
-            <h2 className={heading}>Advertising</h2>
-            <p className={body}>
-              Some pages show ads from Adsterra, an ad network. Each ad runs in a sealed frame on a
-              separate address, ads.questurian.com: it cannot see the page around it, your account
-              or anything you type, and we tell Adsterra nothing about you. To choose and count its
-              ads, Adsterra&apos;s servers see your IP address and browser and may set their own
-              cookies.{' '}
-              <a
-                href="https://adsterra.com/privacy-policy/"
-                className="text-accent underline underline-offset-2"
-                rel="noopener noreferrer"
-              >
-                Adsterra&apos;s privacy policy
-              </a>{' '}
-              says what it keeps.
-            </p>
-            <p className={body}>
-              If you are in the European Union, the wider EEA, the UK or Switzerland, we ask before
-              any ad loads, and no ad loads until you answer. To find out whether to ask, our ad
-              address reads the country your connection comes from; it is not stored. Your answer
-              is kept in your browser only. You can change it here at any time:
-            </p>
-            <AdChoice />
-          </>
-        ) : null}
 
         <h2 className={heading}>Who else handles it</h2>
         <p className={body}>

@@ -23,10 +23,8 @@ export function AdSlotPreview({
   if (!isAdShapeOn(shape)) return null;
 
   return (
-    <div data-ad-slot>
-      <BlockSection contentClassName="py-6 768:py-8" aria-label="Advertisement">
-        <InArticleAd slotId={`homepage-${block.id}`} variant={shape} />
-      </BlockSection>
-    </div>
+    <BlockSection contentClassName="py-6 768:py-8" aria-label="Advertisement">
+      <InArticleAd slotId={`homepage-${block.id}`} variant={shape} />
+    </BlockSection>
   );
 }

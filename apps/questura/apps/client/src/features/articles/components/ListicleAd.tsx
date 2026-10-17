@@ -10,7 +10,7 @@ import { InArticleAd } from './InArticleAd'
  */
 export function ListicleAd({ slotId }: { slotId: string }) {
   return (
-    <li data-ad-slot className="list-none py-6 480:py-8">
+    <li className="list-none py-6 480:py-8">
       <InArticleAd slotId={slotId} variant="rectangle" />
     </li>
   )

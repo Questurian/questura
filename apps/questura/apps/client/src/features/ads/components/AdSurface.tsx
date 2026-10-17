@@ -1,5 +1,4 @@
-import { AD_PREVIEW, isAdShapeLive, type AdShape } from '../lib/adUnits'
-import { AdsterraFrame } from './AdsterraFrame'
+import { AD_PREVIEW, type AdShape } from '../lib/adUnits'
 
 /**
  * The box an ad sits in, at its exact size for every width the shape covers.
@@ -12,10 +11,10 @@ import { AdsterraFrame } from './AdsterraFrame'
  * screen width. `overflow-hidden` keeps a creative from widening the page on
  * the rare phone narrower than the unit.
  *
- * Live shape: the sandboxed Adsterra frame. Unkeyed shape in development: a
- * dashed outline naming the size. Unkeyed on the live site: nothing at all,
- * and the slot components around it check `isAdShapeOn` and drop their label
- * and rules too.
+ * No ad network is wired in (`lib/adUnits.ts`). In development: a dashed
+ * outline naming the size. On the live site: nothing at all, and the slot
+ * components around it check `isAdShapeOn` and drop their label and rules
+ * too. A network's slot component mounts inside this box when one is wired.
  */
 const SHAPE_BOX: Record<AdShape, string> = {
   banner: 'h-[50px] max-w-[320px] @min-[728px]:h-[90px] @min-[728px]:max-w-[728px]',
@@ -41,16 +40,6 @@ const PREVIEW_LABEL: Record<AdShape, React.ReactNode> = {
 
 export function AdSurface({ shape, className = '' }: { shape: AdShape; className?: string }) {
   const box = `mx-auto w-full overflow-hidden ${SHAPE_BOX[shape]} ${className}`
-
-  if (isAdShapeLive(shape)) {
-    return (
-      <div data-ad-container className="@container w-full">
-        <div data-ad-shape={shape} className={box}>
-          <AdsterraFrame shape={shape} />
-        </div>
-      </div>
-    )
-  }
 
   if (!AD_PREVIEW) return null
 

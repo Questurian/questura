@@ -1,64 +1,32 @@
 /**
- * The ad network's units, and the slot shapes the site builds from them.
+ * The ad slot shapes the site reserves, and whether any network fills them.
  *
- * The network is Adsterra, banners only (2026-10-17 owner decision: no
- * popunders, social bar, interstitials or native tiles -- fixed sizes are what
- * keep a slot from shoving the page under the reader). Each banner size is its
- * own unit in the Adsterra dashboard with its own key.
+ * No ad network is wired in. Adsterra ran on 2026-10-17 and was removed the
+ * same day: the owner could not control what it showed (casino ads, fake
+ * "new message" banners) without asking their support, and Google AdSense,
+ * which has self-serve blocking controls and no traffic minimum, is the next
+ * candidate. Why each piece was built the way it was, and what to reuse:
+ * docs/procedures/ads.md.
  *
- * TO TURN ADS ON: the owner runs `bash apps/questura/infra/ads/setup-ads.sh`,
- * which saves each unit's key and the script address to the vault; the keys
- * then go into `UNIT_KEYS` below and the address into `ADSTERRA_SCRIPT_ORIGIN`.
- * Keys are not secrets -- every visitor's browser sees them in the page. Merge
- * to main and the deploy ships it. Full checklist: docs/procedures/ads.md.
- *
- * A shape is live only when every unit it uses has a key, so a half-configured
- * shape draws nothing rather than a gap on phones. In development, shapes with
- * no key draw a labelled outline instead (`AD_PREVIEW`) so placements can be
- * seen while laying pages out; `NEXT_PUBLIC_AD_PREVIEW=0` turns that off.
+ * What stays is network-neutral: where ads go (`adPlacement.ts`,
+ * `listicleAdPlacement.ts`, the homepage `ad-slot` block) and the exact box
+ * each shape reserves (`AdSurface`). On the live site nothing draws until a
+ * network is wired in; in development each slot draws a labelled outline
+ * (`AD_PREVIEW`) so placements can be seen, and `NEXT_PUBLIC_AD_PREVIEW=0`
+ * turns that off.
  *
  * Dependency-free so node:test can import it.
  */
 
-/**
- * Where Adsterra serves banner code from. Checked 2026-10-17: every unit key
- * loads from here (the wizard first saved the Popunder unit's host, which 404s
- * for banner keys).
- */
-export const ADSTERRA_SCRIPT_ORIGIN = 'https://www.highperformanceformat.com'
-
-/**
- * The address each banner's frame loads from: the `questura-ad-frame` Worker
- * (`ad-frame/`, `lib/adFrameResponse.ts`). A separate origin, so the ad's
- * code gets storage of its own without ever sharing the site's.
- */
-export const AD_FRAME_ORIGIN = 'https://ads.questurian.com'
-
 export type AdUnitName = 'leaderboard' | 'mobileBanner' | 'rectangle' | 'skyscraper'
 
-export type AdUnitKeys = Record<AdUnitName, string>
-
-/** One key per Adsterra banner unit. Empty means that size is off. */
-const UNIT_KEYS: AdUnitKeys = {
-  /** 728x90 */
-  leaderboard: 'afc1e764e1125220de205ac7d78f6e13',
-  /** 320x50 */
-  mobileBanner: '8832c0b6f820f906601615cddc406e08',
-  /** 300x250 */
-  rectangle: '05af3a05a344fce898708177bb99fd24',
-  /** 160x600 */
-  skyscraper: '2b5f6ed821a8683d5af69eddeee004d1',
-}
-
-/** Exact IAB sizes, so the creative fits the box the page already reserved. */
+/** Exact IAB sizes, so a creative fits the box the page already reserved. */
 export const AD_UNIT_SIZES: Record<AdUnitName, { width: number; height: number }> = {
   leaderboard: { width: 728, height: 90 },
   mobileBanner: { width: 320, height: 50 },
   rectangle: { width: 300, height: 250 },
   skyscraper: { width: 160, height: 600 },
 }
-
-export type AdUnit = { name: AdUnitName; key: string; width: number; height: number }
 
 /**
  * A slot shape: which unit fills it at which width, smallest first.
@@ -100,58 +68,26 @@ export const AD_SHAPES: Record<AdShape, AdShapeSpec> = {
   },
 }
 
-/** Adsterra keys are 32 hex characters; anything else is a paste mistake. */
-const KEY_PATTERN = /^[a-z0-9]{16,64}$/i
-
-export function isValidAdKey(key: string): boolean {
-  return KEY_PATTERN.test(key)
-}
-
-export function adUnit(name: AdUnitName, keys: AdUnitKeys = UNIT_KEYS): AdUnit {
-  return { name, key: keys[name], ...AD_UNIT_SIZES[name] }
-}
-
-/** The smallest width of the step `width` falls on. */
-export function adStepWidth(shape: AdShape, width: number): number {
-  let picked = 0
-  for (const step of AD_SHAPES[shape].steps) {
-    if (width >= step.minWidth) picked = step.minWidth
-  }
-  return picked
-}
-
 /** The unit a shape uses at this width (container or viewport, per `measure`). */
-export function adUnitForWidth(
-  shape: AdShape,
-  width: number,
-  keys: AdUnitKeys = UNIT_KEYS,
-): AdUnit {
+export function adUnitForWidth(shape: AdShape, width: number): AdUnitName {
   let picked = AD_SHAPES[shape].steps[0].unit
   for (const step of AD_SHAPES[shape].steps) {
     if (width >= step.minWidth) picked = step.unit
   }
-  return adUnit(picked, keys)
+  return picked
 }
 
-/** The frame document for one unit, on the ad frame origin. */
-export function adFrameUrl(unit: Pick<AdUnit, 'key' | 'width' | 'height'>): string {
-  const query = new URLSearchParams({ k: unit.key, w: String(unit.width), h: String(unit.height) })
-  return `${AD_FRAME_ORIGIN}/frame?${query.toString()}`
-}
+/** True once a network fills the slots on the live site. None does today. */
+export const ADS_LIVE = false
 
-/** Every unit the shape uses has a real key. */
-export function isAdShapeLive(shape: AdShape, keys: AdUnitKeys = UNIT_KEYS): boolean {
-  return AD_SHAPES[shape].steps.every((step) => isValidAdKey(keys[step.unit]))
-}
-
-/** Development draws outlines where unkeyed slots would go. */
+/** Development draws outlines where the slots go. */
 export const AD_PREVIEW =
   process.env.NODE_ENV !== 'production' && process.env.NEXT_PUBLIC_AD_PREVIEW !== '0'
 
-/** The slot is drawn at all: a real ad, or a development outline. */
+/**
+ * The slot is drawn at all: a real ad, or a development outline. Per shape,
+ * so a network that fills only some sizes can switch the others off here.
+ */
 export function isAdShapeOn(shape: AdShape): boolean {
-  return isAdShapeLive(shape) || AD_PREVIEW
+  return (ADS_LIVE || AD_PREVIEW) && shape in AD_SHAPES
 }
-
-/** At least one shape serves real ads. The privacy page keys its ads paragraph off this. */
-export const ADS_LIVE = (Object.keys(AD_SHAPES) as AdShape[]).some((shape) => isAdShapeLive(shape))

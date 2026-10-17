@@ -12,7 +12,6 @@ import { NavigationFeedback } from "@/components/navigation/NavigationFeedback";
 import { WebVitals } from "@/components/observability/WebVitals";
 import DevTools from "@/features/DevTools/DevTools";
 import { IDENTITY_HINT_SCRIPT } from "@/lib/user/identityHint";
-import { AD_CONSENT_SCRIPT } from "@/features/ads/lib/adConsent";
 import { NAV_THEME_SCRIPT } from "@/features/Navigation/lib/navTheme";
 import { getBackendUrl } from "@/lib/api/api-config";
 import { getPublicBaseUrl } from "@/lib/seo/publicBaseUrl";
@@ -68,9 +67,6 @@ export default async function RootLayout({
         {/* Before first paint: the reader's navbar colour
             (features/Navigation/lib/navTheme.ts). */}
         <script dangerouslySetInnerHTML={{ __html: NAV_THEME_SCRIPT }} />
-        {/* Before first paint: hide ad slots for a visitor who said no
-            (features/ads/lib/adConsent.ts). */}
-        <script dangerouslySetInnerHTML={{ __html: AD_CONSENT_SCRIPT }} />
       </head>
       {/* Every photo on the site is served from the image CDN, so a cold visit
           otherwise pays DNS + TLS against a second origin before the first

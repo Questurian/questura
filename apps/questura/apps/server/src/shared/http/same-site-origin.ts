@@ -5,10 +5,11 @@
  *
  * Why only same-site. The session cookies are `SameSite=Lax`, so a browser
  * already leaves them off a POST that starts on another site. A sibling
- * subdomain is the *same* site, so they ride along -- and ads.questurian.com
- * runs third-party ad code (Questura client `features/ads`). CORS stops that
- * code from reading the answer, not the API from acting on the request, so the
- * refusal has to happen at the door.
+ * subdomain is the *same* site, so they ride along -- and a subdomain can end
+ * up running third-party code (ads.questurian.com served Adsterra banners on
+ * 2026-10-17). CORS stops that code from reading the answer, not the API from
+ * acting on the request, so the refusal has to happen at the door. Kept after
+ * that subdomain went: it costs nothing and covers the next one.
  *
  * Allowed through: safe methods, requests with no `Origin` (servers, webhooks),
  * `Origin: null` (an opaque-origin document, which browsers treat as

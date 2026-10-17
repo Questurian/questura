@@ -53,12 +53,3 @@ test('only a plain-http build allows plain-http images', () => {
   assert.equal(imgSrc('https://api.questurian.com'), "img-src 'self' data: blob: https:")
   assert.equal(imgSrc('http://api.readiness.localhost:4100'), "img-src 'self' data: blob: https: http:")
 })
-
-// Each banner runs in a document from the ad frame origin, under that
-// origin's own headers: the page frames it, and loads no ad script itself.
-test('the report-only policy frames the ad origin and runs no ad script', () => {
-  const policy = reportOnlyContentSecurityPolicy('https://api.questurian.com')
-  const directive = (name) => policy.split('; ').find((part) => part.startsWith(`${name} `)) ?? ''
-  assert.match(directive('frame-src'), /https:\/\/ads\.questurian\.com/)
-  assert.doesNotMatch(directive('script-src'), /highperformanceformat|ads\.questurian/)
-})

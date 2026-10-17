@@ -1,5 +1,3 @@
-import { AD_FRAME_ORIGIN } from "../../features/ads/lib/adUnits.ts";
-
 /**
  * Sent on every page (`next.config.ts`, source `/:path*`). Launch harness D4.
  *
@@ -35,10 +33,6 @@ import { AD_FRAME_ORIGIN } from "../../features/ads/lib/adUnits.ts";
  *   otherwise every photo there is a console line. Live's API is https, so
  *   live's policy is unchanged.
  * - frames: Instagram embeds, Google Maps, and Turnstile's challenge.
- * - frames from the ad frame origin (ads.questurian.com). Each banner runs in
- *   a document served from there (features/ads), so its scripts and the
- *   advertiser's frames answer to that origin's headers, not this policy, and
- *   no ad host needs listing here.
  * - no plugins (`object-src 'none'`), no `<base>` from elsewhere, forms only
  *   post to this site.
  */
@@ -51,7 +45,7 @@ export function reportOnlyContentSecurityPolicy(apiOrigin: string): string {
     `img-src 'self' data: blob: ${imageSources}`,
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "font-src 'self' data: https://fonts.gstatic.com",
-    `frame-src https://www.instagram.com https://www.google.com https://challenges.cloudflare.com ${AD_FRAME_ORIGIN}`,
+    "frame-src https://www.instagram.com https://www.google.com https://challenges.cloudflare.com",
     "worker-src 'self' blob:",
     "object-src 'none'",
     "base-uri 'self'",
