@@ -5,6 +5,7 @@ import type { PayloadInstance } from '@/types'
 import { normalizeArticleGridFourLayout } from '../article-grid/service'
 import { normalizeArticleListLayout } from '../article-list/service'
 import { normalizeMapsTheme } from '../questurian-maps-dark/service'
+import { normalizeAdSlotSize } from '../ad-slot/service'
 import {
   assertAuthorFeatureItemsMatchAuthors,
   authorIdsFromAuthorFeatureBlock,
@@ -277,6 +278,19 @@ const newsletterSignupBehavior: CuratedBlockBehavior = {
   },
 }
 
+/** No items, nothing to publish-check: the editor only picks its shape. */
+const adSlotBehavior: CuratedBlockBehavior = {
+  isArticleBlock: false,
+  clearsItems: true,
+  prepareRecord(block) {
+    block.adSize = normalizeAdSlotSize(block.adSize)
+  },
+  resolveSelection() {
+    return getNewsletterSignupPlaceholderSelection()
+  },
+  resolveFields: (block) => ({ adSize: normalizeAdSlotSize(block.adSize) }),
+}
+
 /**
  * Per-type behavior keyed by `blockType`. The registry pairs each entry with its Payload
  * `Block` by slug; a block registered without a behavior here fails fast at module load.
@@ -366,6 +380,7 @@ export const CURATED_BLOCK_BEHAVIORS: Record<string, CuratedBlockBehavior> = {
   'newsletter-signup': newsletterSignupBehavior,
   'page-hero': pageHeroBehavior,
   'photo-pile': photoPileBehavior,
+  'ad-slot': adSlotBehavior,
   'article-list': {
     ...featuredBehavior,
     prepareRecord(block) {

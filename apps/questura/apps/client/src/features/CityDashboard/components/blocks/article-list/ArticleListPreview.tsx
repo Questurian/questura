@@ -16,6 +16,9 @@ import { heroImagePriority, type ImagePriority } from '../heroImagePriority'
 import { BlockSectionHeader } from '../BlockSectionHeader'
 import { BLOCK_TYPE } from '../blockType'
 import { ArticleKickerLabel } from '../ArticleKickerLabel'
+import { AdLabel } from '@/features/ads/components/AdLabel'
+import { AdSurface } from '@/features/ads/components/AdSurface'
+import { isAdShapeOn } from '@/features/ads/lib/adUnits'
 
 function getArticleTypeLabel(article: FeaturedArticleTeaser): string {
   return article.articleType ?? article.category?.name ?? 'Article'
@@ -123,26 +126,20 @@ function ArticleRow({ article, imagePriority, layout }: ArticleRowProps): JSX.El
 }
 
 /**
- * The ad rail beside a square-with-ad list (1024+). It reserves a standard
- * 300×600 half-page slot and sticks while the list scrolls past. No ad network
- * is wired yet: in production the rail is empty space; in development it shows
- * an outline so the slot can be seen while laying pages out.
+ * The ad rail beside a square-with-ad list (1024+). The column is always
+ * there -- the list's width depends on it -- and the 160x600 skyscraper sticks
+ * in it while the list scrolls past. With no unit key on the live site the
+ * column is empty space; in development it shows the slot's outline.
  */
 function AdRail(): JSX.Element {
-  const showOutline = process.env.NODE_ENV !== 'production'
-
   return (
     <aside aria-label="Advertisement" className="hidden 1024:block">
-      <div
-        data-ad-slot="article-list-rail"
-        className={`sticky top-24 mt-8 h-[600px] w-[300px] ${
-          showOutline
-            ? 'flex items-center justify-center border border-dashed border-[#c9c1b4] font-[family-name:var(--font-dm-sans)] text-[0.72rem] font-bold uppercase tracking-[0.12em] text-[#8a8178]'
-            : ''
-        }`}
-      >
-        {showOutline ? 'Ad · 300 × 600' : null}
-      </div>
+      {isAdShapeOn('rail') ? (
+        <div data-ad-slot="article-list-rail" className="sticky top-24 mt-8">
+          <AdLabel className="mb-1.5" />
+          <AdSurface shape="rail" />
+        </div>
+      ) : null}
     </aside>
   )
 }

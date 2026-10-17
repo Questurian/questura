@@ -1,6 +1,7 @@
 import type { ComponentType } from "react";
 
 import type {
+  AdSlotBlock,
   ArticleGridBlock,
   ArticleListBlock,
   AuthorFeatureBlock,
@@ -39,6 +40,7 @@ import { QuesturianMapsDarkPreview } from "../components/blocks/questurian-maps-
 import { PageHeroPreview } from "../components/blocks/page-hero/PageHeroPreview";
 import { ArticleListPreview } from "../components/blocks/article-list/ArticleListPreview";
 import { NewsletterSignupPreview } from "../components/blocks/newsletter-signup/NewsletterSignupPreview";
+import { AdSlotPreview } from "../components/blocks/ad-slot/AdSlotPreview";
 import { EditorialFeaturePreview } from "../components/blocks/editorial-feature/EditorialFeaturePreview";
 import { AuthorFeaturePreview } from "../components/blocks/author-feature/AuthorFeaturePreview";
 
@@ -205,6 +207,10 @@ const homepageBlockFallbackLayouts: HomepageBlockLayoutFallbackDefinition[] = [
   defineHomepageBlockLayoutAnySlots<NewsletterSignupBlock>({
     blockType: "newsletter-signup",
     Component: NewsletterSignupPreview,
+  }),
+  defineHomepageBlockLayoutAnySlots<AdSlotBlock>({
+    blockType: "ad-slot",
+    Component: AdSlotPreview,
   }),
 ];
 

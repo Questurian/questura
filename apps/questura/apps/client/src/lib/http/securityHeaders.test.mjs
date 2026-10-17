@@ -53,3 +53,12 @@ test('only a plain-http build allows plain-http images', () => {
   assert.equal(imgSrc('https://api.questurian.com'), "img-src 'self' data: blob: https:")
   assert.equal(imgSrc('http://api.readiness.localhost:4100'), "img-src 'self' data: blob: https: http:")
 })
+
+// Each Adsterra banner runs in a sandboxed srcdoc frame, which inherits this
+// policy: its script and the creative frame it opens are checked against it.
+test('the report-only policy lets the ad frames load the banner script', () => {
+  const policy = reportOnlyContentSecurityPolicy('https://api.questurian.com')
+  const directive = (name) => policy.split('; ').find((part) => part.startsWith(`${name} `)) ?? ''
+  assert.match(directive('script-src'), /https:\/\/www\.highperformanceformat\.com/)
+  assert.match(directive('frame-src'), /https:\/\/www\.highperformanceformat\.com/)
+})

@@ -1,18 +1,24 @@
 import { Suspense } from 'react'
 import Link from '@/components/navigation/PublicLink'
 import { PublicImage } from '@/components/media/PublicImage'
-import { AdLabel, AdMockSurface } from '@/features/articles/components/AdMock'
+import { AdLabel } from '@/features/ads/components/AdLabel'
+import { AdSurface } from '@/features/ads/components/AdSurface'
+import { isAdShapeOn, type AdShape } from '@/features/ads/lib/adUnits'
 import type { ArticleIndexItem } from '@/features/articles/lib/fetchArticleIndex'
 import type { ArticleSidebarLists } from '@/features/articles/lib/fetchArticleSidebar'
-import { ADS_ENABLED } from '@/features/articles/lib/ads'
 
-function AdSlot({ size }: { size: 'half-page' | 'square' }) {
-  const height = size === 'half-page' ? 'h-[250px] 1024:h-[600px]' : 'h-[300px]'
+/**
+ * The rail's two slots: the tall one (300x250 while the rail sits under the
+ * article, the 160x600 skyscraper once it is a side column at 1024px) and a
+ * 300x250 under it.
+ */
+const RAIL_SLOTS: readonly AdShape[] = ['rail', 'rectangle']
 
+function AdSlot({ shape }: { shape: AdShape }) {
   return (
     <div className="w-full">
       <AdLabel className="mb-1.5" />
-      <AdMockSurface className={height} />
+      <AdSurface shape={shape} />
     </div>
   )
 }
@@ -38,9 +44,11 @@ function SectionHeading({ id, children }: { id: string; children: string }) {
  * overlapping it.
  */
 export function ArticleRail({ trending }: { trending: ArticleIndexItem[] }) {
+  const slots = RAIL_SLOTS.filter(isAdShapeOn)
+
   // With ads off, trending takes the pinned spot instead of hanging at the
   // bottom of an empty column.
-  if (!ADS_ENABLED) {
+  if (slots.length === 0) {
     return (
       <div data-article-sidebar className="1024:h-full">
         <div className="1024:sticky 1024:top-24">
@@ -54,8 +62,9 @@ export function ArticleRail({ trending }: { trending: ArticleIndexItem[] }) {
     <div data-article-sidebar className="1024:flex 1024:h-full 1024:flex-col">
       <div className="1024:flex-1">
         <div className="flex flex-col gap-8 1024:sticky 1024:top-24">
-          <AdSlot size="half-page" />
-          <AdSlot size="square" />
+          {slots.map((shape) => (
+            <AdSlot key={shape} shape={shape} />
+          ))}
         </div>
       </div>
 

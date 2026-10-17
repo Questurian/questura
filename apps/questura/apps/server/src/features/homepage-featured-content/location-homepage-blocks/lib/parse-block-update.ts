@@ -1,6 +1,7 @@
 import { parseArticleGridFourLayoutBodyField } from '../../article-grid/service'
 import { parseArticleListLayoutBodyField } from '../../article-list/service'
 import { parseMapsThemeBodyField } from '../../questurian-maps-dark/service'
+import { parseAdSlotSizeBodyField } from '../../ad-slot/service'
 import {
   hasAuthorFeatureFieldUpdates,
   parseAuthorFeatureCardsBodyField,
@@ -40,6 +41,7 @@ type MediaAspectParse = ReturnType<typeof parseLocationGridMediaAspectBodyField>
 type ArticleGridFourLayoutParse = ReturnType<typeof parseArticleGridFourLayoutBodyField>
 type ArticleListLayoutParse = ReturnType<typeof parseArticleListLayoutBodyField>
 type MapsThemeParse = ReturnType<typeof parseMapsThemeBodyField>
+type AdSlotSizeParse = ReturnType<typeof parseAdSlotSizeBodyField>
 type CreatorKickerParse = ReturnType<typeof parseCreatorKickerBodyField>
 type EditorialFeatureFieldsParse = ReturnType<typeof parseEditorialFeatureFields>
 type PageHeroFieldsParse = ReturnType<typeof parsePageHeroFields>
@@ -65,6 +67,7 @@ export type ParsedBlockUpdateFields = {
   articleGridFourLayout: Extract<ArticleGridFourLayoutParse, { ok: true }>
   articleListLayout: Extract<ArticleListLayoutParse, { ok: true }>
   mapsTheme: Extract<MapsThemeParse, { ok: true }>
+  adSize: Extract<AdSlotSizeParse, { ok: true }>
   creatorKicker: Extract<CreatorKickerParse, { ok: true }>
   editorialFeature: {
     [K in keyof EditorialFeatureFieldsParse]: Extract<EditorialFeatureFieldsParse[K], { ok: true }>
@@ -149,6 +152,11 @@ export function parseBlockUpdateBody(body: unknown): ParseBlockUpdateResult {
     return { ok: false, status: 400, message: mapsTheme.message }
   }
 
+  const adSize = parseAdSlotSizeBodyField(bodyRecord)
+  if (!adSize.ok) {
+    return { ok: false, status: 400, message: adSize.message }
+  }
+
   const creatorKicker = parseCreatorKickerBodyField(bodyRecord)
   if (!creatorKicker.ok) {
     return { ok: false, status: 400, message: creatorKicker.message }
@@ -191,6 +199,7 @@ export function parseBlockUpdateBody(body: unknown): ParseBlockUpdateResult {
     articleGridFourLayout,
     articleListLayout,
     mapsTheme,
+    adSize,
     creatorKicker,
     editorialFeature: editorialFeature as ParsedBlockUpdateFields['editorialFeature'],
     pageHero: pageHero as ParsedBlockUpdateFields['pageHero'],
@@ -239,6 +248,7 @@ export function hasBlockFieldUpdates(fields: ParsedBlockUpdateFields): boolean {
     !fields.articleGridFourLayout.omit ||
     !fields.articleListLayout.omit ||
     !fields.mapsTheme.omit ||
+    !fields.adSize.omit ||
     !fields.creatorKicker.omit ||
     hasEditorialFeatureFieldUpdates(fields.editorialFeature) ||
     hasPageHeroFieldUpdates(fields.pageHero) ||
@@ -292,6 +302,10 @@ export function validateBlockUpdateFields(
 
   if (!fields.mapsTheme.omit && block.blockType !== 'questurian-maps-dark') {
     return { message: 'mapsTheme is only supported for questurian-maps-dark blocks.' }
+  }
+
+  if (!fields.adSize.omit && block.blockType !== 'ad-slot') {
+    return { message: 'adSize is only supported for ad-slot blocks.' }
   }
 
   if (!fields.sectionHeading.omit && !homepageBlockSupportsSectionHeading(block.blockType)) {

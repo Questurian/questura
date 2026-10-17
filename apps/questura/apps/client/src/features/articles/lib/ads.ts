@@ -1,11 +1,12 @@
+import { AD_PREVIEW, ADS_LIVE } from '../../ads/lib/adUnits.ts'
+
 /**
- * Master switch for every ad slot on article pages.
+ * Master switch for the in-article ad planners.
  *
- * Off: no network is wired in, and the empty "Ad space" mocks read as
- * unfinished on a paid site (Questurian/questura#6). The placement planners,
- * slot components and rail layout stay, so turning ads on is this one line --
- * flip it only when a real creative mounts inside `AdMockSurface`'s box.
- *
- * Dependency-free so the node:test suite can import it.
+ * On once any ad size has a unit key (`features/ads/lib/adUnits.ts`), or in
+ * development, where unkeyed slots draw outlines. Each slot still checks its
+ * own size (`isAdShapeOn`), so a planned slot whose size has no key draws
+ * nothing. Off, the planners place nothing and the rail gives its pinned spot
+ * to Trending (Questurian/questura#6: empty mocks read as unfinished).
  */
-export const ADS_ENABLED = false
+export const ADS_ENABLED = ADS_LIVE || AD_PREVIEW
