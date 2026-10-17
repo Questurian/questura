@@ -76,6 +76,7 @@ export const CONTENT_TABLES = [
   'listicle_itineraries_itinerary_days',
   'listicle_itineraries_rels',
   'location_homepages',
+  'location_homepages_blocks_ad_slot',
   'location_homepages_blocks_article_grid',
   'location_homepages_blocks_article_list',
   'location_homepages_blocks_author_feature',

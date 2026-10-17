@@ -1,6 +1,7 @@
 import type { CuratedBlockType } from '../types'
 
 import { curatedBlockRegistry } from '../../block-registry'
+import { normalizeAdSlotSize } from '../../ad-slot/service'
 import { isCuratedBlockType } from '../lib/guards'
 import { HOMEPAGE_BLOCK_SLOT_LIMITS } from '../../slot-count/constants'
 import { isValidRequestedSlotCount } from '../../slot-count/lib/resolve'
@@ -69,6 +70,10 @@ export function parseNewBlockInput(body: unknown): ParseNewBlockResult {
       const t = ss.trim().slice(0, HOMEPAGE_FEATURED_ARTICLES_SECTION_SUBHEADING_MAX)
       if (t) block.sectionSubheading = t
     }
+  }
+
+  if (blockType === 'ad-slot') {
+    block.adSize = normalizeAdSlotSize((body as { adSize?: unknown } | null)?.adSize)
   }
 
   return { ok: true, block, blockType, slotCount }

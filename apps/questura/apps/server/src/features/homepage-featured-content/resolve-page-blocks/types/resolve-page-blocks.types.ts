@@ -28,6 +28,7 @@ export type RawBlock = {
   articleGridFourLayout?: string
   articleListLayout?: string
   mapsTheme?: string
+  adSize?: string
   featureKicker?: string | null
   featureTitle?: string | null
   featureDescription?: string | null
@@ -75,3 +76,4 @@ export type CuratedBlockType =
   | 'newsletter-signup'
   | 'article-list'
   | 'photo-pile'
+  | 'ad-slot'

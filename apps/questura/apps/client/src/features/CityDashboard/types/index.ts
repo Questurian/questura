@@ -328,6 +328,20 @@ export type PhotoPileBlock = {
   };
 };
 
+/** Matches the server's AD_SLOT_SIZE_VALUES. Missing means "banner". */
+export type AdSlotSize = "banner" | "rectangle";
+
+/** One display ad an editor dropped between two blocks. */
+export type AdSlotBlock = {
+  id: string;
+  blockType: "ad-slot";
+  adSize?: AdSlotSize | null;
+  selection?: {
+    items: unknown[];
+    totalSlots: number;
+  };
+};
+
 export type NewsletterSignupBlock = {
   id: string;
   blockType: "newsletter-signup";
@@ -348,6 +362,7 @@ export type CityHomepageBlock<TItem = unknown> =
   | LocationGridBlock
   | ThingsToDoAttractionsBlock
   | NewsletterSignupBlock
+  | AdSlotBlock
   | PageHeroBlock
   | PhotoPileBlock
   | CityHomepageLegacyBlock<TItem>;

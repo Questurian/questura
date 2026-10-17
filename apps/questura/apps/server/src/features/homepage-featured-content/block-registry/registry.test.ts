@@ -28,6 +28,7 @@ const EXPECTED_KEYS = [
   'article-list',
   'page-hero',
   'photo-pile',
+  'ad-slot',
 ] as const
 
 describe('curatedBlockRegistry', () => {
@@ -176,6 +177,7 @@ describe('curatedBlockRegistry', () => {
         'article-list': { min: 5, max: 25, default: 5 },
         'page-hero': { min: 0, max: 0, default: 0 },
         'photo-pile': { min: 0, max: 0, default: 0 },
+        'ad-slot': { min: 0, max: 0, default: 0 },
       })
       expect(curatedBlockRegistry.get('article-grid')?.slotCounts.validCounts).toEqual([3, 4, 8])
       expect(curatedBlockRegistry.get('featured-articles')?.slotCounts.validCounts).toEqual([

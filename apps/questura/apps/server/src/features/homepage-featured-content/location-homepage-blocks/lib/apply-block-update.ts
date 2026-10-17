@@ -90,6 +90,9 @@ export function applyBlockFieldUpdates(block: RawBlock, fields: ParsedBlockUpdat
   if (!fields.mapsTheme.omit) {
     next = { ...next, mapsTheme: fields.mapsTheme.value }
   }
+  if (!fields.adSize.omit) {
+    next = { ...next, adSize: fields.adSize.value }
+  }
   if (!fields.creatorKicker.omit) {
     next = { ...next, creatorKicker: fields.creatorKicker.value }
   }

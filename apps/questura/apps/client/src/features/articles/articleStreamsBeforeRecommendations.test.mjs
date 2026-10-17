@@ -102,6 +102,9 @@ async function bundle(entry) {
     jsx: 'automatic',
     packages: 'external',
     logLevel: 'silent',
+    // Built as the live site is: development draws outlines where unkeyed ad
+    // slots go (features/ads/lib/adUnits.ts), and the live article must not.
+    define: { 'process.env.NODE_ENV': '"production"' },
     plugins: [
       {
         name: 'article-stream-test',

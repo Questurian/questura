@@ -1,6 +1,7 @@
 import type { Block } from 'payload'
 
 import { CURATED_BLOCK_BEHAVIORS, type CuratedBlockBehavior } from './behaviors'
+import { AdSlotBlock } from '../ad-slot/block'
 import { ArticleGridBlock } from '../article-grid/block'
 import { ArticleListBlock } from '../article-list/block'
 import { AuthorFeatureBlock } from '../author-feature/block'
@@ -252,6 +253,12 @@ const CURATED_BLOCK_DEFINITIONS: readonly CuratedBlockDefinition[] = [
   }),
   defineCuratedBlock({
     block: PhotoPileBlock,
+    slotCounts: { min: 0, max: 0, default: 0 },
+    convertibleWhenEmpty: false,
+    publicPayloadKind: REFERENCE_PUBLIC_PAYLOAD,
+  }),
+  defineCuratedBlock({
+    block: AdSlotBlock,
     slotCounts: { min: 0, max: 0, default: 0 },
     convertibleWhenEmpty: false,
     publicPayloadKind: REFERENCE_PUBLIC_PAYLOAD,

@@ -1,4 +1,6 @@
-import { AdLabel, AdMockSurface } from './AdMock'
+import { AdLabel } from '@/features/ads/components/AdLabel'
+import { AdSurface } from '@/features/ads/components/AdSurface'
+import { isAdShapeOn } from '@/features/ads/lib/adUnits'
 import type { AdVariant } from '../lib/adPlacement'
 
 /**
@@ -26,23 +28,22 @@ import type { AdVariant } from '../lib/adPlacement'
  */
 
 /**
- * Both slots are exact IAB sizes, so the creative that arrives fits the box the
- * page already reserved and nothing shifts under the reader.
- *   - banner: 320x50 Mobile Leaderboard, 728x90 Leaderboard from `sm` up.
- *   - rectangle: 300x250 Medium Rectangle -- the same slot the rail runs, and
- *     the most widely filled unit there is.
+ * Both slots are exact IAB sizes (`AdSurface` holds the box), so the creative
+ * that arrives fits the space the page already reserved and nothing shifts
+ * under the reader.
+ *   - banner: 320x50 Mobile Leaderboard, 728x90 Leaderboard from 640px up.
+ *   - rectangle: 300x250 Medium Rectangle -- the same unit the rail runs below
+ *     1024px, and the most widely filled unit there is.
  */
-const VARIANTS: Record<AdVariant, { wrap: string; label: string; surface: string; close: string }> = {
+const VARIANTS: Record<AdVariant, { wrap: string; label: string; close: string }> = {
   banner: {
     wrap: '',
     label: 'pt-2.5 pb-3',
-    surface: 'mx-auto h-[50px] max-w-[320px] sm:h-[90px] sm:max-w-[728px]',
     close: 'mt-5',
   },
   rectangle: {
     wrap: 'py-1 sm:py-2',
     label: 'pt-3 pb-4',
-    surface: 'mx-auto h-[250px] max-w-[300px]',
     close: 'mt-7',
   },
 }
@@ -54,13 +55,17 @@ export function InArticleAd({
   slotId: string
   variant?: AdVariant
 }) {
+  // A size with no unit key draws nothing on the live site -- not even the
+  // label and rules, which would frame an empty gap.
+  if (!isAdShapeOn(variant)) return null
+
   const style = VARIANTS[variant]
 
   return (
     <aside data-in-article-ad={slotId} data-ad-variant={variant} className={style.wrap}>
       <div aria-hidden className="h-px bg-foreground/15" />
       <AdLabel className={style.label} />
-      <AdMockSurface className={style.surface} />
+      <AdSurface shape={variant} />
       <div aria-hidden className={`${style.close} h-px bg-foreground/15`} />
     </aside>
   )
