@@ -245,3 +245,27 @@ describe('proxy load identity log', () => {
     })
   })
 })
+
+describe('proxy same-site foreign origin', () => {
+  it('refuses a write from a sibling subdomain that is not the site', async () => {
+    const response = proxy(
+      new NextRequest('https://api.questurian.com/api/bookmarks', {
+        method: 'POST',
+        headers: { origin: 'https://ads.questurian.com', host: 'api.questurian.com' },
+      }),
+    )
+    expect(response.status).toBe(403)
+    expect(response.headers.get('cache-control')).toBe('no-store')
+    expect(response.headers.get('x-request-id')).toMatch(/^[0-9a-f-]{36}$/)
+  })
+
+  it('lets the site write', () => {
+    const response = proxy(
+      new NextRequest('http://localhost:4000/api/bookmarks', {
+        method: 'POST',
+        headers: { origin: 'http://localhost:3000', host: 'localhost:4000' },
+      }),
+    )
+    expect(response.status).toBe(200)
+  })
+})

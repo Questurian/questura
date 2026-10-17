@@ -6,10 +6,9 @@
  * keep a slot from shoving the page under the reader). Each banner size is its
  * own unit in the Adsterra dashboard with its own key.
  *
- * TO TURN ADS ON: in the Adsterra publisher dashboard, add the site, create one
- * banner unit per size below, open each unit's "Get code", and paste the
- * `key` from its `atOptions` into `UNIT_KEYS`. Also check the script address
- * in that snippet: if it is not `ADSTERRA_SCRIPT_ORIGIN`, change it here too.
+ * TO TURN ADS ON: the owner runs `bash apps/questura/infra/ads/setup-ads.sh`,
+ * which saves each unit's key and the script address to the vault; the keys
+ * then go into `UNIT_KEYS` below and the address into `ADSTERRA_SCRIPT_ORIGIN`.
  * Keys are not secrets -- every visitor's browser sees them in the page. Merge
  * to main and the deploy ships it. Full checklist: docs/procedures/ads.md.
  *
@@ -21,8 +20,19 @@
  * Dependency-free so node:test can import it.
  */
 
-/** Where Adsterra serves banner code from. Check it against the "Get code" snippet. */
+/**
+ * Where Adsterra serves banner code from. Checked 2026-10-17: every unit key
+ * loads from here (the wizard first saved the Popunder unit's host, which 404s
+ * for banner keys).
+ */
 export const ADSTERRA_SCRIPT_ORIGIN = 'https://www.highperformanceformat.com'
+
+/**
+ * The address each banner's frame loads from: the `questura-ad-frame` Worker
+ * (`ad-frame/`, `lib/adFrameResponse.ts`). A separate origin, so the ad's
+ * code gets storage of its own without ever sharing the site's.
+ */
+export const AD_FRAME_ORIGIN = 'https://ads.questurian.com'
 
 export type AdUnitName = 'leaderboard' | 'mobileBanner' | 'rectangle' | 'skyscraper'
 
@@ -31,13 +41,13 @@ export type AdUnitKeys = Record<AdUnitName, string>
 /** One key per Adsterra banner unit. Empty means that size is off. */
 const UNIT_KEYS: AdUnitKeys = {
   /** 728x90 */
-  leaderboard: '',
+  leaderboard: 'afc1e764e1125220de205ac7d78f6e13',
   /** 320x50 */
-  mobileBanner: '',
+  mobileBanner: '8832c0b6f820f906601615cddc406e08',
   /** 300x250 */
-  rectangle: '',
+  rectangle: '05af3a05a344fce898708177bb99fd24',
   /** 160x600 */
-  skyscraper: '',
+  skyscraper: '2b5f6ed821a8683d5af69eddeee004d1',
 }
 
 /** Exact IAB sizes, so the creative fits the box the page already reserved. */
@@ -121,6 +131,12 @@ export function adUnitForWidth(
     if (width >= step.minWidth) picked = step.unit
   }
   return adUnit(picked, keys)
+}
+
+/** The frame document for one unit, on the ad frame origin. */
+export function adFrameUrl(unit: Pick<AdUnit, 'key' | 'width' | 'height'>): string {
+  const query = new URLSearchParams({ k: unit.key, w: String(unit.width), h: String(unit.height) })
+  return `${AD_FRAME_ORIGIN}/frame?${query.toString()}`
 }
 
 /** Every unit the shape uses has a real key. */

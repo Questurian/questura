@@ -2,29 +2,24 @@
 
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore, type RefObject } from 'react'
 
-import { adFrameDocument } from '../lib/adFrameDocument'
-import {
-  ADSTERRA_SCRIPT_ORIGIN,
-  AD_SHAPES,
-  adStepWidth,
-  adUnitForWidth,
-  type AdShape,
-} from '../lib/adUnits'
+import { adsMayLoad } from '../lib/adConsent'
+import { AD_SHAPES, adFrameUrl, adStepWidth, adUnitForWidth, type AdShape } from '../lib/adUnits'
+import { useAdConsent } from './useAdConsent'
 
 /**
- * Sandbox for the ad's own document.
+ * Sandbox for the ad's own document, which loads from ads.questurian.com.
  *
  * - `allow-scripts`: the banner is a script.
+ * - `allow-same-origin`: lets the frame keep *its own* origin,
+ *   ads.questurian.com, whose storage and cookies Adsterra's script needs (it
+ *   fails without them). Safe only because that is a different origin from the
+ *   site: never put this flag on a frame whose document is the site's own
+ *   (`srcdoc`, `about:blank`, a page of ours).
  * - `allow-popups` + `allow-popups-to-escape-sandbox`: a click opens the
  *   advertiser in a new, ordinary tab.
- * - No `allow-same-origin`: the frame gets an opaque origin, so its code
- *   cannot touch the page, our storage or the reader's API session.
  * - No `allow-top-navigation`: an ad can never redirect the reader's page.
- *
- * If Adsterra ever refuses to serve into this (impressions stay at zero with
- * keys in), see docs/procedures/ads.md before loosening it.
  */
-const SANDBOX = 'allow-scripts allow-popups allow-popups-to-escape-sandbox'
+const SANDBOX = 'allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox'
 
 /** Start loading a little before the slot scrolls in, so it is ready on arrival. */
 const NEAR_VIEWPORT = '300px 0px'
@@ -83,9 +78,10 @@ function useContainerStep(shape: AdShape, holder: RefObject<HTMLDivElement | nul
 }
 
 /**
- * One live Adsterra banner, isolated in its own sandboxed document (see
- * `adFrameDocument`). Fills the box `AdSurface` reserved; mounts only once the
- * box is near the viewport, and swaps unit when its space crosses the shape's
+ * One live Adsterra banner, in its own frame on the ad frame origin (see
+ * `adFrameResponse`). Fills the box `AdSurface` reserved; mounts only once the
+ * box is near the viewport and the visitor's consent allows it
+ * (`lib/adConsent.ts`), and swaps unit when its space crosses the shape's
  * threshold (the box changes size with it).
  */
 export function AdsterraFrame({ shape }: { shape: AdShape }) {
@@ -94,6 +90,7 @@ export function AdsterraFrame({ shape }: { shape: AdShape }) {
   const viewportStep = useViewportStep(shape)
   const containerStep = useContainerStep(shape, holder)
   const width = AD_SHAPES[shape].measure === 'viewport' ? viewportStep : containerStep
+  const consent = useAdConsent()
 
   useEffect(() => {
     const element = holder.current
@@ -119,12 +116,13 @@ export function AdsterraFrame({ shape }: { shape: AdShape }) {
 
   return (
     <div ref={holder} className="flex h-full w-full justify-center">
-      {near && unit ? (
+      {near && unit && adsMayLoad(consent) ? (
         <iframe
           key={unit.name}
           title="Advertisement"
           sandbox={SANDBOX}
-          srcDoc={adFrameDocument(unit, ADSTERRA_SCRIPT_ORIGIN)}
+          src={adFrameUrl(unit)}
+          referrerPolicy="strict-origin-when-cross-origin"
           width={unit.width}
           height={unit.height}
           scrolling="no"

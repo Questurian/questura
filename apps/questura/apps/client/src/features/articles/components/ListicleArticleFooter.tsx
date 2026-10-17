@@ -192,7 +192,7 @@ export function ListicleArticleFooter({
         </div>
 
         {ADS_ENABLED ? (
-          <div className="pt-10 480:pt-12 1024:pt-14">
+          <div data-ad-slot className="pt-10 480:pt-12 1024:pt-14">
             <InArticleAd slotId="listicle-foot-banner" variant="banner" />
           </div>
         ) : null}

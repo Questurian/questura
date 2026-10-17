@@ -250,6 +250,13 @@ html[data-identity="member"] .nav-subscribe[data-pending] {
   visibility: hidden;
 }
 
+/* Ad consent (features/ads/lib/adConsent.ts). A visitor who said no to ads
+   gets `html[data-ad-consent="denied"]` from an inline <head> script before
+   first paint, so no empty ad slot ever shows. */
+html[data-ad-consent="denied"] [data-ad-slot] {
+  display: none;
+}
+
 /* Navbar theme (features/Navigation/lib/navTheme.ts). One navbar, two
    palettes: light is the lab's Atlantic 100, dark is Atlantic 150. The reader
    picks one in the menu; an inline <head> script sets `html[data-nav-theme]`

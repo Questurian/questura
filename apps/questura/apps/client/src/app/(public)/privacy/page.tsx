@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 
+import { AdChoice } from '@/features/ads/components/AdChoice';
 import { ADS_LIVE } from '@/features/ads/lib/adUnits';
 
 import {
@@ -33,7 +34,7 @@ export default function PrivacyPage() {
         <h1 className="font-display text-[1.8rem] 480:text-[2.2rem] text-foreground leading-[1.15]">
           Privacy
         </h1>
-        <p className="text-[0.85rem] text-foreground/60 mt-2">Last updated 13 October 2026</p>
+        <p className="text-[0.85rem] text-foreground/60 mt-2">Last updated 17 October 2026</p>
 
         <p className={`${body} mt-6`}>
           {ADS_LIVE
@@ -89,10 +90,11 @@ export default function PrivacyPage() {
           <>
             <h2 className={heading}>Advertising</h2>
             <p className={body}>
-              Some pages show ads from Adsterra, an ad network. Each ad runs in a sealed frame: it
-              cannot see the page around it, your account or anything you type, and we tell
-              Adsterra nothing about you. To choose and count its ads, Adsterra&apos;s servers see your
-              IP address and browser and may set their own cookies.{' '}
+              Some pages show ads from Adsterra, an ad network. Each ad runs in a sealed frame on a
+              separate address, ads.questurian.com: it cannot see the page around it, your account
+              or anything you type, and we tell Adsterra nothing about you. To choose and count its
+              ads, Adsterra&apos;s servers see your IP address and browser and may set their own
+              cookies.{' '}
               <a
                 href="https://adsterra.com/privacy-policy/"
                 className="text-accent underline underline-offset-2"
@@ -102,6 +104,13 @@ export default function PrivacyPage() {
               </a>{' '}
               says what it keeps.
             </p>
+            <p className={body}>
+              If you are in the European Union, the wider EEA, the UK or Switzerland, we ask before
+              any ad loads, and no ad loads until you answer. To find out whether to ask, our ad
+              address reads the country your connection comes from; it is not stored. Your answer
+              is kept in your browser only. You can change it here at any time:
+            </p>
+            <AdChoice />
           </>
         ) : null}
 

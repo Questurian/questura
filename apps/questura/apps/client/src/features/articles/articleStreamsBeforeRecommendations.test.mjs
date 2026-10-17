@@ -242,8 +242,10 @@ test('article heading and body stream before recommendations resolve', { skip },
   // One lookup feeds both placements: trending is local, partners are global
   // and never repeat a trending item.
   assert.match(html, /More from Questurian/)
-  // No mock ad slots on a live article (#6): not in the rail, not in the body.
-  assert.doesNotMatch(html, /Ad space|Advertisement|data-in-article-ad/)
+  // A live article carries real ad slots now that the units have keys, and
+  // never the development outlines or the old "Ad space" mock (#6).
+  assert.doesNotMatch(html, /Ad space|data-ad-preview|Ad · /)
+  assert.match(html, /data-ad-shape="rail"/)
   assert.match(html, /Recommendation 100</)
   assert.equal((html.match(/Recommendation 1</g) ?? []).length, 1)
 })

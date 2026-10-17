@@ -62,7 +62,7 @@ export function InArticleAd({
   const style = VARIANTS[variant]
 
   return (
-    <aside data-in-article-ad={slotId} data-ad-variant={variant} className={style.wrap}>
+    <aside data-ad-slot data-in-article-ad={slotId} data-ad-variant={variant} className={style.wrap}>
       <div aria-hidden className="h-px bg-foreground/15" />
       <AdLabel className={style.label} />
       <AdSurface shape={variant} />
