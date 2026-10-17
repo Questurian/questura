@@ -1,6 +1,4 @@
 import Footer from "@/components/layout/Footer";
-import { AdConsentBanner } from "@/features/ads/components/AdConsentBanner";
-import { ADS_LIVE } from "@/features/ads/lib/adUnits";
 import { ClientInteractionProvider } from "@/components/providers/ClientInteractionProvider";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { Navbar } from "@/features/Navigation";
@@ -22,7 +20,6 @@ export async function PublicChrome({
       </ClientInteractionProvider>
       <main className="flex-1">{children}</main>
       <Footer locationMenu={locationMenu} />
-      {ADS_LIVE ? <AdConsentBanner /> : null}
     </>
   );
 }

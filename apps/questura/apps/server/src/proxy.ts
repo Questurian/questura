@@ -30,9 +30,9 @@ const IS_DEVELOPMENT = process.env.NODE_ENV === 'development'
  * removed here, before any route, logger or error reporter can see it.
  *
  * Then a write from a sibling subdomain that is not one of the site's own
- * origins is refused (`shared/http/same-site-origin.ts`): ads.questurian.com
- * runs third-party ad code, and the reader's `SameSite=Lax` cookies would
- * otherwise ride along on its requests.
+ * origins is refused (`shared/http/same-site-origin.ts`): any subdomain that
+ * ever runs third-party code (ads.questurian.com did, 2026-10-17) would
+ * otherwise send the reader's `SameSite=Lax` cookies along with its requests.
  */
 export function proxy(req: NextRequest) {
   const requestId = acceptOrCreateRequestId(req.headers.get(REQUEST_ID_HEADER))

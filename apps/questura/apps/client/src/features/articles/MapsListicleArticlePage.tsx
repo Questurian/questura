@@ -88,7 +88,7 @@ export function MapsListicleArticlePage({
       ) : null}
 
       {ads.afterIntro ? (
-        <div data-ad-slot className="px-3 pt-4 380:px-4 480:px-5 550:px-6 sm:px-8">
+        <div className="px-3 pt-4 380:px-4 480:px-5 550:px-6 sm:px-8">
           <InArticleAd slotId="listicle-intro" variant="rectangle" />
         </div>
       ) : null}
