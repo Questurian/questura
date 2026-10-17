@@ -16,7 +16,7 @@ const RAIL_SLOTS: readonly AdShape[] = ['rail', 'rectangle']
 
 function AdSlot({ shape }: { shape: AdShape }) {
   return (
-    <div className="w-full">
+    <div data-ad-slot className="w-full">
       <AdLabel className="mb-1.5" />
       <AdSurface shape={shape} />
     </div>

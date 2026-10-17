@@ -7,6 +7,9 @@ import {
   readOriginAuthConfig,
 } from '@/shared/http/origin-auth'
 import { loadIdentityVerdict, readLoadTestConfig } from '@/shared/http/load-identity'
+import { isForeignSameSiteOrigin } from '@/shared/http/same-site-origin'
+import { APP_CONFIG } from '@/shared/config'
+import { APP_URLS } from '@/shared/config/urls'
 import { REQUEST_ID_HEADER, acceptOrCreateRequestId } from '@/shared/observability/request-id'
 import { logger } from '@/shared/utils/logger'
 
@@ -25,6 +28,11 @@ const IS_DEVELOPMENT = process.env.NODE_ENV === 'development'
  * refused, or in `unidentified` mode served with every address header removed
  * so it lands in the shared rate-limit bucket. Either way the header itself is
  * removed here, before any route, logger or error reporter can see it.
+ *
+ * Then a write from a sibling subdomain that is not one of the site's own
+ * origins is refused (`shared/http/same-site-origin.ts`): ads.questurian.com
+ * runs third-party ad code, and the reader's `SameSite=Lax` cookies would
+ * otherwise ride along on its requests.
  */
 export function proxy(req: NextRequest) {
   const requestId = acceptOrCreateRequestId(req.headers.get(REQUEST_ID_HEADER))
@@ -37,6 +45,27 @@ export function proxy(req: NextRequest) {
   const verdict = originAuthVerdict(req.headers, req.nextUrl.pathname, config)
 
   if ((verdict === 'missing' || verdict === 'wrong') && config.mode === 'refuse') {
+    return NextResponse.json(
+      { error: 'Forbidden' },
+      { status: 403, headers: { 'cache-control': 'no-store', [REQUEST_ID_HEADER]: requestId } },
+    )
+  }
+
+  if (
+    isForeignSameSiteOrigin({
+      method: req.method,
+      origin: req.headers.get('origin'),
+      host: req.headers.get('x-forwarded-host') ?? req.headers.get('host'),
+      allowedOrigins: APP_CONFIG.CORS_ORIGINS,
+      selfOrigin: APP_URLS.backend,
+    })
+  ) {
+    logger.warn('Same-site foreign origin refused', {
+      requestId,
+      origin: req.headers.get('origin'),
+      method: req.method,
+      path: req.nextUrl.pathname,
+    })
     return NextResponse.json(
       { error: 'Forbidden' },
       { status: 403, headers: { 'cache-control': 'no-store', [REQUEST_ID_HEADER]: requestId } },

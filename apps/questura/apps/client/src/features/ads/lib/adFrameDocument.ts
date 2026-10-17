@@ -4,10 +4,8 @@
  * Every Adsterra banner reads its settings from one global, `atOptions`, and
  * draws with `document.write`. Run straight in the page, a second banner
  * overwrites the first one's settings, and `document.write` after load wipes
- * the whole React page. So each banner gets a document of its own: an iframe
- * whose `srcdoc` is this string. `AdsterraFrame` sandboxes that iframe without
- * `allow-same-origin`, so the ad code cannot reach the page, its storage or the
- * signed-in reader's API session.
+ * the whole React page. So each banner gets a document of its own, served by
+ * the ad frame origin (`adFrameResponse`) into its own iframe (`AdsterraFrame`).
  *
  * `<base target="_blank">` sends a click to a new tab: the sandbox lets the ad
  * open one but never navigate the reader's page away.

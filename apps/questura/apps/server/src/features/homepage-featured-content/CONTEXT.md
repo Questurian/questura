@@ -44,7 +44,7 @@ Each curated block type is a **slice** under its own folder following a near-uni
   types/            api / internal / public types + index barrel
 ```
 
-Slices present today: `featured-article`, `featured-article-carousel`, `featured-articles`, `article-grid`, `article-list`, `location-grid`, `questurian-maps`, `questurian-maps-dark` (the compact six-map list; shares the `questurian-maps` slice and behavior, only the slot count differs), `hotel-grid`, `tour-grid`, `where-to-eat-drink`, `things-to-do-listicles`, `things-to-do-attractions`, `newsletter-signup`, `page-hero` (no items: section heading + subheading + one `heroMediaSet` photo), `ad-slot` (no items: one display ad, `adSize` `banner` | `rectangle`; the client draws nothing until that size has an ad unit key, see `apps/questura/docs/procedures/ads.md`).
+Slices present today: `featured-article`, `featured-article-carousel`, `featured-articles`, `article-grid`, `article-list`, `location-grid`, `questurian-maps`, `questurian-maps-dark` (the compact six-map list; shares the `questurian-maps` slice and behavior, only the slot count differs), `hotel-grid`, `tour-grid`, `where-to-eat-drink`, `things-to-do-listicles`, `things-to-do-attractions`, `newsletter-signup`, `page-hero` (no items: section heading + subheading + one `heroMediaSet` photo), `ad-slot` (no items: one display ad, `adSize` `banner` | `rectangle`; the ad itself runs in a frame from ads.questurian.com; see `apps/questura/docs/procedures/ads.md`).
 
 Cross-cutting slices (operate across all block types):
 
