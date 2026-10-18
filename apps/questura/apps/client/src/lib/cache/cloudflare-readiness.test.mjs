@@ -14,16 +14,16 @@ const read = (name) => readFileSync(resolve(clientRoot, name), 'utf8')
  * three things about that setup which would break silently.
  */
 
-// `@opennextjs/cloudflare@1.18.1` declares `next: ~15.4.11 || ~15.5.10 || ...`,
-// and the client is on 15.5.27. Later adapters move the floor (1.19.0 wants
-// >=15.5.15, 1.20.6 wants >=15.5.24 <16 || >=16.3.3). A caret on either side of
-// the pair lets a routine install cross a boundary with no error until the
-// build fails.
+// `@opennextjs/cloudflare@1.20.9` declares `next: >=15.5.27 <16 || >=16.3.8`
+// and `wrangler: ^4.125.0`, and the client is on 15.5.27 with wrangler 4.136.2.
+// 1.20.10 needs wrangler ^4.148.0 and 1.20.12 needs Next >=15.5.28, so 1.20.9 is
+// the ceiling for this pair. A caret on either side lets a routine install
+// cross a boundary with no error until the build fails.
 test('the adapter and Next are pinned to a compatible pair', () => {
   assert.equal(pkg.dependencies.next, '15.5.27')
   assert.equal(
     pkg.devDependencies['@opennextjs/cloudflare'],
-    '1.18.1',
+    '1.20.9',
     'Exact, not caret: each adapter release moves its Next range. Check its peerDependencies against the pinned Next before moving it.',
   )
   assert.equal(pkg.devDependencies.wrangler, '4.136.2')
@@ -105,20 +105,18 @@ test('no public page reads cookies or request headers', () => {
 })
 
 // 1.18.1's cache-purge Durable Object handed the tag array to sql.exec as one
-// binding, so every purge alarm threw and retried (fixed upstream in 1.20.x,
-// which needs a newer Next). The purge is what clears the regional page
-// copies on a publication, so the patch must stay applied.
-test('the cache-purge Durable Object patch is applied', () => {
-  const root = JSON.parse(readFileSync(resolve(clientRoot, '../../../../package.json'), 'utf8'))
-  assert.ok(
-    root.pnpm?.patchedDependencies?.['@opennextjs/cloudflare@1.18.1'],
-    'patches/@opennextjs__cloudflare@1.18.1.patch is not registered in the root package.json',
-  )
+// binding, so every purge alarm threw and retried, and its loop never ended.
+// We carried a patch for it; 1.20.x fixed all three lines upstream, so the
+// patch is gone. The purge is what clears the regional page copies on a
+// publication, so this fails if an adapter without the fix is installed.
+test('the installed cache-purge Durable Object has the upstream fix', () => {
   const purge = readFileSync(
     resolve(realpathSync(resolve(clientRoot, 'node_modules/@opennextjs/cloudflare')), 'dist/api/durable-objects/bucket-cache-purge.js'),
     'utf8',
   )
+  assert.match(purge, /VALUES \(\?\)`, tag\)/)
   assert.match(purge, /\.\.\.tags\.map\(\(row\) => row\.tag\)/)
+  assert.match(purge, /while \(tags\.length > 0\)/)
   assert.doesNotMatch(purge, /VALUES \(\?\)`, \[tag\]\)/)
 })
 
