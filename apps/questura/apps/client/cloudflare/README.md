@@ -9,17 +9,22 @@ Evidence: [`docs/capacity/runs/2026-09-22-L09-cloudflare-adapter.md`](../../../d
 ## The version pin is exact on purpose
 
 ```
-@opennextjs/cloudflare  1.18.1
+@opennextjs/cloudflare  1.20.9
 wrangler                4.136.2
-next                    15.5.26
+next                    15.5.27
 ```
 
-`1.18.1` declares `next: ~15.4.11 || ~15.5.10 || ~16.0.11 || ^16.1.5`, so it
-accepts the client's **15.5.26** and the adapter did not need to move when Next
-did. `1.19.0` raises its Next floor to `>=15.5.15`; 1.20.6 wants
-`>=15.5.24 <16 || >=16.3.3`. Moving the adapter is its own change: check the
-new release's `peerDependencies` against the pinned Next first. The server
-(Payload) is not built by the adapter and stays on its own Next.
+`1.20.9` declares `next: >=15.5.27 <16 || >=16.3.8` and `wrangler: ^4.125.0`.
+It is the newest adapter that fits this pair: 1.20.10 wants wrangler
+`^4.148.0` and 1.20.12 wants Next `>=15.5.28`. Moving the adapter is its own
+change: check the new release's `peerDependencies` against the pinned Next
+and wrangler first. The server (Payload) is not built by the adapter and
+stays on its own Next.
+
+1.20.x also fixed the cache-purge Durable Object bug upstream (1.18.1 passed
+the tag array to `sql.exec` as one binding, so every purge alarm threw). The
+local patch for it is gone; `cloudflare-readiness.test.mjs` checks the
+installed adapter still has the fix.
 
 A caret on either package would let a routine `pnpm install` cross that
 boundary with no error until a build fails. `cloudflare-readiness.test.mjs`
