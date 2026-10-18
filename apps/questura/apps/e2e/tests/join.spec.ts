@@ -39,7 +39,7 @@ async function paywallToPlans(page: Page) {
 test('journey 2: the paywall leads to the plans, at the catalog prices, and the article travels along', async ({ page }) => {
   await paywallToPlans(page)
 
-  await page.getByRole('link', { name: 'Continue with Monthly' }).click()
+  await page.getByRole('link', { name: 'Choose monthly' }).click()
   await expect(page).toHaveURL((url) => url.pathname === '/purchase/monthly' && url.searchParams.get('returnTo') === ARTICLE)
   await expect(page.getByRole('heading', { name: 'Complete Your Purchase' }).first()).toBeVisible()
   await expectNoHorizontalScroll(page)
@@ -62,7 +62,7 @@ test('journey 2: a new reader signs up, verifies, pays and lands back on the ope
   )
 
   await paywallToPlans(page)
-  await page.getByRole('link', { name: 'Continue with Monthly' }).click()
+  await page.getByRole('link', { name: 'Choose monthly' }).click()
   await expect(page).toHaveURL((url) => url.pathname === '/purchase/monthly')
 
   // Sign up inside the purchase page.

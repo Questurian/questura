@@ -286,21 +286,62 @@
   }
 }
 
+/* Phones only: the plans start below a short hero, so it points to them. */
+.join-hero-plans-link {
+  display: none;
+}
+
 @media (max-width: 767px) {
   .join-hero {
-    min-height: 400px;
-    padding-inline: 20px;
+    min-height: 350px;
+    padding-inline: 24px;
   }
 
   .join-hero-copy {
-    padding-top: 38px;
+    padding-top: 32px;
   }
 
   .join-hero-title {
     max-width: 360px;
     margin-inline: auto;
-    font-size: clamp(2.45rem, 11.5vw, 3.3rem);
-    line-height: 0.94;
+    font-size: clamp(2.45rem, 11vw, 3.3rem);
+    line-height: 1;
+  }
+
+  .join-hero-plans-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 128px;
+    min-height: 44px;
+    margin-top: 24px;
+    padding: 10px 16px;
+    border: 1px solid #79a9ba;
+    border-radius: 4px;
+    background: #16465b;
+    color: #eef7fa;
+    font-size: 0.875rem;
+    font-weight: 600;
+    line-height: 1.25;
+  }
+
+  .join-hero-plans-link:hover {
+    border-color: #b5dce7;
+    background: #205b70;
+  }
+
+  .join-hero-plans-link:focus-visible {
+    outline: 2px solid #b5dce7;
+    outline-offset: 4px;
+  }
+
+  #plans {
+    padding-top: 32px;
+    padding-inline: 24px;
+  }
+
+  #plans > div:first-child {
+    margin-bottom: 24px;
   }
 
   .join-hero-globe-image,
@@ -395,19 +436,15 @@
 }
 
 .join-plan-arrow-ring-track {
-  stroke: rgb(26 26 26 / 0.18);
+  stroke: rgb(59 91 219 / 0.5);
 }
 
 .join-plan-arrow-ring-progress {
-  stroke: #5F5D59;
+  stroke: #3b5bdb;
   stroke-dasharray: 100;
   stroke-dashoffset: 100;
   transform: rotate(-90deg);
   transform-origin: center;
-}
-
-.join-plan-card--annual .join-plan-arrow-ring-progress {
-  stroke: #3B5BDB;
 }
 
 .join-plan-card:hover .join-plan-arrow-ring-progress,
@@ -477,23 +514,6 @@
   }
 }
 
-.join-faq details summary {
-  list-style: none;
-  cursor: pointer;
-}
-
-.join-faq details summary::-webkit-details-marker {
-  display: none;
-}
-
-.join-faq .join-faq-plus {
-  transition: transform 0.25s ease;
-}
-
-.join-faq details[open] .join-faq-plus {
-  transform: rotate(45deg);
-}
-
 @media (prefers-reduced-motion: reduce) {
   .join-hero-title span,
   .join-hero-title em,
@@ -530,3 +550,4 @@
     stroke-dashoffset: 0;
   }
 }
+

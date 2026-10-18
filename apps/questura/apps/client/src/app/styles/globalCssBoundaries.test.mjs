@@ -48,6 +48,12 @@ test('the public route group loads its own stylesheet', () => {
   assert.match(read('../(public)/layout.tsx'), /import ["']\.\.\/styles\/public-routes\.css["']/)
 })
 
+// The same for /join: its plan cards, showcase rows and closing section are
+// styled only by join-route.css, so without this import they lose all layout.
+test('/join loads its own stylesheet', () => {
+  assert.match(read('../join/layout.tsx'), /import ["']\.\.\/styles\/join-route\.css["']/)
+})
+
 // Reduced-motion rules override the card animations declared above them, and
 // the keyframes the card effects use are declared in editorial-effects.css.
 // Both only work if the order holds.

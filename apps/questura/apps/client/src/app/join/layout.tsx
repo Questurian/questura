@@ -1,3 +1,4 @@
+import "../styles/join-route.css";
 import JoinNavbar from "@/features/Navigation/JoinNavbar";
 import {
   GLOBE_FALLBACK_SRC,
