@@ -101,7 +101,10 @@ describe.skipIf(!available)('refresh worker fencing', () => {
     }
   }
 
-  /** Claim without working, the way a worker that then stalls would. */
+  /**
+   * Claim without working, the way a worker that then stalls would. The due
+   * check matches the worker's `CLAIM_SQL`, millisecond rounding included.
+   */
   async function claimOnly(): Promise<{ id: number; token: string } | null> {
     const token = `test-${Math.random().toString(36).slice(2)}`
     const result = await pool.query(
@@ -110,7 +113,7 @@ describe.skipIf(!available)('refresh worker fencing', () => {
            locked_until = now() + interval '60 seconds', updated_at = now()
        WHERE id IN (
          SELECT id FROM refresh_jobs
-         WHERE (status = 'pending' AND next_attempt_at <= now())
+         WHERE (status = 'pending' AND next_attempt_at <= now()::timestamptz(3))
             OR (status = 'running' AND locked_until < now())
          ORDER BY next_attempt_at LIMIT 1 FOR UPDATE SKIP LOCKED
        )
@@ -389,6 +392,21 @@ describe.skipIf(!available)('refresh worker fencing', () => {
     expect(second.done).toBe(1)
     expect(receiver.allTags()).toEqual(new Set(tags))
     expect((await job(id)).status).toBe('done')
+  })
+
+  // `next_attempt_at` is `timestamp(3)`, and Postgres rounds a write of
+  // `now()` to the millisecond, so a job made due "now" can be stored up to
+  // half a millisecond in the future. A claim inside that half millisecond
+  // compared it with its own unrounded `now()` and skipped a due job — the
+  // flake above at `second.done`. One try catches it only sometimes; fifty
+  // back-to-back tries catch it every time.
+  it('claims a job the moment it is due, despite millisecond rounding', async () => {
+    const id = await enqueue('revalidate:due-now', ['due'])
+    for (let attempt = 0; attempt < 50; attempt += 1) {
+      await pool.query(`UPDATE refresh_jobs SET status = 'pending', next_attempt_at = now() WHERE id = $1`, [id])
+      const result = await drainRefreshJobs(pool as never, { maxJobs: 1 })
+      expect(result).toMatchObject({ claimed: 1, done: 1 })
+    }
   })
 
   // A newer publication lands while the old generation is being delivered:

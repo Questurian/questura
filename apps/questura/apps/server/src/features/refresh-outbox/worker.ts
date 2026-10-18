@@ -122,6 +122,15 @@ export function backoffMs(attempts: number, random: () => number = Math.random):
   return Math.round(base * (1 + 0.2 * random()))
 }
 
+/**
+ * "Due" is compared at the column's own precision. `next_attempt_at` is
+ * `timestamp(3)` (a Payload date field), and Postgres *rounds* to the
+ * millisecond on write: a job made due at `now()` = …248.6 ms is stored as
+ * …249, half a millisecond in the future. Compared with an unrounded `now()`,
+ * a claim inside that half millisecond skipped a job that was already due.
+ * Rounding `now()` the same way cannot go backwards: a moment at or after the
+ * write never rounds to before what the write stored.
+ */
 const CLAIM_SQL = `
   UPDATE refresh_jobs
   SET status = 'running',
@@ -132,7 +141,7 @@ const CLAIM_SQL = `
       updated_at = now()
   WHERE id IN (
     SELECT id FROM refresh_jobs
-    WHERE (status = 'pending' AND next_attempt_at <= now())
+    WHERE (status = 'pending' AND next_attempt_at <= now()::timestamptz(3))
        OR (status = 'running' AND locked_until < now())
     ORDER BY next_attempt_at
     LIMIT $1
