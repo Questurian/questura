@@ -173,6 +173,12 @@ export async function gated(context: BrowserContext): Promise<BrowserContext> {
       (url) => url.pathname.startsWith('/api/') && !REDIRECT_TARGETS.test(url.pathname),
       (route) => route.continue({ headers: { ...route.request().headers(), 'cf-connecting-ip': address } }),
     )
+    // /join's showcase photos are fixed files on the production CDN
+    // (joinShowcase.ts), and the sandbox has no internet: its proxy refuses
+    // them. A blank pixel stands in, as the fake Stripe does for Stripe.
+    await context.route(/^https:\/\/questurian-cdn\.b-cdn\.net\//, (route) =>
+      route.fulfill({ status: 200, contentType: 'image/gif', body: BLANK_GIF }),
+    )
   }
   return context
 }
@@ -195,6 +201,8 @@ export function unexpectedProblems(context: BrowserContext): string[] {
 }
 
 const REDIRECT_TARGETS = /^\/api\/visitor-auth\/(callback\/|verify-email|reset-password\/)/
+/** A 1x1 transparent GIF. */
+const BLANK_GIF = Buffer.from('R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7', 'base64')
 /** Every context gated during the current test, its own and any it made. */
 let watched: BrowserContext[] = []
 
