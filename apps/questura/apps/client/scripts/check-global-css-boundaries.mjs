@@ -6,12 +6,13 @@ import { fileURLToPath } from 'node:url'
 
 const clientRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 /*
- * Two stylesheet entrypoints, each with a fixed import list and order.
+ * Three stylesheet entrypoints, each with a fixed import list and order.
  *
  * `globals.css` is what every route loads, so anything added to it is paid for
  * by /join, /search, the account pages and the auth pages as well. City,
  * article, itinerary and listicle styling belongs in `public-routes.css`,
- * which only the public route group loads.
+ * which only the public route group loads. /join's own sections live in
+ * `join-route.css`, which only that page loads.
  */
 const ENTRYPOINTS = [
   {
@@ -35,6 +36,10 @@ const ENTRYPOINTS = [
       './global/featured-articles-three.css',
       './global/responsive-accessibility.css',
     ],
+  },
+  {
+    path: 'src/app/styles/join-route.css',
+    imports: ['./global/join-showcase.css'],
   },
 ]
 

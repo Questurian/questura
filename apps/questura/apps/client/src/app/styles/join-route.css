@@ -1,0 +1,9 @@
+/*
+ * Stylesheet entrypoint for /join only (imported by app/join/layout.tsx).
+ *
+ * The plan cards, the "What membership unlocks" rows and the closing section
+ * are styled nowhere else, so they stay out of `globals.css`, which every
+ * route downloads. The hero, ticker and plan-card base styles remain in
+ * `membership.css`, which listicles share.
+ */
+@import "./global/join-showcase.css";

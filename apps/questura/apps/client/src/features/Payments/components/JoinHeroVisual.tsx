@@ -169,6 +169,10 @@ export default function JoinHeroVisual() {
         <span>Know more.</span>{' '}
         <em>Travel better.</em>
       </h1>
+      {/* Phones only: on a short screen the plans start below the hero. */}
+      <a className="join-hero-plans-link" href="#plans">
+        View Plans
+      </a>
     </div>
 
     </section>
