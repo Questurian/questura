@@ -301,7 +301,7 @@ function MapWaiting() {
 export function MapPanel(props: MapPanelProps = {}) {
   const { access } = useListicleMapSync()
   if (access === 'teaser') {
-    return <MapTeaser insetBottomPx={props.viewportInsetBottomPx} guides={props.guides} />
+    return <MapTeaser insetBottomPx={props.viewportInsetBottomPx} />
   }
   if (access === 'waiting') return <MapWaiting />
   return <GoogleMapPanel {...props} />

@@ -136,21 +136,3 @@ export function layoutMapTeaser(points: TeaserPoint[], box: Box): { pins: Teaser
     })),
   }
 }
-
-/**
- * "13 places across Miraflores, Lince and 5 more neighborhoods." The phone's
- * stand-in for the names the drawing has no room for. Null when no place has a
- * neighborhood.
- */
-export function teaserAreaLine(points: TeaserPoint[]): string | null {
-  const counts = new Map<string, number>()
-  for (const point of points) if (point.area) counts.set(point.area, (counts.get(point.area) ?? 0) + 1)
-  if (counts.size === 0) return null
-
-  const names = [...counts.entries()].sort((a, b) => b[1] - a[1]).map(([name]) => name)
-  const places = points.length === 1 ? '1 place' : `${points.length} places`
-  if (names.length === 1) return `${places} in ${names[0]}.`
-  if (names.length === 2) return `${places} across ${names[0]} and ${names[1]}.`
-  const rest = names.length - 2
-  return `${places} across ${names[0]}, ${names[1]} and ${rest} more ${rest === 1 ? 'neighborhood' : 'neighborhoods'}.`
-}

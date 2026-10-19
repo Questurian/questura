@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 
-import { layoutMapTeaser, teaserAreaLine } from './mapTeaserLayout.ts'
+import { layoutMapTeaser } from './mapTeaserLayout.ts'
 
 const point = (id, lat, lng, area, extra = {}) => ({ id, lat, lng, inert: true, number: null, area, ...extra })
 
@@ -88,11 +88,4 @@ test('one pin, or no room, never divides by zero', () => {
   const [only] = layoutMapTeaser([point('a', -12.1, -77.0, null)], desktop).pins
   assert.ok(Number.isFinite(only.x) && Number.isFinite(only.y))
   assert.deepEqual(layoutMapTeaser(lima, { width: 0, height: 0, compact: false }), { pins: [], labels: [] })
-})
-
-test('the phone says where the places are in a line', () => {
-  assert.equal(teaserAreaLine(lima), '7 places across Miraflores, Lima Centro and 2 more neighborhoods.')
-  assert.equal(teaserAreaLine(lima.slice(1, 3)), '2 places across Lince and Miraflores.')
-  assert.equal(teaserAreaLine(lima.slice(2, 4)), '2 places in Miraflores.')
-  assert.equal(teaserAreaLine([point('a', 0, 0, null)]), null)
 })
