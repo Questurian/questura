@@ -102,6 +102,8 @@ type ListicleMapSyncValue = {
   points: ListicleMapPoint[]
   /** Which map this reader gets: Google's, the drawn teaser, or plain paper (lib/mapAccess.ts). */
   access: ListicleMapAccess
+  /** `maps:<id>` or `itineraries:<id>`: finds the guide's saved map picture (data/mapTeasers.json). */
+  teaserKey: string | null
   activeId: string | null
   registerEntry: (id: string, el: HTMLElement | null) => void
   scrollToEntry: (id: string) => void
@@ -111,6 +113,7 @@ const ListicleMapSyncContext = createContext<ListicleMapSyncValue>({
   days: null,
   points: [],
   access: 'open',
+  teaserKey: null,
   activeId: null,
   registerEntry: () => {},
   scrollToEntry: () => {},
@@ -156,11 +159,13 @@ export function ListicleMapSyncProvider({
   points,
   days = null,
   access = 'open',
+  teaserKey = null,
   children,
 }: {
   points: ListicleMapPoint[]
   days?: ListicleMapDays | null
   access?: ListicleMapAccess
+  teaserKey?: string | null
   children: ReactNode
 }): JSX.Element {
   const [{ activeId }, dispatchNavigation] = useReducer(
@@ -354,8 +359,8 @@ export function ListicleMapSyncProvider({
   )
 
   const value = useMemo(
-    () => ({ days, points, access, activeId, registerEntry, scrollToEntry }),
-    [days, points, access, activeId, registerEntry, scrollToEntry],
+    () => ({ days, points, access, teaserKey, activeId, registerEntry, scrollToEntry }),
+    [days, points, access, teaserKey, activeId, registerEntry, scrollToEntry],
   )
 
   return <MapSyncProvider value={value}>{children}</MapSyncProvider>

@@ -99,7 +99,7 @@ export function MapsArticleLayout({
   }, [effectiveArticle, lockedPins])
 
   return (
-    <ListicleMapSyncProvider points={points} access={access}>
+    <ListicleMapSyncProvider points={points} access={access} teaserKey={`maps:${article.id}`}>
       <ListicleArticleLayout
         format="maps"
         relatedArticles={relatedArticles}
