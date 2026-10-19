@@ -42,6 +42,7 @@ export const CONTENT_TABLES = [
   'articles_blocks_key_takeaway',
   'articles_blocks_key_takeaway_items',
   'articles_blocks_pull_quote',
+  'articles_blocks_read_more',
   'articles_blocks_text',
   'articles_rels',
   'attractions',
