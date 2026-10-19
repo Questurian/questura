@@ -3,6 +3,7 @@
  * Defines block types for article content composition
  */
 
+import { isReadMoreUrl } from './readMore'
 import { Block } from 'payload'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 
@@ -235,6 +236,26 @@ export const HighlightCalloutBlock: Block = {
   ],
 }
 
+export const ReadMoreBlock: Block = {
+  slug: 'read-more',
+  labels: { singular: 'Read more', plural: 'Read more links' },
+  fields: [
+    {
+      name: 'title',
+      type: 'text',
+      required: true,
+      validate: (value: string | null | undefined) => Boolean(value?.trim()) || 'Enter the article or page title.',
+    },
+    {
+      name: 'url',
+      type: 'text',
+      required: true,
+      validate: (value: string | null | undefined) =>
+        (typeof value === 'string' && isReadMoreUrl(value)) || 'Enter a full http:// or https:// URL, or a path starting with /.',
+    },
+  ],
+}
+
 export const FAQBlock: Block = {
   slug: 'faq',
   labels: {
@@ -332,6 +353,7 @@ export const articleBlocks = [
   PullQuoteBlock,
   InTheKnowBlock,
   HighlightCalloutBlock,
+  ReadMoreBlock,
   FAQBlock,
   AirbnbCardBlock,
   HotelCardBlock,

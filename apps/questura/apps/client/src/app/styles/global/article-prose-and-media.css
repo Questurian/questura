@@ -1,5 +1,16 @@
 /* ===== ARTICLE PROSE ===== */
 
+/* A single text run keeps the underline continuous through label and title. */
+.article-read-more {
+  font-size: 15px;
+  text-decoration-skip-ink: none;
+  text-decoration-thickness: 1px;
+}
+
+@media (min-width: 640px) {
+  .article-read-more { font-size: 16px; }
+}
+
 .article-prose p {
   font-family: var(--font-display);
   /* 17px on phones: 15px Playfair read a size small next to every other

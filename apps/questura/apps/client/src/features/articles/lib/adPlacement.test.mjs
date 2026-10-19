@@ -220,7 +220,7 @@ test('banner: false drops the opening slot but keeps the rest', () => {
 
 // --- editorial blocks -------------------------------------------------------
 
-const EDITORIAL = ['key-takeaway', 'pull-quote', 'in-the-know', 'highlight-callout', 'faq']
+const EDITORIAL = ['key-takeaway', 'pull-quote', 'in-the-know', 'highlight-callout', 'read-more', 'faq']
 
 test('no ad of either kind is ever placed above an editorial block', () => {
   for (const blockType of EDITORIAL) {
