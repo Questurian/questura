@@ -1,10 +1,19 @@
 /* ===== ARTICLE PROSE ===== */
 
+/* Keep editorial links at exactly the standard article's body size. */
+.article-prose,
+.article-read-more {
+  --article-body-font-size: 17px;
+}
+
+.article-prose p,
+.article-prose li,
+.article-read-more {
+  font-size: var(--article-body-font-size);
+}
+
 .article-prose p {
   font-family: var(--font-display);
-  /* 17px on phones: 15px Playfair read a size small next to every other
-     travel publication's phone body text (17-18px). */
-  font-size: 17px;
   line-height: 1.7;
   color: #1A1A1A;
   margin-bottom: 1rem;
@@ -44,7 +53,6 @@
 
 .article-prose li {
   font-family: var(--font-display);
-  font-size: 17px;
   line-height: 1.65;
   color: #1A1A1A;
   margin-bottom: 0.25rem;
@@ -66,8 +74,12 @@
 
 /* Larger reading sizes once the standard-article column has room */
 @media (min-width: 640px) {
+  .article-prose,
+  .article-read-more {
+    --article-body-font-size: 18px;
+  }
+
   .article-prose p {
-    font-size: 18px;
     line-height: 1.78;
   }
 
@@ -83,10 +95,6 @@
     line-height: 1.22;
     margin-top: 1.9rem;
     margin-bottom: 0.65rem;
-  }
-
-  .article-prose li {
-    font-size: 18px;
   }
 }
 
