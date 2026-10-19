@@ -19,9 +19,10 @@ export type GateState = {
   shown: number
   total: number
   /**
-   * Where each withheld stop of a locked itinerary sits on the map. Positions
-   * only; the server sends nothing else about a stop. Empty for everything
-   * that is not a locked itinerary.
+   * Roughly where each withheld stop of a locked itinerary or listicle sits,
+   * and its neighborhood. The server snaps the position to a grid about 650 m
+   * wide (freeSample.ts) and sends nothing else about a stop; the map teaser
+   * draws these. Empty for everything else.
    */
   mapPins: GateMapPin[]
   /**
@@ -32,7 +33,7 @@ export type GateState = {
   itemMoments: Array<string | null>
 }
 
-export type GateMapPin = { lat: number; lng: number }
+export type GateMapPin = { lat: number; lng: number; area: string | null }
 
 function readItemMoments(value: unknown): Array<string | null> {
   if (!Array.isArray(value)) return []
@@ -45,10 +46,10 @@ function readMapPins(value: unknown): GateMapPin[] {
   const pins: GateMapPin[] = []
   for (const entry of value) {
     if (!entry || typeof entry !== 'object') continue
-    const { lat, lng } = entry as { lat?: unknown; lng?: unknown }
+    const { lat, lng, area } = entry as { lat?: unknown; lng?: unknown; area?: unknown }
     if (typeof lat !== 'number' || typeof lng !== 'number') continue
     if (!Number.isFinite(lat) || !Number.isFinite(lng)) continue
-    pins.push({ lat, lng })
+    pins.push({ lat, lng, area: typeof area === 'string' && area !== '' ? area : null })
   }
   return pins
 }

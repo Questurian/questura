@@ -42,12 +42,12 @@ test('readGate: reads a locked listicle\'s moments, keeping their order and gaps
       unit: 'items',
       shown: 3,
       total: 5,
-      mapPins: [{ lat: 1, lng: 2 }],
+      mapPins: [{ lat: 1, lng: 2, area: 'Miraflores' }],
       itemMoments: ['rooftop', null, '', 7, 'late-night'],
     },
   })
   assert.deepEqual(gate?.itemMoments, ['rooftop', null, null, null, 'late-night'])
-  assert.deepEqual(gate?.mapPins, [{ lat: 1, lng: 2 }])
+  assert.deepEqual(gate?.mapPins, [{ lat: 1, lng: 2, area: 'Miraflores' }])
   assert.equal(gate?.unit, 'items')
 })
 
@@ -153,6 +153,7 @@ test('readGate: keeps a locked itinerary\'s stop positions and nothing malformed
       unit: 'days',
       mapPins: [
         { lat: -12.15, lng: -77.02, title: 'must not survive' },
+        { lat: -12.16, lng: -77.03, area: 'Barranco' },
         { lat: '-12.1', lng: -77 },
         { lat: Number.NaN, lng: -77 },
         null,
@@ -160,7 +161,10 @@ test('readGate: keeps a locked itinerary\'s stop positions and nothing malformed
     }),
   )
 
-  assert.deepEqual(gate.mapPins, [{ lat: -12.15, lng: -77.02 }])
+  assert.deepEqual(gate.mapPins, [
+    { lat: -12.15, lng: -77.02, area: null },
+    { lat: -12.16, lng: -77.03, area: 'Barranco' },
+  ])
 })
 
 test('readGate: an item with no pins reads as an empty list, not a missing key', () => {

@@ -16,6 +16,7 @@ import {
   listicleMapNavigationReducer,
 } from '@/features/articles/components/ListicleMapNavigation'
 import type { RenderableTourPick } from '@/features/articles/lib/listicleTourPicks'
+import type { ListicleMapAccess } from '@/features/articles/lib/mapAccess'
 import { DESKTOP_MAP_QUERY } from '@/features/articles/lib/useIsDesktopMap'
 
 /**
@@ -82,6 +83,8 @@ export type ListicleMapPoint = {
    * clickable and the stepper walks past it.
    */
   inert?: boolean
+  /** The neighborhood's name, when the server sent one (locked pins only, for the map teaser). */
+  area?: string | null
 }
 
 /**
@@ -97,6 +100,8 @@ export type ListicleMapDays = {
 type ListicleMapSyncValue = {
   days: ListicleMapDays | null
   points: ListicleMapPoint[]
+  /** Which map this reader gets: Google's, the drawn teaser, or plain paper (lib/mapAccess.ts). */
+  access: ListicleMapAccess
   activeId: string | null
   registerEntry: (id: string, el: HTMLElement | null) => void
   scrollToEntry: (id: string) => void
@@ -105,6 +110,7 @@ type ListicleMapSyncValue = {
 const ListicleMapSyncContext = createContext<ListicleMapSyncValue>({
   days: null,
   points: [],
+  access: 'open',
   activeId: null,
   registerEntry: () => {},
   scrollToEntry: () => {},
@@ -149,10 +155,12 @@ function entryInReadingBand(elementsById: Map<string, HTMLElement>): string | nu
 export function ListicleMapSyncProvider({
   points,
   days = null,
+  access = 'open',
   children,
 }: {
   points: ListicleMapPoint[]
   days?: ListicleMapDays | null
+  access?: ListicleMapAccess
   children: ReactNode
 }): JSX.Element {
   const [{ activeId }, dispatchNavigation] = useReducer(
@@ -346,8 +354,8 @@ export function ListicleMapSyncProvider({
   )
 
   const value = useMemo(
-    () => ({ days, points, activeId, registerEntry, scrollToEntry }),
-    [days, points, activeId, registerEntry, scrollToEntry],
+    () => ({ days, points, access, activeId, registerEntry, scrollToEntry }),
+    [days, points, access, activeId, registerEntry, scrollToEntry],
   )
 
   return <MapSyncProvider value={value}>{children}</MapSyncProvider>

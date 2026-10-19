@@ -1,6 +1,20 @@
 import { describe, expect, it } from 'vitest'
 
-import { DEFAULT_SAMPLE_LIMITS, applySampleRule } from './freeSample'
+import {
+  DEFAULT_SAMPLE_LIMITS,
+  PIN_GRID_DEGREES,
+  applySampleRule,
+  areaNameFromLocationKey,
+  type SamplePin,
+} from './freeSample'
+
+/** Within one grid cell of the real spot, and not on it. */
+function expectRoughly(pin: SamplePin | undefined, lat: number, lng: number) {
+  expect(pin).toBeDefined()
+  expect(Math.abs(pin!.lat - lat)).toBeLessThan(PIN_GRID_DEGREES)
+  expect(Math.abs(pin!.lng - lng)).toBeLessThan(PIN_GRID_DEGREES)
+  expect([pin!.lat, pin!.lng]).not.toEqual([lat, lng])
+}
 
 const text = (i: number) => ({ blockType: 'text', content: `para ${i}` })
 
@@ -151,11 +165,18 @@ describe('applySampleRule — listicle itineraries', () => {
     })
   })
 
-  it('lets each withheld stop through as a map position and nothing else', () => {
+  it('lets each withheld stop through as a rough position and its neighborhood, nothing else', () => {
     const stop = (title: string, latitude: number, longitude: number) => ({
       blockType: 'dining',
       blurb: `why ${title} is worth it`,
-      item: { title, latitude, longitude, address: `${title} street`, phone: '555' },
+      item: {
+        title,
+        latitude,
+        longitude,
+        location: 'peru|lima|barranco',
+        address: `${title} street`,
+        phone: '555',
+      },
     })
     const doc: Record<string, unknown> = {
       itineraryDays: [
@@ -169,11 +190,11 @@ describe('applySampleRule — listicle itineraries', () => {
 
     const outcome = applySampleRule('listicle-itineraries', doc)
 
-    expect(outcome.pins).toEqual([
-      { lat: -12.15, lng: -77.02 },
-      { lat: -12.149, lng: -77.021 },
-      { lat: -12.148, lng: -77.022 },
-    ])
+    expect(outcome.pins).toHaveLength(3)
+    expectRoughly(outcome.pins?.[0], -12.15, -77.02)
+    expectRoughly(outcome.pins?.[1], -12.149, -77.021)
+    expectRoughly(outcome.pins?.[2], -12.148, -77.022)
+    expect(outcome.pins?.map((pin) => pin.area)).toEqual(['Barranco', 'Barranco', 'Barranco'])
     // The pins are the only trace of the stops left anywhere on the document.
     expect(JSON.stringify({ doc, outcome })).not.toMatch(/Isolina|Canta Rana|Juanito|street|555|worth it/)
   })
@@ -194,7 +215,36 @@ describe('applySampleRule — listicle itineraries', () => {
       items: [{ blockType: 'dining', item: { latitude: -12.2, longitude: -77.1 } }],
     }
 
-    expect(applySampleRule('listicle-itineraries', doc).pins).toEqual([{ lat: -12.2, lng: -77.1 }])
+    const pins = applySampleRule('listicle-itineraries', doc).pins
+    expect(pins).toHaveLength(1)
+    expectRoughly(pins?.[0], -12.2, -77.1)
+    expect(pins?.[0]?.area).toBeNull()
+  })
+
+  it('draws the same rough pins every time, so cached and fresh pages agree', () => {
+    const build = () => ({
+      itineraryDays: [{ items: [{ blockType: 'dining', item: { latitude: -12.1234, longitude: -77.0321 } }] }],
+    })
+
+    expect(applySampleRule('listicle-itineraries', build()).pins).toEqual(
+      applySampleRule('listicle-itineraries', build()).pins,
+    )
+  })
+})
+
+describe('areaNameFromLocationKey', () => {
+  it('names the neighborhood at the end of a location key', () => {
+    expect(areaNameFromLocationKey('peru|lima|miraflores')).toBe('Miraflores')
+    expect(areaNameFromLocationKey('peru|lima|magdalena-del-mar')).toBe('Magdalena del Mar')
+    expect(areaNameFromLocationKey('peru|lima|san-juan-de-miraflores')).toBe('San Juan de Miraflores')
+    expect(areaNameFromLocationKey('peru|lima|lima-centro')).toBe('Lima Centro')
+  })
+
+  it('says nothing for a city, a country or no key', () => {
+    expect(areaNameFromLocationKey('peru|lima')).toBeNull()
+    expect(areaNameFromLocationKey('peru')).toBeNull()
+    expect(areaNameFromLocationKey(null)).toBeNull()
+    expect(areaNameFromLocationKey('peru|lima|')).toBeNull()
   })
 })
 
@@ -234,14 +284,18 @@ describe('applySampleRule — single-type listicles', () => {
     ])
   })
 
-  it('pins each withheld place by position only', () => {
+  it('pins each withheld place by rough position and neighborhood only', () => {
+    const withArea = place(3)
+    withArea.item = { ...withArea.item, location: 'peru|lima|magdalena-del-mar' } as typeof withArea.item
     const doc: Record<string, unknown> = {
-      items: [place(0), place(1), place(2), place(3), { blockType: 'data-dining', item: { title: 'No coordinates' } }],
+      items: [place(0), place(1), place(2), withArea, { blockType: 'data-dining', item: { title: 'No coordinates' } }],
     }
 
     const outcome = applySampleRule('single-type-listicles', doc, three)
 
-    expect(outcome.pins).toEqual([{ lat: -12.3, lng: -77.3 }])
+    expect(outcome.pins).toHaveLength(1)
+    expectRoughly(outcome.pins?.[0], -12.3, -77.3)
+    expect(outcome.pins?.[0]?.area).toBe('Magdalena del Mar')
     expect(JSON.stringify(outcome)).not.toContain('Place 3')
     expect(JSON.stringify(outcome)).not.toContain('No coordinates')
   })

@@ -14,6 +14,7 @@ import {
   venueRowFromBlock,
 } from '@/features/articles/lib/itineraryDays'
 import { mapPointPreviewFromRow } from '@/features/articles/lib/listicleMapPreview'
+import { mapAccessFor } from '@/features/articles/lib/mapAccess'
 import { GatedBodySkeleton, GatedLoadError } from '@/features/articles/components/GatedStates'
 import type { GateState } from '@/features/articles/lib/gate'
 import { useGatedFullArticle } from '@/features/articles/lib/useGatedFullArticle'
@@ -65,9 +66,10 @@ export function ItineraryArticleLayout({
   // The notice is up and the stay card is not rendered (see `paywalled` on the
   // page), so nothing on the page answers to a pin.
   const paywalled = Boolean(locked && gate) && (phase === 'identifying' || phase === 'anonymous')
-  // Stops the server withheld, as positions only. Dropped the moment the full
-  // body is in, because that body draws the same stops as real pins.
+  // Stops the server withheld, as rough positions only. Dropped the moment the
+  // full body is in, because that body draws the same stops as real pins.
   const lockedPins = locked && effectiveArticle === article ? gate?.mapPins : undefined
+  const access = mapAccessFor(locked, phase)
   const days = useMemo(() => itineraryDaysForArticle(effectiveArticle), [effectiveArticle])
   const [selectedDayIndex, setSelectedDayIndex] = useState(0)
   const dayIndex = Math.min(selectedDayIndex, Math.max(days.length - 1, 0))
@@ -125,6 +127,7 @@ export function ItineraryArticleLayout({
         lng: pin.lng,
         kind: 'stop',
         inert: true,
+        area: pin.area,
       })
     })
 
@@ -146,7 +149,7 @@ export function ItineraryArticleLayout({
   )
 
   return (
-    <ListicleMapSyncProvider points={points} days={mapDays}>
+    <ListicleMapSyncProvider points={points} days={mapDays} access={access}>
       <ListicleArticleLayout
         relatedArticles={relatedArticles}
         footerLinks={footerLinks}
