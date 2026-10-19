@@ -44,6 +44,17 @@ const PADDING = { top: 60, bottom: 290, left: 80, right: 80 }
 const MAPLIBRE = 'https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js'
 const STYLE = 'https://tiles.openfreemap.org/styles/positron'
 
+/**
+ * The neighborhoods a picture names, per city (owner's choice, 2026-10-19:
+ * "just the big ones"). Any other district label is dropped. A city not
+ * listed keeps every label.
+ */
+const BIG_PLACES = {
+  lima: ['Lima', 'Callao', 'Miraflores', 'Barranco', 'San Isidro', 'Magdalena', 'Magdalena del Mar', 'La Victoria', 'Pueblo Libre', 'Lince', 'San Miguel'],
+  medellin: ['Medellín', 'El Poblado', 'Laureles', 'Envigado', 'Belén', 'La América', 'Itagüí', 'Bello', 'Sabaneta'],
+  'mexico-city': ['Ciudad de México', 'Mexico City', 'Roma Norte', 'Roma Sur', 'Condesa', 'Hipódromo', 'Juárez', 'Polanco', 'Centro', 'Coyoacán', 'San Rafael', 'Escandón'],
+}
+
 async function getJson(url) {
   const response = await fetch(url)
   if (!response.ok) throw new Error(`${response.status} for ${url}`)
@@ -74,10 +85,11 @@ function pointsOf(article) {
   return points
 }
 
-async function render(page, points) {
-  return page.evaluate(
-    async ({ points, frame, padding, style }) => {
-      document.body.innerHTML = `<div id="m" style="width:${frame.width}px;height:${frame.height}px"></div>`
+async function render(page, points, labelNames) {
+  const drawn = await page.evaluate(
+    async ({ points, frame, padding, style, labelNames }) => {
+      document.body.innerHTML = `<div id="wrap" style="position:relative;width:${frame.width}px;height:${frame.height}px;overflow:hidden">
+        <div id="m" style="position:absolute;inset:0"></div><div id="labels" style="position:absolute;inset:0"></div></div>`
       const map = new maplibregl.Map({
         container: 'm',
         style,
@@ -87,27 +99,100 @@ async function render(page, points) {
         preserveDrawingBuffer: true,
       })
       await new Promise((resolve) => map.once('load', resolve))
+
+      // The map draws shapes only, in the site's Google colours: no text,
+      // so no highway shields, street names or small districts. The names
+      // that stay are written over it below, in Roboto like Google's.
+      let placeSource = null
+      for (const layer of map.getStyle().layers) {
+        const { id, type } = layer
+        const paint = (prop, value) => map.setPaintProperty(id, prop, value)
+        if (type === 'background') paint('background-color', '#f2f2f2')
+        else if (id === 'water') paint('fill-color', '#c9d7e4')
+        else if (id === 'park' || id === 'landcover_wood') paint('fill-color', '#d3ead2')
+        else if (id === 'building') paint('fill-color', '#e8e8ea')
+        // The members' map draws no district borders either.
+        if (type === 'line' && /boundary/.test(id)) map.setLayoutProperty(id, 'visibility', 'none')
+        if (type === 'symbol') {
+          if (layer['source-layer'] === 'place') placeSource = layer.source
+          map.setLayoutProperty(id, 'visibility', 'none')
+        }
+      }
+
       const bounds = points.reduce(
         (box, p) => box.extend([p.lng, p.lat]),
         new maplibregl.LngLatBounds([points[0].lng, points[0].lat], [points[0].lng, points[0].lat]),
       )
       map.fitBounds(bounds, { padding, duration: 0, maxZoom: 15 })
       await new Promise((resolve) => map.once('idle', resolve))
-      const canvas = map.getCanvas()
-      const small = document.createElement('canvas')
-      small.width = frame.width
-      small.height = frame.height
-      small.getContext('2d').drawImage(canvas, 0, 0, frame.width, frame.height)
+
+      // The big neighborhoods, where OpenStreetMap puts them, once each.
+      const wanted = new Set(labelNames)
+      const seen = new Set()
+      const labels = []
+      for (const feature of placeSource ? map.querySourceFeatures(placeSource, { sourceLayer: 'place' }) : []) {
+        const props = feature.properties ?? {}
+        const label = props.name_en || props.name
+        if (!label || seen.has(label) || !wanted.has(label)) continue
+        if (!['city', 'town', 'village', 'suburb', 'quarter', 'neighbourhood'].includes(props.class)) continue
+        const [lng, lat] = feature.geometry.coordinates
+        const at = map.project([lng, lat])
+        if (at.x < 20 || at.y < 14 || at.x > frame.width - 20 || at.y > frame.height - 14) continue
+        seen.add(label)
+        labels.push({ label, x: at.x, y: at.y, big: props.class === 'city' || props.class === 'town' })
+      }
+
+      // The site draws a marker on every place; a name under one moves just
+      // above or below it, whichever covers fewer markers.
+      const markers = points.map((p) => map.project([p.lng, p.lat]))
+      for (const entry of labels) {
+        const halfWidth = (entry.label.length * (entry.big ? 9.5 : 6.8)) / 2 + 8
+        const halfHeight = (entry.big ? 12 : 9) + 8
+        const covered = (y) => markers.filter((m) => Math.abs(m.x - entry.x) < halfWidth && Math.abs(m.y - y) < halfHeight).length
+        const shift = halfHeight + 4
+        entry.y = [entry.y, entry.y - shift, entry.y + shift].reduce((best, y) => (covered(y) < covered(best) ? y : best))
+      }
+      document.getElementById('labels').innerHTML = labels
+        .map(
+          ({ label, x, y, big }) =>
+            `<span style="position:absolute;left:${x}px;top:${y}px;transform:translate(-50%,-50%);white-space:nowrap;` +
+            `font-family:Roboto,Arial,sans-serif;font-weight:${big ? 500 : 400};font-size:${big ? 18 : 13}px;` +
+            `color:${big ? '#3c4043' : '#5f6368'};text-shadow:0 0 2px #fff,0 0 2px #fff,0 0 3px #fff,0 0 3px #fff">${label}</span>`,
+        )
+        .join('')
+      await document.fonts.load('500 18px Roboto')
+      await document.fonts.load('400 13px Roboto')
+      await document.fonts.ready
+
       const center = map.getCenter()
       return {
-        large: canvas.toDataURL('image/webp', 0.86),
-        small: small.toDataURL('image/webp', 0.86),
         center: [Number(center.lng.toFixed(6)), Number(center.lat.toFixed(6))],
         zoom: Number(map.getZoom().toFixed(4)),
+        labels: labels.map((l) => l.label),
       }
     },
-    { points, frame: FRAME, padding: PADDING, style: STYLE },
+    { points, frame: FRAME, padding: PADDING, style: STYLE, labelNames },
   )
+
+  // The map and its names together, at 2x, then as WebP at both sizes.
+  const png = (await page.locator('#wrap').screenshot({ type: 'png' })).toString('base64')
+  const encoded = await page.evaluate(
+    async ({ png, frame }) => {
+      const image = new Image()
+      image.src = `data:image/png;base64,${png}`
+      await image.decode()
+      const encode = (width, height) => {
+        const canvas = document.createElement('canvas')
+        canvas.width = width
+        canvas.height = height
+        canvas.getContext('2d').drawImage(image, 0, 0, width, height)
+        return canvas.toDataURL('image/webp', 0.86)
+      }
+      return { large: encode(frame.width * 2, frame.height * 2), small: encode(frame.width, frame.height) }
+    },
+    { png, frame: FRAME },
+  )
+  return { ...drawn, ...encoded }
 }
 
 const writeDataUrl = (path, dataUrl) => writeFileSync(path, Buffer.from(dataUrl.split(',')[1], 'base64'))
@@ -123,7 +208,14 @@ try {
 
 const browser = await chromium.launch({ channel: 'chrome' })
 const page = await browser.newPage({ viewport: FRAME, deviceScaleFactor: 2 })
-await page.setContent('<!doctype html><body style="margin:0"></body>')
+// A style the renderer rejects still "renders" -- as an empty background.
+page.on('console', (message) => {
+  if (message.type() === 'error' || message.type() === 'warning') console.error(`  page ${message.type()}: ${message.text().slice(0, 200)}`)
+})
+page.on('pageerror', (error) => console.error(`  page error: ${error.message.slice(0, 200)}`))
+await page.setContent(
+  '<!doctype html><head><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=block"></head><body style="margin:0"></body>',
+)
 await page.addScriptTag({ url: MAPLIBRE })
 
 for (const guide of await guides()) {
@@ -140,7 +232,9 @@ for (const guide of await guides()) {
     console.log(`skip ${key} (${guide.slug}): no places on the map`)
     continue
   }
-  const shot = await render(page, points)
+  // A city without a list names the guide's own neighborhoods.
+  const areas = (article.gate?.mapPins ?? []).map((pin) => pin.area).filter(Boolean)
+  const shot = await render(page, points, BIG_PLACES[guide.city ?? ''] ?? areas)
   const name = `${guide.type}-${article.id}`
   writeDataUrl(resolve(IMAGE_DIR, `${name}.webp`), shot.large)
   writeDataUrl(resolve(IMAGE_DIR, `${name}-782.webp`), shot.small)
@@ -152,7 +246,7 @@ for (const guide of await guides()) {
     center: shot.center,
     zoom: shot.zoom,
   }
-  console.log(`rendered ${key} (${guide.slug}): ${points.length} places, zoom ${shot.zoom}`)
+  console.log(`rendered ${key} (${guide.slug}): ${points.length} places, zoom ${shot.zoom}, names: ${shot.labels.join(', ') || 'none'}`)
 }
 
 await browser.close()
