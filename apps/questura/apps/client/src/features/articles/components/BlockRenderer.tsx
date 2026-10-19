@@ -1,3 +1,4 @@
+import { ReadMoreBlockRenderer } from './ReadMoreBlock'
 import { PublicImage } from '@/components/media/PublicImage'
 import {
   EditorialLabelRule,
@@ -273,6 +274,8 @@ export function BlockRenderer({ block }: { block: ContentBlock }) {
       return <InTheKnowBlockRenderer block={block} />
     case 'highlight-callout':
       return <HighlightCalloutBlockRenderer block={block} />
+    case 'read-more':
+      return <ReadMoreBlockRenderer block={block} />
     case 'faq':
       return <FaqBlockRenderer block={block} />
     case 'airbnb-card':

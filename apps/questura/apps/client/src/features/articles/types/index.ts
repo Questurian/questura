@@ -73,6 +73,13 @@ export type HighlightCalloutBlock = {
   text: string
 }
 
+export type ReadMoreBlock = {
+  id: string
+  blockType: 'read-more'
+  title: string
+  url: string
+}
+
 export type FaqItem = {
   id: string
   question: string
@@ -135,6 +142,7 @@ export type ContentBlock =
   | PullQuoteBlock
   | InTheKnowBlock
   | HighlightCalloutBlock
+  | ReadMoreBlock
   | FaqBlock
   | AirbnbCardBlock
   | HotelCardBlock
