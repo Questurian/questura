@@ -25,6 +25,19 @@ const PAPER_GRID = {
 const UNLOCK = 'Become a member to unlock'
 const HEADLINE = 'See every place on the map.'
 
+/** A map pin standing on rings that spread out from where it lands. */
+function PinMark({ className }: { className: string }) {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 48 48" className={`text-accent ${className}`}>
+      <ellipse cx="24" cy="40" rx="20" ry="6" fill="none" stroke="currentColor" strokeWidth="1.5" opacity="0.28" />
+      <ellipse cx="24" cy="40" rx="13" ry="4" fill="none" stroke="currentColor" strokeWidth="1.75" opacity="0.5" />
+      <ellipse cx="24" cy="40" rx="6.5" ry="2" fill="currentColor" opacity="0.7" />
+      <path d="M24 40C24 40 13 27.5 13 17.5a11 11 0 1 1 22 0C35 27.5 24 40 24 40Z" fill="currentColor" />
+      <circle cx="24" cy="17.5" r="4.2" className="fill-background" />
+    </svg>
+  )
+}
+
 /**
  * The way in, as plain as the paywall beside the list (owner decision,
  * 2026-10-19): no count of places -- a short list should not look short --
@@ -34,7 +47,8 @@ const HEADLINE = 'See every place on the map.'
 function JoinCall({ compact, href }: { compact: boolean; href: string }) {
   if (compact) {
     return (
-      <div className="absolute inset-x-2.5 bottom-2.5 z-[4] flex items-center gap-3 border border-foreground/10 bg-background px-3.5 py-2.5 text-foreground shadow-[0_12px_30px_-18px_rgb(26_26_26/0.5)]">
+      <div className="absolute inset-x-2.5 bottom-2.5 z-[4] flex items-center gap-2.5 border border-foreground/10 bg-background px-3.5 py-2.5 text-foreground shadow-[0_12px_30px_-18px_rgb(26_26_26/0.5)]">
+        <PinMark className="h-8 w-8 shrink-0" />
         <h2 className="min-w-0 flex-1 text-balance font-display text-[1rem] font-medium leading-tight">{HEADLINE}</h2>
         <Link
           href={href}
@@ -47,7 +61,8 @@ function JoinCall({ compact, href }: { compact: boolean; href: string }) {
   }
 
   return (
-    <div className="absolute bottom-10 left-1/2 z-[4] w-[min(400px,calc(100%-40px))] -translate-x-1/2 border border-foreground/10 bg-background px-7 pb-5 pt-6 text-center text-foreground shadow-[0_18px_44px_-24px_rgb(26_26_26/0.45)]">
+    <div className="absolute bottom-10 left-1/2 z-[4] w-[min(400px,calc(100%-40px))] -translate-x-1/2 border border-foreground/10 bg-background px-7 pb-5 pt-5 text-center text-foreground shadow-[0_18px_44px_-24px_rgb(26_26_26/0.45)]">
+      <PinMark className="mx-auto mb-2.5 h-12 w-12" />
       <h2 className="text-balance font-display text-[1.5rem] font-medium leading-[1.15] tracking-[-0.015em]">{HEADLINE}</h2>
       <Link
         href={href}
