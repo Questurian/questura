@@ -18,14 +18,15 @@ import type { ArticleCollectionSlug } from './serializeArticleBlocks'
  *   carries standalone value and is a reason to subscribe on its own.
  * - An itinerary never shows a day. Only its top-level lodging section
  *   survives; the day-by-day plan is the product. The one thing let through
- *   about the withheld stops is where each sits on the map (owner decision,
- *   2026-10-06): a locked itinerary whose map showed only the hotel read as an
- *   empty one. Coordinates only -- no name, photo, text or day.
+ *   about the withheld stops is roughly where each sits on the map (owner
+ *   decision, 2026-10-06): a locked itinerary whose map showed only the hotel
+ *   read as an empty one. A rough position and the neighborhood's name only
+ *   (2026-10-19, see `SamplePin`) -- no name, photo, text or day.
  * - A single-type listicle shows none of its places for now: header and
  *   intro only (owner decision, 2026-10-15, replacing the 2026-08-15 rule
  *   that left them ungated for ads). The owner may open the first place or
  *   two later; `listicleItems` is the one number to change.
- *   As with itineraries, each withheld place keeps only its map position, and
+ *   As with itineraries, each withheld place keeps only its rough position, and
  *   the moment each place sits under, so a member's full list can be headed
  *   by the server-rendered moment headings. Its stored JSON-LD is dropped
  *   whole: it is an ItemList naming every place.
@@ -61,8 +62,49 @@ export const DEFAULT_SAMPLE_LIMITS: SampleLimits = {
  */
 const SAMPLEABLE_ARTICLE_BLOCKS = new Set(['text'])
 
-/** Where a withheld itinerary stop sits on the map, and nothing else about it. */
-export type SamplePin = { lat: number; lng: number }
+/**
+ * Roughly where a withheld stop sits, and the neighborhood it is in. Never its
+ * real spot (owner decision, 2026-10-19): non-members see a drawn map teaser,
+ * not a Google map, and the exact coordinates of paid places were readable in
+ * every locked page's payload. The position is snapped to a grid about 650 m
+ * wide and nudged, so the teaser can show the shape of the list without giving
+ * away a door anyone could walk to.
+ */
+export type SamplePin = { lat: number; lng: number; area: string | null }
+
+/** One grid cell: about 650 m of latitude, a little less of longitude. */
+export const PIN_GRID_DEGREES = 0.006
+
+/**
+ * A fixed nudge of under a third of a cell, so rough pins do not sit in rows
+ * along the grid. Derived from the pin's place in the list, so a cached page
+ * and a fresh one draw the same map.
+ */
+function roughCoordinate(value: number, salt: number): number {
+  const snapped = Math.round(value / PIN_GRID_DEGREES) * PIN_GRID_DEGREES
+  const nudge = (((salt * 7919) % 97) / 97 - 0.5) * PIN_GRID_DEGREES * 0.6
+  return Math.round((snapped + nudge) * 1e5) / 1e5
+}
+
+const LOWERCASE_PARTICLES = new Set(['de', 'del', 'la', 'las', 'los', 'el', 'y'])
+
+/**
+ * `peru|lima|magdalena-del-mar` -> `Magdalena del Mar`. Null unless the key
+ * names a neighborhood (country|city|neighborhood): a city alone says nothing
+ * the page header does not.
+ */
+export function areaNameFromLocationKey(key: unknown): string | null {
+  if (typeof key !== 'string') return null
+  const parts = key.split('|')
+  if (parts.length < 3) return null
+  const words = (parts[parts.length - 1] ?? '').split('-').filter(Boolean)
+  if (words.length === 0) return null
+  return words
+    .map((word, index) =>
+      index > 0 && LOWERCASE_PARTICLES.has(word) ? word : word.charAt(0).toUpperCase() + word.slice(1),
+    )
+    .join(' ')
+}
 
 export type SampleOutcome = {
   /** Whether anything was actually removed. */
@@ -71,7 +113,7 @@ export type SampleOutcome = {
   unit: SampleUnit
   shown: number
   total: number
-  /** Itineraries and listicles: one pin per withheld stop that has coordinates. */
+  /** Itineraries and listicles: one rough pin per withheld stop that has coordinates. */
   pins?: SamplePin[]
   /**
    * Listicles only: the moment of every place in the full list, in order, or
@@ -231,7 +273,7 @@ function sampleListicle(doc: Record<string, unknown>, limits: SampleLimits): Sam
     unit: 'items',
     shown: kept.length,
     total: items.length,
-    pins: pinsForStops(withheld),
+    pins: roughPins(exactPinsForStops(withheld)),
     itemMoments: items.map(momentOf),
   }
 }
@@ -260,9 +302,10 @@ function sampleArticle(doc: Record<string, unknown>, limits: SampleLimits): Samp
 
 /**
  * Built field by field rather than by deleting keys from the stop, so a field
- * added to a venue later cannot ride out with the pin.
+ * added to a venue later cannot ride out with the pin. Exact here; nothing
+ * leaves this module until `roughPins` has blurred it.
  */
-function pinsForStops(stops: unknown[]): SamplePin[] {
+function exactPinsForStops(stops: unknown[]): SamplePin[] {
   const pins: SamplePin[] = []
 
   for (const stop of stops) {
@@ -270,14 +313,26 @@ function pinsForStops(stops: unknown[]): SamplePin[] {
     const item = (stop as { item?: unknown }).item
     if (!item || typeof item !== 'object') continue
 
-    const { latitude, longitude } = item as { latitude?: unknown; longitude?: unknown }
+    const { latitude, longitude, location } = item as {
+      latitude?: unknown
+      longitude?: unknown
+      location?: unknown
+    }
     if (typeof latitude !== 'number' || typeof longitude !== 'number') continue
     if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) continue
 
-    pins.push({ lat: latitude, lng: longitude })
+    pins.push({ lat: latitude, lng: longitude, area: areaNameFromLocationKey(location) })
   }
 
   return pins
+}
+
+function roughPins(pins: SamplePin[]): SamplePin[] {
+  return pins.map((pin, index) => ({
+    lat: roughCoordinate(pin.lat, index + 1),
+    lng: roughCoordinate(pin.lng, index + 41),
+    area: pin.area,
+  }))
 }
 
 function sampleItinerary(doc: Record<string, unknown>): SampleOutcome {
@@ -286,14 +341,14 @@ function sampleItinerary(doc: Record<string, unknown>): SampleOutcome {
 
   // Read before the days are emptied below. Day lodging is not pinned: it is
   // withheld with its day, and the surviving top-level lodging has its own pin.
-  const pins = [
+  const pins = roughPins([
     ...days.flatMap((day) =>
       day && typeof day === 'object'
-        ? pinsForStops(asArray((day as { items?: unknown }).items) ?? [])
+        ? exactPinsForStops(asArray((day as { items?: unknown }).items) ?? [])
         : [],
     ),
-    ...pinsForStops(legacyItems),
-  ]
+    ...exactPinsForStops(legacyItems),
+  ])
 
   // Every day goes, including each day's own lodging -- per-day lodging lives
   // inside the day rows, and the policy is that no day survives. Only the

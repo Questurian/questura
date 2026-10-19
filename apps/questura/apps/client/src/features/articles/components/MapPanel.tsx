@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import dynamic from 'next/dynamic'
 import { setOptions, importLibrary } from '@googlemaps/js-api-loader'
 import { ListicleMapDayMenu } from '@/features/articles/components/ListicleMapDayMenu'
 import {
@@ -277,7 +278,36 @@ export type MapPanelProps = {
   gestureHandling?: google.maps.MapOptions['gestureHandling']
 }
 
-export function MapPanel({
+/**
+ * The drawn stand-in for non-members (lib/mapAccess.ts). Its own chunk: the
+ * maps and itinerary pages are over the first-load JavaScript cap
+ * (perf/budgets.json), and a member never needs this code.
+ */
+const MapTeaser = dynamic(
+  () => import('@/features/articles/components/MapTeaser').then((module) => module.MapTeaser),
+  { ssr: false, loading: () => <MapWaiting /> },
+)
+
+/** Plain paper, while it is not yet known which map this reader gets. */
+function MapWaiting() {
+  return <div aria-hidden="true" className="h-full w-full bg-paper" />
+}
+
+/**
+ * The guide's map. Only a reader who gets it sees Google's: a known
+ * non-member gets the drawn teaser, and nobody loads a billed map before the
+ * page knows who is reading.
+ */
+export function MapPanel(props: MapPanelProps = {}) {
+  const { access } = useListicleMapSync()
+  if (access === 'teaser') {
+    return <MapTeaser insetBottomPx={props.viewportInsetBottomPx} />
+  }
+  if (access === 'waiting') return <MapWaiting />
+  return <GoogleMapPanel {...props} />
+}
+
+function GoogleMapPanel({
   viewportInsetBottomPx = 0,
   paused = false,
   activeZoom = ACTIVE_ZOOM,
@@ -285,7 +315,7 @@ export function MapPanel({
   guides,
   showArticleControls = true,
   gestureHandling = 'auto',
-}: MapPanelProps = {}) {
+}: MapPanelProps) {
   const mapRef = useRef<HTMLDivElement>(null)
   const { points, activeId, scrollToEntry } = useListicleMapSync()
   // Withheld places arrive as inert pins, so any inert pin means the reader is

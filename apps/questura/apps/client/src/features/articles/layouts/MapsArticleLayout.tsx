@@ -11,6 +11,7 @@ import { GatedBodySkeleton, GatedLoadError } from '@/features/articles/component
 import { ListicleArticleLayout } from '@/features/articles/layouts/ListicleArticleLayout'
 import type { GateState } from '@/features/articles/lib/gate'
 import { mapPointPreviewFromRow } from '@/features/articles/lib/listicleMapPreview'
+import { mapAccessFor } from '@/features/articles/lib/mapAccess'
 import { useGatedFullArticle } from '@/features/articles/lib/useGatedFullArticle'
 import type { ListicleFooterLinks } from '@/features/articles/lib/fetchListicleFooterLinks'
 import type { RelatedMapsArticleTeaser } from '@/features/articles/lib/fetchRelatedMapsArticles'
@@ -59,9 +60,10 @@ export function MapsArticleLayout({
 
   const effectiveArticle = locked && phase === 'ready' && data ? data : article
   const paywalled = Boolean(locked && gate) && (phase === 'identifying' || phase === 'anonymous')
-  // Places the server withheld, as positions only. Dropped the moment the full
-  // list is in, because that list draws the same places as real pins.
+  // Places the server withheld, as rough positions only. Dropped the moment the
+  // full list is in, because that list draws the same places as real pins.
   const lockedPins = locked && effectiveArticle === article ? gate?.mapPins : undefined
+  const access = mapAccessFor(locked, phase)
 
   const points = useMemo(() => {
     const rows = effectiveArticle.items ?? []
@@ -89,6 +91,7 @@ export function MapsArticleLayout({
         lat: pin.lat,
         lng: pin.lng,
         inert: true,
+        area: pin.area,
       })
     })
 
@@ -96,7 +99,7 @@ export function MapsArticleLayout({
   }, [effectiveArticle, lockedPins])
 
   return (
-    <ListicleMapSyncProvider points={points}>
+    <ListicleMapSyncProvider points={points} access={access} teaserKey={`maps:${article.id}`}>
       <ListicleArticleLayout
         format="maps"
         relatedArticles={relatedArticles}

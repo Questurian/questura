@@ -85,14 +85,19 @@ describe('gatePublicArticle', () => {
 
     const state = gatePublicArticle('single-type-listicles', doc)
 
-    expect(state).toEqual({
+    expect(state).toMatchObject({
       access: 'member',
       locked: true,
       unit: 'items',
       shown: 0,
       total: 5,
-      mapPins: [0, 1, 2, 3, 4].map((n) => ({ lat: n, lng: n })),
       itemMoments: [null, null, null, null, 'late-night'],
+    })
+    // One rough pin per place, near its spot and never on it (freeSample.test.ts).
+    expect(state?.mapPins).toHaveLength(5)
+    state?.mapPins?.forEach((pin, n) => {
+      expect(Math.abs(pin.lat - n)).toBeLessThan(0.006)
+      expect(Math.abs(pin.lng - n)).toBeLessThan(0.006)
     })
     expect(doc.items).toEqual([])
   })
