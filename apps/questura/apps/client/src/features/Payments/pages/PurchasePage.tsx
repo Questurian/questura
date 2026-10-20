@@ -92,8 +92,13 @@ export default function PurchasePage({
               </h1>
             </div>
 
-            <div className="bg-[#f7f6f2] border border-[#d7d4ce] rounded-sm p-6 480:p-8">
-              <div className="bg-white border border-[#e5e2dc] rounded-sm p-4 mb-6">
+            {/*
+              One ground: the card is the page colour, drawn by a hairline, and
+              the plan summary is the only tinted surface (--paper). The inputs
+              already sit on --background, so nothing reads as a third white.
+            */}
+            <div className="bg-background border border-foreground/15 rounded-[3px] p-6 480:p-8">
+              <div className="bg-paper rounded-[3px] p-4 mb-6">
                 <h2 className="font-display text-[1.1rem] text-[#1A1A1A] mb-1">
                   {planName}
                 </h2>
@@ -138,7 +143,7 @@ export default function PurchasePage({
                     Complete Your Payment
                   </h3>
 
-                  <div className="bg-white border border-[#e5e2dc] rounded-sm p-4 mb-6">
+                  <div className="bg-paper rounded-[3px] p-4 mb-6">
                     <h4 className="text-[0.84rem] font-medium text-[#1A1A1A] mb-1">Account Details</h4>
                     <p className="text-[0.88rem] text-[#6b6a68]">
                       <span className="font-medium text-[#4f4e4b]">Email:</span> {user?.email}
@@ -207,7 +212,7 @@ export default function PurchasePage({
                 </div>
               )}
 
-              <div className="mt-8 pt-5 border-t border-[#e5e2dc]">
+              <div className="mt-8 pt-5 border-t border-foreground/12">
                 <p className="text-center text-[0.78rem] text-[#9a9894]">
                   Secure payment powered by Stripe
                 </p>

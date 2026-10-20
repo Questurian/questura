@@ -56,8 +56,10 @@ export function SectionPhotoStack({
     }
   }, [photos.length])
 
+  // `isolate` keeps the prints' and the words' z-indexes inside the pile, so
+  // the navbar and the menu panel stay above them.
   return (
-    <div className="relative">
+    <div className="relative isolate">
       <div aria-hidden="true" className="relative aspect-[4/3] 768:aspect-[2/1] 1024:aspect-[5/2]">
         {photos.map((src, index) => {
           const depth = (index - top + photos.length) % photos.length

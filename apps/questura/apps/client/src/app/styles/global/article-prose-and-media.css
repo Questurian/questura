@@ -760,6 +760,17 @@
   }
 }
 
+/*
+ * A locked article shows a short sample and the join notice, so the rail has
+ * almost nothing to follow: it stays where it starts. The notice (`.paywalled`)
+ * is swapped out once a member's full body loads, and the rail pins again.
+ */
+@media (min-width: 1024px) {
+  [data-article-layout='standard']:has(.paywalled) [data-rail-pin] {
+    position: static;
+  }
+}
+
 @media print {
   [data-article-sidebar],
   [data-article-share] {
