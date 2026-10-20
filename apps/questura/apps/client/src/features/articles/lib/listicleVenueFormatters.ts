@@ -85,6 +85,15 @@ function stripVenueNamePrefix(address: string, venueTitle?: string): string {
   return normalizedAddress
 }
 
+/**
+ * The street address a venue's stored Google Maps link carries, or `null`.
+ *
+ * The `address` field holds a link, not an address: Location Manager writes
+ * `…/maps/search/?api=1&query=<Name>, <Address>` and the address is read back
+ * out of it here. Links in any other shape (a `maps.app.goo.gl` share link, a
+ * `?cid=` link, a `place_id:` query, a query that is itself a link) carry no
+ * address, and `null` says so; the caller must never print the link instead.
+ */
 export function formatListicleAddressLabel(
   address?: string,
   venueTitle?: string,
@@ -95,7 +104,7 @@ export function formatListicleAddressLabel(
   }
 
   if (!isHttpUrl(raw)) {
-    return normalizeAddressText(raw)
+    return readableAddress(normalizeAddressText(raw), venueTitle)
   }
 
   try {
@@ -107,14 +116,17 @@ export function formatListicleAddressLabel(
       url.searchParams.get('daddr')
 
     if (candidate) {
-      return stripVenueNamePrefix(candidate, venueTitle)
+      return readableAddress(stripVenueNamePrefix(candidate, venueTitle), venueTitle)
     }
 
     if (url.pathname.includes('/maps/place/')) {
       const placeSegment = url.pathname.split('/maps/place/')[1]?.split('/')[0]
       if (placeSegment) {
-        return stripVenueNamePrefix(
-          decodeURIComponent(placeSegment.replace(/\+/g, ' ')),
+        return readableAddress(
+          stripVenueNamePrefix(
+            decodeURIComponent(placeSegment.replace(/\+/g, ' ')),
+            venueTitle,
+          ),
           venueTitle,
         )
       }
@@ -125,6 +137,19 @@ export function formatListicleAddressLabel(
 
   return null
 }
+
+/** Drops a "label" that is a link, a Place ID, or only the venue's own name. */
+function readableAddress(label: string, venueTitle?: string): string | null {
+  if (!label) return null
+  if (/https?:\/\/|www\.|goo\.gl\//i.test(label)) return null
+  if (/^place_id:/i.test(label)) return null
+  const title = normalizeComparableText(venueTitle ?? '')
+  if (title && normalizeComparableText(label) === title) return null
+  return label
+}
+
+/** What the address link says when the stored link holds no readable address. */
+export const LISTICLE_MAP_LINK_LABEL = 'View on Google Maps'
 
 export function formatListiclePhone(
   countryCode?: string | null,

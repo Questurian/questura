@@ -12,6 +12,7 @@ import {
   formatListicleAddressLabel,
   formatListiclePhone,
   isHttpUrl,
+  LISTICLE_MAP_LINK_LABEL,
   normalizeWebsiteUrl,
   parseListicleOperationHoursRows,
 } from '@/features/articles/lib/listicleVenueFormatters'
@@ -43,7 +44,11 @@ export function ListicleVenueInfoGrid({
 }): JSX.Element | null {
   const phoneDisplay = formatListiclePhone(item.countryCode, item.phoneNumber)
   const addressRaw = typeof item.address === 'string' ? item.address.trim() : ''
-  const addressLabel = formatListicleAddressLabel(addressRaw, item.title)
+  // A stored link with no readable address is shown as a link label, never as
+  // the raw URL.
+  const addressLabel =
+    formatListicleAddressLabel(addressRaw, item.title) ??
+    (isHttpUrl(addressRaw) ? LISTICLE_MAP_LINK_LABEL : null)
   const hoursRows = parseListicleOperationHoursRows(item.operationHours)
   const websiteRaw = typeof item.website === 'string' ? item.website.trim() : ''
   const menuRaw = typeof item.menuUrl === 'string' ? item.menuUrl.trim() : ''
