@@ -21,8 +21,8 @@ export type MapSnapshot = {
 
 /**
  * A guide's pictures: the wide one, which phones crop, and the tall one for a
- * locked guide's desktop column (ListicleArticleLayout), drawn at the same
- * zoom with more map above and below.
+ * locked guide's desktop column (ListicleArticleLayout), with more map above
+ * and below and its places drawn a little closer.
  */
 export type MapSnapshotEntry = MapSnapshot & { tall?: MapSnapshot }
 
