@@ -1,14 +1,23 @@
 'use client'
 
-import { ArticleBlockStream } from '@/features/articles/components/ArticleBlockStream'
 import { GatedBodySkeleton, GatedLoadError } from '@/features/articles/components/GatedStates'
 import { PaywallNotice } from '@/features/articles/components/PaywallNotice'
-import { planArticleAds } from '@/features/articles/lib/adPlacement'
-import { ADS_ENABLED } from '@/features/articles/lib/ads'
 import type { GateState } from '@/features/articles/lib/gate'
 import { useGatedFullArticle } from '@/features/articles/lib/useGatedFullArticle'
 import type { ContentBlock } from '@/features/articles/types'
-import type { ReactNode } from 'react'
+import { lazy, Suspense, useEffect, type ReactNode } from 'react'
+
+/**
+ * The member's body and everything that draws it: every block renderer, the
+ * ad plan, the stay boxes. Its own chunk, because the article routes sit at
+ * the first-load JavaScript cap (perf/budgets.json) and only a member who
+ * opens a locked article needs that code in the browser. It starts loading as
+ * soon as the reader is known to be a member, alongside the body itself.
+ */
+const loadMemberBody = () => import('@/features/articles/components/MemberArticleBody')
+const MemberArticleBody = lazy(() =>
+  loadMemberBody().then((module) => ({ default: module.MemberArticleBody })),
+)
 
 type GatedArticleBodyProps = {
   articleId: number
@@ -43,6 +52,10 @@ export function GatedArticleBody({ articleId, gate, path, lang, sample }: GatedA
     enabled: true,
     lang,
   })
+
+  useEffect(() => {
+    if (phase === 'loading') void loadMemberBody()
+  }, [phase])
 
   // The notice is what the server renders and what the browser renders first,
   // so the two agree and hydration is stable. A member sees it briefly before
@@ -87,7 +100,17 @@ export function GatedArticleBody({ articleId, gate, path, lang, sample }: GatedA
     )
   }
 
-  // A member reads no seam, so the plan is the whole body's, as on a free article.
-  const adPlan = planArticleAds(data.contentBlocks, { enabled: ADS_ENABLED })
-  return <ArticleBlockStream blocks={data.contentBlocks} plan={adPlan} />
+  // Until its code is in, the member sees what the loading phase showed.
+  return (
+    <Suspense
+      fallback={
+        <>
+          {sample}
+          <GatedBodySkeleton />
+        </>
+      }
+    >
+      <MemberArticleBody blocks={data.contentBlocks} />
+    </Suspense>
+  )
 }
