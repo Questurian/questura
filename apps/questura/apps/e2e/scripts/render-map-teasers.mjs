@@ -18,6 +18,8 @@
  * box, `tall` for a locked guide's desktop column, which runs the height of
  * the article beside it. The page uses whichever needs less zooming.
  *
+ * On GitHub: Actions → Map teasers → Run workflow (.github/workflows/map-teasers.yml).
+ *
  * Usage (from apps/questura/apps/e2e), with the API that serves the guides:
  *   node scripts/render-map-teasers.mjs [api-base]        # default https://api.questurian.com
  *   node scripts/render-map-teasers.mjs http://localhost:4000 --only maps:16
@@ -229,7 +231,9 @@ try {
   manifest = {}
 }
 
-const browser = await chromium.launch({ channel: 'chrome' })
+// MapLibre needs WebGL; a machine with no GPU (GitHub's runners,
+// .github/workflows/map-teasers.yml) gets it from Chrome's software renderer.
+const browser = await chromium.launch({ channel: 'chrome', args: ['--enable-unsafe-swiftshader'] })
 const page = await browser.newPage({ viewport: FRAMES.wide, deviceScaleFactor: 2 })
 // A style the renderer rejects still "renders" -- as an empty background.
 page.on('console', (message) => {
