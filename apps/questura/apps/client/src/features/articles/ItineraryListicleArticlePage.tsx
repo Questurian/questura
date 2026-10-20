@@ -381,7 +381,9 @@ export function ItineraryListicleArticlePage({
           </div>
         ) : null}
 
-        <NewsletterArticleBand className="mt-14 480:mt-16 sm:mt-20" />
+        {/* Locked at desktop, the column ends with the notice, level with the
+            map beside it (ListicleArticleLayout). */}
+        <NewsletterArticleBand className={`mt-14 480:mt-16 sm:mt-20${paywalled ? " 1024:hidden" : ""}`} />
       </div>
     </article>
   );

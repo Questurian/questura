@@ -152,7 +152,9 @@ export function MapsListicleArticlePage({
         </div>
       )}
 
-      <div className="px-3 pt-14 pb-12 380:px-4 480:px-5 480:pt-16 550:px-6 sm:px-8 sm:pt-20">
+      {/* Locked at desktop, the column ends with the notice, level with the
+          map beside it (ListicleArticleLayout). */}
+      <div className={`px-3 pt-14 pb-12 380:px-4 480:px-5 480:pt-16 550:px-6 sm:px-8 sm:pt-20${paywalled ? ' 1024:hidden' : ''}`}>
         <NewsletterArticleBand />
       </div>
     </article>

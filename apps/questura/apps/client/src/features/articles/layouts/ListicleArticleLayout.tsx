@@ -100,9 +100,13 @@ export function ListicleArticleLayout({
               className="maps-map-divider hidden 1024:block 1024:absolute 1024:top-[25px] 1024:bottom-0 1024:z-20 1024:w-px 1024:pointer-events-none"
             />
           )}
+          {/* A non-member's map is a picture they cannot use, so it does not
+              stay pinned while the prose moves: it runs the height of the
+              article beside it, and the two end level and leave together. */}
           {showMapColumn && (
             <div
-              className="maps-map-column hidden 1024:flex 1024:flex-col 1024:sticky 1024:self-start"
+              data-map-locked={shelfLocked ? '' : undefined}
+              className={`maps-map-column hidden 1024:flex 1024:flex-col ${shelfLocked ? '' : '1024:sticky 1024:self-start'}`}
             >
               <div className="flex-1 min-h-0">
                 {/* No guides menu here: the shelf under this map already shows
