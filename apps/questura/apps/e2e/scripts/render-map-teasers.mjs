@@ -18,6 +18,8 @@
  * box, `tall` for a locked guide's desktop column, which runs the height of
  * the article beside it. The page uses whichever needs less zooming.
  *
+ * On GitHub: Actions → Map teasers → Run workflow (.github/workflows/map-teasers.yml).
+ *
  * Usage (from apps/questura/apps/e2e), with the API that serves the guides:
  *   node scripts/render-map-teasers.mjs [api-base]        # default https://api.questurian.com
  *   node scripts/render-map-teasers.mjs http://localhost:4000 --only maps:16
@@ -48,15 +50,17 @@ const only = args.includes('--only') ? args[args.indexOf('--only') + 1] : null
  *
  * - `wide`: the pinned desktop map's size. Phones crop it. Places stay above
  *   the join card, which covers the lower part.
- * - `tall`: a locked guide's desktop column (ListicleArticleLayout). Its
- *   places sit in a strip as high as the wide picture's, so both draw them at
- *   the same zoom, with map above and below for the page to slide the picture
- *   on: it puts the places above the join card (MapTeaser). The side margin is
- *   wider because a narrow desktop column crops the sides.
+ * - `tall`: a locked guide's desktop column (ListicleArticleLayout), with map
+ *   above and below for the page to slide the picture on: it puts the places
+ *   above the join card (MapTeaser). Its places' strip is 420 px high, not the
+ *   wide picture's 340, so a guide spread north to south fills more of the
+ *   column (owner, 2026-10-20: "a little bit too zoomed out"); 420 still sits
+ *   above the card in a column down to 780 px. The side margin is wider
+ *   because a narrow desktop column crops the sides.
  */
 const FRAMES = {
   wide: { width: 782, height: 690, suffix: '', padding: { top: 60, bottom: 290, left: 80, right: 80 } },
-  tall: { width: 782, height: 1400, suffix: '-tall', padding: { top: 450, bottom: 610, left: 110, right: 110 } },
+  tall: { width: 782, height: 1400, suffix: '-tall', padding: { top: 410, bottom: 570, left: 110, right: 110 } },
 }
 const frameNames = args.includes('--frame') ? [args[args.indexOf('--frame') + 1]] : Object.keys(FRAMES)
 for (const name of frameNames) if (!FRAMES[name]) throw new Error(`--frame must be one of: ${Object.keys(FRAMES).join(', ')}`)
@@ -227,7 +231,9 @@ try {
   manifest = {}
 }
 
-const browser = await chromium.launch({ channel: 'chrome' })
+// MapLibre needs WebGL; a machine with no GPU (GitHub's runners,
+// .github/workflows/map-teasers.yml) gets it from Chrome's software renderer.
+const browser = await chromium.launch({ channel: 'chrome', args: ['--enable-unsafe-swiftshader'] })
 const page = await browser.newPage({ viewport: FRAMES.wide, deviceScaleFactor: 2 })
 // A style the renderer rejects still "renders" -- as an empty background.
 page.on('console', (message) => {

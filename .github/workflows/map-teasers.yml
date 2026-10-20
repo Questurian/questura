@@ -1,0 +1,67 @@
+name: Map teasers
+
+# Redraws the saved map pictures non-members see on a locked guide or
+# itinerary (apps/e2e/scripts/render-map-teasers.mjs). It needs only the public
+# API and free map tiles, so it holds no secrets.
+#
+# Runs on a PR that changes the renderer, and on demand ("Run workflow", with
+# an optional --frame). The pictures come back as the `map-teasers` artifact:
+# unzip it over apps/questura/apps/client and commit, so the PR's own CI checks
+# what ships.
+
+on:
+  pull_request:
+    paths:
+      - apps/questura/apps/e2e/scripts/render-map-teasers.mjs
+      - .github/workflows/map-teasers.yml
+  workflow_dispatch:
+    inputs:
+      frame:
+        description: Draw one picture per guide only (wide or tall); empty draws both
+        type: string
+        default: ''
+
+concurrency:
+  group: map-teasers-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  NODE_VERSION: '22'
+
+jobs:
+  render:
+    name: Render map teasers
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --filter @questura/e2e
+
+      # The script launches the runner's own Google Chrome (channel: 'chrome').
+      - name: Render
+        working-directory: apps/questura/apps/e2e
+        env:
+          FRAME: ${{ inputs.frame }}
+        run: node scripts/render-map-teasers.mjs ${FRAME:+--frame "$FRAME"}
+
+      - name: What changed
+        run: git status --short apps/questura/apps/client
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: map-teasers
+          path: |
+            apps/questura/apps/client/public/images/map-teasers/
+            apps/questura/apps/client/src/features/articles/data/mapTeasers.json
+          retention-days: 7
