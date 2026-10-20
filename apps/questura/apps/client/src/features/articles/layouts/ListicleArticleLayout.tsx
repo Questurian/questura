@@ -6,7 +6,6 @@ import { LISTICLE_MAP_PILL_CLEARANCE } from '@/features/articles/components/List
 import { ListicleArticleFooter } from '@/features/articles/components/ListicleArticleFooter'
 import { useListicleMapSync } from '@/features/articles/components/ListicleMapSync'
 import { MapPanel } from '@/features/articles/components/MapPanel'
-import { PaywallFade } from '@/features/articles/components/PaywallFade'
 import { RelatedListicleShelf } from '@/features/articles/components/RelatedListicleShelf'
 import type { ListicleFooterLinks } from '@/features/articles/lib/fetchListicleFooterLinks'
 import type { RelatedMapsArticleTeaser } from '@/features/articles/lib/fetchRelatedMapsArticles'
@@ -60,8 +59,8 @@ export function ListicleArticleLayout({
   // Only the sheet takes guides: desktop reaches the same links through the
   // shelf under the map column and the section at the foot of the article.
   const guides = { articles: relatedArticles, country, city }
-  // A non-member's shelf is locked like the prose beside it: on show, faded
-  // into the page and out of reach. Their guides are locked too.
+  // A non-member's shelf is locked like the prose beside it: whited out into
+  // the page and out of reach. Their guides are locked too.
   const { access } = useListicleMapSync()
   const shelfLocked = access === 'teaser'
 
@@ -121,7 +120,11 @@ export function ListicleArticleLayout({
                     country={country}
                     city={city}
                   />
-                  <PaywallFade className="inset-y-0" />
+                  {/* Whited out to the page ground, as the prose column
+                      ends: phones have no shelf, so nothing here is on
+                      offer. It keeps its height so the map ends where the
+                      article does. */}
+                  <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-10 bg-background" />
                 </div>
               ) : (
                 <RelatedListicleShelf
