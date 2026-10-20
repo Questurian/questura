@@ -10,6 +10,7 @@ import {
   StreamedArticleRail,
 } from '@/features/articles/components/ArticleSidebar'
 import { planArticleAds, type AdPlan } from '@/features/articles/lib/adPlacement'
+import { pairStayBoxes } from '@/features/articles/lib/stayBoxes'
 import { ADS_ENABLED } from '@/features/articles/lib/ads'
 import { readGate } from '@/features/articles/lib/gate'
 import { articleCrumbsFromPath } from '@/features/articles/lib/articleCrumbs'
@@ -387,14 +388,18 @@ const LAYOUTS: Record<ArticleDisplayLayout, (props: LayoutProps) => React.JSX.El
   centered: CenteredArticleLayout,
 }
 
-export function ArticlePage({ article, path }: { article: Article; path?: string }) {
+export function ArticlePage({ article: source, path }: { article: Article; path?: string }) {
+  // Each Airbnb takes in the section written about it before anything is
+  // planned, so the ad plan indexes the blocks that are drawn. A locked
+  // article's sample holds no cards, so `gate.shown` still counts its blocks.
+  const article = { ...source, contentBlocks: pairStayBoxes(source.contentBlocks ?? []) }
   const gate = readGate(article)
-  const adPlan = planArticleAds(article.contentBlocks ?? [], {
+  const adPlan = planArticleAds(article.contentBlocks, {
     enabled: ADS_ENABLED,
     gateAt: gate?.locked ? gate.shown : null,
   })
   // Started here, awaited only inside the rail and footer boundaries.
-  const sidebar = fetchStandardArticleSidebar(article, path)
+  const sidebar = fetchStandardArticleSidebar(source, path)
   const sharePath = path && path.startsWith('/') ? path : `/${article.slug}`
   const shareUrl = `${getPublicBaseUrl()}${sharePath}`
   const displayLayout: ArticleDisplayLayout =

@@ -1,4 +1,5 @@
 import type { GateState } from '@/features/articles/lib/gate'
+import type { StayLead, StayPosition } from '@/features/articles/lib/stayBoxes'
 
 export type ImageAttributionData = {
   photographer_credit?: string | null
@@ -94,6 +95,13 @@ export type FaqBlock = {
   items: FaqItem[]
 }
 
+export type AirbnbCardImage = ImageAttributionData & {
+  url: string
+  alt: string
+  width: number | null
+  height: number | null
+}
+
 export type AirbnbCard = {
   id: number
   title: string
@@ -104,7 +112,12 @@ export type AirbnbCard = {
   price: string | null
   rating: number | null
   reviewCount: number | null
-  image: (ImageAttributionData & { url: string; alt: string; width: number | null; height: number | null }) | null
+  /** The neighbourhood it is tagged with. Absent from an API older than the boxed card. */
+  area?: string | null
+  /** Up to seven gallery photos, featured first. Absent from an API older than the boxed card. */
+  images?: AirbnbCardImage[]
+  /** The featured photo, `images[0]`. */
+  image: AirbnbCardImage | null
 }
 
 /** `airbnb` is null when the Airbnb is unpublished or gone; the card is then skipped. */
@@ -112,6 +125,10 @@ export type AirbnbCardBlock = {
   id: string
   blockType: 'airbnb-card'
   airbnb: AirbnbCard | null
+  /** Set by `pairStayBoxes`: the section written about this stay, drawn inside its box. */
+  lead?: StayLead | null
+  /** Set by `pairStayBoxes`: the box's number among the article's Airbnbs. */
+  position?: StayPosition | null
 }
 
 export type HotelCard = {
