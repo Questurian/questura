@@ -42,6 +42,10 @@ function SectionHeading({ id, children }: { id: string; children: string }) {
  * and gives the ads a containing block that ends just above it, so they
  * release into the trending list at the bottom of the article instead of
  * overlapping it.
+ *
+ * On a locked article the rail does not pin at all (`data-rail-pin`, see
+ * article-prose-and-media.css): the sample is short, so a pinned rail only
+ * drifts down a little and stops.
  */
 export function ArticleRail({ trending }: { trending: ArticleIndexItem[] }) {
   const slots = RAIL_SLOTS.filter(isAdShapeOn)
@@ -51,7 +55,7 @@ export function ArticleRail({ trending }: { trending: ArticleIndexItem[] }) {
   if (slots.length === 0) {
     return (
       <div data-article-sidebar className="1024:h-full">
-        <div className="1024:sticky 1024:top-24">
+        <div data-rail-pin className="1024:sticky 1024:top-24">
           <ArticleTrending trending={trending} />
         </div>
       </div>
@@ -61,7 +65,7 @@ export function ArticleRail({ trending }: { trending: ArticleIndexItem[] }) {
   return (
     <div data-article-sidebar className="1024:flex 1024:h-full 1024:flex-col">
       <div className="1024:flex-1">
-        <div className="flex flex-col gap-8 1024:sticky 1024:top-24">
+        <div data-rail-pin className="flex flex-col gap-8 1024:sticky 1024:top-24">
           {slots.map((shape) => (
             <AdSlot key={shape} shape={shape} />
           ))}

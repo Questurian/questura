@@ -308,29 +308,50 @@
     line-height: 1;
   }
 
+  /*
+   * A text link, not a button: the italic serif and pale blue of "Travel
+   * better." The label is trimmed to its cap height and the arrow is drawn
+   * exactly 1cap tall, so centering the two boxes centers the capitals and
+   * the arrow on the same line.
+   */
   .join-hero-plans-link {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 128px;
+    gap: 0.4em;
     min-height: 44px;
-    margin-top: 24px;
-    padding: 10px 16px;
-    border: 1px solid #79a9ba;
-    border-radius: 4px;
-    background: #16465b;
-    color: #eef7fa;
-    font-size: 0.875rem;
-    font-weight: 600;
-    line-height: 1.25;
+    margin-top: 20px;
+    padding-inline: 8px;
+    color: #cde7f0;
+    font-family: var(--font-editorial-serif), Georgia, serif;
+    font-size: 1.375rem;
+    font-style: italic;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    line-height: 1;
+    text-shadow: 0 3px 24px rgb(0 10 18 / 0.48);
   }
 
-  .join-hero-plans-link:hover {
-    border-color: #b5dce7;
-    background: #205b70;
+  .join-hero-plans-label {
+    text-box: trim-both cap alphabetic;
+  }
+
+  .join-hero-plans-arrow {
+    flex: none;
+    width: auto;
+    height: 0.7em;
+    height: 1cap;
+    overflow: visible;
+  }
+
+  .join-hero-plans-link:hover .join-hero-plans-label {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.2em;
   }
 
   .join-hero-plans-link:focus-visible {
+    border-radius: 2px;
     outline: 2px solid #b5dce7;
     outline-offset: 4px;
   }

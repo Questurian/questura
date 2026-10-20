@@ -169,9 +169,24 @@ export default function JoinHeroVisual() {
         <span>Know more.</span>{' '}
         <em>Travel better.</em>
       </h1>
-      {/* Phones only: on a short screen the plans start below the hero. */}
+      {/*
+        Phones only: on a short screen the plans start below the hero. Set
+        like "Travel better." with an arrow exactly as tall as the capitals.
+      */}
       <a className="join-hero-plans-link" href="#plans">
-        View Plans
+        <span className="join-hero-plans-label">View plans</span>
+        <svg
+          className="join-hero-plans-arrow"
+          viewBox="0 0 14 18"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={1.5}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M7 .75v16.5M1.5 11.75 7 17.25l5.5-5.5" />
+        </svg>
       </a>
     </div>
 

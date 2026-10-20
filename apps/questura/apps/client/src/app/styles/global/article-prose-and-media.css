@@ -101,6 +101,54 @@
   }
 }
 
+/* A stay box (AirbnbCardBlock) sets its gallery flush with the box's edges,
+   with the credit line on the same inset as the text under it. */
+.stay-box-photos .rounded-sm {
+  border-radius: 0;
+}
+
+.stay-box-photos [data-photo-credit] {
+  padding-inline: 1rem;
+}
+
+@media (min-width: 480px) {
+  .stay-box-photos [data-photo-credit] {
+    padding-inline: 1.25rem;
+  }
+}
+
+@media (min-width: 640px) {
+  .stay-box-photos [data-photo-credit] {
+    padding-inline: 1.75rem;
+  }
+}
+
+/* The box carries the section written about its stay a step below the
+   column's reading size, so it reads as one unit rather than the column
+   running on inside a frame. */
+.stay-box-prose p,
+.stay-box-prose li {
+  font-size: 16px;
+  line-height: 1.68;
+}
+
+.stay-box-prose h3 {
+  font-size: 18px;
+  margin-top: 1.25rem;
+}
+
+@media (min-width: 640px) {
+  .stay-box-prose p,
+  .stay-box-prose li {
+    font-size: 17px;
+    line-height: 1.72;
+  }
+
+  .stay-box-prose h3 {
+    font-size: 20px;
+  }
+}
+
 /*
   The shared article header carries listicle-column overrides (1024:p-0 /
   1024:mx-10) that assume it renders inside the narrow maps column. On the
@@ -757,6 +805,17 @@
     width: calc(100% - 96px);
     max-width: 1344px;
     margin-inline: auto;
+  }
+}
+
+/*
+ * A locked article shows a short sample and the join notice, so the rail has
+ * almost nothing to follow: it stays where it starts. The notice (`.paywalled`)
+ * is swapped out once a member's full body loads, and the rail pins again.
+ */
+@media (min-width: 1024px) {
+  [data-article-layout='standard']:has(.paywalled) [data-rail-pin] {
+    position: static;
   }
 }
 

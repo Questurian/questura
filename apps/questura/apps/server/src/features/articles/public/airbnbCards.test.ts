@@ -44,8 +44,14 @@ describe('sanitizeAirbnbCards', () => {
     await sanitizeAirbnbCards(blocks, payload)
 
     expect(find).toHaveBeenCalledWith(
-      expect.objectContaining({ collection: 'media-sets', where: { id: { in: [41] } } }),
+      expect.objectContaining({ collection: 'media-sets', where: { id: { in: [41, 42] } } }),
     )
+    const featured = {
+      url: 'https://cdn.example/41_wide.webp',
+      alt: 'Clifftop Duplex Penthouse with 180° Ocean Views',
+      width: 1600,
+      height: 900,
+    }
     expect(blocks[1].airbnb).toEqual({
       id: 7,
       title: 'Clifftop Duplex Penthouse with 180° Ocean Views',
@@ -56,12 +62,10 @@ describe('sanitizeAirbnbCards', () => {
       price: null,
       rating: 4.87,
       reviewCount: 308,
-      image: {
-        url: 'https://cdn.example/41_wide.webp',
-        alt: 'Clifftop Duplex Penthouse with 180° Ocean Views',
-        width: 1600,
-        height: 900,
-      },
+      area: null,
+      // 42 did not resolve, so the gallery is the one photo that did.
+      images: [featured],
+      image: featured,
     })
     expect(blocks[1].airbnb).not.toHaveProperty('createdBy')
   })
@@ -107,7 +111,78 @@ describe('sanitizeAirbnbCards', () => {
     await sanitizeAirbnbCards(blocks, payload)
 
     expect((blocks[0].airbnb as { image: unknown }).image).toBeNull()
+    expect((blocks[0].airbnb as { images: unknown }).images).toEqual([])
     expect(find).not.toHaveBeenCalled()
+  })
+
+  it('shows the first seven gallery photos in the saved order, in one query', async () => {
+    const gallery = [44, 43, 45, 46, 47, 48, 49, 50, 51].map((id) => ({ image: id }))
+    const blocks: Array<Record<string, unknown>> = [
+      { blockType: 'airbnb-card', airbnb: airbnbDoc({ gallery }) },
+      { blockType: 'airbnb-card', airbnb: airbnbDoc({ id: 8, gallery: [{ image: 43 }] }) },
+    ]
+    const mediaSet = (id: number) => ({
+      id,
+      alt_text: id === 43 ? 'The balcony at sunset' : '',
+      variants: { wide: { url: `https://cdn.example/${id}_wide.webp`, width: 1600, height: 900 } },
+    })
+    const { payload, find } = payloadWithMediaSets([43, 44, 45, 46, 47, 48, 49].map(mediaSet))
+
+    await sanitizeAirbnbCards(blocks, payload)
+
+    expect(find).toHaveBeenCalledTimes(1)
+    expect(find).toHaveBeenCalledWith(
+      expect.objectContaining({ where: { id: { in: [44, 43, 45, 46, 47, 48, 49] } }, limit: 7 }),
+    )
+    const first = blocks[0].airbnb as { images: Array<{ url: string; alt: string }>; image: unknown }
+    expect(first.images.map((image) => image.url)).toEqual(
+      [44, 43, 45, 46, 47, 48, 49].map((id) => `https://cdn.example/${id}_wide.webp`),
+    )
+    expect(first.image).toEqual(first.images[0])
+    expect(first.images[0].alt).toBe('Clifftop Duplex Penthouse with 180° Ocean Views')
+    expect(first.images[1].alt).toBe('The balcony at sunset')
+    expect(first.images[2].alt).toBe('Clifftop Duplex Penthouse with 180° Ocean Views, photo 3')
+    expect((blocks[1].airbnb as { images: unknown[] }).images).toHaveLength(1)
+  })
+
+  it('leaves out a gallery photo with no wide crop and counts each photo once', async () => {
+    const blocks: Array<Record<string, unknown>> = [
+      {
+        blockType: 'airbnb-card',
+        airbnb: airbnbDoc({ gallery: [{ image: 41 }, { image: 41 }, { image: { id: 42 } }, { image: 43 }] }),
+      },
+    ]
+    const { payload } = payloadWithMediaSets([
+      { id: 41, variants: { wide: { url: 'https://cdn.example/41_wide.webp', width: 1600, height: 900 } } },
+      { id: 42, variants: { square: { url: 'https://cdn.example/42_square.webp', width: 1080, height: 1080 } } },
+      { id: 43, variants: { wide: { url: 'https://cdn.example/43_wide.webp', width: 1600, height: 900 } } },
+    ])
+
+    await sanitizeAirbnbCards(blocks, payload)
+
+    const card = blocks[0].airbnb as { images: Array<{ url: string }> }
+    expect(card.images.map((image) => image.url)).toEqual([
+      'https://cdn.example/41_wide.webp',
+      'https://cdn.example/43_wide.webp',
+    ])
+  })
+
+  it('names the neighbourhood the Airbnb is tagged with', async () => {
+    const blocks: Array<Record<string, unknown>> = [
+      {
+        blockType: 'airbnb-card',
+        airbnb: airbnbDoc({
+          gallery: [],
+          locationRef: { id: 3, level: 'neighborhood', cityName: 'Lima', neighborhoodName: 'Miraflores' },
+        }),
+      },
+      { blockType: 'airbnb-card', airbnb: airbnbDoc({ id: 8, gallery: [], locationRef: 3 }) },
+    ]
+
+    await sanitizeAirbnbCards(blocks)
+
+    expect((blocks[0].airbnb as { area: unknown }).area).toBe('Miraflores')
+    expect((blocks[1].airbnb as { area: unknown }).area).toBeNull()
   })
 })
 
