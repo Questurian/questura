@@ -46,8 +46,11 @@ test('journey 6: changing the password keeps this browser signed in, signs the o
   await page.locator('input[name=confirmNewPassword]').fill(changed)
   await page.getByRole('button', { name: 'Change Password', exact: true }).click()
 
-  await expect(page).toHaveURL((url) => url.pathname === '/account')
   await expect(page.getByText('Password changed successfully!')).toBeVisible()
+  // The account page shows the message, then drops `?passwordChanged=true`
+  // with `router.replace`. Reloading while that navigation is in flight is
+  // aborted by Firefox (NS_BINDING_ABORTED), so wait for the clean URL.
+  await expect(page).toHaveURL((url) => url.pathname === '/account' && url.search === '')
   // This browser keeps a session the server still honours: without its cached
   // copy, it is the session store answering.
   await page.context().clearCookies({ name: /questura_visitor\.session_data/ })
