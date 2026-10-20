@@ -5,15 +5,17 @@ import { usePathname } from 'next/navigation'
 import Link from '@/components/navigation/PublicLink'
 import { useListicleMapSync } from '@/features/articles/components/ListicleMapSync'
 import snapshots from '@/features/articles/data/mapTeasers.json'
-import { layoutSnapshot, type MapSnapshot } from '@/features/articles/lib/mapSnapshot'
+import { layoutSnapshot, picturesForBox, type MapSnapshotEntry } from '@/features/articles/lib/mapSnapshot'
 import { layoutMapTeaser, type TeaserPoint } from '@/features/articles/lib/mapTeaserLayout'
 
-const SNAPSHOTS = snapshots as unknown as Record<string, MapSnapshot>
+const SNAPSHOTS = snapshots as unknown as Record<string, MapSnapshotEntry>
 
 /** Below this much visible height (the phone's split view) the card becomes a bar. */
 const COMPACT_BELOW_PX = 460
 /** Room the phone's join bar takes at the bottom of the map, margin included. */
 const JOIN_BAR_PX = 76
+/** Room the desktop join card takes at the bottom of the map, margin included. */
+const JOIN_CARD_PX = 320
 
 const PAPER_GRID = {
   backgroundImage:
@@ -130,21 +132,27 @@ export function MapTeaser({ insetBottomPx = 0 }: { insetBottomPx?: number }): JS
     [points],
   )
 
-  const snapshot = teaserKey ? SNAPSHOTS[teaserKey] : undefined
-  // On a phone's short split view the join bar takes the bottom, so the
-  // picture slides to keep the places in the strip above it.
-  const snapshotLayout = useMemo(
-    () =>
-      snapshot
-        ? layoutSnapshot(
-            snapshot,
-            teaserPoints,
-            { width: size.width, height: visibleHeight },
-            compact ? { top: 16, bottom: visibleHeight - JOIN_BAR_PX - 8 } : undefined,
-          )
-        : null,
-    [snapshot, teaserPoints, size.width, visibleHeight, compact],
-  )
+  const entry = teaserKey ? SNAPSHOTS[teaserKey] : undefined
+  // The picture that fits the box with the least zooming, or the other one if
+  // the guide's places have moved off it. On a phone's short split view the
+  // join bar takes the bottom, and in a locked desktop column the join card
+  // does, so the picture slides to keep the places in the strip above it.
+  const view = useMemo(() => {
+    if (!entry) return null
+    const box = { width: size.width, height: visibleHeight }
+    for (const picture of picturesForBox(entry, box)) {
+      const focus = compact
+        ? { top: 16, bottom: visibleHeight - JOIN_BAR_PX - 8 }
+        : picture === entry.tall
+          ? { top: 40, bottom: visibleHeight - JOIN_CARD_PX }
+          : undefined
+      const layout = layoutSnapshot(picture, teaserPoints, box, focus)
+      if (layout) return { snapshot: picture, layout }
+    }
+    return null
+  }, [entry, teaserPoints, size.width, visibleHeight, compact])
+  const snapshot = view?.snapshot
+  const snapshotLayout = view?.layout ?? null
   const drawing = useMemo(
     () => (snapshotLayout ? null : layoutMapTeaser(teaserPoints, { width: size.width, height: visibleHeight, compact })),
     [snapshotLayout, teaserPoints, size.width, visibleHeight, compact],

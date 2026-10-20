@@ -727,6 +727,14 @@
     transition: width 360ms cubic-bezier(0.22, 1, 0.36, 1);
   }
 
+  /* Locked: as tall as the article beside it, scrolling with it (see ListicleArticleLayout). */
+  [data-article-layout='listicle'] .maps-map-column[data-map-locked] {
+    top: auto;
+    height: auto;
+    /* Level with the article column's first line (its 25px top padding). */
+    margin-top: 25px;
+  }
+
   [data-article-layout='listicle'] .maps-listicle-article {
     max-width: none;
     margin-inline: 0;

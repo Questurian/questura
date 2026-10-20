@@ -8,7 +8,18 @@
       -77.025705,
       -12.143457
     ],
-    "zoom": 14.7813
+    "zoom": 14.7813,
+    "tall": {
+      "src": "/images/map-teasers/itineraries-12-tall.webp",
+      "srcSmall": "/images/map-teasers/itineraries-12-tall-782.webp",
+      "width": 782,
+      "height": 1400,
+      "center": [
+        -77.025705,
+        -12.142603
+      ],
+      "zoom": 14.7813
+    }
   },
   "itineraries:14": {
     "src": "/images/map-teasers/itineraries-14.webp",
@@ -19,7 +30,18 @@
       -77.046055,
       -12.136046
     ],
-    "zoom": 11.5678
+    "zoom": 11.5678,
+    "tall": {
+      "src": "/images/map-teasers/itineraries-14-tall.webp",
+      "srcSmall": "/images/map-teasers/itineraries-14-tall-782.webp",
+      "width": 782,
+      "height": 1400,
+      "center": [
+        -77.046055,
+        -12.12812
+      ],
+      "zoom": 11.5678
+    }
   },
   "itineraries:15": {
     "src": "/images/map-teasers/itineraries-15.webp",
@@ -30,7 +52,18 @@
       -77.03991,
       -12.128518
     ],
-    "zoom": 13.1193
+    "zoom": 13.1193,
+    "tall": {
+      "src": "/images/map-teasers/itineraries-15-tall.webp",
+      "srcSmall": "/images/map-teasers/itineraries-15-tall-782.webp",
+      "width": 782,
+      "height": 1400,
+      "center": [
+        -77.03991,
+        -12.125814
+      ],
+      "zoom": 13.1193
+    }
   },
   "itineraries:17": {
     "src": "/images/map-teasers/itineraries-17.webp",
@@ -41,7 +74,18 @@
       -77.02604,
       -12.150409
     ],
-    "zoom": 12.3423
+    "zoom": 12.3423,
+    "tall": {
+      "src": "/images/map-teasers/itineraries-17-tall.webp",
+      "srcSmall": "/images/map-teasers/itineraries-17-tall-782.webp",
+      "width": 782,
+      "height": 1400,
+      "center": [
+        -77.02604,
+        -12.145776
+      ],
+      "zoom": 12.3423
+    }
   },
   "itineraries:19": {
     "src": "/images/map-teasers/itineraries-19.webp",
@@ -52,7 +96,18 @@
       -75.57241,
       6.207897
     ],
-    "zoom": 15
+    "zoom": 15,
+    "tall": {
+      "src": "/images/map-teasers/itineraries-19-tall.webp",
+      "srcSmall": "/images/map-teasers/itineraries-19-tall-782.webp",
+      "width": 782,
+      "height": 1400,
+      "center": [
+        -75.57241,
+        6.208643
+      ],
+      "zoom": 15
+    }
   },
   "itineraries:20": {
     "src": "/images/map-teasers/itineraries-20.webp",
@@ -63,7 +118,18 @@
       -99.16556,
       19.419109
     ],
-    "zoom": 13.0105
+    "zoom": 13.0105,
+    "tall": {
+      "src": "/images/map-teasers/itineraries-20-tall.webp",
+      "srcSmall": "/images/map-teasers/itineraries-20-tall-782.webp",
+      "width": 782,
+      "height": 1400,
+      "center": [
+        -99.16556,
+        19.421235
+      ],
+      "zoom": 12.8641
+    }
   },
   "maps:3": {
     "src": "/images/map-teasers/maps-3.webp",
@@ -74,7 +140,18 @@
       -77.022205,
       -12.149102
     ],
-    "zoom": 14.215
+    "zoom": 14.215,
+    "tall": {
+      "src": "/images/map-teasers/maps-3-tall.webp",
+      "srcSmall": "/images/map-teasers/maps-3-tall-782.webp",
+      "width": 782,
+      "height": 1400,
+      "center": [
+        -77.022205,
+        -12.147837
+      ],
+      "zoom": 14.215
+    }
   },
   "maps:8": {
     "src": "/images/map-teasers/maps-8.webp",
@@ -85,7 +162,18 @@
       -77.019855,
       -12.153649
     ],
-    "zoom": 14.101
+    "zoom": 14.101,
+    "tall": {
+      "src": "/images/map-teasers/maps-8-tall.webp",
+      "srcSmall": "/images/map-teasers/maps-8-tall-782.webp",
+      "width": 782,
+      "height": 1400,
+      "center": [
+        -77.019855,
+        -12.152279
+      ],
+      "zoom": 14.101
+    }
   },
   "maps:11": {
     "src": "/images/map-teasers/maps-11.webp",
@@ -96,7 +184,18 @@
       -77.0293,
       -12.106106
     ],
-    "zoom": 13.4912
+    "zoom": 13.4912,
+    "tall": {
+      "src": "/images/map-teasers/maps-11-tall.webp",
+      "srcSmall": "/images/map-teasers/maps-11-tall-782.webp",
+      "width": 782,
+      "height": 1400,
+      "center": [
+        -77.0293,
+        -12.104017
+      ],
+      "zoom": 13.4912
+    }
   },
   "maps:14": {
     "src": "/images/map-teasers/maps-14.webp",
@@ -107,7 +206,18 @@
       -77.033555,
       -12.140855
     ],
-    "zoom": 12.0453
+    "zoom": 12.0453,
+    "tall": {
+      "src": "/images/map-teasers/maps-14-tall.webp",
+      "srcSmall": "/images/map-teasers/maps-14-tall-782.webp",
+      "width": 782,
+      "height": 1400,
+      "center": [
+        -77.033555,
+        -12.135163
+      ],
+      "zoom": 12.0453
+    }
   },
   "maps:15": {
     "src": "/images/map-teasers/maps-15.webp",
@@ -118,7 +228,18 @@
       -77.033685,
       -12.136114
     ],
-    "zoom": 11.2451
+    "zoom": 11.2451,
+    "tall": {
+      "src": "/images/map-teasers/maps-15-tall.webp",
+      "srcSmall": "/images/map-teasers/maps-15-tall-782.webp",
+      "width": 782,
+      "height": 1400,
+      "center": [
+        -77.033685,
+        -12.126202
+      ],
+      "zoom": 11.2451
+    }
   },
   "maps:16": {
     "src": "/images/map-teasers/maps-16.webp",
@@ -129,7 +250,18 @@
       -77.04585,
       -12.134797
     ],
-    "zoom": 11.1539
+    "zoom": 11.1539,
+    "tall": {
+      "src": "/images/map-teasers/maps-16-tall.webp",
+      "srcSmall": "/images/map-teasers/maps-16-tall-782.webp",
+      "width": 782,
+      "height": 1400,
+      "center": [
+        -77.04585,
+        -12.124238
+      ],
+      "zoom": 11.1539
+    }
   },
   "maps:17": {
     "src": "/images/map-teasers/maps-17.webp",
@@ -140,7 +272,18 @@
       -77.040705,
       -12.12723
     ],
-    "zoom": 11.2738
+    "zoom": 11.2738,
+    "tall": {
+      "src": "/images/map-teasers/maps-17-tall.webp",
+      "srcSmall": "/images/map-teasers/maps-17-tall-782.webp",
+      "width": 782,
+      "height": 1400,
+      "center": [
+        -77.040705,
+        -12.117512
+      ],
+      "zoom": 11.2738
+    }
   },
   "maps:18": {
     "src": "/images/map-teasers/maps-18.webp",
@@ -151,7 +294,18 @@
       -77.041555,
       -12.137469
     ],
-    "zoom": 11.7055
+    "zoom": 11.7055,
+    "tall": {
+      "src": "/images/map-teasers/maps-18-tall.webp",
+      "srcSmall": "/images/map-teasers/maps-18-tall-782.webp",
+      "width": 782,
+      "height": 1400,
+      "center": [
+        -77.041555,
+        -12.130265
+      ],
+      "zoom": 11.7055
+    }
   },
   "maps:19": {
     "src": "/images/map-teasers/maps-19.webp",
@@ -162,7 +316,18 @@
       -77.0932,
       -12.138522
     ],
-    "zoom": 11.5547
+    "zoom": 11.5547,
+    "tall": {
+      "src": "/images/map-teasers/maps-19-tall.webp",
+      "srcSmall": "/images/map-teasers/maps-19-tall-782.webp",
+      "width": 782,
+      "height": 1400,
+      "center": [
+        -77.0932,
+        -12.132326
+      ],
+      "zoom": 11.4191
+    }
   },
   "maps:20": {
     "src": "/images/map-teasers/maps-20.webp",
@@ -173,7 +338,18 @@
       -77.022,
       -12.153806
     ],
-    "zoom": 13.491
+    "zoom": 13.491,
+    "tall": {
+      "src": "/images/map-teasers/maps-20-tall.webp",
+      "srcSmall": "/images/map-teasers/maps-20-tall-782.webp",
+      "width": 782,
+      "height": 1400,
+      "center": [
+        -77.022,
+        -12.151717
+      ],
+      "zoom": 13.491
+    }
   },
   "maps:21": {
     "src": "/images/map-teasers/maps-21.webp",
@@ -184,7 +360,18 @@
       -76.974055,
       -12.130844
     ],
-    "zoom": 10.9398
+    "zoom": 10.9398,
+    "tall": {
+      "src": "/images/map-teasers/maps-21-tall.webp",
+      "srcSmall": "/images/map-teasers/maps-21-tall-782.webp",
+      "width": 782,
+      "height": 1400,
+      "center": [
+        -76.974055,
+        -12.118595
+      ],
+      "zoom": 10.9398
+    }
   },
   "maps:22": {
     "src": "/images/map-teasers/maps-22.webp",
@@ -195,7 +382,18 @@
       -77.025,
       -12.145896
     ],
-    "zoom": 12.8295
+    "zoom": 12.8295,
+    "tall": {
+      "src": "/images/map-teasers/maps-22-tall.webp",
+      "srcSmall": "/images/map-teasers/maps-22-tall-782.webp",
+      "width": 782,
+      "height": 1400,
+      "center": [
+        -77.025,
+        -12.142591
+      ],
+      "zoom": 12.8295
+    }
   },
   "maps:23": {
     "src": "/images/map-teasers/maps-23.webp",
@@ -206,7 +404,18 @@
       -77.0402,
       -12.135768
     ],
-    "zoom": 11.2408
+    "zoom": 11.2408,
+    "tall": {
+      "src": "/images/map-teasers/maps-23-tall.webp",
+      "srcSmall": "/images/map-teasers/maps-23-tall-782.webp",
+      "width": 782,
+      "height": 1400,
+      "center": [
+        -77.0402,
+        -12.125825
+      ],
+      "zoom": 11.2408
+    }
   },
   "maps:24": {
     "src": "/images/map-teasers/maps-24.webp",
@@ -217,7 +426,18 @@
       -75.56506,
       6.208047
     ],
-    "zoom": 15
+    "zoom": 15,
+    "tall": {
+      "src": "/images/map-teasers/maps-24-tall.webp",
+      "srcSmall": "/images/map-teasers/maps-24-tall-782.webp",
+      "width": 782,
+      "height": 1400,
+      "center": [
+        -75.56506,
+        6.208793
+      ],
+      "zoom": 15
+    }
   },
   "maps:25": {
     "src": "/images/map-teasers/maps-25.webp",
@@ -228,7 +448,18 @@
       -75.57106,
       6.208047
     ],
-    "zoom": 15
+    "zoom": 15,
+    "tall": {
+      "src": "/images/map-teasers/maps-25-tall.webp",
+      "srcSmall": "/images/map-teasers/maps-25-tall-782.webp",
+      "width": 782,
+      "height": 1400,
+      "center": [
+        -75.57106,
+        6.208793
+      ],
+      "zoom": 15
+    }
   },
   "maps:26": {
     "src": "/images/map-teasers/maps-26.webp",
@@ -239,7 +470,18 @@
       -75.58906,
       6.256047
     ],
-    "zoom": 15
+    "zoom": 15,
+    "tall": {
+      "src": "/images/map-teasers/maps-26-tall.webp",
+      "srcSmall": "/images/map-teasers/maps-26-tall-782.webp",
+      "width": 782,
+      "height": 1400,
+      "center": [
+        -75.58906,
+        6.256794
+      ],
+      "zoom": 15
+    }
   },
   "maps:27": {
     "src": "/images/map-teasers/maps-27.webp",
@@ -250,7 +492,18 @@
       -75.57106,
       6.208047
     ],
-    "zoom": 15
+    "zoom": 15,
+    "tall": {
+      "src": "/images/map-teasers/maps-27-tall.webp",
+      "srcSmall": "/images/map-teasers/maps-27-tall-782.webp",
+      "width": 782,
+      "height": 1400,
+      "center": [
+        -75.57106,
+        6.208793
+      ],
+      "zoom": 15
+    }
   },
   "maps:28": {
     "src": "/images/map-teasers/maps-28.webp",
@@ -261,7 +514,18 @@
       -75.57706,
       6.208047
     ],
-    "zoom": 15
+    "zoom": 15,
+    "tall": {
+      "src": "/images/map-teasers/maps-28-tall.webp",
+      "srcSmall": "/images/map-teasers/maps-28-tall-782.webp",
+      "width": 782,
+      "height": 1400,
+      "center": [
+        -75.57706,
+        6.208793
+      ],
+      "zoom": 15
+    }
   },
   "maps:29": {
     "src": "/images/map-teasers/maps-29.webp",
@@ -272,7 +536,18 @@
       -75.56991,
       6.207397
     ],
-    "zoom": 15
+    "zoom": 15,
+    "tall": {
+      "src": "/images/map-teasers/maps-29-tall.webp",
+      "srcSmall": "/images/map-teasers/maps-29-tall-782.webp",
+      "width": 782,
+      "height": 1400,
+      "center": [
+        -75.56991,
+        6.208143
+      ],
+      "zoom": 15
+    }
   },
   "maps:30": {
     "src": "/images/map-teasers/maps-30.webp",
@@ -283,7 +558,18 @@
       -99.17506,
       19.408173
     ],
-    "zoom": 15
+    "zoom": 15,
+    "tall": {
+      "src": "/images/map-teasers/maps-30-tall.webp",
+      "srcSmall": "/images/map-teasers/maps-30-tall-782.webp",
+      "width": 782,
+      "height": 1400,
+      "center": [
+        -99.17506,
+        19.408881
+      ],
+      "zoom": 15
+    }
   },
   "maps:31": {
     "src": "/images/map-teasers/maps-31.webp",
@@ -294,7 +580,18 @@
       -99.16906,
       19.414173
     ],
-    "zoom": 15
+    "zoom": 15,
+    "tall": {
+      "src": "/images/map-teasers/maps-31-tall.webp",
+      "srcSmall": "/images/map-teasers/maps-31-tall-782.webp",
+      "width": 782,
+      "height": 1400,
+      "center": [
+        -99.16906,
+        19.414881
+      ],
+      "zoom": 15
+    }
   },
   "maps:32": {
     "src": "/images/map-teasers/maps-32.webp",
@@ -305,6 +602,17 @@
       -99.16306,
       19.420173
     ],
-    "zoom": 15
+    "zoom": 15,
+    "tall": {
+      "src": "/images/map-teasers/maps-32-tall.webp",
+      "srcSmall": "/images/map-teasers/maps-32-tall-782.webp",
+      "width": 782,
+      "height": 1400,
+      "center": [
+        -99.16306,
+        19.420881
+      ],
+      "zoom": 15
+    }
   }
 }
