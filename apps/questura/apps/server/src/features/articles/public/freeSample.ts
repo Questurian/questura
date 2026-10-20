@@ -16,6 +16,9 @@ import type { ArticleCollectionSlug } from './serializeArticleBlocks'
  *   the editorial blocks -- key takeaways, pull quotes, in-the-know, highlight
  *   callouts, FAQ -- are held back even when they appear early, because each
  *   carries standalone value and is a reason to subscribe on its own.
+ *   A Read more line among that opening prose is shown (owner decision,
+ *   2026-10-19): it is a link to another page, not reading, so it does not
+ *   count toward the paragraphs either.
  * - An itinerary never shows a day. Only its top-level lodging section
  *   survives; the day-by-day plan is the product. The one thing let through
  *   about the withheld stops is roughly where each sits on the map (owner
@@ -38,7 +41,7 @@ import type { ArticleCollectionSlug } from './serializeArticleBlocks'
 export type SampleUnit = 'blocks' | 'items' | 'days'
 
 export type SampleLimits = {
-  /** Leading `text` blocks kept on a standard article. */
+  /** Leading `text` blocks kept on a standard article (Read more lines ride along uncounted). */
   articleTextBlocks: number
   /** Leading places kept on a single-type listicle. */
   listicleItems: number
@@ -60,7 +63,10 @@ export const DEFAULT_SAMPLE_LIMITS: SampleLimits = {
  * withheld by default, which is the safe direction: the alternative leaks paid
  * content the moment someone adds a block and forgets this file.
  */
-const SAMPLEABLE_ARTICLE_BLOCKS = new Set(['text'])
+const SAMPLEABLE_ARTICLE_BLOCKS = new Set(['text', 'read-more'])
+
+/** Of those, the ones the free part's length is measured in. */
+const COUNTED_ARTICLE_BLOCKS = new Set(['text'])
 
 /**
  * Roughly where a withheld stop sits, and the neighborhood it is in. Never its
@@ -284,10 +290,14 @@ function sampleArticle(doc: Record<string, unknown>, limits: SampleLimits): Samp
 
   const total = blocks.length
   const kept: unknown[] = []
+  let counted = 0
 
   for (const block of blocks) {
-    if (kept.length >= limits.articleTextBlocks) break
-    if (SAMPLEABLE_ARTICLE_BLOCKS.has(blockTypeOf(block))) kept.push(block)
+    if (counted >= limits.articleTextBlocks) break
+    const type = blockTypeOf(block)
+    if (!SAMPLEABLE_ARTICLE_BLOCKS.has(type)) continue
+    kept.push(block)
+    if (COUNTED_ARTICLE_BLOCKS.has(type)) counted++
   }
 
   doc.contentBlocks = kept

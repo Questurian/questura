@@ -100,11 +100,16 @@ function ArticleBody({ article, path, adPlan }: { article: Article; path?: strin
   const gate = readGate(article)
   return (
     <div className="space-y-8 sm:space-y-10">
-      <ArticleBlockStream blocks={article.contentBlocks ?? []} plan={adPlan} />
-
       {gate?.locked ? (
-        <GatedArticleBody articleId={article.id} gate={gate} path={path ?? '/'} />
-      ) : null}
+        <GatedArticleBody
+          articleId={article.id}
+          gate={gate}
+          path={path ?? '/'}
+          sample={<ArticleBlockStream blocks={article.contentBlocks ?? []} plan={adPlan} />}
+        />
+      ) : (
+        <ArticleBlockStream blocks={article.contentBlocks ?? []} plan={adPlan} />
+      )}
 
       {article.author ? <ArticleAuthorBanner author={article.author} /> : null}
 

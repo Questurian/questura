@@ -7,30 +7,22 @@ import type { ContentBlock } from '../types'
 type ArticleBlockStreamProps = {
   blocks: ContentBlock[]
   plan: AdPlan
-  /** Index of `blocks[0]` within the article's full block list. */
-  startIndex?: number
 }
 
 /**
  * Renders a run of blocks with the planned ads spliced in.
  *
- * Both sides of the paywall go through this: the server renders the sample and
- * `GatedArticleBody` renders the remainder after hydration (ADR-0009). The plan
- * is indexed against the *full* block list, so the gated half passes its offset
- * as `startIndex` and the two halves cannot double-place or drop a slot.
+ * Both sides of the paywall go through this: the server renders the sample,
+ * and `GatedArticleBody` swaps in a member's whole body after hydration
+ * (ADR-0009). The plan is indexed against `blocks`, whichever of the two it is.
  *
  * Fragments, not wrappers -- the parent's `space-y-*` only reaches direct DOM
  * children, and an extra div would swallow the gaps.
  */
-export function ArticleBlockStream({
-  blocks,
-  plan,
-  startIndex = 0,
-}: ArticleBlockStreamProps) {
+export function ArticleBlockStream({ blocks, plan }: ArticleBlockStreamProps) {
   return (
     <>
-      {blocks.map((block, offset) => {
-        const index = startIndex + offset
+      {blocks.map((block, index) => {
         const runs = plan.proseRuns.get(index)
         const runAds = plan.proseAds.get(index) ?? []
         const afterBlock = plan.afterBlock.get(index)
