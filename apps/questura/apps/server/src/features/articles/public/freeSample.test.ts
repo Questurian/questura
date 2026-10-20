@@ -56,6 +56,28 @@ describe('applySampleRule — standard articles', () => {
     ])
   })
 
+  it('shows a Read more line inside the opening prose without counting it', () => {
+    const doc: Record<string, unknown> = {
+      contentBlocks: [
+        text(0),
+        { blockType: 'read-more', title: 'Lima food', url: '/peru/lima' },
+        { blockType: 'image' },
+        text(1),
+        { blockType: 'read-more', title: 'After the free part', url: '/x' },
+        text(2),
+      ],
+    }
+
+    const outcome = applySampleRule('articles', doc)
+
+    expect((doc.contentBlocks as { blockType: string }[]).map((b) => b.blockType)).toEqual([
+      'text',
+      'read-more',
+      'text',
+    ])
+    expect(outcome).toEqual({ applied: true, unit: 'blocks', shown: 3, total: 6 })
+  })
+
   it('withholds images', () => {
     const doc: Record<string, unknown> = {
       contentBlocks: [text(0), { blockType: 'image' }, { blockType: 'img-trio' }, text(1)],

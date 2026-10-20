@@ -8,6 +8,7 @@ import { ADS_ENABLED } from '@/features/articles/lib/ads'
 import type { GateState } from '@/features/articles/lib/gate'
 import { useGatedFullArticle } from '@/features/articles/lib/useGatedFullArticle'
 import type { ContentBlock } from '@/features/articles/types'
+import type { ReactNode } from 'react'
 
 type GatedArticleBodyProps = {
   articleId: number
@@ -15,6 +16,8 @@ type GatedArticleBodyProps = {
   /** Path the reader is on, so checkout can return them to it. */
   path: string
   lang?: string
+  /** The Free sample, rendered on the server. A member's full body replaces it. */
+  sample: ReactNode
 }
 
 type FullArticleResponse = {
@@ -22,13 +25,18 @@ type FullArticleResponse = {
 }
 
 /**
- * The locked region of a gated standard article.
+ * The body of a gated standard article: the Free sample and what follows it.
  *
  * Client-side because the cached public shell is `force-static`, where
  * `cookies()` is empty by construction -- no page under it can know who is
  * reading (ADR-0009).
+ *
+ * A member's full body replaces the sample rather than continuing it. The
+ * sample is not a prefix of the body: it skips the blocks held back between
+ * its paragraphs (an image, a key takeaway), so cutting the first `shown`
+ * blocks off the body repeated a paragraph and lost those blocks.
  */
-export function GatedArticleBody({ articleId, gate, path, lang }: GatedArticleBodyProps) {
+export function GatedArticleBody({ articleId, gate, path, lang, sample }: GatedArticleBodyProps) {
   const { phase, data, retry } = useGatedFullArticle<FullArticleResponse>({
     articleId,
     type: 'articles',
@@ -42,31 +50,44 @@ export function GatedArticleBody({ articleId, gate, path, lang }: GatedArticleBo
   // loading placeholder in the cached HTML where a crawler and any reader
   // without JS would find the call to action -- and the paywall class, which
   // the page's paywall JSON-LD points at, lives on this notice.
+  // Fragments, not wrappers: the article's `space-y-*` spaces these blocks.
   if (phase === 'identifying' || phase === 'anonymous') {
-    return <PaywallNotice gate={gate} returnTo={path} />
+    return (
+      <>
+        {sample}
+        <PaywallNotice gate={gate} returnTo={path} />
+      </>
+    )
   }
 
   if (phase === 'unverified') {
-    return <GatedLoadError onRetry={retry} reason="access" />
+    return (
+      <>
+        {sample}
+        <GatedLoadError onRetry={retry} reason="access" />
+      </>
+    )
   }
 
   if (phase === 'loading') {
-    return <GatedBodySkeleton />
+    return (
+      <>
+        {sample}
+        <GatedBodySkeleton />
+      </>
+    )
   }
 
   if (phase === 'failed' || !data?.contentBlocks) {
-    return <GatedLoadError onRetry={retry} />
+    return (
+      <>
+        {sample}
+        <GatedLoadError onRetry={retry} />
+      </>
+    )
   }
 
-  // The full body includes the sample blocks the server already rendered, so
-  // the sample is dropped here rather than duplicated above this component.
-  // Ads are planned over the whole body for the same reason the sample is: the
-  // server already placed the slots for the prefix, and the plan has to agree
-  // with it or the two halves double-place an ad across the seam.
-  const adPlan = planArticleAds(data.contentBlocks, { enabled: ADS_ENABLED, gateAt: gate.shown })
-  const remaining = data.contentBlocks.slice(gate.shown)
-
-  return (
-    <ArticleBlockStream blocks={remaining} plan={adPlan} startIndex={gate.shown} />
-  )
+  // A member reads no seam, so the plan is the whole body's, as on a free article.
+  const adPlan = planArticleAds(data.contentBlocks, { enabled: ADS_ENABLED })
+  return <ArticleBlockStream blocks={data.contentBlocks} plan={adPlan} />
 }
