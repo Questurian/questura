@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { existsSync, readFileSync } from 'node:fs'
 import test from 'node:test'
 
-import { layoutSnapshot } from './mapSnapshot.ts'
+import { layoutSnapshot, picturesForBox } from './mapSnapshot.ts'
 
 const snapshot = {
   src: '/images/map-teasers/maps-1.webp',
@@ -67,6 +67,25 @@ test('an open place keeps its number; a locked one does not', () => {
   )
 })
 
+test("a locked desktop column takes the tall picture; a phone keeps the wide one", () => {
+  const tall = { ...snapshot, src: '/tall.webp', srcSmall: '/tall-782.webp', height: 1400 }
+  const entry = { ...snapshot, tall }
+  // Desktop column beside the article, at 1440 and at 1100 wide.
+  assert.equal(picturesForBox(entry, { width: 773, height: 1257 })[0], tall)
+  assert.equal(picturesForBox(entry, { width: 569, height: 1362 })[0], tall)
+  // Phone: the full map and the split view.
+  assert.equal(picturesForBox(entry, { width: 375, height: 700 })[0], entry)
+  assert.equal(picturesForBox(entry, { width: 390, height: 300 })[0], entry)
+  // The other picture is still offered, for when the first cannot carry the places.
+  assert.equal(picturesForBox(entry, { width: 773, height: 1257 }).length, 2)
+})
+
+test('a guide with no tall picture, or a box not yet measured, gets the wide one', () => {
+  assert.deepEqual(picturesForBox(snapshot, { width: 773, height: 1257 }), [snapshot])
+  const entry = { ...snapshot, tall: { ...snapshot, height: 1400 } }
+  assert.equal(picturesForBox(entry, { width: 0, height: 0 })[0], entry)
+})
+
 // The manifest is written by apps/e2e/scripts/render-map-teasers.mjs. A
 // listed picture that is not in public/ would draw a broken image over a
 // locked guide for every non-member.
@@ -74,7 +93,7 @@ test('every listed map picture exists in public/', () => {
   const manifest = JSON.parse(readFileSync(new URL('../data/mapTeasers.json', import.meta.url), 'utf8'))
   for (const [key, entry] of Object.entries(manifest)) {
     assert.match(key, /^(maps|itineraries):\d+$/)
-    for (const src of [entry.src, entry.srcSmall]) {
+    for (const src of [entry.src, entry.srcSmall, entry.tall?.src, entry.tall?.srcSmall].filter(Boolean)) {
       assert.ok(existsSync(new URL(`../../../../public${src}`, import.meta.url)), `${key}: ${src} is missing`)
     }
   }

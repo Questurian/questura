@@ -14,12 +14,17 @@
  * a non-member's map draws, kept in the upper part where the join card does
  * not sit, so the site can lay its own markers over the picture.
  *
+ * Two pictures per guide (FRAMES): `wide` for the phone and any short map
+ * box, `tall` for a locked guide's desktop column, which runs the height of
+ * the article beside it. The page uses whichever needs less zooming.
+ *
  * Usage (from apps/questura/apps/e2e), with the API that serves the guides:
  *   node scripts/render-map-teasers.mjs [api-base]        # default https://api.questurian.com
  *   node scripts/render-map-teasers.mjs http://localhost:4000 --only maps:16
+ *   node scripts/render-map-teasers.mjs --frame tall      # one of the two pictures only
  *
- * Writes client/public/images/map-teasers/<type>-<id>.webp (2x) and
- * <type>-<id>-782.webp (1x), and client/src/features/articles/data/mapTeasers.json.
+ * Writes client/public/images/map-teasers/<type>-<id>[-tall].webp (2x) and
+ * <type>-<id>[-tall]-782.webp (1x), and client/src/features/articles/data/mapTeasers.json.
  * Run it again whenever a guide is published or its places move; a guide with
  * no picture, or whose places fall outside its picture, shows the drawn teaser.
  */
@@ -34,13 +39,27 @@ const IMAGE_DIR = resolve(CLIENT, 'public/images/map-teasers')
 const MANIFEST = resolve(CLIENT, 'src/features/articles/data/mapTeasers.json')
 
 const args = process.argv.slice(2)
-const api = (args.find((arg) => !arg.startsWith('--') && args[args.indexOf(arg) - 1] !== '--only') ?? 'https://api.questurian.com').replace(/\/$/, '')
+const OPTIONS = ['--only', '--frame']
+const api = (args.find((arg) => !arg.startsWith('--') && !OPTIONS.includes(args[args.indexOf(arg) - 1])) ?? 'https://api.questurian.com').replace(/\/$/, '')
 const only = args.includes('--only') ? args[args.indexOf('--only') + 1] : null
 
-/** The desktop map area on a guide page, in CSS px. Phones crop the same picture. */
-const FRAME = { width: 782, height: 690 }
-/** Places stay above the join card, which covers the lower part of the frame. */
-const PADDING = { top: 60, bottom: 290, left: 80, right: 80 }
+/**
+ * The pictures, in CSS px, with where the places go in each.
+ *
+ * - `wide`: the pinned desktop map's size. Phones crop it. Places stay above
+ *   the join card, which covers the lower part.
+ * - `tall`: a locked guide's desktop column (ListicleArticleLayout). Its
+ *   places sit in a strip as high as the wide picture's, so both draw them at
+ *   the same zoom, with map above and below for the page to slide the picture
+ *   on: it puts the places above the join card (MapTeaser). The side margin is
+ *   wider because a narrow desktop column crops the sides.
+ */
+const FRAMES = {
+  wide: { width: 782, height: 690, suffix: '', padding: { top: 60, bottom: 290, left: 80, right: 80 } },
+  tall: { width: 782, height: 1400, suffix: '-tall', padding: { top: 450, bottom: 610, left: 110, right: 110 } },
+}
+const frameNames = args.includes('--frame') ? [args[args.indexOf('--frame') + 1]] : Object.keys(FRAMES)
+for (const name of frameNames) if (!FRAMES[name]) throw new Error(`--frame must be one of: ${Object.keys(FRAMES).join(', ')}`)
 const MAPLIBRE = 'https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js'
 const STYLE = 'https://tiles.openfreemap.org/styles/positron'
 
@@ -85,7 +104,9 @@ function pointsOf(article) {
   return points
 }
 
-async function render(page, points, labelNames) {
+async function render(page, points, labelNames, { width, height, padding }) {
+  const frame = { width, height }
+  await page.setViewportSize(frame)
   const drawn = await page.evaluate(
     async ({ points, frame, padding, style, labelNames }) => {
       document.body.innerHTML = `<div id="wrap" style="position:relative;width:${frame.width}px;height:${frame.height}px;overflow:hidden">
@@ -171,7 +192,7 @@ async function render(page, points, labelNames) {
         labels: labels.map((l) => l.label),
       }
     },
-    { points, frame: FRAME, padding: PADDING, style: STYLE, labelNames },
+    { points, frame, padding, style: STYLE, labelNames },
   )
 
   // The map and its names together, at 2x, then as WebP at both sizes.
@@ -190,7 +211,7 @@ async function render(page, points, labelNames) {
       }
       return { large: encode(frame.width * 2, frame.height * 2), small: encode(frame.width, frame.height) }
     },
-    { png, frame: FRAME },
+    { png, frame },
   )
   return { ...drawn, ...encoded }
 }
@@ -207,7 +228,7 @@ try {
 }
 
 const browser = await chromium.launch({ channel: 'chrome' })
-const page = await browser.newPage({ viewport: FRAME, deviceScaleFactor: 2 })
+const page = await browser.newPage({ viewport: FRAMES.wide, deviceScaleFactor: 2 })
 // A style the renderer rejects still "renders" -- as an empty background.
 page.on('console', (message) => {
   if (message.type() === 'error' || message.type() === 'warning') console.error(`  page ${message.type()}: ${message.text().slice(0, 200)}`)
@@ -234,19 +255,25 @@ for (const guide of await guides()) {
   }
   // A city without a list names the guide's own neighborhoods.
   const areas = (article.gate?.mapPins ?? []).map((pin) => pin.area).filter(Boolean)
-  const shot = await render(page, points, BIG_PLACES[guide.city ?? ''] ?? areas)
-  const name = `${guide.type}-${article.id}`
-  writeDataUrl(resolve(IMAGE_DIR, `${name}.webp`), shot.large)
-  writeDataUrl(resolve(IMAGE_DIR, `${name}-782.webp`), shot.small)
-  manifest[key] = {
-    src: `/images/map-teasers/${name}.webp`,
-    srcSmall: `/images/map-teasers/${name}-782.webp`,
-    width: FRAME.width,
-    height: FRAME.height,
-    center: shot.center,
-    zoom: shot.zoom,
+  // A guide new to the manifest needs its wide picture: the tall one hangs off it.
+  const names = manifest[key] || frameNames.includes('wide') ? frameNames : ['wide', ...frameNames]
+  for (const frameName of names) {
+    const frame = FRAMES[frameName]
+    const shot = await render(page, points, BIG_PLACES[guide.city ?? ''] ?? areas, frame)
+    const name = `${guide.type}-${article.id}${frame.suffix}`
+    writeDataUrl(resolve(IMAGE_DIR, `${name}.webp`), shot.large)
+    writeDataUrl(resolve(IMAGE_DIR, `${name}-782.webp`), shot.small)
+    const picture = {
+      src: `/images/map-teasers/${name}.webp`,
+      srcSmall: `/images/map-teasers/${name}-782.webp`,
+      width: frame.width,
+      height: frame.height,
+      center: shot.center,
+      zoom: shot.zoom,
+    }
+    manifest[key] = frameName === 'wide' ? { ...picture, tall: manifest[key]?.tall } : { ...manifest[key], tall: picture }
+    console.log(`rendered ${key} ${frameName} (${guide.slug}): ${points.length} places, zoom ${shot.zoom}, names: ${shot.labels.join(', ') || 'none'}`)
   }
-  console.log(`rendered ${key} (${guide.slug}): ${points.length} places, zoom ${shot.zoom}, names: ${shot.labels.join(', ') || 'none'}`)
 }
 
 await browser.close()

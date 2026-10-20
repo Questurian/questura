@@ -19,7 +19,27 @@ export type MapSnapshot = {
   zoom: number
 }
 
-export type SnapshotPoint = { id: string; lat: number; lng: number; inert: boolean; number: number | null }
+/**
+ * A guide's pictures: the wide one, which phones crop, and the tall one for a
+ * locked guide's desktop column (ListicleArticleLayout), drawn at the same
+ * zoom with more map above and below.
+ */
+export type MapSnapshotEntry = MapSnapshot & { tall?: MapSnapshot }
+
+/**
+ * The guide's pictures, the one that needs the least zooming to cover the box
+ * first: blown up, a picture's names blur and its sides are cut off; shrunk,
+ * its names cannot be read.
+ */
+export function picturesForBox(entry: MapSnapshotEntry, box: { width: number; height: number }): MapSnapshot[] {
+  const pictures = entry.tall ? [entry, entry.tall] : [entry]
+  const zooming = (picture: MapSnapshot) =>
+    Math.abs(Math.log(Math.max(box.width / picture.width, box.height / picture.height)))
+  // An unmeasured box zooms every picture infinitely: keep the wide one first.
+  return pictures.sort((a, b) => zooming(a) - zooming(b) || 0)
+}
+
+export type SnapshotPoint ={ id: string; lat: number; lng: number; inert: boolean; number: number | null }
 
 export type SnapshotLayout = {
   /** Where the picture sits in the box: cover, centred across, pinned to the top. */
