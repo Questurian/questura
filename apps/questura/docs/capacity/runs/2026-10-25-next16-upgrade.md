@@ -26,7 +26,7 @@ Next 16 no longer emits the root `app-build-manifest.json`. A small client Webpa
 
 The first accurate Next 16 build exceeded all 44 route budgets: home 185.9 kB, join 175.7 kB, map article 215.6 kB, itinerary 223.4 kB gzip. The owner selected optimization within the existing limits. Budgets and baselines have **not** changed.
 
-The optimized production build passes all 44 route budgets. Representative gzip totals: home 160.1 kB (170.0 limit), map article 185.4 kB (186.3 limit), itinerary 193.6 kB (194.0 limit). Maps and itineraries remain above the general 170 kB cap, under the existing grandfathered limits.
+The optimized production build passes all 44 route budgets. Representative gzip totals: home 160.4 kB (170.0 limit), map article 185.7 kB (186.3 limit), itinerary 193.8 kB (194.0 limit). Maps and itineraries remain above the general 170 kB cap, under the existing grandfathered limits.
 
 Changes reduce work actually needed on first load:
 
@@ -34,7 +34,7 @@ Changes reduce work actually needed on first load:
 - Forms, account screens, optional homepage layouts, result lists, tours, embeds and Google rendering load when used. Private screens retain their original business logic and redirects. Anonymous guides still never load Google's JavaScript.
 - Listicle headers, bylines and footer links render on the server, passed into interactive layouts as React nodes.
 - Public bookmark controls publish write events; the account query cache still invalidates its active/inactive lists after writes without making every public page import React Query.
-- Passive web-vitals observers attach at idle using buffered entries. Development controls are absent from production; the standalone 404 stays usable without interactive site chrome.
+- Web-vitals observers stream immediately in their own chunk; waiting for idle lost reports when a page was hidden early. Development controls are absent from production. The 404 retains the full site menu and footer: its navigation code is split, its footer renders on the server with document recovery links, and the pure wordmark can render on the server too.
 
 Local verification: 517 client tests pass, typecheck passes, lint has no errors (30 warnings), production build and all 44 JS budgets pass. Browser smoke covers seven URLs at 1440 and 390 pixels with one heading, no horizontal overflow and no uncaught errors. Additional interactions at both widths verify sign-in, menu search, signed-out bookmarks redirect, password-reset fields and no Google Maps JS for anonymous readers. This verification uses the local API, not production membership or Stripe.
 
@@ -45,3 +45,7 @@ The preceding main run already failed itinerary JS at 194.1 kB against a 194.0 k
 The subsequent recovery-fix run passed the outage/retry journey in both Chromium and Firefox but still failed the JS and timing gates: https://github.com/Questurian/questura/actions/runs/40222859245
 
 Full CI, including throttled timing and production Cloudflare packaging, must pass on the optimized commit before merge. Local browser smoke does not substitute for the sandbox speed measurements.
+
+The optimized run passed all JS budgets and throttled speed limits, including home tap timing at 16 ms, but found six browser failures: four missing-navigation assertions on 404s, one early-hide web-vitals report, and one Firefox navigation cancellation when the membership test left before sign-out's document redirect finished. Evidence: https://github.com/Questurian/questura/actions/runs/40227296951
+
+The recovery fixes preserve the existing assertions. The sign-out helper now waits for the home document to load instead of treating disappearance of the account button as completed navigation. Local regression checks verify eight cold LCP beacons, full 404 navigation/footer/home recovery at desktop and phone widths, and four sign-out redirects with no aborted document requests (server identity/sign-out responses mocked only inside the local browser). The original 517 tests, typecheck, lint and all 44 JS budgets still pass. Full CI must pass again before merge.
