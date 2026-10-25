@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url'
 
 import { devices, type CDPSession, type Page } from '@playwright/test'
 
-import { expect, gated, test, unexpectedProblems } from './fixtures'
+import { allowProblems, expect, gated, test, unexpectedProblems } from './fixtures'
 
 /**
  * Speed budgets (launch fix plan item 13): home, a city, an article and /join
@@ -215,4 +215,32 @@ test('web vitals: hiding a page sends its LCP to the API beacon', async ({ page,
   expect((await request.allHeaders()).cookie, 'the beacon carries no cookie').toBeUndefined()
   const response = await request.response()
   if (response) expect(response.status()).toBe(204)
+})
+
+// A reporter can still be downloading after `load`. Firefox cancels it when
+// the reader leaves, and React.lazy used to throw the rejected import into
+// app/error.tsx. Abort this exact chunk deterministically; real page errors
+// and every other failed resource remain failures in the fixture's gate.
+test('web vitals: a cancelled reporter cannot replace the reading page', async ({ page }) => {
+  test.skip(!!process.env.E2E_BASE_URL, 'fault injection belongs to the sandbox')
+  let cancelled = false
+  await page.route(/\/_next\/static\/chunks\/\d+\.[0-9a-f]+\.js$/, async (route) => {
+    if (cancelled) return route.continue()
+    const response = await route.fetch()
+    const source = await response.text()
+    if (!source.includes('/api/web-vitals')) return route.fulfill({ response })
+    cancelled = true
+    const escaped = route.request().url().replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    allowProblems(page, new RegExp(`^failed: GET ${escaped} .+$`), 'only the deliberately cancelled passive reporter')
+    allowProblems(page, /^console: Failed to load resource: net::ERR_FAILED \(on \/join\)$/, 'Chromium logs the deliberately aborted reporter resource')
+    await route.abort('failed')
+  })
+  await page.goto('/join')
+  await expect.poll(() => cancelled, { message: 'the reporter chunk was cancelled' }).toBe(true)
+  await expect(page.getByRole('heading', { name: 'Know more. Travel better.' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Something went wrong' })).toHaveCount(0)
+  await page.unroute(/\/_next\/static\/chunks\/\d+\.[0-9a-f]+\.js$/)
+  // The new document must recover normally, rather than cache the failed import.
+  await page.reload()
+  await expect(page.getByRole('heading', { name: 'Know more. Travel better.' })).toBeVisible()
 })
