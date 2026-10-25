@@ -3,9 +3,7 @@
 import type { JSX, ReactNode } from "react";
 import { Clock, ExternalLink, MapPin, Route } from "lucide-react";
 import { ShimmerImage } from "@/components/media/ShimmerImage";
-import { ArticleAuthorBanner } from "@/features/articles/components/ArticleAuthorBanner";
 import { NewsletterArticleBand } from "@/features/newsletter/components/NewsletterArticleBand";
-import { ArticlePageHeader } from "@/features/articles/components/ArticlePageHeader";
 import { InstagramEmbedBlock } from "@/features/articles/components/InstagramEmbedBlock";
 import { ItineraryStayCard } from "@/features/articles/components/ItineraryStayCard";
 import { PaywallFade } from "@/features/articles/components/PaywallFade";
@@ -34,6 +32,8 @@ import type {
 import { isListicleVenue } from "@/features/articles/types/mapsListicle";
 
 type ItineraryListicleArticlePageProps = {
+  header: ReactNode;
+  authorBanner: ReactNode;
   article: ListicleItineraryArticle;
   days: ItineraryDay[];
   selectedDayIndex: number;
@@ -276,6 +276,8 @@ function StopList({
 
 export function ItineraryListicleArticlePage({
   article,
+  header,
+  authorBanner,
   days,
   selectedDayIndex,
   onSelectDay,
@@ -286,27 +288,12 @@ export function ItineraryListicleArticlePage({
   const selectedDay = days[dayIndex] ?? { whereStaying: [], items: [] };
   const whereStaying = populatedVenueStops(selectedDay.whereStaying);
   const stops = selectedDay.items ?? [];
-  const featuredImage = article.header?.featuredImage;
   const introRaw = article.header?.intro;
   const introHtml = typeof introRaw === "string" ? introRaw : null;
-  const description = article.seoSection?.metaDescription;
 
   return (
     <article className="maps-listicle-article itinerary-article min-h-screen bg-background sm:max-w-[600px] sm:mx-auto">
-      <ArticlePageHeader
-        title={article.title}
-        description={description}
-        featuredImage={
-          featuredImage?.url
-            ? { ...featuredImage, url: featuredImage.url, alt: featuredImage.alt_text }
-            : null
-        }
-        publishedAt={article.publishedAt ?? undefined}
-        updatedAt={article.updatedAt}
-        author={article.author}
-        bookmark={{ targetType: "itineraries", targetId: article.id }}
-        bylineVariant="plain"
-      />
+      {header}
 
       {introHtml ? (
         <div className="relative px-3 pt-6 pb-2 380:px-4 380:pt-8 380:pb-3 480:px-5 480:pt-10 480:pb-4 550:px-6 sm:px-8 sm:pt-10 sm:pb-5">
@@ -377,7 +364,7 @@ export function ItineraryListicleArticlePage({
             and links sit here, after the plan, as on a standard article. */}
         {article.author ? (
           <div className={lockedSlot ? "mt-8 sm:mt-10" : "mt-14 480:mt-16 sm:mt-20"}>
-            <ArticleAuthorBanner author={article.author} />
+            {authorBanner}
           </div>
         ) : null}
 

@@ -1,17 +1,13 @@
 "use client";
+import { lazy, Suspense, useSyncExternalStore } from "react";
 
-import dynamic from "next/dynamic";
+const DevMembershipSwitcher = process.env.NODE_ENV === "development"
+  ? lazy(() => import("./DevMembershipSwitcher"))
+  : null;
+const subscribe = () => () => {};
 
-/**
- * Developer tools for `pnpm dev` only. `process.env.NODE_ENV` is replaced at
- * build time, so in the live build this is `null` and the switcher module is
- * never bundled (`devToolsAreNotInTheLiveBuild.test.mjs` holds that).
- */
-const DevMembershipSwitcher =
-  process.env.NODE_ENV === "development"
-    ? dynamic(() => import("./DevMembershipSwitcher"), { ssr: false })
-    : null;
-
+/** Local-only controls; neither the switcher nor a dynamic-loader runtime ships. */
 export default function DevTools() {
-  return DevMembershipSwitcher ? <DevMembershipSwitcher /> : null;
+  const hydrated = useSyncExternalStore(subscribe, () => true, () => false);
+  return DevMembershipSwitcher && hydrated ? <Suspense fallback={null}><DevMembershipSwitcher /></Suspense> : null;
 }

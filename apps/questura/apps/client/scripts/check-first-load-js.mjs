@@ -28,7 +28,7 @@ const read = (file) => JSON.parse(readFileSync(join(dist, file), 'utf8'))
 let manifest
 let routes
 try {
-  manifest = read('app-build-manifest.json')
+  manifest = read('questura-client-entrypoints.json')
   routes = read('app-path-routes-manifest.json')
 } catch {
   console.error(`No build in ${dist}. Build first (pnpm build, or the readiness stack's --build).`)

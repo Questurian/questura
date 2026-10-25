@@ -1,10 +1,7 @@
 import type { Metadata } from 'next'
 import {
-  CityDashboardPage,
-  CityHomepageContent,
   fetchNeighborhoodHomepage,
 } from '@/features/CityDashboard'
-import { renderStandardArticleByPath } from '@/features/articles/routes/renderStandardArticleByPath'
 import {
   guardArticleSlug,
   guardCategorySegment,
@@ -65,6 +62,7 @@ export default async function CountryCategoryArticlePage({ params }: Props) {
 
   const neighborhood = await fetchNeighborhoodHomepage(country, city, category)
   if (neighborhood) {
+    const { CityDashboardPage, CityHomepageContent } = await import('@/features/CityDashboard')
     return (
       <>
         <CityHomepageContent
@@ -80,6 +78,7 @@ export default async function CountryCategoryArticlePage({ params }: Props) {
   guardCategorySegment(city)
   guardArticleSlug(category)
 
+  const { renderStandardArticleByPath } = await import('@/features/articles/routes/renderStandardArticleByPath')
   return renderStandardArticleByPath({
     path: buildPath(country, city, category),
   })

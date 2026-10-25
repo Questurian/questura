@@ -142,7 +142,7 @@ test('no block after the first has a priority image', () => {
 // same standing as row one's.
 test('a layout that splits its items into rows offsets the later rows', () => {
   const source = readFileSync(
-    join(blocksDir, 'questurian-maps/QuestUrianMapsPreview.tsx'),
+    join(blocksDir, 'questurian-maps/QuestUrianMapsPreviewContent.tsx'),
     'utf8',
   )
   const rowTwo = source.slice(source.indexOf('row2.map('))

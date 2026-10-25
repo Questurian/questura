@@ -1,14 +1,10 @@
 'use client';
 
 import { useCallback, useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
 
-import { APIError } from '@/lib/api';
-import { queryKeys } from '@/lib/react-query';
 import { useLoginModalStore } from '@/lib/stores/loginModalStore';
-import { fetchBookmarkPage } from '../services/bookmarks.service';
 import { useBookmarkStore } from '../stores/bookmarkStore';
-import type { BookmarkRef, BookmarkTargetType } from '../types';
+import type { BookmarkRef } from '../types';
 
 /**
  * Bookmark state for one control.
@@ -48,23 +44,6 @@ export function useBookmark(ref: BookmarkRef) {
   }, [isBookmarked, openLoginModal, ref, reload, toggleInStore]);
 
   return { isBookmarked, isPending, toggle };
-}
-
-/**
- * The Bookmark list page, which lives under `app/(private)` where
- * `ClientInteractionProvider` does wrap page content, so React Query is
- * available here.
- */
-export function useBookmarkPage(page: number, type: BookmarkTargetType | null) {
-  return useQuery({
-    queryKey: queryKeys.bookmarkPage(page, type),
-    queryFn: () => fetchBookmarkPage({ page, pageSize: 20, type: type ?? undefined }),
-    retry: (failureCount, error) => {
-      if (error instanceof APIError && error.status >= 400 && error.status < 500) return false;
-      return failureCount < 2;
-    },
-    staleTime: 30 * 1000,
-  });
 }
 
 /** Count of everything the reader has bookmarked, for the account-page entry point. */

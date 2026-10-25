@@ -4,6 +4,8 @@
  */
 
 import { QueryClient } from '@tanstack/react-query';
+import { queryKeys } from './queryKeys';
+import { onBookmarkWrite } from '@/features/bookmarks/stores/bookmarkCacheEvents';
 
 import { retryDecision } from '@/lib/api/request-policy';
 
@@ -42,4 +44,11 @@ export const queryClient = new QueryClient({
       retryDelay: 0,
     },
   },
+});
+
+// A public bookmark control need not import React Query just to invalidate
+// cached account lists. Once this client exists, it listens for those writes.
+onBookmarkWrite(() => {
+  void queryClient.invalidateQueries({ queryKey: queryKeys.bookmarks, refetchType: 'active' });
+  queryClient.removeQueries({ queryKey: queryKeys.bookmarks, type: 'inactive' });
 });

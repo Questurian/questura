@@ -1,11 +1,10 @@
 "use client";
 
-import { useAuth } from "@/lib/user/hooks";
-import { useMembership } from "@/features/Payments/hooks/useMembership";
+import { useNavigationIdentity } from "@/lib/user/hooks/useNavigationIdentity";
 
 export function useDesktopNavbarState() {
-  const { user, loading, isAuthenticated } = useAuth();
-  const { isActive } = useMembership(user);
+  const { user, loading, isAuthenticated } = useNavigationIdentity();
+  const isActive = user?.membership?.active ?? false;
   const shouldShowSubscribe = !isAuthenticated || !isActive;
 
   return {

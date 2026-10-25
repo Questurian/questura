@@ -1,7 +1,7 @@
 import { useStore } from 'zustand';
 
 import { isUnauthenticated } from '@/lib/api';
-import { queryClient, queryKeys } from '@/lib/react-query';
+import { notifyBookmarkWrite } from './bookmarkCacheEvents';
 import { identityStore } from '@/lib/user/currentIdentity';
 
 import { createBookmark, deleteBookmark, fetchBookmarkRefs } from '../services/bookmarks.service';
@@ -23,23 +23,11 @@ import { createBookmarkStore, type BookmarkCoreState } from './bookmarkStoreCore
  * per page rather than once per card. The logic — unknown versus signed out,
  * stale responses, recovery — lives in `bookmarkStoreCore.ts`.
  */
-/**
- * The Bookmarks page reads its list through React Query, from the one
- * module-level client, and kept a page it had already shown for its whole
- * staleTime. Saving an article and going straight back to the page showed the
- * old list until a refresh. After every write, drop the lists nobody is
- * showing, so the next visit fetches, and refetch the one on screen.
- */
-function forgetSavedLists() {
-  void queryClient.invalidateQueries({ queryKey: queryKeys.bookmarks, refetchType: 'active' });
-  queryClient.removeQueries({ queryKey: queryKeys.bookmarks, type: 'inactive' });
-}
-
 export const bookmarkStore = createBookmarkStore<BookmarkRef>({
   keyOf: bookmarkRefKey,
   fetchRefs: fetchBookmarkRefs,
-  create: (ref) => createBookmark(ref).then(forgetSavedLists),
-  remove: (ref) => deleteBookmark(ref).then(forgetSavedLists),
+  create: (ref) => createBookmark(ref).then(notifyBookmarkWrite),
+  remove: (ref) => deleteBookmark(ref).then(notifyBookmarkWrite),
   isUnauthorized: isUnauthenticated,
 });
 
