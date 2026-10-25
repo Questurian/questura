@@ -1,8 +1,9 @@
 import assert from 'node:assert/strict'
 import { readdirSync, readFileSync, realpathSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
+import { createRequire } from 'node:module'
 import test from 'node:test'
-import { fileURLToPath } from 'node:url'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 
 const clientRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../../..')
 const pkg = JSON.parse(readFileSync(resolve(clientRoot, 'package.json'), 'utf8'))
@@ -14,19 +15,25 @@ const read = (name) => readFileSync(resolve(clientRoot, name), 'utf8')
  * three things about that setup which would break silently.
  */
 
-// `@opennextjs/cloudflare@1.20.9` declares `next: >=15.5.27 <16 || >=16.3.8`
-// and `wrangler: ^4.125.0`, and the client is on 15.5.27 with wrangler 4.136.2.
-// 1.20.10 needs wrangler ^4.148.0 and 1.20.12 needs Next >=15.5.28, so 1.20.9 is
-// the ceiling for this pair. A caret on either side lets a routine install
-// cross a boundary with no error until the build fails.
+// Keep the Worker adapter paired with a pinned, supported Next release.
+// Cloudflare 1.20.9 accepts Next >=16.3.8 and Wrangler ^4.125.0.
 test('the adapter and Next are pinned to a compatible pair', () => {
-  assert.equal(pkg.dependencies.next, '15.5.27')
+  assert.equal(pkg.dependencies.next, '16.4.3')
   assert.equal(
     pkg.devDependencies['@opennextjs/cloudflare'],
     '1.20.9',
     'Exact, not caret: each adapter release moves its Next range. Check its peerDependencies against the pinned Next before moving it.',
   )
   assert.equal(pkg.devDependencies.wrangler, '4.136.2')
+})
+
+// The October 24 deploy failed despite green CI: OpenNext checks the current
+// date against the framework's support window before compiling. Exercise that
+// same installed guard here so a calendar cutoff fails PR CI as well.
+test('the deployed Next version passes OpenNext support policy today', async () => {
+  const adapterRequire = createRequire(realpathSync(resolve(clientRoot, 'node_modules/@opennextjs/cloudflare/package.json')))
+  const helper = await import(pathToFileURL(adapterRequire.resolve('@opennextjs/aws/build/helper.js')).href)
+  assert.equal(helper.isNextVersionSupported(pkg.dependencies.next), true, 'Upgrade Next before deploying: OpenNext rejects this version under its current support policy.')
 })
 
 // Questura publishes by on-demand invalidation (ADR-0003). Without the tag

@@ -86,7 +86,9 @@ export async function POST(req: NextRequest) {
   }
 
   for (const tag of tags) {
-    revalidateTag(tag);
+    // Studio publishes through this webhook: expire immediately so the next
+    // reader receives the updated content rather than stale-while-revalidate.
+    revalidateTag(tag, { expire: 0 });
   }
 
   for (const path of paths) {
