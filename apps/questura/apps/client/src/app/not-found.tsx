@@ -1,50 +1,16 @@
-import Link from '@/components/navigation/PublicLink';
-import { PublicChrome } from '@/components/layout/PublicChrome';
-import { SiteFonts } from '@/components/layout/SiteFonts';
-
-/**
- * The one not-found page. Next renders it inside the root layout only, so it
- * brings the site's own navigation and footer: a reader who followed a dead
- * link can go on from here, not only "home" (launch fix plan item 8,
- * journey 10).
- */
+/** Error routes stay usable without loading the site's interactive chrome. */
 export default function NotFound() {
   return (
-    <SiteFonts>
-      <PublicChrome>
-        <NotFoundCard />
-      </PublicChrome>
-    </SiteFonts>
-  );
-}
-
-function NotFoundCard() {
-  return (
-    <div className="min-h-[70vh] flex items-center justify-center px-5">
-      <div className="w-full max-w-md">
-        <div className="bg-[#f7f6f2] border border-[#d7d4ce] rounded-sm p-8 text-center">
-          <h1 className="font-display text-[2.1rem] text-[#1A1A1A]">
-            404
-          </h1>
-          <p className="mt-2 font-display text-[1.15rem] text-[#1A1A1A]">
-            Page Not Found
-          </p>
-          <p className="mt-2 text-[0.88rem] text-[#6b6a68] leading-[1.65] mb-6">
-            The page you&apos;re looking for doesn&apos;t exist or has been moved.
-          </p>
-
-          <Link
-            href="/"
-            className="
-              inline-block w-full bg-[#2C2C2C] hover:bg-[#1A1A1A]
-              text-white text-center py-3.5 rounded
-              text-[0.88rem] font-medium transition-colors
-            "
-          >
-            Return to Home
-          </Link>
-        </div>
+    <main className="flex min-h-screen items-center justify-center bg-background px-5 text-foreground">
+      <div className="w-full max-w-md border-t border-accent py-8">
+        <p className="text-[13px] font-medium text-accent">Questurian</p>
+        <h1 className="mt-4 font-display text-[36px] leading-tight">404</h1>
+        <p className="mt-2 font-display text-[22px]">Page Not Found</p>
+        <p className="mt-3 text-[15px] leading-relaxed text-foreground/70">The page you&apos;re looking for doesn&apos;t exist or has been moved.</p>
+        {/* A fresh document also recovers a failed client navigation. */}
+        {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
+        <a href="/" className="mt-7 inline-flex min-h-11 items-center bg-accent px-5 text-[14px] font-medium text-background focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent">Return to Home</a>
       </div>
-    </div>
+    </main>
   );
 }

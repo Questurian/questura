@@ -1,3 +1,5 @@
+import { ListicleArticleFooter } from '@/features/articles/components/ListicleArticleFooter'
+import { ArticlePageHeader } from '@/features/articles/components/ArticlePageHeader'
 import { notFound } from 'next/navigation'
 import { JsonLd } from '@/components/seo/JsonLd'
 import { renderListicleMomentHeadings } from '@/features/articles/components/ListicleMomentHeading'
@@ -66,9 +68,24 @@ export async function renderMapsArticleRoute({
       )}
       <MapsArticleLayout
         article={article}
+        header={
+          <ArticlePageHeader
+            title={article.title}
+            description={article.seoSection?.metaDescription}
+            featuredImage={
+              article.header?.featuredImage?.url
+                ? { ...article.header.featuredImage, url: article.header.featuredImage.url, alt: article.header.featuredImage.alt_text }
+                : null
+        }
+        publishedAt={article.publishedAt}
+        updatedAt={article.updatedAt}
+        author={article.author}
+        bookmark={{ targetType: 'maps', targetId: article.id }}
+      />
+        }
         momentHeadings={renderListicleMomentHeadings(momentSource)}
         relatedArticles={relatedArticles}
-        footerLinks={footerLinks}
+        footer={footerLinks ? <ListicleArticleFooter links={footerLinks} country={scope.country} city={scope.city} /> : null}
         country={scope.country}
         city={scope.city}
         gate={gate}

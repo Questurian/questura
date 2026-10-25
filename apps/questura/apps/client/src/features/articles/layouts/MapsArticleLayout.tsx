@@ -13,15 +13,15 @@ import type { GateState } from '@/features/articles/lib/gate'
 import { mapPointPreviewFromRow } from '@/features/articles/lib/listicleMapPreview'
 import { mapAccessFor } from '@/features/articles/lib/mapAccess'
 import { useGatedFullArticle } from '@/features/articles/lib/useGatedFullArticle'
-import type { ListicleFooterLinks } from '@/features/articles/lib/fetchListicleFooterLinks'
 import type { RelatedMapsArticleTeaser } from '@/features/articles/lib/fetchRelatedMapsArticles'
 import type { MapsListicleArticle } from '@/features/articles/types/mapsListicle'
 
 interface MapsArticleLayoutProps {
+  header: ReactNode
   article: MapsListicleArticle
   momentHeadings: ListicleMomentHeadings
   relatedArticles: RelatedMapsArticleTeaser[]
-  footerLinks?: ListicleFooterLinks | null
+  footer?: ReactNode
   country: string
   city?: string | null
   /** `readGate(article)`, read on the server. */
@@ -36,9 +36,10 @@ interface MapsArticleLayoutProps {
 
 export function MapsArticleLayout({
   article,
+  header,
   momentHeadings,
   relatedArticles,
-  footerLinks,
+  footer,
   country,
   city,
   gate,
@@ -103,12 +104,13 @@ export function MapsArticleLayout({
       <ListicleArticleLayout
         format="maps"
         relatedArticles={relatedArticles}
-        footerLinks={footerLinks}
+        footer={footer}
         country={country}
         city={city}
       >
         <MapsListicleArticlePage
           article={effectiveArticle}
+          header={header}
           momentHeadings={momentHeadings}
           paywalled={paywalled}
           lockedSlot={

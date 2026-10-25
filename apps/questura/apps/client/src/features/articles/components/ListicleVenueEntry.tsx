@@ -1,5 +1,5 @@
-import { useCallback, type JSX } from "react";
-import { InstagramEmbedBlock } from "@/features/articles/components/InstagramEmbedBlock";
+import { lazy, Suspense, useCallback, type JSX } from "react";
+const InstagramEmbedBlock = lazy(() => import("./InstagramEmbedBlock").then((module) => ({ default: module.InstagramEmbedBlock })));
 import { useListicleMapSync } from "@/features/articles/components/ListicleMapSync";
 import { ListiclePhotoCarousel } from "@/features/articles/components/ListiclePhotoCarousel";
 import { ListicleTourPicks } from "@/features/articles/components/ListicleTourPicks";
@@ -123,12 +123,12 @@ export function ListicleVenueEntry({
             {/* First entries render eagerly; the rest pre-load in the
                 background a couple at a time (InstagramEmbedBlock warm-up
                 queue) so they're ready before the reader reaches them. */}
-            <InstagramEmbedBlock
+            <Suspense fallback={<div aria-hidden className="min-h-[600px] w-full bg-paper" />}><InstagramEmbedBlock
               embedCode={instagramCode}
               captionMode="hide"
               eager={index < 2}
               className="w-full max-w-[540px]"
-            />
+            /></Suspense>
           </div>
         ) : null}
       </div>

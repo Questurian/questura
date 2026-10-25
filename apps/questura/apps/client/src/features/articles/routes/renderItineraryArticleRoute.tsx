@@ -1,3 +1,6 @@
+import { ArticleAuthorBanner } from '@/features/articles/components/ArticleAuthorBanner'
+import { ListicleArticleFooter } from '@/features/articles/components/ListicleArticleFooter'
+import { ArticlePageHeader } from '@/features/articles/components/ArticlePageHeader'
 import { notFound } from 'next/navigation'
 import { JsonLd } from '@/components/seo/JsonLd'
 import { PaywallNotice } from '@/features/articles/components/PaywallNotice'
@@ -47,8 +50,25 @@ export async function renderItineraryArticleRoute({
       <JsonLd data={buildArticlePageJsonLd({ article, path, locked })} />
       <ItineraryArticleLayout
         article={article}
+        authorBanner={article.author ? <ArticleAuthorBanner author={article.author} /> : null}
+        header={
+          <ArticlePageHeader
+            title={article.title}
+            description={article.seoSection?.metaDescription}
+            featuredImage={
+              article.header?.featuredImage?.url
+                ? { ...article.header.featuredImage, url: article.header.featuredImage.url, alt: article.header.featuredImage.alt_text }
+                : null
+        }
+        publishedAt={article.publishedAt ?? undefined}
+        updatedAt={article.updatedAt}
+        author={article.author}
+        bookmark={{ targetType: "itineraries", targetId: article.id }}
+        bylineVariant="plain"
+      />
+        }
         relatedArticles={relatedArticles}
-        footerLinks={footerLinks}
+        footer={footerLinks ? <ListicleArticleFooter links={footerLinks} country={scope.country} city={scope.city} /> : null}
         country={scope.country}
         city={scope.city}
         gate={gate}

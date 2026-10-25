@@ -3,10 +3,25 @@ import type { CurrentPrincipalResponse } from '@/lib/user/types'
 
 import { IdentityStore, type IdentityResponse } from './identity'
 import { hintFromResponse, writeHint } from './identityHint'
+import { IdentityObserver } from './identityObserver'
+import { IdentitySuperseded } from './identity'
+import { isUnauthenticated, retryDecision } from '@/lib/api/request-policy'
+
+export const navigationIdentity = new IdentityObserver({
+  read: () => identityStore.read({ maxAgeMs: 2 * 60 * 1000 }),
+  anonymous: (error) => {
+    if (!isUnauthenticated(error)) return false
+    writeHint('anon')
+    return true
+  },
+  retry: (error, attempt) => error instanceof IdentitySuperseded
+    ? { retry: true, delayMs: 0 }
+    : retryDecision(error, attempt, 0),
+})
 
 /**
- * The page's one identity store (`identity.ts`). The navbar's React Query
- * hook and the gated body both read through it, so a fresh gated page sends
+ * The page's one identity store (`identity.ts`). The navbar's lightweight observer, account query
+ * hook and gated body both read through it, so a fresh gated page sends
  * one `/api/me`, not two.
  *
  * Module state lives in the browser tab. In a server render this module is
@@ -16,8 +31,13 @@ import { hintFromResponse, writeHint } from './identityHint'
 export const identityStore = new IdentityStore({
   fetcher: () => get<CurrentPrincipalResponse>('/api/me') as Promise<IdentityResponse>,
   // Every answer refreshes the navbar's pre-paint hint (`identityHint.ts`).
-  onAnswer: (value) => writeHint(hintFromResponse(value)),
+  onAnswer: (value) => {
+    writeHint(hintFromResponse(value))
+    navigationIdentity.accept(value)
+  },
 })
+
+identityStore.subscribe(() => navigationIdentity.invalidate())
 
 /** How long a primed answer stays good for the navbar's first query. */
 const PRIMED_IDENTITY_MAX_AGE_MS = 5_000

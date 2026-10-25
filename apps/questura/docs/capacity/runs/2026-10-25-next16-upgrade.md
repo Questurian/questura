@@ -20,14 +20,28 @@ Local production reproduction used a loopback-only proxy to the local API, retur
 
 After the fixes: 510 client tests pass, typecheck/build pass, lint has no errors (30 existing/new compiler-migration warnings).
 
-## Performance gate migration and remaining decision
+## Performance gate migration and optimization
 
-Next 16 no longer emits the root `app-build-manifest.json`. The old JS gate incorrectly reported that no build existed. A small client Webpack plugin now emits the actual app entrypoint files for the same measurement. It explicitly includes the separate `main-app` runtime; omitting that would falsely report a large reduction. Unit coverage verifies bootstrap inclusion, route deduplication and fail-closed behavior when the bootstrap is missing.
+Next 16 no longer emits the root `app-build-manifest.json`. A small client Webpack plugin now emits the actual app entrypoint files for the same measurement. It explicitly includes the separate `main-app` runtime; omitting it would falsely report a large reduction. Unit coverage verifies bootstrap inclusion, route deduplication and fail-closed behavior when the bootstrap is missing.
 
-Budgets and baselines have **not** been increased. The accurate Next 16 build currently exceeds the existing JS limits on all 44 measured routes. Representative gzip totals are home 185.9 kB, join 175.7 kB, map article 215.6 kB and itinerary 223.4 kB. The existing cap is 170 kB; over-cap routes are held to their prior baseline plus 1% build noise.
+The first accurate Next 16 build exceeded all 44 route budgets: home 185.9 kB, join 175.7 kB, map article 215.6 kB, itinerary 223.4 kB gzip. The owner selected optimization within the existing limits. Budgets and baselines have **not** changed.
 
-The preceding main run already failed the itinerary JS gate at 194.1 kB against a 194.0 kB limit, and home tap timing at 32 ms against its 24 ms limit. Evidence: https://github.com/Questurian/questura/actions/runs/40193987543
+The optimized production build passes all 44 route budgets. Representative gzip totals: home 160.1 kB (170.0 limit), map article 185.4 kB (186.3 limit), itinerary 193.6 kB (194.0 limit). Maps and itineraries remain above the general 170 kB cap, under the existing grandfathered limits.
 
-On the upgrade run, home tap timing samples were 40, 40 and 48 ms (median 40 ms); LCP was 1608 ms against 1720 ms, with CLS 0. This is not evidence that the tap limit passes. The framework adds about 30 kB gzip per route relative to current main.
+Changes reduce work actually needed on first load:
 
-Before merge, either reduce the initial JS to the existing budgets and resolve the tap gate, or explicitly accept a documented performance rebaseline for this framework migration. Do not silently raise caps or suppress these failures.
+- Navigation observes the existing server identity store without loading account/query tools. It shares requests, retains known identity during service failures, clears only on a confirmed anonymous response or 401, and discards responses from previous readers. Server authorization and membership decisions are unchanged.
+- Forms, account screens, optional homepage layouts, result lists, tours, embeds and Google rendering load when used. Private screens retain their original business logic and redirects. Anonymous guides still never load Google's JavaScript.
+- Listicle headers, bylines and footer links render on the server, passed into interactive layouts as React nodes.
+- Public bookmark controls publish write events; the account query cache still invalidates its active/inactive lists after writes without making every public page import React Query.
+- Passive web-vitals observers attach at idle using buffered entries. Development controls are absent from production; the standalone 404 stays usable without interactive site chrome.
+
+Local verification: 517 client tests pass, typecheck passes, lint has no errors (30 warnings), production build and all 44 JS budgets pass. Browser smoke covers seven URLs at 1440 and 390 pixels with one heading, no horizontal overflow and no uncaught errors. Additional interactions at both widths verify sign-in, menu search, signed-out bookmarks redirect, password-reset fields and no Google Maps JS for anonymous readers. This verification uses the local API, not production membership or Stripe.
+
+## Full CI
+
+The preceding main run already failed itinerary JS at 194.1 kB against a 194.0 kB limit, and home tap timing at 32 ms against 24 ms: https://github.com/Questurian/questura/actions/runs/40193987543
+
+The subsequent recovery-fix run passed the outage/retry journey in both Chromium and Firefox but still failed the JS and timing gates: https://github.com/Questurian/questura/actions/runs/40222859245
+
+Full CI, including throttled timing and production Cloudflare packaging, must pass on the optimized commit before merge. Local browser smoke does not substitute for the sandbox speed measurements.

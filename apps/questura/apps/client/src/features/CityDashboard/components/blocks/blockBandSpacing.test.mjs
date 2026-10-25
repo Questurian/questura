@@ -37,7 +37,7 @@ test('a band after a featured block gets paper above it too', () => {
 const BAND_BLOCKS = {
   'editorial-feature/EditorialFeaturePreview.tsx': /band=\{tone === TONES\.dark\}/,
   'questurian-maps-dark/QuesturianMapsDarkPreview.tsx': /band=\{theme === 'blue'\}/,
-  'questurian-maps/QuestUrianMapsPreview.tsx': /<BlockSection[^>]*\bband\b/,
+  'questurian-maps/QuestUrianMapsPreviewContent.tsx': /<BlockSection[^>]*\bband\b/,
   'featured-article/FeaturedArticleOneArticlePreview.tsx': /<section[^>]*data-block-band=""/,
 }
 

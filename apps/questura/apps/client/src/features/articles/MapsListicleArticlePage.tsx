@@ -1,5 +1,4 @@
 import { Fragment, type JSX, type ReactNode } from 'react'
-import { ArticlePageHeader } from '@/features/articles/components/ArticlePageHeader'
 import { ListicleMapRegion } from '@/features/articles/components/ListicleMapRegion'
 import { ListicleSeparator } from '@/features/articles/components/ListicleSeparator'
 import { ListicleAd } from '@/features/articles/components/ListicleAd'
@@ -17,6 +16,7 @@ import { PaywallFade } from '@/features/articles/components/PaywallFade'
 import type { MapsListicleArticle } from '@/features/articles/types/mapsListicle'
 
 type MapsListicleArticlePageProps = {
+  header: ReactNode;
   article: MapsListicleArticle
   /** Moment headings rendered on the server, keyed by the run they open. */
   momentHeadings?: ListicleMomentHeadings
@@ -37,14 +37,13 @@ const NO_MOMENT_HEADINGS: ListicleMomentHeadings = {}
 
 export function MapsListicleArticlePage({
   article,
+  header,
   momentHeadings = NO_MOMENT_HEADINGS,
   lockedSlot = null,
   paywalled = false,
 }: MapsListicleArticlePageProps): JSX.Element {
-  const featuredImage = article.header?.featuredImage
   const introRaw = article.header?.intro
   const introHtml = typeof introRaw === 'string' ? introRaw : null
-  const description = article.seoSection?.metaDescription
 
   const items = article.items ?? []
   // Nothing but the header and intro: the list, its separator and the space
@@ -59,19 +58,7 @@ export function MapsListicleArticlePage({
 
   return (
     <article data-listicle-type="maps" className="maps-listicle-article min-h-screen bg-background sm:max-w-[600px] sm:mx-auto">
-      <ArticlePageHeader
-        title={article.title}
-        description={description}
-        featuredImage={
-          featuredImage?.url
-            ? { ...featuredImage, url: featuredImage.url, alt: featuredImage.alt_text }
-            : null
-        }
-        publishedAt={article.publishedAt}
-        updatedAt={article.updatedAt}
-        author={article.author}
-        bookmark={{ targetType: 'maps', targetId: article.id }}
-      />
+      {header}
 
       {introHtml ? (
         <div className="maps-listicle-intro-wrap relative px-3 pt-6 pb-2 380:px-4 380:pt-8 380:pb-3 480:px-5 480:pt-10 480:pb-4 550:px-6 sm:px-8 sm:pt-10 sm:pb-5">
