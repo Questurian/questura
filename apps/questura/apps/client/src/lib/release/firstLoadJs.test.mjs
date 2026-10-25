@@ -2,6 +2,23 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 
 import { checkFirstLoadJs, firstLoadJsByRoute, limitFor } from './firstLoadJs.mjs'
+import { clientEntryManifest } from '../../../scripts/client-entrypoints-plugin.mjs'
+
+test('Next 16 budget inputs use real app entrypoint files, excluding Pages and API entries', () => {
+  const entry = (files) => ({ getFiles: () => files })
+  const result = clientEntryManifest(new Map([
+    ['main-app', entry(['static/chunks/runtime.js', 'static/chunks/react.js'])],
+    ['app/layout', entry(['static/chunks/runtime.js', 'static/chunks/layout.js'])],
+    ['app/(public)/page', entry(['static/chunks/runtime.js', 'static/chunks/home.js'])],
+    ['app/api/health/route', entry(['static/chunks/api.js'])],
+    ['pages/500', entry(['static/chunks/500.js'])],
+  ]))
+  assert.deepEqual(firstLoadJsByRoute(result, { '/(public)/page': '/' }, () => 1000), { '/': 4 })
+})
+
+test('missing Next runtime cannot silently under-report every JS budget', () => {
+  assert.throws(() => clientEntryManifest(new Map()), /bootstrap entrypoint is missing/)
+})
 
 // Launch fix plan item 13: first-load JS per route is what the browser
 // fetches (the page and every layout above it), held to a committed baseline.

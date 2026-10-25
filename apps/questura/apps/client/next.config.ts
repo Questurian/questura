@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 import { PHASE_PRODUCTION_BUILD } from "next/constants";
 import createNextIntlPlugin from "next-intl/plugin";
+import { ClientEntrypointsPlugin } from "./scripts/client-entrypoints-plugin.mjs";
 
 import { assertProductionBuildEnv } from "./src/lib/release/productionBuildEnv";
 import { SECURITY_HEADERS } from "./src/lib/http/securityHeaders";
@@ -8,6 +9,10 @@ import { SECURITY_HEADERS } from "./src/lib/http/securityHeaders";
 const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
 
 const nextConfig: NextConfig = {
+  webpack(config, { isServer }) {
+    if (!isServer) config.plugins.push(new ClientEntrypointsPlugin());
+    return config;
+  },
   // No `X-Powered-By: Next.js`: it tells a scanner what to try (2026-10-01 audit).
   poweredByHeader: false,
   // Lets a production build for measurement live beside a running `pnpm dev`
