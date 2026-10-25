@@ -4,7 +4,7 @@ import type { AirbnbCard, AirbnbCardBlock } from '../types'
 import type { ListicleItemImage } from '../lib/listicleItemHelpers'
 import { photoCredit } from '../lib/photoCredit'
 import { withoutListNumber } from '../lib/stayBoxes'
-import { editorialKickerClass } from './EditorialRule'
+import { editorialReadingLabelClass } from './EditorialRule'
 import { StayBoxGallery } from './StayBoxGallery'
 
 const reviewCountFormat = new Intl.NumberFormat('en-US')
@@ -74,7 +74,7 @@ export function AirbnbCardBlockRenderer({ block }: { block: AirbnbCardBlock }): 
       <div className={`px-4 pb-5 480:px-5 sm:px-7 sm:pb-7 ${photos.length > 0 ? 'pt-3 sm:pt-4' : 'pt-5 sm:pt-7'}`}>
         <div className="flex items-center gap-2.5">
           {position ? (
-            <span className={`shrink-0 text-accent ${editorialKickerClass}`}>
+            <span className={`shrink-0 text-accent ${editorialReadingLabelClass}`}>
               <span aria-hidden>
                 {twoDigits(position.index)} / {twoDigits(position.total)}
               </span>
@@ -84,7 +84,7 @@ export function AirbnbCardBlockRenderer({ block }: { block: AirbnbCardBlock }): 
             </span>
           ) : null}
           <span
-            className={`min-w-0 truncate ${editorialKickerClass} ${position ? 'text-foreground/55' : 'text-accent'}`}
+            className={`min-w-0 truncate ${editorialReadingLabelClass} ${position ? 'text-foreground/55' : 'text-accent'}`}
           >
             {airbnb.area ? `Airbnb · ${airbnb.area}` : 'Airbnb'}
           </span>
@@ -110,7 +110,7 @@ export function AirbnbCardBlockRenderer({ block }: { block: AirbnbCardBlock }): 
         ) : null}
 
         {airbnb.description ? (
-          <p className="mt-3 font-display text-[17px] italic leading-[1.5] text-foreground/80 sm:text-[19px] sm:leading-[1.45]">
+          <p className="mt-3 font-display text-[17px] leading-[1.7] text-foreground/80 sm:text-[18px] sm:leading-[1.78]">
             {airbnb.description}
           </p>
         ) : null}
@@ -165,7 +165,7 @@ export function AirbnbCardBlockRenderer({ block }: { block: AirbnbCardBlock }): 
             href={airbnb.listingUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex h-12 shrink-0 items-center justify-center gap-2 bg-foreground px-6 text-[13px] font-medium uppercase leading-none tracking-[0.12em] text-background transition-colors duration-150 ease-out [font-family:var(--font-dm-sans)] hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 focus-visible:ring-offset-2 focus-visible:ring-offset-paper motion-reduce:transition-none sm:ml-auto"
+            className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 border border-foreground/25 px-5 text-[14px] font-medium leading-none text-foreground transition-colors duration-150 ease-out [font-family:var(--font-dm-sans)] hover:border-accent hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 focus-visible:ring-offset-2 focus-visible:ring-offset-paper motion-reduce:transition-none sm:ml-auto"
           >
             View on Airbnb
             <ArrowUpRight className="size-4" strokeWidth={1.8} aria-hidden />

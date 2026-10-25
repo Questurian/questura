@@ -2,9 +2,7 @@ import { ReadMoreBlockRenderer } from './ReadMoreBlock'
 import { PublicImage } from '@/components/media/PublicImage'
 import {
   EditorialLabelRule,
-  EditorialRule,
-  EditorialTick,
-  editorialKickerClass,
+  editorialReadingLabelClass,
 } from './EditorialRule'
 import { InlineMarkdown } from './InlineMarkdown'
 import { AirbnbCardBlockRenderer } from './AirbnbCardBlock'
@@ -69,7 +67,7 @@ function ImageBlockRenderer({ block }: { block: ImageBlock }) {
         className="px-4 pt-2 1024:px-0"
       />
       {block.caption && (
-        <figcaption className="px-4 pt-2 text-[11px] italic text-foreground/50 1024:px-0 sm:text-[12px]">
+        <figcaption className="px-4 pt-2 font-display text-[14px] leading-relaxed text-foreground/70 1024:px-0 sm:text-[15px]">
           {block.caption}
         </figcaption>
       )}
@@ -83,14 +81,14 @@ function ImgPairBlockRenderer({ block }: { block: ImgPairBlock }) {
 
   return (
     <figure className="-mx-4 1024:mx-0">
-      <div className="flex gap-1 sm:gap-2">
+      <div className="grid grid-cols-2 gap-2 sm:gap-3">
         <PublicImage
           src={block.imageOne.url}
           alt={alt1}
           width={720}
           height={960}
           sizes="(min-width: 1024px) 436px, (min-width: 768px) 376px, 50vw"
-          className="w-1/2 aspect-[3/4] object-cover"
+          className="w-full aspect-[3/4] object-cover"
         />
         <PublicImage
           src={block.imageTwo.url}
@@ -98,7 +96,7 @@ function ImgPairBlockRenderer({ block }: { block: ImgPairBlock }) {
           width={720}
           height={960}
           sizes="(min-width: 1024px) 436px, (min-width: 768px) 376px, 50vw"
-          className="w-1/2 aspect-[3/4] object-cover"
+          className="w-full aspect-[3/4] object-cover"
         />
       </div>
       <PhotoCreditLine
@@ -109,7 +107,7 @@ function ImgPairBlockRenderer({ block }: { block: ImgPairBlock }) {
         className="px-4 pt-2 1024:px-0"
       />
       {block.caption && (
-        <figcaption className="px-4 pt-2 text-[11px] italic text-foreground/50 1024:px-0 sm:text-[12px]">
+        <figcaption className="px-4 pt-2 font-display text-[14px] leading-relaxed text-foreground/70 1024:px-0 sm:text-[15px]">
           {block.caption}
         </figcaption>
       )}
@@ -124,7 +122,7 @@ function ImgTrioBlockRenderer({ block }: { block: ImgTrioBlock }) {
 
   return (
     <figure className="-mx-4 1024:mx-0">
-      <div className="grid grid-cols-1 gap-1 sm:grid-cols-3 sm:gap-2">
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-3 sm:gap-3">
         {images.map((image, index) => (
           <PublicImage
             key={`${image.id}-${index}`}
@@ -142,7 +140,7 @@ function ImgTrioBlockRenderer({ block }: { block: ImgTrioBlock }) {
         className="px-4 pt-2 1024:px-0"
       />
       {block.caption && (
-        <figcaption className="px-4 pt-2 text-[11px] italic text-foreground/50 1024:px-0 sm:text-[12px]">
+        <figcaption className="px-4 pt-2 font-display text-[14px] leading-relaxed text-foreground/70 1024:px-0 sm:text-[15px]">
           {block.caption}
         </figcaption>
       )}
@@ -150,34 +148,20 @@ function ImgTrioBlockRenderer({ block }: { block: ImgTrioBlock }) {
   )
 }
 
-/**
- * Editorial blocks.
- *
- * Not cards. The column is paper held by type, hairlines and whitespace; the
- * only framed object on an article is the header. Each block interrupts the
- * reading column as type:
- *   - a sans kicker with a trailing hairline (`EditorialLabelRule`),
- *   - accent blue for labels and ticks (see `--accent` in foundations.css),
- *   - Playfair at reading size, left-aligned on the same grid as the prose.
- *
- * Pull quote is the one ornamental beat (double-rule diamond). "In The Know"
- * is the one change of ground: a `--paper-accent` wash, no border.
- *
- * Vertical air uses padding, not margin -- the parent `space-y-*` already
- * owns the gap between blocks, and `my-*` loses the fight with it.
+/** Editorial interruptions share the prose grid, readable labels and quiet rules.
+ * Warm paper distinguishes practical advice; quotes get space rather than ornaments.
  */
 
 function KeyTakeawayBlockRenderer({ block }: { block: KeyTakeawayBlock }) {
   return (
     <aside className="py-4 sm:py-5">
-      <EditorialLabelRule className="mb-5">
-        {block.label ?? 'Key Takeaways'}
+      <EditorialLabelRule reading className="mb-5">
+        {block.label ?? 'Key takeaways'}
       </EditorialLabelRule>
-      <ul className="flex flex-col gap-3.5 sm:gap-4">
+      <ul className="list-disc space-y-3 pl-5 marker:text-accent">
         {block.items.map((item, index) => (
-          <li key={item.id ?? `${index}-${item.text}`} className="flex gap-3 text-foreground">
-            <EditorialTick className="text-accent" />
-            <span className="font-display text-[15px] leading-[1.72] sm:text-[18px] sm:leading-[1.78]">
+          <li key={item.id ?? `${index}-${item.text}`} className="pl-1 text-foreground">
+            <span className="font-display text-[17px] leading-[1.7] sm:text-[18px] sm:leading-[1.78]">
               <InlineMarkdown text={item.text} />
             </span>
           </li>
@@ -190,26 +174,21 @@ function KeyTakeawayBlockRenderer({ block }: { block: KeyTakeawayBlock }) {
 
 function PullQuoteBlockRenderer({ block }: { block: PullQuoteBlock }) {
   return (
-    <blockquote className="py-8 text-foreground sm:py-12">
-      <EditorialRule className="mx-auto max-w-[18ch] text-foreground/50" />
-      <p className="my-8 text-center font-display text-[26px] font-normal italic leading-[1.22] sm:my-10 sm:text-[34px] sm:leading-[1.18]">
+    <blockquote className="border-y border-foreground/20 py-7 text-foreground sm:py-9">
+      <p className="max-w-[32ch] font-display text-[24px] leading-[1.4] sm:text-[30px] sm:leading-[1.4]">
         &ldquo;<InlineMarkdown text={block.quote} />&rdquo;
       </p>
-      <EditorialRule className="mx-auto max-w-[18ch] text-foreground/50" />
     </blockquote>
   )
 }
 
 function InTheKnowBlockRenderer({ block }: { block: InTheKnowBlock }) {
   return (
-    // The one tinted surface. A wash rather than a card: no border, and it
-    // bleeds past the column edge on narrow screens so it reads as a change of
-    // ground. Type stays on the same inset as the prose.
-    <aside className="-mx-4 bg-paper-accent px-4 py-8 sm:mx-0 sm:px-0 sm:py-9">
-      <EditorialLabelRule className="mb-4">
-        {block.label ?? 'In The Know'}
+    <aside className="bg-paper px-5 py-6 sm:px-7 sm:py-7">
+      <EditorialLabelRule reading className="mb-4">
+        {block.label ?? 'In the know'}
       </EditorialLabelRule>
-      <p className="font-display text-[15px] leading-[1.72] text-foreground sm:text-[18px] sm:leading-[1.78]">
+      <p className="font-display text-[17px] leading-[1.7] text-foreground sm:text-[18px] sm:leading-[1.78]">
         <InlineMarkdown text={block.text} />
       </p>
     </aside>
@@ -219,11 +198,11 @@ function InTheKnowBlockRenderer({ block }: { block: InTheKnowBlock }) {
 function HighlightCalloutBlockRenderer({ block }: { block: HighlightCalloutBlock }) {
   return (
     // A marginal note: one accent hairline in the gutter, no fill, no frame.
-    <aside className="border-l-2 border-accent py-1 pl-4 sm:pl-5">
-      <p className={`mb-2.5 text-accent ${editorialKickerClass}`}>
-        {block.label ?? 'Editor Note'}
+    <aside className="border-l border-accent py-2 pl-5 sm:pl-6">
+      <p className={`mb-2.5 text-accent ${editorialReadingLabelClass}`}>
+        {block.label ?? "Editor’s note"}
       </p>
-      <p className="font-display text-[16px] font-normal italic leading-[1.55] text-foreground sm:text-[19px] sm:leading-[1.5]">
+      <p className="font-display text-[17px] font-normal leading-[1.7] text-foreground sm:text-[18px] sm:leading-[1.78]">
         <InlineMarkdown text={block.text} />
       </p>
     </aside>
@@ -233,7 +212,7 @@ function HighlightCalloutBlockRenderer({ block }: { block: HighlightCalloutBlock
 function FaqBlockRenderer({ block }: { block: FaqBlock }) {
   return (
     <section className="py-4 sm:py-5">
-      <EditorialLabelRule className="mb-1">
+      <EditorialLabelRule reading className="mb-1">
         {block.title ?? block.label ?? 'FAQ'}
       </EditorialLabelRule>
       <dl>
@@ -242,10 +221,10 @@ function FaqBlockRenderer({ block }: { block: FaqBlock }) {
             key={item.id}
             className={index === 0 ? 'py-5' : 'border-t border-foreground/12 py-5'}
           >
-            <dt className="font-display text-[16px] font-semibold leading-[1.35] text-foreground sm:text-[18px]">
+            <dt className="font-display text-[18px] font-semibold leading-[1.4] text-foreground sm:text-[20px]">
               <InlineMarkdown text={item.question} />
             </dt>
-            <dd className="mt-1.5 font-display text-[15px] leading-[1.72] text-foreground/70 sm:text-[17px] sm:leading-[1.7]">
+            <dd className="mt-1.5 font-display text-[17px] leading-[1.7] text-foreground/85 sm:text-[18px] sm:leading-[1.78]">
               <InlineMarkdown text={item.answer} />
             </dd>
           </div>
