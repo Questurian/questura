@@ -8,6 +8,7 @@
     "build": "pnpm run sync:flags && next build --webpack && node scripts/scan-client-bundle.mjs",
     "scan:bundle": "node scripts/scan-client-bundle.mjs",
     "check:first-load-js": "node scripts/check-first-load-js.mjs",
+    "check:worker-runtime": "node scripts/check-worker-runtime.mjs",
     "check:global-css": "node scripts/check-global-css-boundaries.mjs",
     "check:structured-data": "node scripts/check-structured-data.mjs",
     "start": "next start",
@@ -30,7 +31,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@netlify/plugin-nextjs": "^5.14.5",
-    "@opennextjs/cloudflare": "1.20.9",
+    "@opennextjs/cloudflare": "1.20.13",
     "@tailwindcss/postcss": "^4",
     "@types/google.maps": "^3.64.0",
     "@types/node": "^20",
@@ -41,6 +42,6 @@
     "eslint-plugin-react-hooks": "^5.2.0",
     "tailwindcss": "^4",
     "typescript": "^5",
-    "wrangler": "4.136.2"
+    "wrangler": "4.148.0"
   }
 }

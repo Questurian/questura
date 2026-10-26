@@ -17,7 +17,8 @@ CI passes on a `main` commit:
 3. **Website** (Cloudflare Worker). Only after the API succeeded or had
    nothing to do. Builds with `opennextjs-cloudflare build` from a clean
    checkout (no `.env` files: every baked-in value is in the workflow),
-   scans the upload for localhost addresses, deploys, and waits until
+   scans the upload for localhost addresses, starts the built Worker locally to
+   check dynamic health and unsigned webhook rejection, deploys, and waits until
    `www.questurian.com/api/health` names the commit.
 4. **Smoke.** Home, a city page, `/join`, both health endpoints.
 
@@ -67,6 +68,44 @@ Why tokens in GitHub are acceptable in a public repo: anyone who can push to
 what auto-deploy means. The environment rule keeps the tokens away from
 everything that is not `main`. The database and the Stripe key still never go
 in a GitHub workflow.
+
+## Replace a revoked Railway deploy token
+
+For an existing installation, use this focused repair instead of repeating
+the full setup wizard:
+
+```bash
+python3 apps/questura/scripts/restore-railway-deploy-token.py
+```
+
+On macOS, double-click `apps/questura/scripts/restore-railway-deploy-token.command`
+to open the same hidden prompt in Terminal.
+
+In project **questura → Settings → Tokens**, create a **new project token**
+named `github-deploy-replacement`, environment **production**. Copy its complete
+value into the script's hidden prompt and press Enter. Old rows marked
+invalid, including `github-deploy` and `questura-dashboard`, cannot be reused.
+Only the replacement deploy token is needed here; do not paste an account token.
+
+The script checks the exact project/environment with Railway before writing.
+It then atomically updates `RAILWAY_DEPLOY_TOKEN` in
+`~/.questura-vault/deploy.env` (folder 700, file 600, other values preserved)
+and sets GitHub's existing **production** secret `RAILWAY_TOKEN` through stdin.
+No token is printed, passed in process arguments, or committed to this repo.
+It does not edit application variables, Stripe settings, other keys, or start
+a deployment. If GitHub sync fails, the validated token stays in the vault.
+
+To sync that saved token later, without pasting again:
+
+```bash
+python3 apps/questura/scripts/restore-railway-deploy-token.py --sync-saved
+```
+
+`--check` performs a read-only validation. It can verify GitHub secret metadata,
+but GitHub does not expose the encrypted value for comparison. `--vault-only`
+saves a validated replacement locally without updating GitHub. After a
+successful sync, rerun the failed Deploy workflow through GitHub Actions;
+do not deploy a second copy manually.
 
 ## When Railway settings or variables change
 
