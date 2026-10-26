@@ -16,15 +16,15 @@ const read = (name) => readFileSync(resolve(clientRoot, name), 'utf8')
  */
 
 // Keep the Worker adapter paired with a pinned, supported Next release.
-// Cloudflare 1.20.9 accepts Next >=16.3.8 and Wrangler ^4.125.0.
+// Cloudflare 1.20.13 accepts Next >=16.4.1 and requires Wrangler ^4.148.0.
 test('the adapter and Next are pinned to a compatible pair', () => {
   assert.equal(pkg.dependencies.next, '16.4.3')
   assert.equal(
     pkg.devDependencies['@opennextjs/cloudflare'],
-    '1.20.9',
+    '1.20.13',
     'Exact, not caret: each adapter release moves its Next range. Check its peerDependencies against the pinned Next before moving it.',
   )
-  assert.equal(pkg.devDependencies.wrangler, '4.136.2')
+  assert.equal(pkg.devDependencies.wrangler, '4.148.0')
 })
 
 // The October 24 deploy failed despite green CI: OpenNext checks the current

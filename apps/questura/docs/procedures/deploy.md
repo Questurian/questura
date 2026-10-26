@@ -17,7 +17,8 @@ CI passes on a `main` commit:
 3. **Website** (Cloudflare Worker). Only after the API succeeded or had
    nothing to do. Builds with `opennextjs-cloudflare build` from a clean
    checkout (no `.env` files: every baked-in value is in the workflow),
-   scans the upload for localhost addresses, deploys, and waits until
+   scans the upload for localhost addresses, starts the built Worker locally to
+   check dynamic health and unsigned webhook rejection, deploys, and waits until
    `www.questurian.com/api/health` names the commit.
 4. **Smoke.** Home, a city page, `/join`, both health endpoints.
 

@@ -201,6 +201,7 @@ jobs:
           NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_ciPlaceholderNotARealKey0000 \
             pnpm exec opennextjs-cloudflare build
           pnpm scan:bundle
+          pnpm check:worker-runtime
 
       - name: Stack logs
         if: ${{ failure() }}
