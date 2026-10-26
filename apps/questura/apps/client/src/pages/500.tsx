@@ -1,4 +1,5 @@
 import Head from 'next/head';
+import type { PageConfig } from 'next';
 
 /**
  * What a reader gets when the server cannot render a page at all.
@@ -22,11 +23,10 @@ import Head from 'next/head';
  * No JavaScript at all. The page needs none (plain links), and Next's Pages
  * Router runtime, once loaded on an error page, keeps probing the failed
  * address (`HEAD /_next/data/…`), adding load to a page that already failed.
- * `amp: false` is the default; it is here because Next's page-config type
- * only accepts an object sharing a key with it, and it does not list the
- * (still honoured) `unstable_runtimeJS`.
+ * Next 16 removed AMP configuration. Declare the still-honoured runtime
+ * switch alongside PageConfig so route validation retains the public type.
  */
-export const config = { amp: false, unstable_runtimeJS: false };
+export const config: PageConfig & { unstable_runtimeJS: boolean } = { unstable_runtimeJS: false };
 
 const INK = '#1A1A1A';
 const GROUND = '#F5F0E8';

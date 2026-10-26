@@ -1,7 +1,7 @@
 "use client";
 
 import { Check } from 'lucide-react';
-import { PasswordRequirements } from '../lib/auth-utils';
+import { validatePasswordRequirements, type PasswordRequirements } from '../lib/auth-utils';
 
 interface PasswordStrengthIndicatorProps {
   requirements: PasswordRequirements;
@@ -40,4 +40,9 @@ export default function PasswordStrengthIndicator({ requirements }: PasswordStre
       ))}
     </ul>
   );
+}
+
+/** Password policy loads with the strength UI, rather than the form shell. */
+export function PasswordStrengthForInput({ password }: { password: string }) {
+  return <PasswordStrengthIndicator requirements={validatePasswordRequirements(password)} />;
 }

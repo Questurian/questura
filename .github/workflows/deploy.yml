@@ -213,6 +213,10 @@ jobs:
         working-directory: apps/questura/apps/client
         run: pnpm scan:bundle
 
+      - name: Local Worker runtime smoke before publishing
+        working-directory: apps/questura/apps/client
+        run: pnpm check:worker-runtime
+
       - name: Deploy
         working-directory: apps/questura/apps/client
         env:

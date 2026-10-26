@@ -18,14 +18,15 @@ import { mapAccessFor } from '@/features/articles/lib/mapAccess'
 import { GatedBodySkeleton, GatedLoadError } from '@/features/articles/components/GatedStates'
 import type { GateState } from '@/features/articles/lib/gate'
 import { useGatedFullArticle } from '@/features/articles/lib/useGatedFullArticle'
-import type { ListicleFooterLinks } from '@/features/articles/lib/fetchListicleFooterLinks'
 import type { RelatedMapsArticleTeaser } from '@/features/articles/lib/fetchRelatedMapsArticles'
 import type { ListicleItineraryArticle } from '@/features/articles/types/itineraryListicle'
 
 interface ItineraryArticleLayoutProps {
+  header: ReactNode
+  authorBanner: ReactNode
   article: ListicleItineraryArticle
   relatedArticles: RelatedMapsArticleTeaser[]
-  footerLinks?: ListicleFooterLinks | null
+  footer?: ReactNode
   country: string
   city?: string | null
   /** `readGate(article)`, read on the server. */
@@ -40,8 +41,10 @@ interface ItineraryArticleLayoutProps {
 
 export function ItineraryArticleLayout({
   article,
+  header,
+  authorBanner,
   relatedArticles,
-  footerLinks,
+  footer,
   country,
   city,
   gate,
@@ -152,12 +155,14 @@ export function ItineraryArticleLayout({
     <ListicleMapSyncProvider points={points} days={mapDays} access={access} teaserKey={`itineraries:${article.id}`}>
       <ListicleArticleLayout
         relatedArticles={relatedArticles}
-        footerLinks={footerLinks}
+        footer={footer}
         country={country}
         city={city}
       >
         <ItineraryListicleArticlePage
           article={effectiveArticle}
+          header={header}
+          authorBanner={authorBanner}
           days={days}
           selectedDayIndex={dayIndex}
           onSelectDay={setSelectedDayIndex}

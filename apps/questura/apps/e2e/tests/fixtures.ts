@@ -262,10 +262,13 @@ export async function expectCacheCopyKept(context: BrowserContext) {
   expect(names.some((name) => name.includes('questura_visitor.session_data')), `session cache copy in ${names}`).toBe(true)
 }
 
-/** Signs out through the user menu and waits for the signed-out header. */
+/** Sign-out replaces the document. Wait for that navigation before the next journey step. */
 export async function signOut(page: Page) {
   await page.getByRole('button', { name: 'Open user menu' }).locator('visible=true').first().click()
-  await page.getByRole('button', { name: 'Sign out' }).or(page.getByRole('link', { name: 'Sign out' })).first().click()
+  await Promise.all([
+    page.waitForURL((url) => url.pathname === '/', { waitUntil: 'load' }),
+    page.getByRole('button', { name: 'Sign out' }).or(page.getByRole('link', { name: 'Sign out' })).first().click(),
+  ])
   await expect(page.getByRole('button', { name: 'Open user menu' }).locator('visible=true')).toHaveCount(0)
 }
 

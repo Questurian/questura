@@ -29,7 +29,7 @@ test('the switcher is loaded only behind the development check', () => {
   const source = read('./DevTools.tsx')
   assert.match(
     source,
-    /process\.env\.NODE_ENV === "development"\s*\?\s*dynamic\(\(\) => import\("\.\/DevMembershipSwitcher"\)/,
+    /process\.env\.NODE_ENV === "development"\s*\?\s*lazy\(\(\) => import\("\.\/DevMembershipSwitcher"\)/,
   )
 })
 

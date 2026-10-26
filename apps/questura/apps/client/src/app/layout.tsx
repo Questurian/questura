@@ -10,7 +10,6 @@ import { DEFAULT_LOCALE } from "@/lib/i18n/locales";
 import { IMAGE_CDN_ORIGIN } from "@/lib/media/imageCdnOrigin";
 import { NavigationFeedback } from "@/components/navigation/NavigationFeedback";
 import { WebVitals } from "@/components/observability/WebVitals";
-import DevTools from "@/features/DevTools/DevTools";
 import { IDENTITY_HINT_SCRIPT } from "@/lib/user/identityHint";
 import { NAV_THEME_SCRIPT } from "@/features/Navigation/lib/navTheme";
 import { getBackendUrl } from "@/lib/api/api-config";
@@ -56,6 +55,9 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const DevTools = process.env.NODE_ENV === 'development'
+    ? (await import('@/features/DevTools/DevTools')).default
+    : null;
   return (
     // The pre-paint scripts below set `data-identity` and `data-nav-theme`
     // before React hydrates.
@@ -84,7 +86,7 @@ export default async function RootLayout({
         </div>
         <NavigationFeedback />
         <WebVitals />
-        <DevTools />
+        {DevTools ? <DevTools /> : null}
       </body>
     </html>
   );

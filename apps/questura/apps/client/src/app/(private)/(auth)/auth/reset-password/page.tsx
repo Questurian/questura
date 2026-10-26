@@ -1,11 +1,10 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from 'react';
+import { lazy, Suspense, useEffect, useState, type FormEvent } from 'react';
 import Link from 'next/link';
 
 import { post } from '@/lib/api';
-import { isPasswordValid, validatePasswordRequirements } from '@/features/Auth/lib/auth-utils';
-import PasswordStrengthIndicator from '@/features/Auth/components/PasswordStrengthIndicator';
+const PasswordStrengthIndicator = lazy(() => import('@/features/Auth/components/PasswordStrengthIndicator').then((module) => ({ default: module.PasswordStrengthForInput })));
 import {
   AuthNotice,
   Spinner,
@@ -93,6 +92,7 @@ export default function ResetPasswordPage() {
       return;
     }
 
+    const { isPasswordValid } = await import('@/features/Auth/lib/auth-utils');
     if (!isPasswordValid(newPassword)) {
       setError('Password must be at least 8 characters with uppercase, number, and symbol.');
       return;
@@ -141,7 +141,7 @@ export default function ResetPasswordPage() {
                 disabled={pending}
                 autoFocus
               />
-              <PasswordStrengthIndicator requirements={validatePasswordRequirements(newPassword)} />
+              <Suspense fallback={null}><PasswordStrengthIndicator password={newPassword} /></Suspense>
             </div>
             <NewPasswordField
               label="Confirm new password"

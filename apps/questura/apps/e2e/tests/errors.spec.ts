@@ -38,13 +38,17 @@ test('journey 10: an article the API cannot serve (503) shows the error page, no
   // Never prerendered, so the page is put together on demand, from the API.
   const article = `/zz-launch/harbor/food-and-drink/api-down-${suffix()}`
   allowProblems(page, new RegExp(`^http 500: GET \\S+${article}$`), 'the page this journey breaks answers 500')
+  // Next 16 delivers an on-demand RSC render failure to app/error.tsx and
+  // logs the redacted server error in the browser. Permit only that expected
+  // error on the one deliberately broken URL; other console failures fail.
+  allowProblems(page, new RegExp(`^console: (?:Error: Minified React error #441;[^\\n]*|Error) \\(on ${article}\\)$`), 'the deliberately failed Server Component render')
   await edgeFault({ status: 503, match: encodeURIComponent(article) })
   try {
     const response = await page.goto(article)
     expect(response?.status()).toBe(500)
     await expect(page.getByRole('heading', { name: 'Something went wrong' })).toBeVisible()
     await expect(page.getByText('This page could not be shown just now.')).toBeVisible()
-    await expect(page.getByRole('link', { name: 'Try again' })).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Try again' })).toBeVisible()
     await expect(page.getByRole('link', { name: 'Go to the homepage' })).toHaveAttribute('href', '/')
     // Not blank, and not Next's bare built-in page.
     await expect(page.getByText('Internal Server Error')).toHaveCount(0)
@@ -55,6 +59,8 @@ test('journey 10: an article the API cannot serve (503) shows the error page, no
 
   // Once the API is back the same address is an ordinary 404 again.
   allowProblems(page, new RegExp(`^http 404: GET \\S+${article}(\\?_rsc=\\S+)?$`), 'with the API back, the made-up article is missing')
+  await page.getByRole('button', { name: 'Try again' }).click()
+  await expect(page.getByRole('heading', { name: '404', exact: true })).toBeVisible()
   expect((await page.goto(article))?.status()).toBe(404)
 })
 

@@ -25,6 +25,9 @@ type OrnamentProps = {
 export const editorialKickerClass =
   'font-[family-name:var(--font-dm-sans)] text-[10px] font-semibold uppercase leading-none tracking-[0.16em] sm:text-[11px]'
 
+export const editorialReadingLabelClass =
+  'font-[family-name:var(--font-dm-sans)] text-[13px] font-semibold leading-[1.4] tracking-normal sm:text-[14px]'
+
 function Rail(): JSX.Element {
   return (
     <div className="box-border min-h-[3px] flex-1 border-x-0 border-b-0 border-t-[3px] border-double border-t-current" />
@@ -78,14 +81,16 @@ export function EditorialLabelRule({
   children,
   toneClassName = 'text-accent',
   className = '',
+  reading = false,
 }: {
+  reading?: boolean
   children: ReactNode
   toneClassName?: string
   className?: string
 }): JSX.Element {
   return (
     <div className={`flex items-center gap-3 ${className}`}>
-      <span className={`shrink-0 ${editorialKickerClass} ${toneClassName}`}>
+      <span className={`min-w-0 ${reading ? editorialReadingLabelClass : `shrink-0 ${editorialKickerClass}`} ${toneClassName}`}>
         {children}
       </span>
       <div aria-hidden="true" className="h-px min-w-8 flex-1 bg-foreground/18" />

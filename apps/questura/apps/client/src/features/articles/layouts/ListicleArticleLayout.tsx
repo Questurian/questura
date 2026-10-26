@@ -1,13 +1,11 @@
 'use client'
 
-import type { CSSProperties, JSX } from 'react'
+import type { CSSProperties, JSX, ReactNode } from 'react'
 import dynamic from 'next/dynamic'
 import { LISTICLE_MAP_PILL_CLEARANCE } from '@/features/articles/components/ListicleMapModes'
-import { ListicleArticleFooter } from '@/features/articles/components/ListicleArticleFooter'
 import { useListicleMapSync } from '@/features/articles/components/ListicleMapSync'
 import { MapPanel } from '@/features/articles/components/MapPanel'
 import { RelatedListicleShelf } from '@/features/articles/components/RelatedListicleShelf'
-import type { ListicleFooterLinks } from '@/features/articles/lib/fetchListicleFooterLinks'
 import type { RelatedMapsArticleTeaser } from '@/features/articles/lib/fetchRelatedMapsArticles'
 import { useIsDesktopMap } from '@/features/articles/lib/useIsDesktopMap'
 import { useDevStore } from '@/lib/stores/devStore'
@@ -16,7 +14,7 @@ interface ListicleArticleLayoutProps {
   children: JSX.Element
   relatedArticles: RelatedMapsArticleTeaser[]
   /** Links for the foot of the article; the list is the last thing above it. */
-  footerLinks?: ListicleFooterLinks | null
+  footer?: ReactNode
   country: string
   city?: string | null
   format?: 'maps' | 'itinerary'
@@ -44,7 +42,7 @@ const listicleLayoutStyle = {
 export function ListicleArticleLayout({
   children,
   relatedArticles,
-  footerLinks,
+  footer,
   country,
   city,
   format = 'itinerary',
@@ -136,13 +134,7 @@ export function ListicleArticleLayout({
             </div>
           )}
         </div>
-        {footerLinks ? (
-          <ListicleArticleFooter
-            links={footerLinks}
-            country={country}
-            city={city}
-          />
-        ) : null}
+        {footer}
         {showMapSheet ? (
           <div
             aria-hidden="true"

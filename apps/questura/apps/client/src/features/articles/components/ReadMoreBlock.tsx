@@ -5,13 +5,14 @@ export function ReadMoreBlockRenderer({ block }: { block: ReadMoreBlock }) {
   if (!block.title?.trim() || !isReadMoreUrl(block.url)) return null
 
   return (
-    <aside className="my-7 min-w-0 sm:my-9">
+    <aside className="min-w-0 border-y border-foreground/20 py-5">
       <a
         href={block.url}
         title={block.title}
-        className="article-read-more inline-block max-w-full truncate font-mono font-bold uppercase leading-snug text-accent underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
+        className="article-read-more block max-w-full break-words font-display leading-relaxed text-accent underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
       >
-        {`READ MORE: ${block.title}`}
+        <span className="mb-1 block font-sans text-[13px] font-medium text-foreground/65">Read next</span>
+        {block.title}
       </a>
     </aside>
   )

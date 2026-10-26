@@ -5,9 +5,10 @@
   "scripts": {
     "sync:flags": "node scripts/sync-flag-assets.mjs",
     "dev": "pnpm run sync:flags && node scripts/show-commands.cjs && next dev --turbopack -p 3000",
-    "build": "pnpm run sync:flags && next build && node scripts/scan-client-bundle.mjs",
+    "build": "pnpm run sync:flags && next build --webpack && node scripts/scan-client-bundle.mjs",
     "scan:bundle": "node scripts/scan-client-bundle.mjs",
     "check:first-load-js": "node scripts/check-first-load-js.mjs",
+    "check:worker-runtime": "node scripts/check-worker-runtime.mjs",
     "check:global-css": "node scripts/check-global-css-boundaries.mjs",
     "check:structured-data": "node scripts/check-structured-data.mjs",
     "start": "next start",
@@ -21,7 +22,7 @@
     "@tanstack/react-query-devtools": "^5.90.2",
     "flag-icons": "7.5.0",
     "lucide-react": "^0.553.0",
-    "next": "15.5.27",
+    "next": "16.4.3",
     "next-intl": "^4.11.2",
     "react": "19.1.0",
     "react-dom": "19.1.0",
@@ -30,17 +31,17 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@netlify/plugin-nextjs": "^5.14.5",
-    "@opennextjs/cloudflare": "1.20.9",
+    "@opennextjs/cloudflare": "1.20.13",
     "@tailwindcss/postcss": "^4",
     "@types/google.maps": "^3.64.0",
     "@types/node": "^20",
     "@types/react": "^19.2.10",
     "@types/react-dom": "^19.2.3",
     "eslint": "^9",
-    "eslint-config-next": "15.5.26",
+    "eslint-config-next": "16.4.3",
     "eslint-plugin-react-hooks": "^5.2.0",
     "tailwindcss": "^4",
     "typescript": "^5",
-    "wrangler": "4.136.2"
+    "wrangler": "4.148.0"
   }
 }

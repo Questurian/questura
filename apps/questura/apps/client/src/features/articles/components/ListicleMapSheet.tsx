@@ -251,7 +251,8 @@ export function ListicleMapSheet({
       <div
         data-listicle-map-sheet=""
         id="listicle-map-sheet-panel"
-        className={`fixed inset-x-0 top-0 z-50 flex flex-col bg-background 1024:hidden ${
+        // Page UI stays below the navbar (40) and site dialogs (50).
+        className={`fixed inset-x-0 top-0 z-30 flex flex-col bg-background 1024:hidden ${
           mode === 'split' ? 'border-t-[3px] border-double border-foreground/55' : ''
         }`}
         style={{ height, transform: `translateY(${translateY}px)`, transition }}
@@ -280,7 +281,7 @@ export function ListicleMapSheet({
         data-listicle-map-sheet=""
         data-listicle-map-controls=""
         aria-hidden={!showControls}
-        className="pointer-events-none fixed inset-x-0 bottom-0 z-[60] flex flex-col items-center gap-2.5 px-3 1024:hidden"
+        className="pointer-events-none fixed inset-x-0 bottom-0 z-[35] flex flex-col items-center gap-2.5 px-3 1024:hidden"
         style={{
           paddingBottom: 'calc(1rem + env(safe-area-inset-bottom))',
           transform: showControls
