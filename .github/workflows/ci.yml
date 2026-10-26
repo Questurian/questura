@@ -52,6 +52,9 @@ jobs:
       - name: Softprod shell suites
         run: pnpm --dir apps/questura/apps/server run test:softprod
 
+      - name: Private deploy-token repair tests (stdlib, no network)
+        run: python3 -m unittest discover -s apps/questura/scripts -p 'test_restore_railway_deploy_token.py' -v
+
   questura-server:
     name: Questura server tests
     runs-on: ubuntu-latest
