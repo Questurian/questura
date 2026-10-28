@@ -140,35 +140,6 @@ describe('sanitizeHotelCards', () => {
     expect(blocks.map((block) => block.hotel)).toEqual([null, null, null])
     expect(find).not.toHaveBeenCalled()
   })
-
-  it('reduces a Hotel List to its public cards in order, leaving out hidden ones', async () => {
-    const blocks: Array<Record<string, unknown>> = [
-      {
-        blockType: 'hotel-list',
-        label: '  ',
-        display: 'stack',
-        hotels: [
-          hotelDoc({ id: 7, title: 'Second', gallery: [{ image: 41 }] }),
-          hotelDoc({ status: 'draft' }),
-          12,
-          hotelDoc({ id: 3, title: 'Third', gallery: [] }),
-        ],
-      },
-      { blockType: 'hotel-list', display: 'grid', hotels: null },
-    ]
-    const { payload, find } = payloadWithMediaSets([
-      { id: 41, alt_text: '', variants: { wide: { url: 'https://cdn.example/41_wide.webp', width: 1600, height: 900 } } },
-    ])
-
-    await sanitizeHotelCards(blocks, payload)
-
-    const hotels = blocks[0].hotels as Array<Record<string, unknown>>
-    expect(hotels.map((hotel) => hotel.title)).toEqual(['Second', 'Third'])
-    expect(hotels[0].image).toMatchObject({ url: 'https://cdn.example/41_wide.webp', alt: 'Second' })
-    expect(blocks[0]).toMatchObject({ label: null, display: 'stack' })
-    expect(blocks[1]).toMatchObject({ hotels: [], label: null, display: 'carousel' })
-    expect(find).toHaveBeenCalledTimes(1)
-  })
 })
 
 describe('serializeArticleByCollection hotel cards', () => {

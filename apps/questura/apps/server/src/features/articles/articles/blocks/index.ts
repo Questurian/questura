@@ -321,45 +321,36 @@ export const HotelCardBlock: Block = {
 }
 
 /**
- * Hotel List - several saved accommodations kept together in one block
- * (owner, 2026-10-28): a long list is one block to open and edit, not ten
- * Hotel Cards in a row. It draws as the carousel or as the cards stacked;
- * each hotel is read at render time, like the Hotel Card.
+ * Hotel List - several saved stays kept together in one block (owner,
+ * 2026-10-28): a long list is one block to open and edit, not ten cards in a
+ * row. Hotels and Airbnbs mix in one ordered list (owner, 2026-10-28), drawn
+ * as compact rows in one paper box; each stay is read at render time, like
+ * the Hotel and Airbnb Cards. Shown to editors as "Stay List".
  */
 export const HotelListBlock: Block = {
   slug: 'hotel-list',
   interfaceName: 'HotelListBlock',
   labels: {
-    singular: 'Hotel List',
-    plural: 'Hotel Lists',
+    singular: 'Stay List',
+    plural: 'Stay Lists',
   },
   fields: [
     {
       name: 'label',
       type: 'text',
       admin: {
-        description: 'The small blue heading over the list. Empty shows "Hotels".',
+        description: 'The small blue heading over the list. Empty shows "Where to stay".',
       },
     },
     {
-      name: 'display',
-      type: 'select',
-      required: true,
-      defaultValue: 'carousel',
-      options: [
-        { label: 'Carousel', value: 'carousel' },
-        { label: 'Stacked cards', value: 'stack' },
-      ],
-    },
-    {
-      name: 'hotels',
+      name: 'stays',
       type: 'relationship',
-      relationTo: 'accommodations',
+      relationTo: ['accommodations', 'airbnbs'],
       hasMany: true,
       required: true,
       minRows: 1,
       admin: {
-        description: 'The hotels to show, in order',
+        description: 'The hotels and Airbnbs to show, in order',
       },
     },
   ],

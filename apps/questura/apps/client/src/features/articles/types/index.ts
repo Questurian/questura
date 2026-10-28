@@ -148,17 +148,23 @@ export type HotelCardBlock = {
   hotel: HotelCard | null
 }
 
+/** One row of a Stay List: a hotel or an Airbnb. */
+export type StayListItem = HotelCard & {
+  kind: 'hotel' | 'airbnb'
+  /** An Airbnb's stars; null for hotels. */
+  rating: number | null
+}
+
 /**
- * Several hotels kept in one block, drawn as the carousel or as stacked
- * cards. Unpublished or gone hotels are already left out of `hotels`.
+ * Hotels and Airbnbs kept in one block (slug `hotel-list`), drawn as compact
+ * rows. Unpublished or gone stays are already left out of `stays`.
  */
 export type HotelListBlock = {
   id: string
   blockType: 'hotel-list'
-  /** The heading over the list; null shows "Hotels". */
+  /** The heading over the list; null shows "Where to stay". */
   label: string | null
-  display: 'carousel' | 'stack'
-  hotels: HotelCard[]
+  stays: StayListItem[]
 }
 
 export type ContentBlock =

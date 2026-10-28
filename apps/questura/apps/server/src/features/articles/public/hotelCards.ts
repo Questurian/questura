@@ -72,7 +72,7 @@ function priceTicks(value: unknown): string | null {
 }
 
 /** The featured photo is the first gallery row; it arrives as an id or a shallow doc. */
-function featuredMediaSetId(hotel: Record<string, unknown>): number | null {
+export function featuredMediaSetId(hotel: Record<string, unknown>): number | null {
   const gallery = hotel.gallery
   if (!Array.isArray(gallery) || gallery.length === 0) return null
   const first = gallery[0]
@@ -80,7 +80,7 @@ function featuredMediaSetId(hotel: Record<string, unknown>): number | null {
   return relationId((first as { image?: unknown }).image)
 }
 
-function toPublicCard(hotel: Record<string, unknown>): PublicHotelCard | null {
+export function toPublicHotelCard(hotel: Record<string, unknown>): PublicHotelCard | null {
   if (hotel.status !== 'published') return null
   const id = relationId(hotel)
   const title = text(hotel.title)
@@ -107,43 +107,16 @@ function toPublicCard(hotel: Record<string, unknown>): PublicHotelCard | null {
 }
 
 /**
- * Hotel Card blocks hold a relationship to an accommodation, Hotel Lists a
- * row of them; reduce each populated one to the public card shape. The routes
- * read with overrideAccess, so an unpublished or deleted accommodation would
- * otherwise leak, along with contact fields the card never shows; a card
- * becomes `hotel: null` and the site skips it, and a list leaves it out. The
- * featured photo sits past the article fetch depth, so its variants are
- * batch-resolved, the same way Airbnb Cards resolve theirs.
+ * Wide-card variants of media sets, keyed by id, in one query. The photos sit
+ * past the article fetch depth, so cards resolve theirs in a batch.
  */
-export async function sanitizeHotelCards(
-  blocks: Array<Record<string, unknown>>,
-  payload?: Payload,
-): Promise<void> {
-  const pending: Array<{ card: PublicHotelCard; mediaSetId: number }> = []
-
-  const toCard = (hotel: unknown): PublicHotelCard | null => {
-    const card =
-      hotel && typeof hotel === 'object' ? toPublicCard(hotel as Record<string, unknown>) : null
-    if (!card) return null
-    const mediaSetId = featuredMediaSetId(hotel as Record<string, unknown>)
-    if (mediaSetId !== null) pending.push({ card, mediaSetId })
-    return card
-  }
-
-  for (const block of blocks) {
-    if (block.blockType === 'hotel-card') {
-      block.hotel = toCard(block.hotel)
-    } else if (block.blockType === 'hotel-list') {
-      const hotels = Array.isArray(block.hotels) ? block.hotels : []
-      block.hotels = hotels.map(toCard).filter((card): card is PublicHotelCard => card !== null)
-      block.label = text(block.label)
-      block.display = block.display === 'stack' ? 'stack' : 'carousel'
-    }
-  }
-
-  if (!payload || pending.length === 0) return
-
-  const uniqueIds = [...new Set(pending.map((entry) => entry.mediaSetId))]
+export async function resolveWideCardImages(
+  payload: Payload,
+  mediaSetIds: number[],
+): Promise<Map<number, PublicHotelCardImage>> {
+  const uniqueIds = [...new Set(mediaSetIds)]
+  const resolvedById = new Map<number, PublicHotelCardImage>()
+  if (uniqueIds.length === 0) return resolvedById
   const mediaSets = await payload.find({
     collection: 'media-sets',
     where: { id: { in: uniqueIds } },
@@ -152,7 +125,6 @@ export async function sanitizeHotelCards(
     overrideAccess: true,
   })
 
-  const resolvedById = new Map<number, PublicHotelCardImage>()
   for (const doc of mediaSets.docs as unknown as Array<Record<string, unknown>>) {
     if (typeof doc.id !== 'number') continue
     const resolved = resolveMediaSetForPlacement(doc, 'wide-card', {
@@ -168,7 +140,41 @@ export async function sanitizeHotelCards(
       ...publicImageAttribution(resolved),
     })
   }
+  return resolvedById
+}
 
+/**
+ * Hotel Card blocks hold a relationship to an accommodation; reduce each
+ * populated one to the public card shape. The routes read with
+ * overrideAccess, so an unpublished or deleted accommodation would otherwise
+ * leak, along with contact fields the card never shows; the card becomes
+ * `hotel: null` and the site skips it. The featured photo sits past the
+ * article fetch depth, so its variants are batch-resolved, the same way
+ * Airbnb Cards resolve theirs. Hotel Lists are `stayLists.ts`.
+ */
+export async function sanitizeHotelCards(
+  blocks: Array<Record<string, unknown>>,
+  payload?: Payload,
+): Promise<void> {
+  const pending: Array<{ card: PublicHotelCard; mediaSetId: number }> = []
+
+  for (const block of blocks) {
+    if (block.blockType !== 'hotel-card') continue
+    const hotel = block.hotel
+    const card =
+      hotel && typeof hotel === 'object' ? toPublicHotelCard(hotel as Record<string, unknown>) : null
+    block.hotel = card
+    if (!card) continue
+    const mediaSetId = featuredMediaSetId(hotel as Record<string, unknown>)
+    if (mediaSetId !== null) pending.push({ card, mediaSetId })
+  }
+
+  if (!payload || pending.length === 0) return
+
+  const resolvedById = await resolveWideCardImages(
+    payload,
+    pending.map((entry) => entry.mediaSetId),
+  )
   for (const { card, mediaSetId } of pending) {
     const resolved = resolvedById.get(mediaSetId)
     if (resolved) card.image = { ...resolved, alt: resolved.alt || card.title }

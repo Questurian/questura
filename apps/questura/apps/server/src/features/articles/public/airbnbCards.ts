@@ -58,7 +58,7 @@ function relationId(ref: unknown): number | null {
 }
 
 /** The gallery's media-set ids in order, each once; rows arrive as ids or shallow docs. */
-function galleryMediaSetIds(airbnb: Record<string, unknown>): number[] {
+export function galleryMediaSetIds(airbnb: Record<string, unknown>): number[] {
   const gallery = airbnb.gallery
   if (!Array.isArray(gallery)) return []
   const ids: number[] = []
@@ -77,7 +77,7 @@ function areaName(locationRef: unknown): string | null {
   return text(location.neighborhoodName) ?? text(location.cityName)
 }
 
-function toPublicCard(airbnb: Record<string, unknown>): PublicAirbnbCard | null {
+export function toPublicAirbnbCard(airbnb: Record<string, unknown>): PublicAirbnbCard | null {
   if (airbnb.status !== 'published') return null
   const id = relationId(airbnb)
   const title = text(airbnb.title)
@@ -120,7 +120,7 @@ export async function sanitizeAirbnbCards(
     const airbnb = block.airbnb
     const card =
       airbnb && typeof airbnb === 'object'
-        ? toPublicCard(airbnb as Record<string, unknown>)
+        ? toPublicAirbnbCard(airbnb as Record<string, unknown>)
         : null
     block.airbnb = card
     if (!card) continue
