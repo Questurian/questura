@@ -197,7 +197,6 @@ export default function MembershipShowcase() {
                 </>
               ),
             }))}
-            choices={CATEGORY_PHOTOS.map((photo) => ({ label: `${photo.category}, photo ${photo.photo}` }))}
           />
         </FeatureRow>
 
@@ -216,7 +215,6 @@ export default function MembershipShowcase() {
               label: spread.label,
               content: <StoryComposition spread={spread} light />,
             }))}
-            choices={CITY_GUIDE_SPREADS.map((spread) => ({ text: spread.choice }))}
           />
         </FeatureRow>
       </section>
@@ -236,7 +234,6 @@ export default function MembershipShowcase() {
               label: `A listicle entry for ${place.name}: restaurant photo, short description and practical details, with its location map.`,
               content: <ListiclePreview place={place} />,
             }))}
-            choices={LISTICLE_PLACES.map((place) => ({ text: place.choice }))}
           />
         </FeatureRow>
 
@@ -254,7 +251,6 @@ export default function MembershipShowcase() {
               label: spread.label,
               content: <StoryComposition spread={spread} light={false} />,
             }))}
-            choices={LOCAL_INTEL_SPREADS.map((spread) => ({ text: spread.choice }))}
           />
         </FeatureRow>
       </section>
