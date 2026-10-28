@@ -22,8 +22,9 @@ const LEAVE_MS = 800;
  * `fade` cross-fades the stills. `stack` is the section mastheads' photo pile:
  * the top print slides off and the rest move up a place.
  *
- * Motion stops for a reader who asks for reduced motion, and while the picture
- * is off screen or the tab is hidden.
+ * A reader who asks for reduced motion still gets the stills in turn, as a
+ * plain cross-fade: no slide, no shuffle (owner, 2026-10-28; the CSS does the
+ * fade). Nothing advances while the picture is off screen or the tab is hidden.
  */
 export default function FeatureSlideshow({
   label,
@@ -38,7 +39,6 @@ export default function FeatureSlideshow({
 }) {
   const [current, setCurrent] = useState(0);
   const [leaving, setLeaving] = useState<number | null>(null);
-  const [paused, setPaused] = useState(false);
   const [onScreen, setOnScreen] = useState(false);
   const [near, setNear] = useState(false);
   const [pageVisible, setPageVisible] = useState(true);
@@ -48,13 +48,6 @@ export default function FeatureSlideshow({
   const count = slides.length;
 
   useEffect(() => {
-    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
-    if (reduced.matches) setPaused(true);
-    const onReducedChange = () => {
-      if (reduced.matches) setPaused(true);
-    };
-    reduced.addEventListener('change', onReducedChange);
-
     const onVisibility = () => setPageVisible(!document.hidden);
     onVisibility();
     document.addEventListener('visibilitychange', onVisibility);
@@ -84,7 +77,6 @@ export default function FeatureSlideshow({
     }
 
     return () => {
-      reduced.removeEventListener('change', onReducedChange);
       document.removeEventListener('visibilitychange', onVisibility);
       observer?.disconnect();
       approach?.disconnect();
@@ -105,12 +97,12 @@ export default function FeatureSlideshow({
   }, [leaving]);
 
   useEffect(() => {
-    if (paused || !onScreen || !pageVisible || count < 2) return;
+    if (!onScreen || !pageVisible || count < 2) return;
     const timer = window.setTimeout(() => show((current + 1) % count, true), interval);
     return () => window.clearTimeout(timer);
     // `show` closes over `current`, which is already a dependency.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [current, paused, onScreen, pageVisible, count, interval]);
+  }, [current, onScreen, pageVisible, count, interval]);
 
   return (
     <div

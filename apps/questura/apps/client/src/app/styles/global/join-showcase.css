@@ -920,9 +920,30 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .feature-still,
-  .feature-pair--categories .category-stack-card,
   .join-closing-cta {
     transition: none;
+  }
+
+  /*
+   * The slideshows still play, as a cross-fade in place: the new still fades
+   * in on top, and the old one drops only once it is covered. The photo pile
+   * shows its top print alone, so nothing moves.
+   */
+  .feature-still,
+  .feature-pair--categories .category-stack-card,
+  .feature-pair--categories .category-stack-card[data-depth] {
+    opacity: 0;
+    visibility: hidden;
+    transform: none;
+    transition:
+      opacity 0s linear 800ms,
+      visibility 0s linear 800ms;
+  }
+
+  .feature-still.is-current,
+  .feature-pair--categories .category-stack-card.is-current {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 800ms ease;
   }
 }
