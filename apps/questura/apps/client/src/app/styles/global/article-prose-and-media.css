@@ -252,15 +252,53 @@
   }
 }
 
+/* Links sit on the words themselves (Eater, Condé Nast Traveler): blue text
+   on a light underline. Hovering washes a pale blue highlight up from the
+   underline, the way The Atlantic marks a link under the pointer. */
 .article-prose a {
   color: var(--accent);
   text-decoration: underline;
+  text-decoration-color: rgb(var(--accent-rgb) / 0.45);
   text-decoration-thickness: 1px;
   text-underline-offset: 3px;
+  background-image: linear-gradient(rgb(var(--accent-rgb) / 0.13), rgb(var(--accent-rgb) / 0.13));
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  background-size: 100% 0;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  transition:
+    background-size 160ms ease,
+    text-decoration-color 160ms ease;
 }
 
-.article-prose a:hover {
-  text-decoration-thickness: 2px;
+.article-prose a:hover,
+.article-prose a:focus-visible {
+  text-decoration-color: var(--accent);
+  background-size: 100% 100%;
+}
+
+/* Read next: the title takes the same highlight as a prose link. */
+.article-read-more-title {
+  background-image: linear-gradient(rgb(var(--accent-rgb) / 0.13), rgb(var(--accent-rgb) / 0.13));
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  background-size: 100% 0;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  transition: background-size 160ms ease;
+}
+
+.article-read-more:hover .article-read-more-title,
+.article-read-more:focus-visible .article-read-more-title {
+  background-size: 100% 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .article-prose a,
+  .article-read-more-title {
+    transition: none;
+  }
 }
 
 /* Maps listicle: tighter rhythm on very small phones; aligns with 380 breakpoint */
