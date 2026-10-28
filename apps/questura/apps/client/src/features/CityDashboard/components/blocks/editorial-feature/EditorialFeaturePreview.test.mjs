@@ -7,15 +7,14 @@ const source = readFileSync(
   'utf8'
 )
 
-test('editorial feature draws rules only at desktop, where the rail sits beside the copy', () => {
-  // Owner, 2026-10-28: below 1024 the copy, the rail and its cards carried
-  // rules desktop never shows. Only the desktop rail rule and its list
-  // dividers stay.
-  assert.doesNotMatch(source, /\b768:border-/)
-  // No unprefixed rule: every border-* below is a 1024: one.
-  assert.doesNotMatch(source, /(?<![:\w-])border-[ytb]\b(?!-)/)
-  assert.match(source, /gap-4 \$\{tone\.railRule\}[^"`]*1024:border-l/)
-  assert.match(source, /\$\{tone\.itemRule\} pb-4 1024:border-b 1024:last:border-b-0/)
+test('editorial feature reserves full-width divider rules for tablet and desktop', () => {
+  // Owner, 2026-10-28: the copy column is not boxed by rules at any width.
+  assert.doesNotMatch(source, /copyRule/)
+  assert.doesNotMatch(source, /justify-center[^"`]*border-y/)
+
+  assert.doesNotMatch(source, /gap-4 border-t /)
+  assert.match(source, /gap-4 \$\{tone\.railRule\}[^"`]*768:border-t/)
+  assert.match(source, /768:pt-6/)
 })
 
 test('dark theme inverts onto the article-header ink band', () => {

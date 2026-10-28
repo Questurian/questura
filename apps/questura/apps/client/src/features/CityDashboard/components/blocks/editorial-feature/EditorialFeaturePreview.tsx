@@ -112,7 +112,7 @@ function RelatedArticle({ article, count, index, tone }: {
     : '1024:grid-cols-[minmax(96px,38%)_1fr]'
 
   return (
-    <article className={`grid min-w-0 gap-3 ${tone.itemRule} pb-4 1024:border-b 1024:last:border-b-0 ${showImage ? imageColumn : 'grid-cols-[2rem_1fr]'}`}>
+    <article className={`grid min-w-0 gap-3 border-b ${tone.itemRule} pb-4 last:border-b-0 ${showImage ? imageColumn : 'grid-cols-[2rem_1fr]'}`}>
       {showImage ? (
         <div className={`aspect-square overflow-hidden ${tone.imageGround} ${square ? '' : '768:aspect-[16/10]'}`}>
           <ArticleImage article={article} square={square} tone={tone} />
@@ -234,7 +234,7 @@ export function EditorialFeaturePreview({
           ) : null}
         </div>
 
-        <div className={`grid content-start gap-4 ${tone.railRule} 768:col-span-2 768:grid-cols-2 1024:col-span-1 1024:grid-cols-1 1024:border-l 1024:pl-6 ${block.totalSlots === 6 ? '1280:grid-cols-1' : ''}`}>
+        <div className={`grid content-start gap-4 ${tone.railRule} 768:col-span-2 768:grid-cols-2 768:border-t 768:pt-6 1024:col-span-1 1024:grid-cols-1 1024:border-l 1024:border-t-0 1024:pl-6 1024:pt-0 ${block.totalSlots === 6 ? '1280:grid-cols-1' : ''}`}>
           {block.items.map((article, index) => (
             <RelatedArticle key={`${article.articlePath ?? article.title}:${index}`}
               article={article} count={block.totalSlots} index={index} tone={tone} />
