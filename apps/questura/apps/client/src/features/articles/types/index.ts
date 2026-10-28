@@ -67,6 +67,11 @@ export type InTheKnowBlock = {
   text: string
 }
 
+/** Legacy API/cache shape; always draws through the In the Know renderer. */
+export type LegacyHighlightCalloutBlock = Omit<InTheKnowBlock, 'blockType'> & {
+  blockType: 'highlight-callout'
+}
+
 export type ReadMoreBlock = {
   id: string
   blockType: 'read-more'
@@ -151,6 +156,7 @@ export type ContentBlock =
   | KeyTakeawayBlock
   | PullQuoteBlock
   | InTheKnowBlock
+  | LegacyHighlightCalloutBlock
   | ReadMoreBlock
   | FaqBlock
   | AirbnbCardBlock

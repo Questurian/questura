@@ -15,6 +15,7 @@ import {
   ImgTrioBlock,
   InTheKnowBlock,
   KeyTakeawayBlock,
+  LegacyHighlightCalloutBlock,
   PullQuoteBlock,
   TextBlock,
 } from '../types'
@@ -184,7 +185,7 @@ function PullQuoteBlockRenderer({ block }: { block: PullQuoteBlock }) {
   )
 }
 
-function InTheKnowBlockRenderer({ block }: { block: InTheKnowBlock }) {
+function InTheKnowBlockRenderer({ block }: { block: InTheKnowBlock | LegacyHighlightCalloutBlock }) {
   return (
     <EditorialBox tone="warm" label={block.label ?? 'In the know'}>
       <p className={editorialBoxCopyClass}>
@@ -228,6 +229,7 @@ export function BlockRenderer({ block }: { block: ContentBlock }) {
     case 'pull-quote':
       return <PullQuoteBlockRenderer block={block} />
     case 'in-the-know':
+    case 'highlight-callout':
       return <InTheKnowBlockRenderer block={block} />
     case 'read-more':
       return <ReadMoreBlockRenderer block={block} />
