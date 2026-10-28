@@ -148,6 +148,19 @@ export type HotelCardBlock = {
   hotel: HotelCard | null
 }
 
+/**
+ * Several hotels kept in one block, drawn as the carousel or as stacked
+ * cards. Unpublished or gone hotels are already left out of `hotels`.
+ */
+export type HotelListBlock = {
+  id: string
+  blockType: 'hotel-list'
+  /** The heading over the list; null shows "Hotels". */
+  label: string | null
+  display: 'carousel' | 'stack'
+  hotels: HotelCard[]
+}
+
 export type ContentBlock =
   | TextBlock
   | ImageBlock
@@ -161,6 +174,7 @@ export type ContentBlock =
   | FaqBlock
   | AirbnbCardBlock
   | HotelCardBlock
+  | HotelListBlock
 
 /**
  * The byline, as served from the Authors collection (ADR-0007). Authorship is

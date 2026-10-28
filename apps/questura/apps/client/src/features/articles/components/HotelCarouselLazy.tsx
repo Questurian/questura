@@ -13,6 +13,6 @@ const HotelCarousel = dynamic(() => import('./HotelCarousel').then((module) => m
   loading: () => <div aria-hidden="true" className="h-[420px] bg-paper sm:h-[460px]" />,
 })
 
-export function HotelCarouselLazy({ hotels }: { hotels: HotelCard[] }): JSX.Element {
-  return <HotelCarousel hotels={hotels} />
+export function HotelCarouselLazy({ hotels, label }: { hotels: HotelCard[]; label?: string }): JSX.Element {
+  return <HotelCarousel hotels={hotels} label={label} />
 }

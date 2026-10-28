@@ -321,6 +321,51 @@ export const HotelCardBlock: Block = {
 }
 
 /**
+ * Hotel List - several saved accommodations kept together in one block
+ * (owner, 2026-10-28): a long list is one block to open and edit, not ten
+ * Hotel Cards in a row. It draws as the carousel or as the cards stacked;
+ * each hotel is read at render time, like the Hotel Card.
+ */
+export const HotelListBlock: Block = {
+  slug: 'hotel-list',
+  interfaceName: 'HotelListBlock',
+  labels: {
+    singular: 'Hotel List',
+    plural: 'Hotel Lists',
+  },
+  fields: [
+    {
+      name: 'label',
+      type: 'text',
+      admin: {
+        description: 'The small blue heading over the list. Empty shows "Hotels".',
+      },
+    },
+    {
+      name: 'display',
+      type: 'select',
+      required: true,
+      defaultValue: 'carousel',
+      options: [
+        { label: 'Carousel', value: 'carousel' },
+        { label: 'Stacked cards', value: 'stack' },
+      ],
+    },
+    {
+      name: 'hotels',
+      type: 'relationship',
+      relationTo: 'accommodations',
+      hasMany: true,
+      required: true,
+      minRows: 1,
+      admin: {
+        description: 'The hotels to show, in order',
+      },
+    },
+  ],
+}
+
+/**
  * All available article blocks
  */
 export const articleBlocks = [
@@ -335,4 +380,5 @@ export const articleBlocks = [
   FAQBlock,
   AirbnbCardBlock,
   HotelCardBlock,
+  HotelListBlock,
 ]

@@ -5,6 +5,7 @@ import { EditorialBox, editorialBoxCopyClass } from './EditorialBox'
 import { InlineMarkdown } from './InlineMarkdown'
 import { AirbnbCardBlockRenderer } from './AirbnbCardBlock'
 import { HotelCardBlockRenderer } from './HotelCardBlock'
+import { HotelListBlockRenderer } from './HotelListBlock'
 import { PhotoCreditLine } from './PhotoCreditLine'
 import { blockPhotoCredit, photoCredit } from '../lib/photoCredit'
 import {
@@ -239,6 +240,8 @@ export function BlockRenderer({ block }: { block: ContentBlock }) {
       return <AirbnbCardBlockRenderer block={block} />
     case 'hotel-card':
       return <HotelCardBlockRenderer block={block} />
+    case 'hotel-list':
+      return <HotelListBlockRenderer block={block} />
     default:
       return null
   }

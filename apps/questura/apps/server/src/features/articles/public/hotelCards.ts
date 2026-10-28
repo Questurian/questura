@@ -107,12 +107,13 @@ function toPublicCard(hotel: Record<string, unknown>): PublicHotelCard | null {
 }
 
 /**
- * Hotel Card blocks hold a relationship to an accommodation; reduce each
- * populated one to the public card shape. The routes read with overrideAccess,
- * so an unpublished or deleted accommodation would otherwise leak, along with
- * contact fields the card never shows; it becomes `hotel: null` and the site
- * skips the card. The featured photo sits past the article fetch depth, so its
- * variants are batch-resolved, the same way Airbnb Cards resolve theirs.
+ * Hotel Card blocks hold a relationship to an accommodation, Hotel Lists a
+ * row of them; reduce each populated one to the public card shape. The routes
+ * read with overrideAccess, so an unpublished or deleted accommodation would
+ * otherwise leak, along with contact fields the card never shows; a card
+ * becomes `hotel: null` and the site skips it, and a list leaves it out. The
+ * featured photo sits past the article fetch depth, so its variants are
+ * batch-resolved, the same way Airbnb Cards resolve theirs.
  */
 export async function sanitizeHotelCards(
   blocks: Array<Record<string, unknown>>,
@@ -120,15 +121,24 @@ export async function sanitizeHotelCards(
 ): Promise<void> {
   const pending: Array<{ card: PublicHotelCard; mediaSetId: number }> = []
 
-  for (const block of blocks) {
-    if (block.blockType !== 'hotel-card') continue
-    const hotel = block.hotel
+  const toCard = (hotel: unknown): PublicHotelCard | null => {
     const card =
       hotel && typeof hotel === 'object' ? toPublicCard(hotel as Record<string, unknown>) : null
-    block.hotel = card
-    if (!card) continue
+    if (!card) return null
     const mediaSetId = featuredMediaSetId(hotel as Record<string, unknown>)
     if (mediaSetId !== null) pending.push({ card, mediaSetId })
+    return card
+  }
+
+  for (const block of blocks) {
+    if (block.blockType === 'hotel-card') {
+      block.hotel = toCard(block.hotel)
+    } else if (block.blockType === 'hotel-list') {
+      const hotels = Array.isArray(block.hotels) ? block.hotels : []
+      block.hotels = hotels.map(toCard).filter((card): card is PublicHotelCard => card !== null)
+      block.label = text(block.label)
+      block.display = block.display === 'stack' ? 'stack' : 'carousel'
+    }
   }
 
   if (!payload || pending.length === 0) return
