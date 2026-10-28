@@ -41,14 +41,22 @@ function cookieAuthRoutesWithoutOriginGuard(): string[] {
   return routeFiles(API_ROOT)
     .filter((file) => {
       const source = readFileSync(file, 'utf8')
-      return source.includes('current-principal') && !source.includes('forbiddenOriginResponse')
+      const sharedGuard = source.match(/import\s*\{\s*devRouteGuard(?:\s+as\s+(\w+))?\s*\}\s*from\s*['"]@\/features\/dev-tools\/dev-route-guard['"]/)
+      const callsSharedGuard = sharedGuard && new RegExp(`\\b${sharedGuard[1] ?? 'devRouteGuard'}\\s*\\(`).test(source)
+      return source.includes('current-principal') && !source.includes('forbiddenOriginResponse') && !callsSharedGuard
     })
     .map((file) => path.relative(API_ROOT, file))
 }
 
 describe('cookie-authenticated API routes', () => {
-  it('all call forbiddenOriginResponse', () => {
+  it('all call forbiddenOriginResponse directly or through the shared dev guard', () => {
     expect(cookieAuthRoutesWithoutOriginGuard()).toEqual([])
+  })
+
+  it('the shared dev guard calls forbiddenOriginResponse and returns its refusal', () => {
+    const source = readFileSync(path.resolve(API_ROOT, '../../features/dev-tools/dev-route-guard.ts'), 'utf8')
+    expect(source).toMatch(/const blocked = forbiddenOriginResponse\(req, corsHeaders\)/)
+    expect(source).toMatch(/if \(blocked\) return \{ corsHeaders, refused: blocked \}/)
   })
 
   it('finds the routes it claims to scan', () => {
