@@ -10,10 +10,11 @@
  *
  * What stays is network-neutral: where ads go (`adPlacement.ts`,
  * `listicleAdPlacement.ts`, the homepage `ad-slot` block) and the exact box
- * each shape reserves (`AdSurface`). On the live site nothing draws until a
- * network is wired in; in development each slot draws a labelled outline
- * (`AD_PREVIEW`) so placements can be seen, and `NEXT_PUBLIC_AD_PREVIEW=0`
- * turns that off.
+ * each shape reserves (`AdSurface`). Nothing draws until a network is wired
+ * in, on the live site or in development (the owner's call, 2026-10-27: no
+ * outlines until AdSense approves). `NEXT_PUBLIC_AD_PREVIEW=1` under
+ * `pnpm dev` draws a labelled outline in each slot (`AD_PREVIEW`) to check
+ * placements.
  *
  * Dependency-free so node:test can import it.
  */
@@ -80,9 +81,9 @@ export function adUnitForWidth(shape: AdShape, width: number): AdUnitName {
 /** True once a network fills the slots on the live site. None does today. */
 export const ADS_LIVE = false
 
-/** Development draws outlines where the slots go. */
+/** Development draws outlines where the slots go, only when asked (`NEXT_PUBLIC_AD_PREVIEW=1`). */
 export const AD_PREVIEW =
-  process.env.NODE_ENV !== 'production' && process.env.NEXT_PUBLIC_AD_PREVIEW !== '0'
+  process.env.NODE_ENV !== 'production' && process.env.NEXT_PUBLIC_AD_PREVIEW === '1'
 
 /**
  * The slot is drawn at all: a real ad, or a development outline. Per shape,

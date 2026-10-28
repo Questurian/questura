@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { getBackendUrl } from "@/lib/api";
 import { useDevStore } from "@/lib/stores/devStore";
@@ -21,6 +21,11 @@ import { writeHint } from "@/lib/user/identityHint";
  * The route knows more states (cancelling, payment failed, paused, ...) and
  * `pnpm dev:member` can still set them; this panel offers only the two that
  * matter day to day.
+ *
+ * Signed out, it signs the saved local login in by itself (`/api/dev/session`,
+ * which keeps that login in the server's gitignored `.dev-login.json`) and
+ * opens with the reason when that fails. Sign out here and it stays signed out
+ * until "Sign in as saved reader".
  */
 
 /** The two states the panel offers, by the route's state names. */
@@ -40,6 +45,31 @@ const LOCAL_HOSTS = new Set(["localhost", "127.0.0.1", "[::1]"]);
 
 const endpoint = () => `${getBackendUrl()}/api/dev/membership`;
 
+/** "off" once the reader signs out here, so signed-out pages stay testable. */
+const AUTO_SIGN_IN_KEY = "qv-dev-auto-sign-in";
+/** Set for the reload after an auto sign-in, so a cookie that did not stick cannot loop. */
+const AUTO_TRIED_KEY = "qv-dev-auto-sign-in-tried";
+
+function readStorage(storage: () => Storage, key: string): string | null {
+  try {
+    return storage().getItem(key);
+  } catch {
+    return null;
+  }
+}
+
+function writeStorage(storage: () => Storage, key: string, value: string | null) {
+  try {
+    if (value === null) storage().removeItem(key);
+    else storage().setItem(key, value);
+  } catch {
+    // Private window or blocked storage: auto sign-in just runs every visit.
+  }
+}
+
+const local = () => window.localStorage;
+const session = () => window.sessionStorage;
+
 export default function DevMembershipSwitcher() {
   const [onLocalhost, setOnLocalhost] = useState(false);
   const [open, setOpen] = useState(false);
@@ -47,10 +77,42 @@ export default function DevMembershipSwitcher() {
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const { mapsEnabled, toggleMapsEnabled } = useDevStore();
+  const autoTried = useRef(false);
 
   useEffect(() => {
     setOnLocalhost(LOCAL_HOSTS.has(window.location.hostname));
   }, []);
+
+  function reloadAs(hint: "anon" | "user" | "member") {
+    writeHint(hint);
+    identityStore.invalidate();
+    window.location.reload();
+  }
+
+  function failAutoSignIn(reason: string) {
+    console.error(`[DEV] Auto sign-in failed: ${reason}`);
+    setError(`Auto sign-in failed: ${reason}`);
+    setOpen(true);
+  }
+
+  async function autoSignIn() {
+    setBusy("auto-sign-in");
+    setError(null);
+    try {
+      const response = await fetch(`${getBackendUrl()}/api/dev/session`, { method: "POST", credentials: "include" });
+      const body = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        failAutoSignIn(body.error ?? `The local API answered ${response.status}.`);
+        return;
+      }
+      writeStorage(session, AUTO_TRIED_KEY, "1");
+      reloadAs(body.active ? "member" : "user");
+    } catch {
+      failAutoSignIn("Can't reach the local API on port 4000. Is pnpm dev running from the repo root?");
+    } finally {
+      setBusy(null);
+    }
+  }
 
   const load = useCallback(async () => {
     setStatus({ kind: "loading" });
@@ -61,12 +123,26 @@ export default function DevMembershipSwitcher() {
         return;
       }
       const body = await response.json();
-      setStatus(body.signedIn
-        ? { kind: "signed-in", email: body.email, state: body.state, states: body.states }
-        : { kind: "signed-out", states: body.states });
+      if (body.signedIn) {
+        writeStorage(session, AUTO_TRIED_KEY, null);
+        setStatus({ kind: "signed-in", email: body.email, state: body.state, states: body.states });
+        return;
+      }
+      setStatus({ kind: "signed-out", states: body.states });
+      if (readStorage(local, AUTO_SIGN_IN_KEY) === "off") return;
+      if (readStorage(session, AUTO_TRIED_KEY)) {
+        writeStorage(session, AUTO_TRIED_KEY, null);
+        failAutoSignIn("Auto sign-in answered OK, but this browser did not keep the session cookie. Open the site on http://localhost:3000 (not 127.0.0.1) and check the cookie isn't blocked.");
+        return;
+      }
+      if (autoTried.current) return;
+      autoTried.current = true;
+      void autoSignIn();
     } catch {
       setStatus({ kind: "unavailable", reason: "Can't reach the local API on port 4000. The switcher needs pnpm dev." });
     }
+    // autoSignIn and failAutoSignIn only use setters and storage.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Once on arrival, so the chip names the current state, and again on every open.
@@ -87,10 +163,9 @@ export default function DevMembershipSwitcher() {
     return () => document.removeEventListener("keydown", onKeyDown);
   }, [open]);
 
-  const reloadAs = (hint: "anon" | "user" | "member") => {
-    writeHint(hint);
-    identityStore.invalidate();
-    window.location.reload();
+  const signInAsSaved = () => {
+    writeStorage(local, AUTO_SIGN_IN_KEY, null);
+    void autoSignIn();
   };
 
   const choose = async (name: string) => {
@@ -118,6 +193,7 @@ export default function DevMembershipSwitcher() {
 
   const signOut = async () => {
     setBusy("sign-out");
+    writeStorage(local, AUTO_SIGN_IN_KEY, "off");
     try {
       await fetch(`${getBackendUrl()}/api/visitor-auth/sign-out`, {
         method: "POST",
@@ -163,9 +239,12 @@ export default function DevMembershipSwitcher() {
 
           {status.kind === "signed-out" && (
             <div className="flex flex-col gap-2 px-3 py-3">
-              <p className="text-white/60">Sign in once with your local account; after that, pick any state here.</p>
-              <button type="button" onClick={signIn} className="rounded-md bg-[#3B5BDB] px-3 py-2 text-left font-semibold text-white hover:bg-[#3452C9]">
-                Sign in
+              <p className="text-white/60">Sign in as the saved local reader (apps/server/.dev-login.json); then pick any state here.</p>
+              <button type="button" onClick={signInAsSaved} disabled={busy !== null} className="rounded-md bg-[#3B5BDB] px-3 py-2 text-left font-semibold text-white hover:bg-[#3452C9] disabled:cursor-wait">
+                {busy === "auto-sign-in" ? "Signing in…" : "Sign in as saved reader"}
+              </button>
+              <button type="button" onClick={signIn} className="text-left text-white/70 underline-offset-2 hover:text-white hover:underline">
+                Sign in another way
               </button>
             </div>
           )}

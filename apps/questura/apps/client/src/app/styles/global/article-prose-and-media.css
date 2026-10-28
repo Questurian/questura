@@ -65,6 +65,73 @@
   font-weight: 600;
 }
 
+.article-prose li::marker {
+  color: var(--accent);
+}
+
+.article-prose ol > li::marker {
+  font-family: var(--font-dm-sans);
+  font-weight: 600;
+}
+
+/* A fourth-level heading is a kicker: small blue caps over what follows. */
+.article-prose h4 {
+  font-family: var(--font-dm-sans);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-top: 1.75rem;
+  margin-bottom: 0.5rem;
+}
+
+/* A quote typed in the text editor: indented italic, no box, so it reads as
+   a quote and not as one more editorial block. */
+.article-prose blockquote {
+  margin: 1.5rem 0;
+  padding-left: 1.5rem;
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-style: italic;
+  line-height: 1.6;
+  color: #1A1A1A;
+}
+
+.article-prose blockquote p {
+  font-size: inherit;
+  line-height: inherit;
+  margin-bottom: 0.5rem;
+}
+
+.article-prose blockquote > :last-child {
+  margin-bottom: 0;
+}
+
+/* A section break, drawn as three quiet points instead of a black rule. */
+.article-prose hr {
+  border: 0;
+  height: auto;
+  margin: 2.25rem 0;
+  overflow: visible;
+  text-align: center;
+  color: rgb(26 26 26 / 0.4);
+}
+
+.article-prose hr::before {
+  content: '\2022\2003\2022\2003\2022';
+  font-size: 14px;
+  line-height: 1;
+}
+
+.article-prose code {
+  font-family: var(--font-geist-mono);
+  font-size: 0.85em;
+  padding: 0.1em 0.35em;
+  background: var(--paper);
+}
+
 .article-prose p:last-child,
 .article-prose ul:last-child,
 .article-prose ol:last-child {
@@ -99,6 +166,15 @@
   .article-prose li {
     font-size: 18px;
   }
+
+  .article-prose h4 {
+    font-size: 13px;
+  }
+
+  .article-prose blockquote {
+    padding-left: 2rem;
+    font-size: 20px;
+  }
 }
 
 /* A stay box (AirbnbCardBlock) sets its gallery flush with the box's edges,
@@ -123,13 +199,22 @@
   }
 }
 
-/* The box carries the section written about its stay a step below the
-   column's reading size, so it reads as one unit rather than the column
-   running on inside a frame. */
+/* The box's one description: the section written about its stay, in the
+   same size and tone the record's own summary used, with the writer's bold
+   kept at full ink. */
 .stay-box-prose p,
 .stay-box-prose li {
-  font-size: 16px;
-  line-height: 1.68;
+  font-size: 17px;
+  line-height: 1.7;
+  color: rgb(26 26 26 / 0.8);
+}
+
+.stay-box-prose > :first-child {
+  margin-top: 0;
+}
+
+.stay-box-prose strong {
+  color: var(--foreground);
 }
 
 .stay-box-prose h3 {
@@ -140,8 +225,8 @@
 @media (min-width: 640px) {
   .stay-box-prose p,
   .stay-box-prose li {
-    font-size: 17px;
-    line-height: 1.72;
+    font-size: 18px;
+    line-height: 1.78;
   }
 
   .stay-box-prose h3 {
@@ -168,9 +253,14 @@
 }
 
 .article-prose a {
-  color: #C65D3B;
+  color: var(--accent);
   text-decoration: underline;
-  text-underline-offset: 2px;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+.article-prose a:hover {
+  text-decoration-thickness: 2px;
 }
 
 /* Maps listicle: tighter rhythm on very small phones; aligns with 380 breakpoint */

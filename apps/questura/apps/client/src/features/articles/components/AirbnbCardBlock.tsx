@@ -4,7 +4,6 @@ import type { AirbnbCard, AirbnbCardBlock } from '../types'
 import type { ListicleItemImage } from '../lib/listicleItemHelpers'
 import { photoCredit } from '../lib/photoCredit'
 import { withoutListNumber } from '../lib/stayBoxes'
-import { editorialReadingLabelClass } from './EditorialRule'
 import { StayBoxGallery } from './StayBoxGallery'
 
 const reviewCountFormat = new Intl.NumberFormat('en-US')
@@ -18,8 +17,6 @@ function formatRating(rating: number): string {
   return Number.isInteger(rating) ? rating.toFixed(1) : String(rating)
 }
 
-const twoDigits = (value: number): string => String(value).padStart(2, '0')
-
 function plainText(html: string): string {
   return html.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').trim()
 }
@@ -31,8 +28,19 @@ function boxPhotos(airbnb: AirbnbCard): ListicleItemImage[] {
 }
 
 const detailRowClass =
-  'flex items-start gap-2.5 text-[13px] leading-snug text-foreground/70 [font-family:var(--font-dm-sans)] sm:text-[14px]'
-const detailIconClass = 'mt-px size-[15px] shrink-0 text-accent sm:size-4'
+  'flex items-start gap-2 text-[13px] leading-snug text-accent [font-family:var(--font-dm-sans)] sm:text-[14px]'
+// A one-em slot as tall as the first line, so the icon centres on that line
+// and both rows' text starts on the same edge whatever the icon's width.
+const detailIconSlotClass = 'flex h-[1lh] w-[1em] shrink-0 items-center justify-center'
+// Each icon is drawn as tall as DM Sans's capitals (0.70em) with a line as
+// thick as its stems (0.0843em), measured in Chrome. House and MapPin fill
+// their 24-unit boxes differently, so each has its own box and stroke. The
+// line box centres a little below the capitals' middle, and each icon's ink
+// sits off its box's centre by its own amount: the lifts close both.
+const houseIconClass = 'size-[0.778em] -translate-y-[0.02em]'
+const houseIconStroke = 2.6
+const pinIconClass = 'size-[0.7385em] -translate-y-[0.037em]'
+const pinIconStroke = 2.74
 
 /**
  * Airbnb Card: one stay, drawn as a box (owner decision, 2026-10-20).
@@ -40,9 +48,10 @@ const detailIconClass = 'mt-px size-[15px] shrink-0 text-accent sm:size-4'
  * The one framed object down the column besides the header, by request: on a
  * "best Airbnbs" article each stay reads as a unit, the way a Condé Nast
  * Traveler gallery does, with the photos, the name, what the writer said about
- * it and the way to book all inside one paper box. `pairStayBoxes` hands the
- * box the section written beside the card (`lead`) and its number in the list
- * (`position`); without them it still draws the stay from the Airbnb record.
+ * it and the way to book all inside one paper box. One description only: the
+ * writer's section when there is one, else the record's summary. `pairStayBoxes` hands the
+ * box the section written beside the card (`lead`) and its place in a list
+ * (`position`, used only to strip the heading's "1." number); without them it still draws the stay from the Airbnb record.
  * Data is live from that record, so the box follows edits made in Location
  * Manager.
  */
@@ -62,7 +71,7 @@ export function AirbnbCardBlockRenderer({ block }: { block: AirbnbCardBlock }): 
   const angle = lead && !lead.namesStay && headingHtml ? plainText(headingHtml) : null
   const writeUp = lead?.html.trim() ? lead.html : null
   const titleClass =
-    'mt-3 font-display text-[23px] font-semibold leading-[1.18] text-foreground sm:mt-3.5 sm:text-[29px] sm:leading-[1.14]'
+    'font-display text-[23px] font-semibold leading-[1.18] text-foreground sm:text-[29px] sm:leading-[1.14]'
 
   return (
     <section
@@ -71,26 +80,10 @@ export function AirbnbCardBlockRenderer({ block }: { block: AirbnbCardBlock }): 
     >
       {photos.length > 0 ? <StayBoxGallery images={photos} /> : null}
 
-      <div className={`px-4 pb-5 480:px-5 sm:px-7 sm:pb-7 ${photos.length > 0 ? 'pt-3 sm:pt-4' : 'pt-5 sm:pt-7'}`}>
-        <div className="flex items-center gap-2.5">
-          {position ? (
-            <span className={`shrink-0 text-accent ${editorialReadingLabelClass}`}>
-              <span aria-hidden>
-                {twoDigits(position.index)} / {twoDigits(position.total)}
-              </span>
-              <span className="sr-only">
-                Stay {position.index} of {position.total}:
-              </span>
-            </span>
-          ) : null}
-          <span
-            className={`min-w-0 truncate ${editorialReadingLabelClass} ${position ? 'text-foreground/55' : 'text-accent'}`}
-          >
-            {airbnb.area ? `Airbnb · ${airbnb.area}` : 'Airbnb'}
-          </span>
-          <span aria-hidden className="h-px min-w-6 flex-1 bg-foreground/18" />
-        </div>
-
+      <div className={`px-4 pb-5 480:px-5 sm:px-7 sm:pb-7 ${photos.length > 0 ? 'pt-4 sm:pt-5' : 'pt-5 sm:pt-7'}`}>
+        {/* No kicker over the name (owner, 2026-10-27): no "01 / 05" count,
+            the boxes' order already shows, and no "Airbnb · Area", the View on
+            Airbnb button below already says it. */}
         {headingHtml && !angle ? (
           <Heading
             id={headingId}
@@ -109,7 +102,15 @@ export function AirbnbCardBlockRenderer({ block }: { block: AirbnbCardBlock }): 
           </p>
         ) : null}
 
-        {airbnb.description ? (
+        {/* One description, up top (owner, 2026-10-27): the section the writer
+            put beside the card when there is one, since it carries their bold
+            and links, else the Airbnb record's own summary. Never both. */}
+        {writeUp ? (
+          <div
+            className="article-prose stay-box-prose mt-3"
+            dangerouslySetInnerHTML={{ __html: writeUp }}
+          />
+        ) : airbnb.description ? (
           <p className="mt-3 font-display text-[17px] leading-[1.7] text-foreground/80 sm:text-[18px] sm:leading-[1.78]">
             {airbnb.description}
           </p>
@@ -119,26 +120,23 @@ export function AirbnbCardBlockRenderer({ block }: { block: AirbnbCardBlock }): 
           <ul className="mt-4 space-y-2">
             {airbnb.stayType ? (
               <li className={detailRowClass}>
-                <House className={detailIconClass} strokeWidth={1.75} aria-hidden />
+                <span className={detailIconSlotClass} aria-hidden>
+                  <House className={houseIconClass} strokeWidth={houseIconStroke} />
+                </span>
                 <span className="sr-only">The stay: </span>
                 {airbnb.stayType}
               </li>
             ) : null}
             {airbnb.near ? (
               <li className={detailRowClass}>
-                <MapPin className={detailIconClass} strokeWidth={1.75} aria-hidden />
+                <span className={detailIconSlotClass} aria-hidden>
+                  <MapPin className={pinIconClass} strokeWidth={pinIconStroke} />
+                </span>
                 <span className="sr-only">Near: </span>
                 {airbnb.near}
               </li>
             ) : null}
           </ul>
-        ) : null}
-
-        {writeUp ? (
-          <div
-            className="article-prose stay-box-prose mt-5"
-            dangerouslySetInnerHTML={{ __html: writeUp }}
-          />
         ) : null}
 
         <div className="mt-5 flex flex-col gap-4 border-t border-foreground/15 pt-4 sm:mt-6 sm:flex-row sm:items-center sm:justify-between sm:pt-5">

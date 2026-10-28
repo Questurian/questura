@@ -39,9 +39,10 @@ arrives:
 - **rail**: 300x250 below 1024px, 160x600 from 1024px.
 
 `AdSurface` reserves each box in the server HTML. `ADS_LIVE` is `false`, so on
-the live site every slot (and its "Advertisement" label) draws nothing. In
-`pnpm dev` each slot draws a dashed outline naming its size;
-`NEXT_PUBLIC_AD_PREVIEW=0` turns that off.
+the live site every slot (and its "Advertisement" label) draws nothing, and
+so does `pnpm dev` (owner's call, 2026-10-27: no outlines anywhere until
+AdSense approves). `NEXT_PUBLIC_AD_PREVIEW=1` in `apps/client/.env.local`
+draws a dashed outline naming each slot's size, to check placements.
 
 ## What Adsterra taught us (keep for the next network)
 

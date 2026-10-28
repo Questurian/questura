@@ -1,9 +1,7 @@
 import { ReadMoreBlockRenderer } from './ReadMoreBlock'
 import { PublicImage } from '@/components/media/PublicImage'
-import {
-  EditorialLabelRule,
-  editorialReadingLabelClass,
-} from './EditorialRule'
+import { EditorialDiamond, EditorialTick } from './EditorialRule'
+import { EditorialBox, editorialBoxCopyClass } from './EditorialBox'
 import { InlineMarkdown } from './InlineMarkdown'
 import { AirbnbCardBlockRenderer } from './AirbnbCardBlock'
 import { HotelCardBlockRenderer } from './HotelCardBlock'
@@ -12,7 +10,6 @@ import { blockPhotoCredit, photoCredit } from '../lib/photoCredit'
 import {
   ContentBlock,
   FaqBlock,
-  HighlightCalloutBlock,
   ImageBlock,
   ImgPairBlock,
   ImgTrioBlock,
@@ -148,90 +145,71 @@ function ImgTrioBlockRenderer({ block }: { block: ImgTrioBlock }) {
   )
 }
 
-/** Editorial interruptions share the prose grid, readable labels and quiet rules.
- * Warm paper distinguishes practical advice; quotes get space rather than ornaments.
+/**
+ * Editorial blocks: square paper boxes opened by the sans kicker
+ * (`EditorialBox`). The pull quote is the one block left unboxed: the
+ * site's diamond ornament over large italic type.
  */
 
 function KeyTakeawayBlockRenderer({ block }: { block: KeyTakeawayBlock }) {
   return (
-    <aside className="py-4 sm:py-5">
-      <EditorialLabelRule reading className="mb-5">
-        {block.label ?? 'Key takeaways'}
-      </EditorialLabelRule>
-      <ul className="list-disc space-y-3 pl-5 marker:text-accent">
+    <EditorialBox label={block.label ?? 'Key takeaways'}>
+      <ul className="space-y-3">
         {block.items.map((item, index) => (
-          <li key={item.id ?? `${index}-${item.text}`} className="pl-1 text-foreground">
-            <span className="font-display text-[17px] leading-[1.7] sm:text-[18px] sm:leading-[1.78]">
+          <li key={item.id ?? `${index}-${item.text}`} className="flex gap-3.5 text-foreground">
+            {/* Sits the tick on the first line's centre; the tick keeps its own top margin. */}
+            <span aria-hidden className="flex shrink-0 pt-1 sm:pt-[5px]">
+              <EditorialTick className="text-accent" />
+            </span>
+            <span className={editorialBoxCopyClass}>
               <InlineMarkdown text={item.text} />
             </span>
           </li>
         ))}
       </ul>
-      <div aria-hidden className="mt-6 h-px bg-foreground/15" />
-    </aside>
+    </EditorialBox>
   )
 }
 
 function PullQuoteBlockRenderer({ block }: { block: PullQuoteBlock }) {
   return (
-    <blockquote className="border-y border-foreground/20 py-7 text-foreground sm:py-9">
-      <p className="max-w-[32ch] font-display text-[24px] leading-[1.4] sm:text-[30px] sm:leading-[1.4]">
-        &ldquo;<InlineMarkdown text={block.quote} />&rdquo;
-      </p>
-    </blockquote>
+    <figure className="px-2 py-4 text-center sm:px-8 sm:py-6">
+      <EditorialDiamond className="mx-auto mb-5 text-accent sm:mb-6" />
+      <blockquote className="mx-auto max-w-[30ch] text-balance font-display text-[24px] italic leading-[1.4] text-foreground sm:text-[30px] sm:leading-[1.36]">
+        <p>
+          <InlineMarkdown text={block.quote} />
+        </p>
+      </blockquote>
+    </figure>
   )
 }
 
 function InTheKnowBlockRenderer({ block }: { block: InTheKnowBlock }) {
   return (
-    <aside className="bg-paper px-5 py-6 sm:px-7 sm:py-7">
-      <EditorialLabelRule reading className="mb-4">
-        {block.label ?? 'In the know'}
-      </EditorialLabelRule>
-      <p className="font-display text-[17px] leading-[1.7] text-foreground sm:text-[18px] sm:leading-[1.78]">
+    <EditorialBox tone="warm" label={block.label ?? 'In the know'}>
+      <p className={editorialBoxCopyClass}>
         <InlineMarkdown text={block.text} />
       </p>
-    </aside>
-  )
-}
-
-function HighlightCalloutBlockRenderer({ block }: { block: HighlightCalloutBlock }) {
-  return (
-    // A marginal note: one accent hairline in the gutter, no fill, no frame.
-    <aside className="border-l border-accent py-2 pl-5 sm:pl-6">
-      <p className={`mb-2.5 text-accent ${editorialReadingLabelClass}`}>
-        {block.label ?? "Editor’s note"}
-      </p>
-      <p className="font-display text-[17px] font-normal leading-[1.7] text-foreground sm:text-[18px] sm:leading-[1.78]">
-        <InlineMarkdown text={block.text} />
-      </p>
-    </aside>
+    </EditorialBox>
   )
 }
 
 function FaqBlockRenderer({ block }: { block: FaqBlock }) {
   return (
-    <section className="py-4 sm:py-5">
-      <EditorialLabelRule reading className="mb-1">
-        {block.title ?? block.label ?? 'FAQ'}
-      </EditorialLabelRule>
-      <dl>
-        {block.items.map((item, index) => (
-          <div
-            key={item.id}
-            className={index === 0 ? 'py-5' : 'border-t border-foreground/12 py-5'}
-          >
+    <EditorialBox as="section" label={block.title ?? block.label ?? 'FAQ'}>
+      <dl className="space-y-5 sm:space-y-6">
+        {block.items.map((item) => (
+          <div key={item.id}>
             <dt className="font-display text-[18px] font-semibold leading-[1.4] text-foreground sm:text-[20px]">
               <InlineMarkdown text={item.question} />
             </dt>
-            <dd className="mt-1.5 font-display text-[17px] leading-[1.7] text-foreground/85 sm:text-[18px] sm:leading-[1.78]">
+            <dd className={`mt-1.5 text-foreground/85 ${editorialBoxCopyClass}`}>
               <InlineMarkdown text={item.answer} />
             </dd>
           </div>
         ))}
       </dl>
-      <div aria-hidden className="h-px bg-foreground/15" />
-    </section>
+    </EditorialBox>
   )
 }
 
@@ -251,8 +229,6 @@ export function BlockRenderer({ block }: { block: ContentBlock }) {
       return <PullQuoteBlockRenderer block={block} />
     case 'in-the-know':
       return <InTheKnowBlockRenderer block={block} />
-    case 'highlight-callout':
-      return <HighlightCalloutBlockRenderer block={block} />
     case 'read-more':
       return <ReadMoreBlockRenderer block={block} />
     case 'faq':

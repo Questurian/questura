@@ -69,6 +69,7 @@ import * as migration_20261015_075516_access_default_member from './20261015_075
 import * as migration_20261015_162702_listicle_access_tier from './20261015_162702_listicle_access_tier';
 import * as migration_20261017_045410_homepage_ad_slot_block from './20261017_045410_homepage_ad_slot_block';
 import * as migration_20261019_155756_article_read_more from './20261019_155756_article_read_more';
+import * as migration_20261028_004428_merge_highlight_callout_into_in_the_know from './20261028_004428_merge_highlight_callout_into_in_the_know';
 
 export const migrations = [
   {
@@ -424,6 +425,11 @@ export const migrations = [
   {
     up: migration_20261019_155756_article_read_more.up,
     down: migration_20261019_155756_article_read_more.down,
-    name: '20261019_155756_article_read_more'
+    name: '20261019_155756_article_read_more',
+  },
+  {
+    up: migration_20261028_004428_merge_highlight_callout_into_in_the_know.up,
+    down: migration_20261028_004428_merge_highlight_callout_into_in_the_know.down,
+    name: '20261028_004428_merge_highlight_callout_into_in_the_know'
   },
 ];

@@ -1,17 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-import { APP_CONFIG } from '@/shared/config'
-import { forbiddenOriginResponse, getPrivateCorsHeaders, isAllowedOrigin } from '@/shared/utils/cors'
 import { visitorAuthPool } from '@/features/visitor-auth/lib/better-auth'
 import { lookupVisitorSession } from '@/features/visitor-auth/lib/current-principal'
 import {
   DEV_MEMBERSHIP_STATES,
-  devToolsRefusal,
   isDevMembershipStateName,
-  isLocalHost,
   readDevMembershipState,
   writeDevMembershipState,
 } from '@/features/dev-tools/membership-states'
+import { devRouteGuard as guard } from '@/features/dev-tools/dev-route-guard'
 
 /**
  * The localhost DEV switcher's backend: read or set the signed-in visitor's
@@ -26,28 +23,6 @@ import {
 export const dynamic = 'force-dynamic'
 
 const STATES = Object.entries(DEV_MEMBERSHIP_STATES).map(([name, { label, about, active }]) => ({ name, label, about, active }))
-
-function guard(req: NextRequest): { corsHeaders: Record<string, string>; refused: NextResponse | null } {
-  const corsHeaders = getPrivateCorsHeaders(req)
-  if (devToolsRefusal({ NODE_ENV: process.env.NODE_ENV, databaseUri: APP_CONFIG.database.uri })) {
-    return { corsHeaders, refused: NextResponse.json({ error: 'Not found.' }, { status: 404, headers: { 'Cache-Control': 'no-store' } }) }
-  }
-  const blocked = forbiddenOriginResponse(req, corsHeaders)
-  if (blocked) return { corsHeaders, refused: blocked }
-  if (!isLocalOrigin(req.headers.get('origin'))) {
-    return { corsHeaders, refused: NextResponse.json({ error: 'Origin not allowed.' }, { status: 403, headers: corsHeaders }) }
-  }
-  return { corsHeaders, refused: null }
-}
-
-function isLocalOrigin(origin: string | null): boolean {
-  if (!origin || !isAllowedOrigin(origin)) return false
-  try {
-    return isLocalHost(new URL(origin).hostname)
-  } catch {
-    return false
-  }
-}
 
 async function signedInUser(req: NextRequest) {
   const session = await lookupVisitorSession(req.headers, { freshSession: true })

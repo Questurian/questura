@@ -11,8 +11,9 @@ import { AD_PREVIEW, type AdShape } from '../lib/adUnits'
  * screen width. `overflow-hidden` keeps a creative from widening the page on
  * the rare phone narrower than the unit.
  *
- * No ad network is wired in (`lib/adUnits.ts`). In development: a dashed
- * outline naming the size. On the live site: nothing at all, and the slot
+ * No ad network is wired in (`lib/adUnits.ts`). With `NEXT_PUBLIC_AD_PREVIEW=1`
+ * under `pnpm dev`: a dashed outline naming the size. Otherwise, on the live
+ * site and in development: nothing at all, and the slot
  * components around it check `isAdShapeOn` and drop their label and rules
  * too. A network's slot component mounts inside this box when one is wired.
  */

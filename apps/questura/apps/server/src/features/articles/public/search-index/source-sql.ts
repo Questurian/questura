@@ -34,9 +34,6 @@ const ARTICLE_BODY = `
     SELECT _parent_id, concat_ws(' ', label, text) AS body
     FROM articles_blocks_in_the_know
     UNION ALL
-    SELECT _parent_id, concat_ws(' ', label, text) AS body
-    FROM articles_blocks_highlight_callout
-    UNION ALL
     SELECT _parent_id, quote AS body
     FROM articles_blocks_pull_quote
     UNION ALL

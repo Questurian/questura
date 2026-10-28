@@ -67,13 +67,6 @@ export type InTheKnowBlock = {
   text: string
 }
 
-export type HighlightCalloutBlock = {
-  id: string
-  blockType: 'highlight-callout'
-  label?: string
-  text: string
-}
-
 export type ReadMoreBlock = {
   id: string
   blockType: 'read-more'
@@ -158,7 +151,6 @@ export type ContentBlock =
   | KeyTakeawayBlock
   | PullQuoteBlock
   | InTheKnowBlock
-  | HighlightCalloutBlock
   | ReadMoreBlock
   | FaqBlock
   | AirbnbCardBlock
