@@ -70,8 +70,7 @@ import * as migration_20261015_162702_listicle_access_tier from './20261015_1627
 import * as migration_20261017_045410_homepage_ad_slot_block from './20261017_045410_homepage_ad_slot_block';
 import * as migration_20261019_155756_article_read_more from './20261019_155756_article_read_more';
 import * as migration_20261028_004428_merge_highlight_callout_into_in_the_know from './20261028_004428_merge_highlight_callout_into_in_the_know';
-import * as migration_20261028_215736_hotel_list_block from './20261028_215736_hotel_list_block';
-import * as migration_20261028_224459_stay_list_airbnbs from './20261028_224459_stay_list_airbnbs';
+import * as migration_20261028_233521_hotel_list_block from './20261028_233521_hotel_list_block';
 
 export const migrations = [
   {
@@ -435,13 +434,8 @@ export const migrations = [
     name: '20261028_004428_merge_highlight_callout_into_in_the_know',
   },
   {
-    up: migration_20261028_215736_hotel_list_block.up,
-    down: migration_20261028_215736_hotel_list_block.down,
-    name: '20261028_215736_hotel_list_block',
-  },
-  {
-    up: migration_20261028_224459_stay_list_airbnbs.up,
-    down: migration_20261028_224459_stay_list_airbnbs.down,
-    name: '20261028_224459_stay_list_airbnbs'
+    up: migration_20261028_233521_hotel_list_block.up,
+    down: migration_20261028_233521_hotel_list_block.down,
+    name: '20261028_233521_hotel_list_block'
   },
 ];
