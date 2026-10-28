@@ -12,19 +12,19 @@ const arrowClass =
   'flex size-9 items-center justify-center bg-foreground text-[1.3rem] leading-none text-background transition-colors hover:bg-charcoal disabled:pointer-events-none disabled:bg-foreground/15 disabled:text-foreground/40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent sm:size-10'
 
 /**
- * Two or more hotel cards in a row, drawn as one swipeable row (owner
- * request, 2026-10-27): the in-article form of the homepage hotel grid. The
- * row scrolls natively, so it works before the arrows' script arrives.
+ * Two or more hotel cards in a row, or a Hotel List, drawn as one swipeable
+ * row (owner request, 2026-10-27): the in-article form of the homepage hotel
+ * grid. The row scrolls natively, so it works before the arrows' script arrives.
  */
-export function HotelCarousel({ hotels }: { hotels: HotelCard[] }): JSX.Element {
+export function HotelCarousel({ hotels, label = 'Hotels' }: { hotels: HotelCard[]; label?: string }): JSX.Element {
   const { scrollRef, pageCount, activePage, scrollToPage, scrollByPage } = useSnapCarousel(hotels.length)
   const canScrollNext = pageCount > 0 ? activePage < pageCount - 1 : hotels.length > 1
 
   return (
     // No ground of its own: the row sits on the page, on the column's edges.
-    <section aria-roledescription="carousel" aria-label="Hotels">
+    <section aria-roledescription="carousel" aria-label={label}>
       <div className="mb-4 flex items-center justify-between gap-3 sm:mb-5">
-        <EditorialBoxLabel>Hotels</EditorialBoxLabel>
+        <EditorialBoxLabel>{label}</EditorialBoxLabel>
         <div className="flex shrink-0 items-center gap-1.5">
           <button type="button" onClick={() => scrollByPage(-1)} disabled={activePage === 0} aria-label="Previous hotels" className={arrowClass}>
             ‹

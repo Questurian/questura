@@ -148,6 +148,25 @@ export type HotelCardBlock = {
   hotel: HotelCard | null
 }
 
+/** One row of a Stay List: a hotel or an Airbnb. */
+export type StayListItem = HotelCard & {
+  kind: 'hotel' | 'airbnb'
+  /** An Airbnb's stars; null for hotels. */
+  rating: number | null
+}
+
+/**
+ * Hotels, or Airbnbs, kept in one block (slug `hotel-list`), drawn as compact
+ * rows. Unpublished or gone stays are already left out of `stays`.
+ */
+export type HotelListBlock = {
+  id: string
+  blockType: 'hotel-list'
+  /** The heading over the list; null shows "Hotels" or "Airbnbs". */
+  label: string | null
+  stays: StayListItem[]
+}
+
 export type ContentBlock =
   | TextBlock
   | ImageBlock
@@ -161,6 +180,7 @@ export type ContentBlock =
   | FaqBlock
   | AirbnbCardBlock
   | HotelCardBlock
+  | HotelListBlock
 
 /**
  * The byline, as served from the Authors collection (ADR-0007). Authorship is
