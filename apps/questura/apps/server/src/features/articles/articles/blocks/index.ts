@@ -215,27 +215,6 @@ export const InTheKnowBlock: Block = {
   ],
 }
 
-export const HighlightCalloutBlock: Block = {
-  slug: 'highlight-callout',
-  labels: {
-    singular: 'Highlight Callout',
-    plural: 'Highlight Callouts',
-  },
-  fields: [
-    {
-      name: 'label',
-      type: 'text',
-      required: true,
-      defaultValue: 'Highlight Callout',
-    },
-    {
-      name: 'text',
-      type: 'textarea',
-      required: true,
-    },
-  ],
-}
-
 export const ReadMoreBlock: Block = {
   slug: 'read-more',
   labels: { singular: 'Read more', plural: 'Read more links' },
@@ -352,7 +331,6 @@ export const articleBlocks = [
   KeyTakeawayBlock,
   PullQuoteBlock,
   InTheKnowBlock,
-  HighlightCalloutBlock,
   ReadMoreBlock,
   FAQBlock,
   AirbnbCardBlock,

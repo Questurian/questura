@@ -43,6 +43,7 @@
     "typecheck": "tsc --noEmit",
     "rebuild:search-index": "cross-env NODE_OPTIONS=--no-deprecation tsx scripts/rebuild-search-index.ts",
     "dev:member": "cross-env NODE_OPTIONS=--no-deprecation tsx scripts/dev-member.ts",
+    "dev:showcase": "cross-env NODE_OPTIONS=--no-deprecation tsx scripts/dev-ui-showcase.ts",
     "db:refresh": "cross-env NODE_OPTIONS=--no-deprecation tsx scripts/db-refresh/refresh.ts",
     "db:refresh:setup": "cross-env NODE_OPTIONS=--no-deprecation tsx scripts/db-refresh/setup.ts",
     "audit:visitor-auth-orphans": "cross-env NODE_OPTIONS=--no-deprecation tsx scripts/audit-visitor-auth-orphans.ts",

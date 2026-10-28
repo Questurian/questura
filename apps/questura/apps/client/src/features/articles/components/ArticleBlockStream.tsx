@@ -1,7 +1,9 @@
 import { Fragment } from 'react'
 import { BlockRenderer, ProseRun } from './BlockRenderer'
+import { HotelCarouselLazy } from './HotelCarouselLazy'
 import { InArticleAd } from './InArticleAd'
 import type { AdPlan } from '../lib/adPlacement'
+import { findHotelRuns } from '../lib/hotelRuns'
 import type { ContentBlock } from '../types'
 
 type ArticleBlockStreamProps = {
@@ -18,14 +20,20 @@ type ArticleBlockStreamProps = {
  *
  * Fragments, not wrappers -- the parent's `space-y-*` only reaches direct DOM
  * children, and an extra div would swallow the gaps.
+ *
+ * Hotel cards in a row draw as one carousel at the first card (`hotelRuns`);
+ * the others draw nothing, so every index the plan names still lines up.
  */
 export function ArticleBlockStream({ blocks, plan }: ArticleBlockStreamProps) {
+  const hotelRuns = findHotelRuns(blocks)
+
   return (
     <>
       {blocks.map((block, index) => {
         const runs = plan.proseRuns.get(index)
         const runAds = plan.proseAds.get(index) ?? []
         const afterBlock = plan.afterBlock.get(index)
+        const hotelRun = hotelRuns.starts.get(index)
 
         return (
           <Fragment key={block.id}>
@@ -41,7 +49,9 @@ export function ArticleBlockStream({ blocks, plan }: ArticleBlockStreamProps) {
                   ) : null}
                 </Fragment>
               ))
-            ) : (
+            ) : hotelRun ? (
+              <HotelCarouselLazy hotels={hotelRun} />
+            ) : hotelRuns.members.has(index) ? null : (
               <BlockRenderer block={block} />
             )}
             {afterBlock ? (

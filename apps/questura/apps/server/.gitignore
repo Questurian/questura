@@ -55,3 +55,6 @@ CLAUDE.md
 
 # db:refresh stamp (when local content was last copied from live)
 /.local-db-refresh.json
+
+# saved localhost login for the DEV chip (src/features/dev-tools/dev-login.ts)
+/.dev-login.json

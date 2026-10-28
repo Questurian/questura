@@ -56,9 +56,12 @@ they cached). `QUESTURA_DB_REFRESH=off pnpm dev` skips it.
 ## Local loop
 
 ```bash
-cd apps/questura
+cd ~/Projects/questura   # the repo root: the pnpm workspace lives here
 pnpm dev
 ```
+
+Run it from the repo root. From `apps/questura` turbo cannot find the
+workspace and exits at once (“recursive turbo invocations”).
 
 Client: `http://localhost:3000`. Server / Payload admin: `http://localhost:4000`.
 
@@ -77,11 +80,25 @@ first casualties (2026-09-28, three migrations behind).
 
 ### Members on localhost
 
-Nobody can pay on the Mac, so nobody is a member unless you say so. Sign in
-on `http://localhost:3000` with a local account, then use the **DEV** chip in
-the bottom-left corner: pick Never paid, Member, Member yearly, Cancelling,
-Payment failed, Paused or Expired and the page reloads as that reader. It also
-signs you out.
+Nobody can pay on the Mac, so nobody is a member unless you say so. Open
+`http://localhost:3000` and the **DEV** chip in the bottom-left corner signs
+you in by itself as the saved local reader, then pick Member or Not a member
+and the page reloads as that reader.
+
+**The saved local reader.** `apps/server/.dev-login.json` (gitignored, mode
+600) holds one local email and password. The first auto sign-in writes it with
+a new `dev-reader-…@example.com` account, created straight in the local
+database so no verification mail goes out. Put any other local account's email
+and password in it to be that reader instead (a Google-only account has no
+password, so it cannot be used here); delete it to start over. When auto
+sign-in fails, the chip opens with the reason (and logs it to the browser
+console): no API on port 4000, a broken file, a wrong password, a cookie the
+browser did not keep. **Sign out** in the chip keeps you signed out, for
+testing signed-out pages, until **Sign in as saved reader**. The route behind
+it, `/api/dev/session`, has the same refusals as `/api/dev/membership` below.
+
+**Live logins do not work here.** Readers and members are never copied from
+live, so localhost only knows accounts made on localhost.
 
 The chip exists only under `pnpm dev` on localhost (it is not in the live
 build), and its route (`/api/dev/membership`) answers 404 in production mode or
