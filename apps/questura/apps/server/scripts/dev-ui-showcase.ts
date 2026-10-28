@@ -208,7 +208,7 @@ async function buildBlocks(payload: Payload, source: Doc): Promise<Block[]> {
     ...(loneHotel ? [{ blockType: 'hotel-card', hotel: loneHotel }] : []),
     text(h('h2', 'Hotels side by side'), p(t('Two or more Hotel Cards in a row draw as one carousel (hotelRuns.ts).'))),
     ...carouselHotels.map((id) => ({ blockType: 'hotel-card', hotel: id })),
-    { blockType: 'read-more', title: 'Read more: the article these stays came from', url: readMorePath },
+    { blockType: 'read-more', title: 'The article these stays came from', url: readMorePath },
     text(p(t(LOREM))),
     {
       blockType: 'faq',
