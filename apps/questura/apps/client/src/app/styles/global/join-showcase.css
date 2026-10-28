@@ -344,101 +344,6 @@
   transform: translateX(0);
 }
 
-.feature-controls {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-top: 3px;
-}
-
-.feature-choices {
-  display: flex;
-  gap: 20px;
-  min-width: 0;
-}
-
-.feature-controls button {
-  min-height: 44px;
-  padding: 10px 0;
-  border: 0;
-  background: transparent;
-  color: #77756f;
-  cursor: pointer;
-  font: inherit;
-  font-size: 0.75rem;
-  line-height: 1.4;
-  appearance: none;
-}
-
-.feature-choice {
-  position: relative;
-}
-
-.feature-choice::after {
-  position: absolute;
-  right: 0;
-  bottom: 7px;
-  left: 0;
-  height: 1px;
-  background: #3451c7;
-  content: '';
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform 300ms ease;
-}
-
-.feature-choice[aria-pressed='true'] {
-  color: #3451c7;
-}
-
-.feature-choice[aria-pressed='true']::after {
-  transform: scaleX(1);
-}
-
-.feature-controls .feature-pause {
-  flex-shrink: 0;
-  width: 44px;
-  font-size: 0.95rem;
-}
-
-.feature-controls button:hover {
-  color: #3451c7;
-}
-
-.feature-controls button:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 3px;
-}
-
-/* Six quiet dots for the photo pile. */
-.feature-pair--categories .feature-choices {
-  gap: 8px;
-}
-
-.feature-controls .feature-choice--dot {
-  width: 24px;
-  padding: 0;
-}
-
-.feature-choice--dot::after {
-  top: 50%;
-  right: auto;
-  bottom: auto;
-  left: 50%;
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: rgb(26 26 26 / 0.25);
-  transform: translate(-50%, -50%);
-}
-
-.feature-choice--dot[aria-pressed='true']::after,
-.feature-choice--dot:hover::after {
-  background: var(--accent);
-  transform: translate(-50%, -50%);
-}
-
 /* The section mastheads' photo pile, one category title per print. */
 .feature-pair--categories .feature-images {
   margin: 0;
@@ -677,7 +582,6 @@
   min-height: 0;
   overflow: hidden;
   padding: 2cqw;
-  border-top: 2px double rgb(var(--accent-rgb) / 0.55);
 }
 
 .listicle-preview-media {
@@ -977,10 +881,6 @@
     font-size: 1.02rem;
   }
 
-  .feature-choices {
-    gap: 16px;
-  }
-
   .category-wordmark {
     font-size: 6cqw;
   }
@@ -1021,7 +921,6 @@
 
 @media (prefers-reduced-motion: reduce) {
   .feature-still,
-  .feature-choice::after,
   .feature-pair--categories .category-stack-card,
   .join-closing-cta {
     transition: none;

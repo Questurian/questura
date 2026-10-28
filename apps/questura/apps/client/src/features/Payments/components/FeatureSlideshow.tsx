@@ -1,19 +1,12 @@
 'use client';
 
-import { useEffect, useRef, useState, type CSSProperties, type KeyboardEvent, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 
 export type FeatureSlide = {
   key: string;
   /** What the slide shows, for screen readers: the artwork inside is aria-hidden. */
   label: string;
   content: ReactNode;
-};
-
-export type FeatureChoice = {
-  /** Visible text on a word choice; dot choices show nothing. */
-  text?: string;
-  /** Accessible name, needed when the choice is a dot. */
-  label?: string;
 };
 
 /** Each slide's stack position for the photo-pile shuffle: 0 is on top. */
@@ -23,25 +16,23 @@ const LEAVE_MS = 800;
 
 /**
  * One "What membership unlocks" picture on /join: a few stills that advance on
- * their own while on screen, with choices under them and a pause button.
+ * their own while on screen. No controls under them (owner, 2026-10-28: the
+ * choices and pause button looked silly); the pictures just play.
  *
  * `fade` cross-fades the stills. `stack` is the section mastheads' photo pile:
  * the top print slides off and the rest move up a place.
  *
- * Motion stops for a reader who asks for reduced motion, while the picture is
- * off screen or the tab is hidden, and for good once the reader picks a still
- * or presses pause.
+ * Motion stops for a reader who asks for reduced motion, and while the picture
+ * is off screen or the tab is hidden.
  */
 export default function FeatureSlideshow({
   label,
   slides,
-  choices,
   variant = 'fade',
   className = '',
 }: {
   label: string;
   slides: FeatureSlide[];
-  choices: FeatureChoice[];
   variant?: 'fade' | 'stack';
   className?: string;
 }) {
@@ -52,7 +43,6 @@ export default function FeatureSlideshow({
   const [near, setNear] = useState(false);
   const [pageVisible, setPageVisible] = useState(true);
   const regionRef = useRef<HTMLDivElement | null>(null);
-  const choiceRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const isStack = variant === 'stack';
   const interval = isStack ? 4500 : 5500;
   const count = slides.length;
@@ -122,27 +112,12 @@ export default function FeatureSlideshow({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [current, paused, onScreen, pageVisible, count, interval]);
 
-  const choose = (index: number) => {
-    setPaused(true);
-    show(index, true);
-  };
-
-  const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
-    if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
-    event.preventDefault();
-    const next = (current + (event.key === 'ArrowRight' ? 1 : -1) + count) % count;
-    choose(next);
-    choiceRefs.current[next]?.focus();
-  };
-
   return (
     <div
       ref={regionRef}
       className={`feature-pair ${className}`}
       role="region"
-      aria-roledescription="carousel"
       aria-label={label}
-      onKeyDown={onKeyDown}
       style={isStack ? ({ '--stack-count': count } as CSSProperties) : undefined}
     >
       <div className={`feature-images${isStack ? ' category-stack' : ''}`}>
@@ -170,34 +145,6 @@ export default function FeatureSlideshow({
             </figure>
           );
         })}
-      </div>
-      <div className="feature-controls">
-        <div className="feature-choices" aria-label={isStack ? 'Choose a photo' : 'Choose a view'}>
-          {choices.map((choice, index) => (
-            <button
-              key={choice.label ?? choice.text}
-              ref={(button) => {
-                choiceRefs.current[index] = button;
-              }}
-              type="button"
-              className={`feature-choice${choice.text ? '' : ' feature-choice--dot'}`}
-              aria-label={choice.label}
-              title={choice.text ? undefined : choice.label}
-              aria-pressed={index === current}
-              onClick={() => choose(index)}
-            >
-              {choice.text}
-            </button>
-          ))}
-        </div>
-        <button
-          type="button"
-          className="feature-pause"
-          aria-label={`${paused ? 'Play' : 'Pause'} ${label} slideshow`}
-          onClick={() => setPaused((value) => !value)}
-        >
-          <span aria-hidden="true">{paused ? '▷' : 'Ⅱ'}</span>
-        </button>
       </div>
     </div>
   );
