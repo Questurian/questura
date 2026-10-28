@@ -208,17 +208,17 @@ async function buildBlocks(payload: Payload, source: Doc): Promise<Block[]> {
     ...(loneHotel ? [{ blockType: 'hotel-card', hotel: loneHotel }] : []),
     text(h('h2', 'Hotels side by side'), p(t('Two or more Hotel Cards in a row draw as one carousel (hotelRuns.ts).'))),
     ...carouselHotels.map((id) => ({ blockType: 'hotel-card', hotel: id })),
-    text(h('h2', 'A Stay List'), p(t('One Stay List block holding hotels and Airbnbs mixed, drawn as compact rows under its own heading.'))),
-    ...(carouselHotels.length || airbnbs.length
+    text(h('h2', 'A hotel Stay List'), p(t('One Stay List block holding hotels, drawn as compact rows under its own heading.'))),
+    ...(carouselHotels.length
       ? [{
           blockType: 'hotel-list',
           label: 'Where to sleep',
-          stays: [
-            ...carouselHotels.slice(0, 2).map((value) => ({ relationTo: 'accommodations', value })),
-            ...airbnbs.map((value) => ({ relationTo: 'airbnbs', value })),
-            ...carouselHotels.slice(2).map((value) => ({ relationTo: 'accommodations', value })),
-          ],
+          stays: carouselHotels.map((value) => ({ relationTo: 'accommodations', value })),
         }]
+      : []),
+    text(h('h2', 'An Airbnb Stay List'), p(t('A second list for the Airbnbs, its heading left empty ("Airbnbs").'))),
+    ...(airbnbs.length
+      ? [{ blockType: 'hotel-list', stays: airbnbs.map((value) => ({ relationTo: 'airbnbs', value })) }]
       : []),
     { blockType: 'read-more', title: 'The article these stays came from', url: readMorePath },
     text(p(t(LOREM))),

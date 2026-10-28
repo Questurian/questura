@@ -43,9 +43,13 @@ function StayRow({ stay }: { stay: StayListItem }): JSX.Element {
         <div aria-hidden className="aspect-square w-full bg-background-warm" />
       )}
       <div className="min-w-0">
-        <p className="mb-1 text-[11px] font-medium uppercase tracking-[0.08em] text-foreground/50 [font-family:var(--font-dm-sans)]">
-          {stay.type ?? (stay.kind === 'airbnb' ? 'Airbnb' : 'Hotel')}
-        </p>
+        {/* A hotel's type tells hotels apart (Hostel, Boutique Hotel); every
+            row of an Airbnb list would only repeat what the heading says. */}
+        {stay.kind === 'hotel' ? (
+          <p className="mb-1 text-[11px] font-medium uppercase tracking-[0.08em] text-foreground/50 [font-family:var(--font-dm-sans)]">
+            {stay.type ?? 'Hotel'}
+          </p>
+        ) : null}
         <HotelTitle hotel={stay} className="text-[17px] leading-[1.25] sm:text-[19px]" />
         <div className="mt-1">
           <StayFacts stay={stay} />
@@ -66,14 +70,18 @@ function StayRow({ stay }: { stay: StayListItem }): JSX.Element {
 }
 
 /**
- * A Stay List (owner, 2026-10-28): hotels and Airbnbs in one paper box, one
- * compact row each (square photo, type, name, facts, link), so a long list
- * reads like a guidebook index rather than a wall of cards.
+ * A Stay List (owner, 2026-10-28): the hotels, or the Airbnbs, in one paper
+ * box, one compact row each (square photo, name, facts, link), so a long list
+ * reads like a guidebook index rather than a wall of cards. An article keeps
+ * its hotel list and its Airbnb list apart.
  */
 export function HotelListBlockRenderer({ block }: { block: HotelListBlock }): JSX.Element | null {
   if (block.stays.length === 0) return null
   return (
-    <EditorialBox as="section" label={block.label ?? 'Where to stay'}>
+    <EditorialBox
+      as="section"
+      label={block.label ?? (block.stays.every((stay) => stay.kind === 'airbnb') ? 'Airbnbs' : 'Hotels')}
+    >
       <ul className="divide-y divide-foreground/15">
         {block.stays.map((stay, index) => (
           <StayRow key={`${stay.kind}-${stay.id}-${index}`} stay={stay} />

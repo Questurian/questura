@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import type { Payload } from 'payload'
 
+import { oneKindOfStay } from '../articles/blocks'
 import { sanitizeStayLists } from './stayLists'
 
 const hotelDoc = (overrides: Record<string, unknown> = {}) => ({
@@ -81,5 +82,14 @@ describe('sanitizeStayLists', () => {
     expect(blocks[1]).toMatchObject({ stays: [], label: null })
     expect(find).toHaveBeenCalledTimes(1)
     expect(find).toHaveBeenCalledWith(expect.objectContaining({ where: { id: { in: [42, 41] } } }))
+  })
+})
+
+describe('oneKindOfStay', () => {
+  it('takes a list of one kind and refuses a mixed or empty one', () => {
+    expect(oneKindOfStay([{ relationTo: 'airbnbs', value: 1 }, { relationTo: 'airbnbs', value: 2 }])).toBe(true)
+    expect(oneKindOfStay([{ relationTo: 'accommodations', value: 1 }, { relationTo: 'airbnbs', value: 2 }])).toMatch(/not both/)
+    expect(oneKindOfStay([])).toMatch(/at least one/)
+    expect(oneKindOfStay(null)).toMatch(/at least one/)
   })
 })

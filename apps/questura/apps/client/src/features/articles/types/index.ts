@@ -156,13 +156,13 @@ export type StayListItem = HotelCard & {
 }
 
 /**
- * Hotels and Airbnbs kept in one block (slug `hotel-list`), drawn as compact
+ * Hotels, or Airbnbs, kept in one block (slug `hotel-list`), drawn as compact
  * rows. Unpublished or gone stays are already left out of `stays`.
  */
 export type HotelListBlock = {
   id: string
   blockType: 'hotel-list'
-  /** The heading over the list; null shows "Where to stay". */
+  /** The heading over the list; null shows "Hotels" or "Airbnbs". */
   label: string | null
   stays: StayListItem[]
 }
