@@ -402,7 +402,7 @@ async function linking(): Promise<void> {
   const otherOwner = await passwordSignIn(otherEmail)
   const mismatch = google(unique('someone-else'))
   const mismatched = await land(otherOwner, await consent(await startGoogle(otherOwner, 'link'), mismatch))
-  record(group, "explicit link refuses a Google account with a different address", mismatched.error === "email_doesn't_match" && (await googleOwner(mismatch.sub)) === null && !(await providers(otherId)).includes('google'), landed(mismatched))
+  record(group, 'explicit link refuses a Google account with a different address', mismatched.error === 'email_does_not_match' && (await googleOwner(mismatch.sub)) === null && !(await providers(otherId)).includes('google'), landed(mismatched))
 }
 
 // -------------------------------------------------------------- google first
