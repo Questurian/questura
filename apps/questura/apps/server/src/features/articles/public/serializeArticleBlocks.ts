@@ -8,6 +8,7 @@ import { resolveArticleFeaturedImage } from './view-model'
 import { sanitizeAirbnbCards } from './airbnbCards'
 import { sanitizeHotelCards } from './hotelCards'
 import { sanitizeStayLists } from './stayLists'
+import { anchorArticleHeadings } from './headingAnchors'
 
 async function toLexicalHTML(data: unknown): Promise<string> {
   return convertLexicalToHTMLAsync({
@@ -146,6 +147,11 @@ async function serializeStandardArticleBlocks(
       }
     }),
   )
+
+  const contents = anchorArticleHeadings(blocks)
+  if (article.showTableOfContents === true && contents.length > 0) {
+    article.tableOfContents = contents
+  }
 }
 
 async function serializeMapsListicleBlocks(

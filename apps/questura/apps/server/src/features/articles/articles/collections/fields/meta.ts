@@ -136,3 +136,17 @@ export const displayLayout: Field = {
     description: 'How the public article page is laid out. Body, paywall and ads are the same in all three.',
   },
 }
+
+/**
+ * A Contents box under the header that lists the article's H2 headings and
+ * jumps to each. Meant for the few long guides; off by default.
+ */
+export const showTableOfContents: Field = {
+  name: 'showTableOfContents',
+  type: 'checkbox',
+  defaultValue: false,
+  admin: {
+    position: 'sidebar',
+    description: 'Show a Contents box under the header listing every H2 heading. For long guides.',
+  },
+}
