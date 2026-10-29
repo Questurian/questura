@@ -579,7 +579,10 @@ export async function seedLaunchCorpus(payload: PayloadLike, pool: Pool, seed: n
   const identities: LaunchManifest['identities'] = []
   const publishedPieces = pieces.filter((piece) => piece.status === 'published')
   for (const [position, identity] of LAUNCH_IDENTITIES.entries()) {
-    const user = await context.internalAdapter.createUser({ email: identity.email, name: identity.name, emailVerified: true })
+    const user = await context.internalAdapter.createUser(
+      { email: identity.email, name: identity.name, emailVerified: true },
+      { method: 'email-password' },
+    )
     await context.internalAdapter.linkAccount({
       userId: user.id,
       providerId: 'credential',

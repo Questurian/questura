@@ -110,7 +110,10 @@ describe('/api/dev/session', () => {
     usersExist(false)
 
     expect((await POST(request())).status).toBe(200)
-    expect(createUser).toHaveBeenCalledWith(expect.objectContaining({ email: LOGIN.email, emailVerified: true }))
+    expect(createUser).toHaveBeenCalledWith(
+      expect.objectContaining({ email: LOGIN.email, emailVerified: true }),
+      { method: 'email-password' },
+    )
     expect(linkAccount).toHaveBeenCalledWith(expect.objectContaining({ userId: 'u1', providerId: 'credential', password: `hashed:${LOGIN.password}` }))
     expect(ensureProfile).toHaveBeenCalled()
   })
