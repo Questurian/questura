@@ -246,9 +246,20 @@ export type Article = {
   gate?: GateState
   /** How the standard article page is framed; missing on older rows means classic. */
   displayLayout?: ArticleDisplayLayout | null
+  /**
+   * The article's H2 headings, in order, when its Contents box is on. The
+   * server builds it from the whole body, so it names locked parts too.
+   */
+  tableOfContents?: TableOfContentsEntry[]
 }
 
 export type ArticleDisplayLayout = 'classic' | 'dark-hero' | 'centered'
+
+/** One line of the Contents box: an H2's anchor id and its text. */
+export type TableOfContentsEntry = {
+  id: string
+  title: string
+}
 
 export {
   isListicleVenue,

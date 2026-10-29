@@ -106,10 +106,21 @@ function ArticleBody({ article, path, adPlan }: { article: Article; path?: strin
           articleId={article.id}
           gate={gate}
           path={path ?? '/'}
-          sample={<ArticleBlockStream blocks={article.contentBlocks ?? []} plan={adPlan} />}
+          contents={article.tableOfContents}
+          sample={
+            <ArticleBlockStream
+              blocks={article.contentBlocks ?? []}
+              plan={adPlan}
+              contents={article.tableOfContents}
+            />
+          }
         />
       ) : (
-        <ArticleBlockStream blocks={article.contentBlocks ?? []} plan={adPlan} />
+        <ArticleBlockStream
+          blocks={article.contentBlocks ?? []}
+          plan={adPlan}
+          contents={article.tableOfContents}
+        />
       )}
 
       {article.author ? <ArticleAuthorBanner author={article.author} /> : null}

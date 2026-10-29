@@ -294,9 +294,52 @@
   background-size: 100% 100%;
 }
 
+/* Contents box: ink lines that take the prose links' highlight. */
+.article-contents-link {
+  text-decoration: underline;
+  text-decoration-color: rgb(26 26 26 / 0.25);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+  background-image: linear-gradient(rgb(var(--accent-rgb) / 0.13), rgb(var(--accent-rgb) / 0.13));
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  background-size: 100% 0;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  transition:
+    background-size 160ms ease,
+    text-decoration-color 160ms ease;
+}
+
+.article-contents-link:hover,
+.article-contents-link:focus-visible {
+  text-decoration-color: var(--accent);
+  background-size: 100% 100%;
+}
+
+/* Section anchors land below the sticky navbar, not under it. */
+.article-prose h2[id],
+.article-prose h3[id] {
+  scroll-margin-top: 80px;
+}
+
+@media (min-width: 1024px) {
+  .article-prose h2[id],
+  .article-prose h3[id] {
+    scroll-margin-top: calc(var(--navbar-height, 6rem) + 16px);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html:has(.article-contents) {
+    scroll-behavior: smooth;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .article-prose a,
-  .article-read-more-title {
+  .article-read-more-title,
+  .article-contents-link {
     transition: none;
   }
 }
