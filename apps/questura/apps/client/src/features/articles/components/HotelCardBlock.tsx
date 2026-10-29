@@ -79,9 +79,11 @@ export function HotelLinkLabel({ children }: { children: string }): JSX.Element 
  * row are drawn as one carousel instead (`HotelCarousel`, ArticleBlockStream).
  */
 export function HotelCardBlockRenderer({ block }: { block: HotelCardBlock }): JSX.Element | null {
-  const hotel = block.hotel
-  if (!hotel) return null
+  return block.hotel ? <HotelCardBox hotel={block.hotel} /> : null
+}
 
+/** One hotel's paper box: a lone Hotel Card, or one card of a stacked Hotel List. */
+export function HotelCardBox({ hotel }: { hotel: HotelCard }): JSX.Element {
   return (
     <aside className={`group relative grid bg-paper ${hotel.image ? 'sm:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]' : ''}`}>
       {hotel.image ? (

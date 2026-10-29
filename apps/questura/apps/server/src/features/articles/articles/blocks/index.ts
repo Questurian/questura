@@ -321,6 +321,57 @@ export const HotelCardBlock: Block = {
 }
 
 /**
+ * A Stay List holds one kind of stay: all hotels or all Airbnbs (owner,
+ * 2026-10-28), so an article shows a hotel list and an Airbnb list apart.
+ * Payload's own required check is replaced by this one, so it also refuses an
+ * empty list.
+ */
+export function oneKindOfStay(value: unknown): true | string {
+  const stays = Array.isArray(value) ? value : []
+  if (stays.length === 0) return 'Add at least one hotel or Airbnb.'
+  const kinds = new Set(
+    stays.map((stay) => (stay && typeof stay === 'object' ? (stay as { relationTo?: unknown }).relationTo : null)),
+  )
+  return kinds.size === 1 ? true : 'A list holds hotels or Airbnbs, not both. Make a second list for the other kind.'
+}
+
+/**
+ * Stay List (slug `hotel-list`) - several saved stays kept together in one
+ * block (owner, 2026-10-28): a long list is one block to open and edit, not
+ * ten cards in a row. Each list is all hotels or all Airbnbs, drawn as
+ * compact rows in one paper box; each stay is read at render time, like the
+ * Hotel and Airbnb Cards.
+ */
+export const HotelListBlock: Block = {
+  slug: 'hotel-list',
+  interfaceName: 'HotelListBlock',
+  labels: {
+    singular: 'Stay List',
+    plural: 'Stay Lists',
+  },
+  fields: [
+    {
+      name: 'label',
+      type: 'text',
+      admin: {
+        description: 'The small blue heading over the list. Empty shows "Hotels" or "Airbnbs".',
+      },
+    },
+    {
+      name: 'stays',
+      type: 'relationship',
+      relationTo: ['accommodations', 'airbnbs'],
+      hasMany: true,
+      required: true,
+      validate: oneKindOfStay,
+      admin: {
+        description: 'The hotels, or the Airbnbs, to show, in order. One kind per list.',
+      },
+    },
+  ],
+}
+
+/**
  * All available article blocks
  */
 export const articleBlocks = [
@@ -335,4 +386,5 @@ export const articleBlocks = [
   FAQBlock,
   AirbnbCardBlock,
   HotelCardBlock,
+  HotelListBlock,
 ]

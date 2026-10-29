@@ -8,8 +8,9 @@ const source = readFileSync(
 )
 
 test('editorial feature reserves full-width divider rules for tablet and desktop', () => {
-  assert.doesNotMatch(source, /justify-center border-y /)
-  assert.match(source, /justify-center \$\{tone\.copyRule\}[^"`]*768:border-y/)
+  // Owner, 2026-10-28: the copy column is not boxed by rules at any width.
+  assert.doesNotMatch(source, /copyRule/)
+  assert.doesNotMatch(source, /justify-center[^"`]*border-y/)
 
   assert.doesNotMatch(source, /gap-4 border-t /)
   assert.match(source, /gap-4 \$\{tone\.railRule\}[^"`]*768:border-t/)

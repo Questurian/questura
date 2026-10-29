@@ -29,7 +29,6 @@ const TONES = {
     kicker: '',
     title: 'text-foreground',
     description: 'text-foreground/80',
-    copyRule: 'border-foreground/30',
     railRule: 'border-foreground/70',
     itemRule: 'border-foreground/25',
     itemTitle: '',
@@ -44,7 +43,6 @@ const TONES = {
     kicker: 'text-accent-soft',
     title: 'text-background',
     description: 'text-background/75',
-    copyRule: 'border-background/25',
     railRule: 'border-background/50',
     itemRule: 'border-background/20',
     itemTitle: 'text-background',
@@ -186,7 +184,7 @@ export function EditorialFeaturePreview({
           ) : null}
         </div>
 
-        <div className={`flex min-w-0 flex-col justify-center ${tone.copyRule} py-8 text-center 768:border-y 768:px-5 1024:border-y-0 1024:px-0`}>
+        <div className="flex min-w-0 flex-col justify-center py-8 text-center 768:px-5 1024:px-0">
           {flag ? (
             <CountryFlag
               code={flag}
