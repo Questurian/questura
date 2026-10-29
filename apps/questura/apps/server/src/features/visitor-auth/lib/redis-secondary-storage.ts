@@ -91,6 +91,13 @@ export const redisSecondaryStorage = {
     return getRedis().getdel(key)
   },
 
+  // Better Auth's limiter needs the post-increment count and a fixed window.
+  // Reuse the atomic script below; a GET/SET would lose concurrent requests.
+  async increment(key: string, ttlSeconds: number): Promise<number> {
+    const { count } = await redisSecondaryStorage.incrementWithExpiry(key, ttlSeconds)
+    return count
+  },
+
   async incrementWithExpiry(
     key: string,
     ttlSeconds: number

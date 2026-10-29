@@ -78,6 +78,27 @@ describe('redisSecondaryStorage', () => {
 
     await expect(redisSecondaryStorage.incrementManyWithExpiry(['a', 'b'], 60)).rejects.toThrow(/invalid/)
   })
+
+  it('returns the atomic count when Better Auth calls increment without a receiver', async () => {
+    fakeRedis.eval.mockResolvedValueOnce([7, 42])
+    // Better Auth extracts this method before calling it. It cannot use `this`.
+    const { increment } = redisSecondaryStorage
+
+    expect(await increment('rate-limit', 60)).toBe(7)
+    expect(fakeRedis.eval.mock.calls.at(-1)?.slice(1)).toEqual([1, 'rate-limit', 60])
+  })
+
+  it('rejects an invalid increment answer instead of allowing a request', async () => {
+    fakeRedis.eval.mockResolvedValueOnce(null)
+
+    await expect(redisSecondaryStorage.increment('rate-limit', 60)).rejects.toThrow(/invalid/)
+  })
+
+  it('propagates a failed Redis increment instead of reporting a fresh counter', async () => {
+    fakeRedis.eval.mockRejectedValueOnce(new Error('Redis unavailable'))
+
+    await expect(redisSecondaryStorage.increment('rate-limit', 60)).rejects.toThrow('Redis unavailable')
+  })
 })
 
 describe('connection errors', () => {

@@ -30,7 +30,10 @@ async function findUserId(email: string): Promise<string | null> {
 async function createLocalReader({ email, password }: DevLogin): Promise<void> {
   const context = await visitorAuth.$context
   const hash = await context.password.hash(password)
-  const user = await context.internalAdapter.createUser({ email, name: 'Dev Reader', emailVerified: true })
+  const user = await context.internalAdapter.createUser(
+    { email, name: 'Dev Reader', emailVerified: true },
+    { method: 'email-password' },
+  )
   if (!user) throw new DevLoginError(`Could not create the local account ${email}.`)
   await context.internalAdapter.linkAccount({ userId: user.id, providerId: 'credential', accountId: user.id, password: hash })
   await ensureVisitorProfileForAuthUser({ id: user.id, email: user.email, name: user.name })
