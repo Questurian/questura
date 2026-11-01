@@ -11,7 +11,7 @@ export const getMediaMode = (value: unknown): MediaMode | null => {
   return value
 }
 
-/** Like `getMediaMode`, but also accepts the listicle-only "no media" choice. */
+/** Like `getMediaMode`, but also accepts the "no media" choice of listicle items and itinerary stops. */
 export const getListicleMediaMode = (value: unknown): ListicleMediaMode | null =>
   value === 'none' ? value : getMediaMode(value)
 

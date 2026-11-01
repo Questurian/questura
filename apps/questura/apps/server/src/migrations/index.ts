@@ -72,6 +72,7 @@ import * as migration_20261019_155756_article_read_more from './20261019_155756_
 import * as migration_20261028_004428_merge_highlight_callout_into_in_the_know from './20261028_004428_merge_highlight_callout_into_in_the_know';
 import * as migration_20261028_233521_hotel_list_block from './20261028_233521_hotel_list_block';
 import * as migration_20261029_164239_article_show_table_of_contents from './20261029_164239_article_show_table_of_contents';
+import * as migration_20261101_153353_itinerary_stops_blurb_only from './20261101_153353_itinerary_stops_blurb_only';
 
 export const migrations = [
   {
@@ -442,6 +443,11 @@ export const migrations = [
   {
     up: migration_20261029_164239_article_show_table_of_contents.up,
     down: migration_20261029_164239_article_show_table_of_contents.down,
-    name: '20261029_164239_article_show_table_of_contents'
+    name: '20261029_164239_article_show_table_of_contents',
+  },
+  {
+    up: migration_20261101_153353_itinerary_stops_blurb_only.up,
+    down: migration_20261101_153353_itinerary_stops_blurb_only.down,
+    name: '20261101_153353_itinerary_stops_blurb_only'
   },
 ];

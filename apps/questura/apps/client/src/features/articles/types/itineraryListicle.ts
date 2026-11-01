@@ -63,7 +63,7 @@ export type ItineraryVenueBlock = {
   moment?: ItineraryMoment | null;
   momentLabel?: string | null;
   blurb?: string;
-  mediaMode?: "photos" | "instagram" | "both";
+  mediaMode?: "photos" | "instagram" | "both" | "none";
   selectedPhotos?: ListicleSelectedPhoto[] | null;
   selectedInstagramPost?: ListicleInstagramPost | number | string | null;
   /** Operator-curated Tour Picks on attraction stops (ordered, max 4). */

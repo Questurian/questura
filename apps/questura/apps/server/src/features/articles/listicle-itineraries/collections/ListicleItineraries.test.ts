@@ -258,6 +258,29 @@ describe('ListicleItineraries attraction tour-picks validation', () => {
   })
 })
 
+describe('ListicleItineraries stop media', () => {
+  it('accepts a blurb-only stop and clears any leftover media', async () => {
+    const data = buildData()
+    const stop: Record<string, unknown> = buildAttractionStop({
+      mediaMode: 'none',
+      selectedPhotos: [700],
+      selectedInstagramPost: 800,
+    })
+    data.items = [stop]
+
+    await expect(runBeforeValidate(data)).resolves.toEqual(data)
+    expect(stop.selectedPhotos).toEqual([])
+    expect(stop.selectedInstagramPost).toBeNull()
+  })
+
+  it('still rejects the photos mode with no photo picked', async () => {
+    const data = buildData()
+    data.items = [buildAttractionStop({ selectedPhotos: [] })]
+
+    await expect(runBeforeValidate(data)).rejects.toThrow('must select between 1 and 6 photos')
+  })
+})
+
 describe('ListicleItineraries stop-row rules answer 400 on the row', () => {
   it('answers a missing tour title with a 400 on the stop, not a 500', async () => {
     await expect(runBeforeValidate(buildData({ title: ' ' }))).rejects.toMatchObject({
