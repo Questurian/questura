@@ -17,7 +17,7 @@ export const ItineraryAccommodationsBlock: Block = {
       type: 'relationship',
       relationTo: 'accommodations',
       required: true,
-      filterOptions: createLocationFilter('accommodations'),
+      filterOptions: createLocationFilter('accommodations', { allowSameCountry: true }),
       admin: {
         description: 'Select an accommodations listing for this itinerary timeslot',
       },

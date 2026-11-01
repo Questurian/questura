@@ -17,7 +17,7 @@ export const ItineraryDiningBlock: Block = {
       type: 'relationship',
       relationTo: 'dining',
       required: true,
-      filterOptions: createLocationFilter('dining'),
+      filterOptions: createLocationFilter('dining', { allowSameCountry: true }),
       admin: {
         description: 'Select a dining listing for this itinerary timeslot',
       },

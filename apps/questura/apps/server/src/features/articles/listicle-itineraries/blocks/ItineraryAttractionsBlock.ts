@@ -18,7 +18,7 @@ export const ItineraryAttractionsBlock: Block = {
       type: 'relationship',
       relationTo: 'attractions',
       required: true,
-      filterOptions: createLocationFilter('attractions'),
+      filterOptions: createLocationFilter('attractions', { allowSameCountry: true }),
       admin: {
         description: 'Select an attraction listing for this itinerary timeslot',
       },

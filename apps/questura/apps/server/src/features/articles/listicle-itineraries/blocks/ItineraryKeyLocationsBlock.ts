@@ -15,7 +15,7 @@ export const ItineraryKeyLocationsBlock: Block = {
       type: 'relationship',
       relationTo: 'key-locations',
       required: true,
-      filterOptions: createLocationFilter('key-locations'),
+      filterOptions: createLocationFilter('key-locations', { allowSameCountry: true }),
       admin: {
         description: 'Select a key location for this itinerary timeslot',
       },

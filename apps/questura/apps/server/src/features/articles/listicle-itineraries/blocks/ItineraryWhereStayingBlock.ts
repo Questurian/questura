@@ -16,7 +16,7 @@ export const ItineraryWhereStayingBlock: Block = {
       type: 'relationship',
       relationTo: 'accommodations',
       required: true,
-      filterOptions: createLocationFilter('accommodations'),
+      filterOptions: createLocationFilter('accommodations', { allowSameCountry: true }),
       admin: {
         description: 'Select the accommodation for this night or segment (separate from timed stops)',
       },
