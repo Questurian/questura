@@ -17,7 +17,7 @@ export const ItineraryNightlifeBlock: Block = {
       type: 'relationship',
       relationTo: 'nightlife',
       required: true,
-      filterOptions: createLocationFilter('nightlife'),
+      filterOptions: createLocationFilter('nightlife', { allowSameCountry: true }),
       admin: {
         description: 'Select a nightlife listing for this itinerary timeslot',
       },

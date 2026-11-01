@@ -9,8 +9,14 @@ import { getArticleLocationScope } from '@/shared/location/server/articleLocatio
  * scope. The collection slug argument is accepted for call-site readability but
  * is not used — the scope is derived entirely from the parent `location` and
  * `sharedNeighborhoods` on the form.
+ *
+ * `allowSameCountry` is for itinerary stops, which may sit outside the city on
+ * a day trip. Exact selected neighborhoods still limit the picker to them.
  */
-export const createLocationFilter = (_: string) => {
+export const createLocationFilter = (
+  _: string,
+  options: { allowSameCountry?: boolean } = {},
+) => {
   return async ({ data, req }: FilterOptionsProps): Promise<Where> => {
     const parentLocation = data?.location as string | undefined
     const sharedNeighborhoods = data?.sharedNeighborhoods
@@ -34,7 +40,13 @@ export const createLocationFilter = (_: string) => {
 
     const locationClauses: Where[] = []
 
-    if (scope.keys.length) {
+    if (options.allowSameCountry && !scope.exactNeighborhoods) {
+      locationClauses.push({
+        location: {
+          contains: parentLocation.split('|')[0],
+        },
+      })
+    } else if (scope.keys.length) {
       locationClauses.push({
         location: {
           in: scope.keys,

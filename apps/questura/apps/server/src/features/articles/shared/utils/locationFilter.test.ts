@@ -67,4 +67,31 @@ describe('article location filter', () => {
       } as never),
     ).resolves.toEqual(exactNeighborhoodFilter)
   })
+
+  it('keeps exact neighborhoods exact even when the same country is allowed', async () => {
+    const filter = createLocationFilter('attractions', { allowSameCountry: true })
+
+    await expect(
+      filter({
+        data: {
+          location: 'peru|lima',
+          sharedNeighborhoods: [101, 102],
+        },
+        req,
+      } as never),
+    ).resolves.toEqual(exactNeighborhoodFilter)
+  })
+
+  it('opens an itinerary stop picker to the whole country for a day trip', async () => {
+    const filter = createLocationFilter('attractions', { allowSameCountry: true })
+    const where = (await filter({
+      data: {
+        location: 'peru|lima',
+        sharedNeighborhoods: [],
+      },
+      req: { payload: { find: async () => ({ docs: [{ id: 251, locationKey: 'peru|lima', level: 'city' }], totalDocs: 1, totalPages: 1 }) } },
+    } as never)) as { and: Array<{ or?: Array<Record<string, unknown>> }> }
+
+    expect(where.and[1].or?.[0]).toEqual({ location: { contains: 'peru' } })
+  })
 })
