@@ -153,6 +153,14 @@ export const isLocationWithinArticleScope = (
   return scope.keys.includes(normalizedLocation)
 }
 
+export const isLocationInSameCountry = (
+  itemLocationKey: string,
+  parentLocationKey: string,
+): boolean => {
+  const itemCountry = normalizeLocationKey(itemLocationKey).split('|')[0]
+  return Boolean(itemCountry) && itemCountry === normalizeLocationKey(parentLocationKey).split('|')[0]
+}
+
 export const syncSharedNeighborhoodsField = (
   fieldName = 'sharedNeighborhoods',
 ): CollectionBeforeValidateHook => {
