@@ -2,6 +2,7 @@ import { staffUser } from '@/features/auth/lib/staff-user'
 import { CollectionConfig } from 'payload'
 import {
   getArticleLocationScope,
+  isLocationInSameCountry,
   isLocationWithinArticleScope,
   syncSharedNeighborhoodsField,
   validateSharedNeighborhoodSelection,
@@ -341,7 +342,16 @@ export const ListicleItineraries: CollectionConfig = {
           })
 
           for (const block of computed) {
-            if (block.location && !isLocationWithinArticleScope(block.location, locationScope)) {
+            // A stop may leave the city, as on a day trip, but not the country.
+            // An itinerary pinned to exact neighborhoods stays inside them.
+            const isDayTripStop =
+              !locationScope.exactNeighborhoods
+              && isLocationInSameCountry(block.location ?? '', parentLocation)
+            if (
+              block.location
+              && !isLocationWithinArticleScope(block.location, locationScope)
+              && !isDayTripStop
+            ) {
               throw fieldRuleError({
                 collection: 'listicle-itineraries',
                 path: 'itineraryDays',

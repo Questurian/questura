@@ -32,6 +32,14 @@ function buildReq() {
           }
         }
 
+        if (collection === 'attractions' && String(id) === '203') {
+          return { id: 203, title: 'Islas Ballestas', location: 'peru|paracas|paracas', gallery: [] }
+        }
+
+        if (collection === 'attractions' && String(id) === '204') {
+          return { id: 204, title: 'Comuna 13', location: 'colombia|medellin', gallery: [] }
+        }
+
         throw new Error(`Not found: ${collection}:${id}`)
       },
     },
@@ -278,6 +286,24 @@ describe('ListicleItineraries stop media', () => {
     data.items = [buildAttractionStop({ selectedPhotos: [] })]
 
     await expect(runBeforeValidate(data)).rejects.toThrow('must select between 1 and 6 photos')
+  })
+})
+
+describe('ListicleItineraries day-trip stops', () => {
+  const blurbOnlyStop = (item: number) => buildAttractionStop({ item, mediaMode: 'none', selectedPhotos: [] })
+
+  it('accepts a stop in another city of the same country', async () => {
+    const data = buildData()
+    data.items = [blurbOnlyStop(203)]
+
+    await expect(runBeforeValidate(data)).resolves.toEqual(data)
+  })
+
+  it('rejects a stop in another country', async () => {
+    const data = buildData()
+    data.items = [blurbOnlyStop(204)]
+
+    await expect(runBeforeValidate(data)).rejects.toThrow('location does not match itinerary location')
   })
 })
 
