@@ -3,7 +3,9 @@ import { createItemMediaFields } from '../../../shared/utils/itemMedia/fields'
 
 const itineraryMediaFieldOptions = {
   mediaModeEnumName: 'itm_media_mode',
-  modeDescription: 'Select whether this itinerary stop uses photos, Instagram, or both.',
+  allowNoMedia: true,
+  modeDescription:
+    'Select whether this itinerary stop uses photos, Instagram, both, or no media (blurb only).',
 }
 
 export const createItineraryItemMediaFields = (

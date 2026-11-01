@@ -19,7 +19,7 @@ export type ItemMediaSourceCollection =
 
 export type MediaMode = 'photos' | 'instagram' | 'both'
 
-/** A listicle item can also run with no media at all: just the blurb. */
+/** A listicle item or itinerary stop can also run with no media at all: just the blurb. */
 export type ListicleMediaMode = MediaMode | 'none'
 
 export type SourceItemMediaIds = {
@@ -30,7 +30,7 @@ export type SourceItemMediaIds = {
 export type ItemMediaFieldOptions = {
   mediaModeDbName?: string
   mediaModeEnumName?: string
-  /** Adds the "no media" choice. Listicle items only; itinerary stops always carry media. */
+  /** Adds the "no media" choice. Not every media field offers it. */
   allowNoMedia?: boolean
   modeDescription?: string
   photosDescription?: string

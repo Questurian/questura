@@ -1,6 +1,6 @@
 import type { PayloadRequest } from 'payload'
 import {
-  getMediaMode,
+  getListicleMediaMode,
   requiresInstagram,
   requiresPhotos,
 } from '../../shared/utils/itemMedia/mediaMode'
@@ -290,16 +290,16 @@ export async function validateListicleItineraryBlockRows(params: {
       validateTourPicks({ blockTours: block.tours, sourceItem, itemLabel })
     }
 
-    const mediaMode = getMediaMode(block.mediaMode)
+    const mediaMode = getListicleMediaMode(block.mediaMode)
     if (!mediaMode) {
-      throw reject(`${itemLabel} must select a media mode (photos, instagram, or both).`)
+      throw reject(`${itemLabel} must select a media mode (photos, instagram, both, or none).`)
     }
 
-    if (mediaMode === 'photos') {
+    if (mediaMode === 'photos' || mediaMode === 'none') {
       block.selectedInstagramPost = null
     }
 
-    if (mediaMode === 'instagram') {
+    if (mediaMode === 'instagram' || mediaMode === 'none') {
       block.selectedPhotos = []
     }
 
