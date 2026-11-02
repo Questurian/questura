@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 
-import { SECURITY_HEADERS, reportOnlyContentSecurityPolicy } from './securityHeaders.ts'
+import { SECURITY_HEADERS, STUDIO_PREVIEW_HEADERS, reportOnlyContentSecurityPolicy } from './securityHeaders.ts'
 
 // Every page carries these (launch harness D4). Without them the site could
 // be framed by another site and a signed-in reader tricked into clicking
@@ -52,4 +52,11 @@ test('only a plain-http build allows plain-http images', () => {
   const imgSrc = (api) => reportOnlyContentSecurityPolicy(api).split('; ').find((part) => part.startsWith('img-src '))
   assert.equal(imgSrc('https://api.questurian.com'), "img-src 'self' data: blob: https:")
   assert.equal(imgSrc('http://api.readiness.localhost:4100'), "img-src 'self' data: blob: https: http:")
+})
+
+// The one page that may be framed, and only by the studio on the owner's Mac.
+test('the studio preview can be framed by the studio and nothing else', () => {
+  const headers = Object.fromEntries(STUDIO_PREVIEW_HEADERS.map(({ key, value }) => [key.toLowerCase(), value]))
+  assert.equal(headers['content-security-policy'], 'frame-ancestors http://localhost:3003')
+  assert.match(headers['x-robots-tag'], /noindex/)
 })

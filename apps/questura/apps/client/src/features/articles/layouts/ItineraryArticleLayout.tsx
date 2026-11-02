@@ -37,6 +37,8 @@ interface ItineraryArticleLayoutProps {
    * first-load JavaScript, which is over the cap (perf/budgets.json).
    */
   paywallNotice?: ReactNode
+  /** The studio preview follows the day being edited. Readers never pass this. */
+  followDayIndex?: number
 }
 
 export function ItineraryArticleLayout({
@@ -49,6 +51,7 @@ export function ItineraryArticleLayout({
   city,
   gate,
   paywallNotice = null,
+  followDayIndex,
 }: ItineraryArticleLayoutProps): JSX.Element {
   // `gate` comes from the server once, so `gate.mapPins` keeps one identity
   // across renders: a fresh array would rebuild every marker and re-frame the
@@ -74,7 +77,12 @@ export function ItineraryArticleLayout({
   const lockedPins = locked && effectiveArticle === article ? gate?.mapPins : undefined
   const access = mapAccessFor(locked, phase)
   const days = useMemo(() => itineraryDaysForArticle(effectiveArticle), [effectiveArticle])
-  const [selectedDayIndex, setSelectedDayIndex] = useState(0)
+  const [selectedDayIndex, setSelectedDayIndex] = useState(followDayIndex ?? 0)
+  const [followedDayIndex, setFollowedDayIndex] = useState(followDayIndex)
+  if (followDayIndex !== followedDayIndex) {
+    setFollowedDayIndex(followDayIndex)
+    if (followDayIndex !== undefined) setSelectedDayIndex(followDayIndex)
+  }
   const dayIndex = Math.min(selectedDayIndex, Math.max(days.length - 1, 0))
 
   // Map shows the selected day only: pins swap and the map re-fits on day
