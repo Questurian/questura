@@ -1,5 +1,3 @@
-import { STUDIO_ORIGIN } from "./studioOrigin.ts";
-
 /**
  * Sent on every page (`next.config.ts`, source `/:path*`). Launch harness D4.
  *
@@ -67,12 +65,12 @@ function apiOrigin(): string {
 /**
  * The studio preview (`/studio-preview/*`) sits in an iframe inside the AI Blog
  * Writer on the owner's Mac, and only there. It has no buttons a reader would
- * fear, and it draws only what that same origin posts to it. Applied after
+ * fear, and it draws only what its parent frame posts to it. Applied after
  * SECURITY_HEADERS, so this replaces their policy. `X-Frame-Options: DENY`
  * stays on the response: a `frame-ancestors` policy makes browsers ignore it.
  */
 export const STUDIO_PREVIEW_HEADERS = [
-  { key: "Content-Security-Policy", value: `frame-ancestors ${STUDIO_ORIGIN}` },
+  { key: "Content-Security-Policy", value: "frame-ancestors http://localhost:3003" },
   { key: "X-Robots-Tag", value: "noindex, nofollow" },
 ];
 

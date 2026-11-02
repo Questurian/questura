@@ -8,7 +8,6 @@ import {
   isListicleItineraryArticle,
   type ListicleItineraryArticle,
 } from '@/features/articles/types/itineraryListicle'
-import { STUDIO_ORIGIN } from '@/lib/http/studioOrigin'
 
 type StudioMessage = {
   type: 'studio-preview:article'
@@ -25,7 +24,10 @@ function parseCountryCity(location: unknown): { country: string; city: string | 
  * The real itinerary page, drawn from whatever the AI Blog Writer posts in. The
  * page holds no draft of its own and fetches nothing; the studio asks the API
  * for the article and sends the answer. Blurbs arrive as HTML, so only the
- * studio's origin and this site's own are listened to.
+ * parent frame is listened to: this page's `frame-ancestors` lets only the
+ * studio be that parent (STUDIO_PREVIEW_HEADERS). The studio's address cannot
+ * be written here, because the build refuses a localhost address in browser
+ * code (scan-client-bundle.mjs).
  */
 export function StudioItineraryPreview(): JSX.Element {
   const [article, setArticle] = useState<ListicleItineraryArticle | null>(null)
@@ -33,14 +35,14 @@ export function StudioItineraryPreview(): JSX.Element {
 
   useEffect(() => {
     function onMessage(event: MessageEvent<StudioMessage>) {
-      if (event.origin !== STUDIO_ORIGIN && event.origin !== window.location.origin) return
+      if (event.source !== window.parent) return
       if (event.data?.type !== 'studio-preview:article') return
       if (isListicleItineraryArticle(event.data.article)) setArticle(event.data.article)
       if (typeof event.data.dayIndex === 'number') setDayIndex(event.data.dayIndex)
     }
 
     window.addEventListener('message', onMessage)
-    window.parent.postMessage({ type: 'studio-preview:ready' }, STUDIO_ORIGIN)
+    window.parent.postMessage({ type: 'studio-preview:ready' }, '*')
     return () => window.removeEventListener('message', onMessage)
   }, [])
 
