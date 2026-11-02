@@ -4,7 +4,7 @@ import createNextIntlPlugin from "next-intl/plugin";
 import { ClientEntrypointsPlugin } from "./scripts/client-entrypoints-plugin.mjs";
 
 import { assertProductionBuildEnv } from "./src/lib/release/productionBuildEnv";
-import { SECURITY_HEADERS } from "./src/lib/http/securityHeaders";
+import { SECURITY_HEADERS, STUDIO_PREVIEW_HEADERS } from "./src/lib/http/securityHeaders";
 
 const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
 
@@ -34,6 +34,7 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       { source: "/:path*", headers: SECURITY_HEADERS },
+      { source: "/studio-preview/:path*", headers: STUDIO_PREVIEW_HEADERS },
       {
         // Join hero globe derivatives are width-versioned filenames
         // (questurian-globe-1650.webp); new artwork gets new names, so the

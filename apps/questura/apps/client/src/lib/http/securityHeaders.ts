@@ -1,10 +1,12 @@
+import { STUDIO_ORIGIN } from "./studioOrigin.ts";
+
 /**
  * Sent on every page (`next.config.ts`, source `/:path*`). Launch harness D4.
  *
  * - `X-Frame-Options` and `frame-ancestors 'none'`: no other site may frame
  *   ours. Framed, a signed-in reader could be tricked into clicking a real
- *   button (Subscribe, Cancel subscription) laid under a decoy. Nothing here
- *   frames the site itself: no Payload live preview, no iframe of our pages.
+ *   button (Subscribe, Cancel subscription) laid under a decoy. The one page
+ *   allowed in a frame is the studio preview: see STUDIO_PREVIEW_HEADERS.
  * - `nosniff`: a response is only ever what its Content-Type says.
  * - `Referrer-Policy`: other sites see our origin, never a full path that
  *   could carry `?returnTo=` or a session id.
@@ -61,6 +63,18 @@ function apiOrigin(): string {
     return "https://api.questurian.com";
   }
 }
+
+/**
+ * The studio preview (`/studio-preview/*`) sits in an iframe inside the AI Blog
+ * Writer on the owner's Mac, and only there. It has no buttons a reader would
+ * fear, and it draws only what that same origin posts to it. Applied after
+ * SECURITY_HEADERS, so this replaces their policy. `X-Frame-Options: DENY`
+ * stays on the response: a `frame-ancestors` policy makes browsers ignore it.
+ */
+export const STUDIO_PREVIEW_HEADERS = [
+  { key: "Content-Security-Policy", value: `frame-ancestors ${STUDIO_ORIGIN}` },
+  { key: "X-Robots-Tag", value: "noindex, nofollow" },
+];
 
 export const SECURITY_HEADERS = [
   { key: "X-Frame-Options", value: "DENY" },
