@@ -1,8 +1,8 @@
 import type { CollectionSlug, Payload } from 'payload'
 
 /**
- * Fills in an unsaved itinerary so the public serializer and the site's page
- * can read it: the AI Blog Writer holds bare ids, the page wants the records.
+ * Fills in an unsaved itinerary or listicle so the public serializer and the
+ * site's page can read it: the AI Blog Writer holds bare ids, the page wants the records.
  *
  * The depth matches the public article routes (depth 2 on the article, so each
  * related record here is read at depth 1). A stop whose record is gone keeps
@@ -16,6 +16,10 @@ const STOP_ITEM_COLLECTIONS: Record<string, CollectionSlug> = {
   'itinerary-attractions': 'attractions',
   'itinerary-nightlife': 'nightlife',
   'itinerary-key-location': 'key-locations',
+  'data-dining': 'dining',
+  'data-accommodations': 'accommodations',
+  'data-attractions': 'attractions',
+  'data-nightlife': 'nightlife',
 }
 
 type Id = number | string
@@ -27,7 +31,7 @@ const isId = (value: unknown): value is Id =>
 
 const isRow = (value: unknown): value is Row => typeof value === 'object' && value !== null
 
-export async function populateDraftItinerary(doc: Row, payload: Payload): Promise<Row> {
+export async function populateDraftArticle(doc: Row, payload: Payload): Promise<Row> {
   const wanted = new Map<CollectionSlug, Set<Id>>()
   const assigns: Assign[] = []
 
@@ -78,6 +82,7 @@ export async function populateDraftItinerary(doc: Row, payload: Payload): Promis
     one(doc.header, 'featuredMediaSet', 'media-sets')
     one(doc.header, 'featuredImage', 'media-assets')
   }
+  if (Array.isArray(doc.items)) doc.items.filter(isRow).forEach(stop)
   if (Array.isArray(doc.itineraryDays)) {
     for (const day of doc.itineraryDays) {
       if (!isRow(day)) continue

@@ -1,7 +1,7 @@
 import type { Payload } from 'payload'
 import { describe, expect, it, vi } from 'vitest'
 
-import { populateDraftItinerary } from './populateDraftArticle'
+import { populateDraftArticle } from './populateDraftArticle'
 
 function fakePayload() {
   const find = vi.fn(async ({ collection, where }: { collection: string; where: { id: { in: number[] } } }) => ({
@@ -10,7 +10,23 @@ function fakePayload() {
   return { payload: { find } as unknown as Payload, find }
 }
 
-describe('populateDraftItinerary', () => {
+describe('populateDraftArticle', () => {
+  it('fills a single-type listicle from its block type', async () => {
+    const { payload } = fakePayload()
+    const doc = {
+      items: [
+        { blockType: 'data-nightlife', item: 5, selectedPhotos: [6] },
+        { blockType: 'data-attractions', item: 7, tours: [8] },
+      ],
+    }
+
+    await populateDraftArticle(doc, payload)
+
+    expect(doc.items[0].item).toEqual({ id: 5, from: 'nightlife' })
+    expect(doc.items[0].selectedPhotos).toEqual([{ id: 6, from: 'media-sets' }])
+    expect(doc.items[1].tours).toEqual([{ id: 8, from: 'tours' }])
+  })
+
   it('fills every relationship the page reads, one query per collection', async () => {
     const { payload, find } = fakePayload()
     const doc = {
@@ -33,7 +49,7 @@ describe('populateDraftItinerary', () => {
       ],
     }
 
-    await populateDraftItinerary(doc, payload)
+    await populateDraftArticle(doc, payload)
 
     const [day] = doc.itineraryDays
     expect(doc.author).toEqual({ id: 1, from: 'authors' })
@@ -57,7 +73,7 @@ describe('populateDraftItinerary', () => {
       itineraryDays: [{ items: [{ blockType: 'itinerary-dining', item: 1, selectedPhotos: [9, 3, 7] }] }],
     }
 
-    await populateDraftItinerary(doc, payload)
+    await populateDraftArticle(doc, payload)
 
     const photos = doc.itineraryDays[0].items[0].selectedPhotos as unknown as Array<{ id: number }>
     expect(photos.map((photo) => photo.id)).toEqual([9, 3, 7])
@@ -76,7 +92,7 @@ describe('populateDraftItinerary', () => {
       ],
     }
 
-    await populateDraftItinerary(doc, payload)
+    await populateDraftArticle(doc, payload)
 
     expect(doc.itineraryDays[0].items.map((row) => row.item)).toEqual([404, null])
   })

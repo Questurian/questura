@@ -2,13 +2,13 @@ import { NextRequest } from 'next/server'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const authenticateRequest = vi.hoisted(() => vi.fn())
-const populateDraftItinerary = vi.hoisted(() => vi.fn(async (doc: unknown) => doc))
+const populateDraftArticle = vi.hoisted(() => vi.fn(async (doc: unknown) => doc))
 const serializeArticleByCollection = vi.hoisted(() => vi.fn(async () => undefined))
 
 vi.mock('payload', () => ({ getPayload: vi.fn(async () => ({})) }))
 vi.mock('@/payload.config', () => ({ default: {} }))
 vi.mock('@/features/auth/lib/auth-middleware', () => ({ authenticateRequest }))
-vi.mock('@/features/articles/studio-preview/populateDraftArticle', () => ({ populateDraftItinerary }))
+vi.mock('@/features/articles/studio-preview/populateDraftArticle', () => ({ populateDraftArticle }))
 vi.mock('@/features/articles/public/serializeArticleBlocks', () => ({ serializeArticleByCollection }))
 
 import { POST } from './route'
@@ -32,7 +32,7 @@ describe('POST /api/studio-preview', () => {
     const response = await POST(post({ doc: { title: 'x' } }))
 
     expect(response.status).toBe(401)
-    expect(populateDraftItinerary).not.toHaveBeenCalled()
+    expect(populateDraftArticle).not.toHaveBeenCalled()
   })
 
   it('needs a document', async () => {
@@ -47,5 +47,13 @@ describe('POST /api/studio-preview', () => {
     expect(response.headers.get('cache-control')).toBe('no-store')
     expect(await response.json()).toEqual({ title: 'Draft day' })
     expect(serializeArticleByCollection).toHaveBeenCalledWith('listicle-itineraries', { title: 'Draft day' }, {})
+  })
+
+  it('serializes a single-type listicle as one', async () => {
+    const doc = { articleType: 'single-type-listicle' }
+
+    await POST(post({ doc }))
+
+    expect(serializeArticleByCollection).toHaveBeenCalledWith('single-type-listicles', doc, {})
   })
 })
