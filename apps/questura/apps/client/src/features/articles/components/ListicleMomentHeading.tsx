@@ -259,3 +259,14 @@ export function renderListicleMomentHeadings(
   }
   return headings;
 }
+
+/**
+ * One heading for every moment there is, for the studio preview: its list
+ * changes in the browser, where the icon set is not allowed, so the server
+ * renders them all once and the page picks.
+ */
+export function renderEveryListicleMomentHeading(): Readonly<Record<string, JSX.Element>> {
+  return Object.fromEntries(
+    Object.keys(MOMENT_CONFIG).map((moment) => [moment, <ListicleMomentHeading key={moment} moment={moment} />]),
+  );
+}
