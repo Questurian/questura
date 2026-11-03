@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 
-import { checkFirstLoadJs, firstLoadJsByRoute, limitFor } from './firstLoadJs.mjs'
+import { budgetedRoutes, checkFirstLoadJs, firstLoadJsByRoute, limitFor } from './firstLoadJs.mjs'
 import { clientEntryManifest } from '../../../scripts/client-entrypoints-plugin.mjs'
 
 test('Next 16 budget inputs use real app entrypoint files, excluding Pages and API entries', () => {
@@ -80,4 +80,17 @@ test('checkFirstLoadJs fails growth, names over-cap and unbaselined routes', () 
   assert.deepEqual(result.overCap.map((row) => row.route), ['/b'])
   assert.deepEqual(result.unbaselined.map((row) => row.route), ['/new'])
   assert.deepEqual(result.gone, ['/gone'])
+})
+
+test('staff-only preview routes leave the budget; a public route with a similar name stays in', () => {
+  const measured = {
+    '/studio-preview/itinerary': 190.8,
+    '/studio-preview-guide': 190.8,
+    '/[country]/[city]/itineraries/[slug]': 191.8,
+  }
+  assert.deepEqual(Object.keys(budgetedRoutes(measured, { excludedRoutePrefixes: ['/studio-preview/'] })), [
+    '/studio-preview-guide',
+    '/[country]/[city]/itineraries/[slug]',
+  ])
+  assert.deepEqual(budgetedRoutes(measured, {}), measured)
 })

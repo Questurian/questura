@@ -17,7 +17,7 @@ import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { constants, gzipSync } from 'node:zlib'
 
-import { checkFirstLoadJs, firstLoadJsByRoute } from '../src/lib/release/firstLoadJs.mjs'
+import { budgetedRoutes, checkFirstLoadJs, firstLoadJsByRoute } from '../src/lib/release/firstLoadJs.mjs'
 
 const HERE = dirname(fileURLToPath(import.meta.url))
 const BUDGETS = resolve(HERE, '../../../perf/budgets.json')
@@ -35,10 +35,13 @@ try {
   process.exit(1)
 }
 
-const measured = firstLoadJsByRoute(manifest, routes, (file) =>
-  gzipSync(readFileSync(join(dist, file)), { level: constants.Z_BEST_COMPRESSION }).length,
-)
 const budgets = JSON.parse(readFileSync(BUDGETS, 'utf8'))
+const measured = budgetedRoutes(
+  firstLoadJsByRoute(manifest, routes, (file) =>
+    gzipSync(readFileSync(join(dist, file)), { level: constants.Z_BEST_COMPRESSION }).length,
+  ),
+  budgets.firstLoadJs,
+)
 
 if (update) {
   budgets.firstLoadJs.baselineKb = Object.fromEntries(Object.entries(measured).sort(([a], [b]) => a.localeCompare(b)))

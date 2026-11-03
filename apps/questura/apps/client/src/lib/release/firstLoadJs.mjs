@@ -59,6 +59,20 @@ export function firstLoadJsByRoute(appBuildManifest, appPathRoutes, sizeOf) {
   return out
 }
 
+/**
+ * The routes the budget applies to: all but those under `excludedRoutePrefixes`,
+ * which no reader loads. A prefix must name a whole path segment (`/studio-preview/`).
+ *
+ * @param {Record<string, number>} measured
+ * @param {{ excludedRoutePrefixes?: string[] }} budget
+ */
+export function budgetedRoutes(measured, budget) {
+  const prefixes = budget.excludedRoutePrefixes ?? []
+  return Object.fromEntries(
+    Object.entries(measured).filter(([route]) => !prefixes.some((prefix) => route.startsWith(prefix))),
+  )
+}
+
 /** What a route already over the cap may still grow by: build noise, not a feature. */
 export const OVER_CAP_SLACK = 0.01
 

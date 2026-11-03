@@ -94,6 +94,10 @@
     "_measured": "gzip -9 of the readiness client build's chunks (src/lib/release/firstLoadJs.mjs), 2026-09-25; a GitHub runner agreed within 0.1 kB on every route",
     "capKb": 170,
     "growth": 0.1,
+    "excludedRoutePrefixes": [
+      "/studio-preview/"
+    ],
+    "_excluded": "Staff-only pages the AI Blog Writer frames to preview a draft. No reader loads them, and the article code they draw is budgeted on the public routes that use it.",
     "baselineKb": {
       "/": 155.4,
       "/[country]": 141.7,
