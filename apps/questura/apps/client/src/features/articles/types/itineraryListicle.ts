@@ -62,6 +62,8 @@ export type ItineraryVenueBlock = {
   item: ListicleVenue;
   moment?: ItineraryMoment | null;
   momentLabel?: string | null;
+  /** Something you do at this place; heads the card instead of the place name. */
+  activityTitle?: string | null;
   blurb?: string;
   mediaMode?: "photos" | "instagram" | "both" | "none";
   selectedPhotos?: ListicleSelectedPhoto[] | null;
