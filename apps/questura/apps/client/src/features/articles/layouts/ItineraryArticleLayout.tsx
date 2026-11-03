@@ -119,7 +119,7 @@ export function ItineraryArticleLayout({
       result.push({
         id: row.id,
         index,
-        title,
+        title: row.activityTitle ?? title,
         lat: latitude,
         lng: longitude,
         kind: 'stop',

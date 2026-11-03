@@ -24,6 +24,16 @@ export const ItineraryAttractionsBlock: Block = {
       },
     },
     ...itineraryMomentFields,
+    {
+      name: 'activityTitle',
+      label: 'Activity title',
+      type: 'text',
+      maxLength: 80,
+      admin: {
+        description:
+          'Optional. For something you do at this place rather than the place itself (paragliding, a surf lesson). Becomes the heading; the place name moves to a line beneath it. Lives only on this stop.',
+      },
+    },
     createTourPicksField(),
     ...createItineraryItemMediaFields('attractions'),
     angleField,

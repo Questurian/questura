@@ -52,3 +52,13 @@ describe('itinerary stop moment fields', () => {
     expect(fieldNames(listicleItineraryWhereStayingBlocks[0])).not.toContain('momentLabel')
   })
 })
+
+describe('itinerary activity title', () => {
+  it('rides only on attraction stops', () => {
+    const withActivityTitle = listicleItineraryStopBlocks
+      .filter((block) => fieldNames(block).includes('activityTitle'))
+      .map((block) => block.slug)
+
+    expect(withActivityTitle).toEqual(['itinerary-attractions'])
+  })
+})

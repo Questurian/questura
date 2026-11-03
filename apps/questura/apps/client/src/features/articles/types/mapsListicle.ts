@@ -59,6 +59,8 @@ export type ListicleItemRow = {
   id: string
   blurb?: string
   item: ListicleVenue
+  /** Something you do at `item`; heads the entry, with the place named beneath it. */
+  activityTitle?: string
   blockType?: string
   mediaMode?: string
   selectedPhotos?: ListicleSelectedPhoto[]

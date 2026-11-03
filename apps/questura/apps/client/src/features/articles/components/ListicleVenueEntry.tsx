@@ -95,11 +95,20 @@ export function ListicleVenueEntry({
 
         <div className="space-y-2 480:space-y-2.5 sm:space-y-3">
           <ListicleVenueTitleRow
-            title={row.item.title}
+            title={row.activityTitle ?? row.item.title}
             headingLevel={headingLevel}
             priceLevel={diningPriceLevel}
             priceDescriptor={priceTierDescriptor(diningPriceLevel)}
           />
+          {row.activityTitle ? (
+            <p className="maps-listicle-meta-row">
+              <span className="maps-listicle-meta-item">
+                <span className="maps-listicle-meta-value">
+                  At {row.item.title}
+                </span>
+              </span>
+            </p>
+          ) : null}
         </div>
 
         {editorialBlurbHtml ? (

@@ -49,6 +49,7 @@ export function venueRowFromBlock(
     // the stay card, the stops, the map preview excerpt — gets HTML.
     blurb: blurbHtml(block.blurb) ?? undefined,
     item: block.item,
+    activityTitle: block.activityTitle?.trim() || undefined,
     blockType: block.blockType,
     mediaMode: block.mediaMode,
     selectedPhotos: block.selectedPhotos ?? undefined,
