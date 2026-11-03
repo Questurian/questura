@@ -191,7 +191,9 @@ column leaves the layouts out and reads about 35 kB low. Every route but two
 is under the cap; the largest is `/[country]/[city]/[category]` at 165.1 kB.
 Two are over it and may not grow: **`/[country]/[city]/itineraries/[slug]`
 190.1 kB** and **`/[country]/[city]/maps/[slug]` 181.3 kB** (the listicle
-components, about 25 kB, load with the page). A change meant to add
+components, about 25 kB, load with the page). The staff-only `/studio-preview/`
+pages draw that same article code and sit outside the budget
+(`excludedRoutePrefixes`): no reader loads them. A change meant to add
 JavaScript updates the baseline in the same PR and says why:
 
 ```bash
