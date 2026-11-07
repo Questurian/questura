@@ -9,18 +9,15 @@ import { preventVisitorProfileDelete } from './hooks/preventDelete'
  *
  * Collection `update` is deliberately wider than that: editors work profiles
  * for support (a mistyped address, a name), and losing that would push every
- * correction onto an admin. But entitlement is nothing more than a future
- * `paidThroughAt`, so a plain date field on this collection *is* the paywall —
- * an editor who can write it can hand themselves, or anyone, a free
- * membership, and one who can clear `stripeCustomerId` can strand a paying
- * visitor's subscription with no way back to their profile.
+ * correction onto an admin. Membership fields control paywall access, and
+ * clearing `stripeCustomerId` can strand a paying visitor's subscription.
  *
  * Field access is the right seam rather than narrowing the collection: it
  * refuses the write at the API as well as greying the input out in the admin
  * panel, and it is bypassed by trusted Local API calls — so Stripe resync,
  * checkout and the nightly reconciler, which all write through the Local API
- * with `overrideAccess`, are unaffected. Stripe stays the only thing that
- * grants access; an admin doing it by hand stays possible and is logged.
+ * with `overrideAccess`, are unaffected. Complimentary access is stored
+ * separately from Stripe billing, and staff changes are logged.
  */
 const membershipFieldAccess = { update: isAdminFieldLevel } as const
 
@@ -109,6 +106,15 @@ export const VisitorProfiles: CollectionConfig = {
       ],
     },
     {
+      name: 'complimentaryAccess',
+      type: 'checkbox',
+      defaultValue: false,
+      access: membershipFieldAccess,
+      admin: {
+        description: 'Grant member access until an admin turns this off. This does not change Stripe billing.',
+      },
+    },
+    {
       name: 'subscriptionStatus',
       type: 'select',
       required: true,
@@ -130,8 +136,6 @@ export const VisitorProfiles: CollectionConfig = {
         {
           name: 'paidThroughAt',
           type: 'date',
-          // The paywall itself: access is `isFuture(paidThroughAt)` and
-          // nothing else.
           access: membershipFieldAccess,
           admin: {
             description:

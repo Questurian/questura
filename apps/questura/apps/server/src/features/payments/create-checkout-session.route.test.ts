@@ -129,6 +129,20 @@ describe('create checkout session route auth guard', () => {
     expect(mocks.stripeCheckoutCreate).not.toHaveBeenCalled()
   })
 
+  it('refuses complimentary accounts before contacting Stripe', async () => {
+    mocks.requireVisitorPrincipal.mockResolvedValue({
+      principal: { id: 'visitor_123', email: 'visitor@example.com', profileId: 10 },
+    })
+    mocks.findVisitorProfileByAuthUserId.mockResolvedValue({ id: 10, complimentaryAccess: true })
+
+    const response = await POST(createRequest())
+
+    expect(response.status).toBe(409)
+    expect(mocks.stripePriceRetrieve).not.toHaveBeenCalled()
+    expect(mocks.stripeCustomerCreate).not.toHaveBeenCalled()
+    expect(mocks.stripeCheckoutCreate).not.toHaveBeenCalled()
+  })
+
   it('does not require a verified email to start checkout', async () => {
     mocks.requireVisitorPrincipal.mockResolvedValue({
       result: { authenticated: true },

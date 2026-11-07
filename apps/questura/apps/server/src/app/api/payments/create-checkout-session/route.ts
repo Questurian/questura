@@ -163,6 +163,12 @@ export async function POST(req: NextRequest) {
     }
 
     const profile = await findVisitorProfileByAuthUserId(visitorAuthUserId)
+    if (profile?.complimentaryAccess === true) {
+      return NextResponse.json(
+        { error: 'Your account already has complimentary membership.' },
+        { status: 409, headers: corsHeaders }
+      )
+    }
 
     // 2. Validate required user data
     if (!visitor.email) {

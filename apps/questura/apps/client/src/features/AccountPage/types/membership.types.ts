@@ -7,6 +7,7 @@ export interface MembershipSectionProps {
 export type MembershipType =
   | 'free'
   | 'active'
+  | 'complimentary'
   | 'expiring'
   | 'expired'
   | 'cancelled'
