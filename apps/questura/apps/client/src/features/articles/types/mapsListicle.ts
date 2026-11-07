@@ -74,6 +74,8 @@ export type ListicleItemRow = {
 
 export type MapsListicleHeader = {
   intro?: string | { root?: unknown }
+  /** Itineraries: open the first stop blurb of day 1 with a drop cap. */
+  dropCap?: boolean | null
   featuredImage?: ImageAttributionData & {
     url: string
     alt_text?: string
