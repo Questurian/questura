@@ -315,10 +315,38 @@ function sampleArticle(doc: Record<string, unknown>, limits: SampleLimits): Samp
  * added to a venue later cannot ride out with the pin. Exact here; nothing
  * leaves this module until `roughPins` has blurred it.
  */
+function stopItemId(stop: unknown): string | null {
+  if (!stop || typeof stop !== 'object') return null
+  const item = (stop as { item?: unknown }).item
+  if (typeof item === 'number' || typeof item === 'string') return String(item)
+  if (item && typeof item === 'object') {
+    const id = (item as { id?: unknown }).id
+    if (typeof id === 'number' || typeof id === 'string') return String(id)
+  }
+  return null
+}
+
+/**
+ * An activity on the same place as the stop before it is that stop's add-on
+ * (ADR 0047 in questurian-studio): the page draws it inside the place's entry
+ * with no pin of its own, so the teaser must not show a second dot for it.
+ */
+function isActivityAddOn(stop: unknown, previous: unknown): boolean {
+  if (!stop || typeof stop !== 'object' || !previous || typeof previous !== 'object') return false
+  const { activityTitle, blockType } = stop as { activityTitle?: unknown; blockType?: unknown }
+  if (typeof activityTitle !== 'string' || activityTitle.trim() === '') return false
+  if (blockType !== (previous as { blockType?: unknown }).blockType) return false
+  const id = stopItemId(stop)
+  return id !== null && id === stopItemId(previous)
+}
+
 function exactPinsForStops(stops: unknown[]): SamplePin[] {
   const pins: SamplePin[] = []
+  let place: unknown
 
   for (const stop of stops) {
+    if (isActivityAddOn(stop, place)) continue
+    place = stop
     if (!stop || typeof stop !== 'object') continue
     const item = (stop as { item?: unknown }).item
     if (!item || typeof item !== 'object') continue

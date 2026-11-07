@@ -17,6 +17,7 @@ import {
   populatedVenueStops,
   venueRowFromBlock,
 } from "@/features/articles/lib/itineraryDays";
+import { groupItineraryStops } from "@/features/articles/lib/itineraryAddOns";
 import { photoCredit } from "@/features/articles/lib/photoCredit";
 import {
   formatPriceTier,
@@ -246,7 +247,7 @@ function StopList({
 
   return (
     <ol className="m-0 list-none p-0">
-      {stops.map((block, index) => {
+      {groupItineraryStops(stops).map(({ block, index, addOns }) => {
         if (isTourAgencyBlock(block)) {
           return (
             <TourAgencyCard
@@ -258,6 +259,11 @@ function StopList({
 
         const row = venueRowFromBlock(block, `${block.blockType}-${index}`);
         if (!row) return null;
+        const addOnRows = addOns
+          .map((addOn) =>
+            venueRowFromBlock(addOn.block, `${addOn.block.blockType}-${addOn.index}`),
+          )
+          .filter((addOnRow): addOnRow is NonNullable<typeof addOnRow> => Boolean(addOnRow));
 
         return (
           <ListicleVenueEntry
@@ -267,6 +273,7 @@ function StopList({
             moment={block.moment}
             momentLabel={block.momentLabel}
             autoAdvancePhotos
+            addOns={addOnRows}
           />
         );
       })}

@@ -14,6 +14,7 @@ import { listicleInstagramEmbedCode } from "@/features/articles/lib/listicleInst
 import type { ListicleItemRow } from "@/features/articles/types/mapsListicle";
 import { ItineraryMomentBadge } from "@/features/articles/components/ItineraryMomentBadge";
 import { buildNightlifeDetailsCell } from "@/features/articles/components/ItineraryNightlifeDetails";
+import { ItineraryActivityAddOn } from "@/features/articles/components/ItineraryActivityAddOn";
 
 function stringArray(value: unknown): string[] {
   return Array.isArray(value)
@@ -39,6 +40,7 @@ export function ListicleVenueEntry({
   momentLabel,
   autoAdvancePhotos = false,
   headingLevel,
+  addOns = [],
 }: {
   row: ListicleItemRow;
   index: number;
@@ -47,6 +49,8 @@ export function ListicleVenueEntry({
   /** Cycle this stop's photos while the map is showing it (itineraries). */
   autoAdvancePhotos?: boolean;
   headingLevel?: 2 | 3;
+  /** Itinerary activities done at this place, drawn at the foot of its entry. */
+  addOns?: ListicleItemRow[];
 }): JSX.Element {
   const { registerEntry, activeId } = useListicleMapSync();
   const images = listicleItemImagesFromRow(row);
@@ -140,6 +144,10 @@ export function ListicleVenueEntry({
             /></Suspense>
           </div>
         ) : null}
+
+        {addOns.map((addOn) => (
+          <ItineraryActivityAddOn key={addOn.id} row={addOn} parentId={row.id} />
+        ))}
       </div>
     </li>
   );

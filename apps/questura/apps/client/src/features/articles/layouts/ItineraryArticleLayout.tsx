@@ -13,6 +13,7 @@ import {
   populatedVenueStops,
   venueRowFromBlock,
 } from '@/features/articles/lib/itineraryDays'
+import { groupItineraryStops } from '@/features/articles/lib/itineraryAddOns'
 import { mapPointPreviewFromRow } from '@/features/articles/lib/listicleMapPreview'
 import { mapAccessFor } from '@/features/articles/lib/mapAccess'
 import { GatedBodySkeleton, GatedLoadError } from '@/features/articles/components/GatedStates'
@@ -109,21 +110,30 @@ export function ItineraryArticleLayout({
 
     // Tour-agency stops occupy a slot in the on-page numbering but have no
     // coordinates, so pin numbers come from the list position, not from a
-    // count of pinned venues.
-    ;(day.items ?? []).forEach((block, index) => {
+    // count of pinned venues. An activity add-on has no pin or number: it is
+    // read inside its place's entry, so its tours join that pin's card.
+    groupItineraryStops(day.items).forEach(({ block, index, addOns }, position) => {
       if (isTourAgencyBlock(block)) return
       const row = venueRowFromBlock(block, `${block.blockType}-${index}`)
       if (!row) return
       const { latitude, longitude, title } = row.item
       if (typeof latitude !== 'number' || typeof longitude !== 'number') return
+      const preview = mapPointPreviewFromRow(row)
+      for (const addOn of addOns) {
+        const addOnRow = venueRowFromBlock(addOn.block, `${addOn.block.blockType}-${addOn.index}`)
+        if (!addOnRow) continue
+        const seen = new Set(preview.tours.map((tour) => String(tour.id)))
+        const extra = mapPointPreviewFromRow(addOnRow).tours.filter((tour) => !seen.has(String(tour.id)))
+        preview.tours = [...preview.tours, ...extra]
+      }
       result.push({
         id: row.id,
-        index,
+        index: position,
         title: row.activityTitle ?? title,
         lat: latitude,
         lng: longitude,
         kind: 'stop',
-        preview: mapPointPreviewFromRow(row),
+        preview,
       })
     })
 
