@@ -9,6 +9,7 @@ import { logger } from '@/shared/utils/logger'
 const MEMBERSHIP_FIELDS = [
   'authUserId',
   'billingEmail',
+  'complimentaryAccess',
   'subscriptionStatus',
   'paidThroughAt',
   'dunningGraceUntil',

@@ -28,6 +28,7 @@ function formatDate(dateString: string | null): string {
  */
 export function getBillingInfo(user: User | null, entitled: boolean): BillingInfo | null {
   if (!user || user.subscriptionStatus !== 'active') return null;
+  if (user.membership.source === 'complimentary') return null;
   if (!entitled) return null;
   if (user.cancelAtPeriodEnd) return null;
 
@@ -335,6 +336,17 @@ export function getMembershipState(user: User | null, entitled: boolean): Member
   const state = membershipStateFromStatus(user);
 
   if (!user) return state;
+
+  if (user.membership.source === 'complimentary') {
+    return {
+      ...state,
+      type: 'complimentary',
+      label: 'Complimentary membership',
+      badgeClass: 'bg-paper text-accent',
+      description: 'You have complimentary access to member features.',
+      showUpgradeButton: false,
+    };
+  }
 
   if (!entitled) {
     return claimsCurrentAccess(state, user) ? accessPausedState() : state;

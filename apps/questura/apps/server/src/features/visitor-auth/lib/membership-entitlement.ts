@@ -1,6 +1,7 @@
-export type MembershipSource = 'stripe' | null
+export type MembershipSource = 'stripe' | 'complimentary' | null
 
 export type MembershipFields = {
+  complimentaryAccess?: boolean | null
   subscriptionStatus?: string | null
   paidThroughAt?: string | null
   dunningGraceUntil?: string | null
@@ -38,18 +39,20 @@ function isFuture(value: string | null | undefined): boolean {
  * `dunningGraceUntil` covers a recoverable failure; either one being in the
  * future means the visitor is entitled.
  */
-function hasActiveStripeMembership(profile: MembershipFields | null | undefined): boolean {
+export function hasActiveStripeMembership(profile: MembershipFields | null | undefined): boolean {
   if (!profile) return false
 
   return isFuture(profile.paidThroughAt) || isFuture(profile.dunningGraceUntil)
 }
 
 export function deriveVisitorMembership(profile: MembershipFields | null | undefined): VisitorMembership {
-  const active = hasActiveStripeMembership(profile)
+  let source: MembershipSource = null
+  if (hasActiveStripeMembership(profile)) source = 'stripe'
+  else if (profile?.complimentaryAccess === true) source = 'complimentary'
 
   return {
-    active,
-    source: active ? 'stripe' : null,
+    active: source !== null,
+    source,
     // D5: a paused subscription is stored as past_due plus a flag (see
     // VisitorProfiles); the client is told it is paused.
     status: profile?.subscriptionPaused ? 'paused' : (profile?.subscriptionStatus ?? 'none'),

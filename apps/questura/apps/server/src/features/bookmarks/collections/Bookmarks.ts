@@ -7,8 +7,8 @@ import { BOOKMARK_TARGET_TYPES } from '../lib/target'
  *
  * Everything about this collection is shaped by two facts from that ADR.
  *
- * It is *not* on `VisitorProfiles`. That document is the paywall — entitlement
- * is `isFuture(paidThroughAt)` and nothing else — and a bookmark click has no
+ * It is *not* on `VisitorProfiles`. That document controls membership access,
+ * and a bookmark click has no
  * business writing to the billing record. An array field there would also have
  * no uniqueness constraint and would lose writes to read-modify-write races.
  *

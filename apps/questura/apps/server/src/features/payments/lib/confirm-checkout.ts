@@ -1,5 +1,5 @@
 import type Stripe from 'stripe'
-import { deriveVisitorMembership } from '@/features/visitor-auth/lib/membership-entitlement'
+import { hasActiveStripeMembership } from '@/features/visitor-auth/lib/membership-entitlement'
 import { findVisitorProfileByAuthUserId } from '@/features/visitor-auth/lib/visitor-profile'
 import { logger } from '@/shared/utils/logger'
 import { stripe } from './stripe'
@@ -113,7 +113,7 @@ export async function confirmCheckoutForVisitor(
 
   // The webhook usually wins. Answering from the row it wrote keeps this off
   // the lock pool, which is the resource a burst is short of.
-  if (profile?.stripeSubscriptionId === subscriptionId && deriveVisitorMembership(profile).active) {
+  if (profile?.stripeSubscriptionId === subscriptionId && hasActiveStripeMembership(profile)) {
     return { outcome: 'already_current', membershipActive: true }
   }
 
@@ -129,5 +129,5 @@ export async function confirmCheckoutForVisitor(
     return { outcome: 'resynced', membershipActive: false }
   }
 
-  return { outcome: 'resynced', membershipActive: deriveVisitorMembership(after).active }
+  return { outcome: 'resynced', membershipActive: hasActiveStripeMembership(after) }
 }

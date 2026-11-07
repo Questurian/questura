@@ -11,6 +11,7 @@ function visitor(fields) {
     kind: 'visitor',
     id: 'v_1',
     email: 'member@example.com',
+    membership: { source: null },
     subscriptionStatus: 'active',
     subscriptionRenewsAt: null,
     membershipExpiration: null,
@@ -19,6 +20,21 @@ function visitor(fields) {
     ...fields,
   }
 }
+
+test('complimentary access on a cancelled account has no billing or upgrade controls', () => {
+  const user = visitor({
+    membership: { source: 'complimentary' },
+    subscriptionStatus: 'cancelled',
+    membershipExpiration: inDays(-3),
+  })
+  const state = getMembershipState(user, true)
+  const billing = getBillingInfo(user, true)
+  assert.equal(state.label, 'Complimentary membership')
+  assert.equal(state.showUpgradeButton, false)
+  assert.equal(state.showReactivateButton, false)
+  assert.equal(billing, null)
+  assert.equal(getMembershipLinks(state, billing, true).showActionLinks, false)
+})
 
 // The reported bug: a disputed charge revokes entitlement without touching the
 // subscription, so the status enum still reads `active` and the paid-through

@@ -71,6 +71,7 @@ describe('VisitorProfiles membership fields', () => {
   const MEMBERSHIP_FIELDS = [
     'authUserId',
     'billingEmail',
+    'complimentaryAccess',
     'subscriptionStatus',
     'paidThroughAt',
     'dunningGraceUntil',
@@ -81,8 +82,7 @@ describe('VisitorProfiles membership fields', () => {
     'affiliateReferredAt',
   ]
 
-  // Entitlement is a future `paidThroughAt` and nothing else, so write access
-  // to these fields is write access to the paywall.
+  // Membership fields and billing links are writable only by admins.
   it.each(MEMBERSHIP_FIELDS)('refuses %s to an editor', (name) => {
     expect(fieldUpdate(name)({ id: 2, collection: 'users', role: 'editor', status: 'active' })).toBe(
       false,
@@ -134,9 +134,9 @@ describe('membership edit audit trail', () => {
 
     run({
       operation: 'update',
-      doc: { id: 7, paidThroughAt: '2030-01-01T00:00:00.000Z', subscriptionStatus: 'active' },
-      previousDoc: { id: 7, paidThroughAt: null, subscriptionStatus: 'none' },
-      req: { user: { id: 2, collection: 'users', role: 'editor' } },
+      doc: { id: 7, complimentaryAccess: true },
+      previousDoc: { id: 7, complimentaryAccess: false },
+      req: { user: { id: 2, collection: 'users', role: 'admin' } },
     })
 
     expect(warn).toHaveBeenCalledWith(
@@ -144,7 +144,7 @@ describe('membership edit audit trail', () => {
       expect.objectContaining({
         profileId: 7,
         actorId: 2,
-        changedFields: ['subscriptionStatus', 'paidThroughAt'],
+        changedFields: ['complimentaryAccess'],
       }),
     )
 

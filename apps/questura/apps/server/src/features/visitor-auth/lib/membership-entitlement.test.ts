@@ -43,6 +43,20 @@ describe('deriveVisitorMembership', () => {
     expect(deriveVisitorMembership({ subscriptionStatus: 'active' }).active).toBe(false)
   })
 
+  it('grants complimentary access independently of expired billing and revokes it when disabled', () => {
+    const profile = { subscriptionStatus: 'cancelled', paidThroughAt: PAST }
+    expect(deriveVisitorMembership({ ...profile, complimentaryAccess: true })).toMatchObject({
+      active: true,
+      source: 'complimentary',
+      status: 'cancelled',
+    })
+    expect(deriveVisitorMembership({ ...profile, complimentaryAccess: false }).active).toBe(false)
+    expect(deriveVisitorMembership({
+      complimentaryAccess: true,
+      paidThroughAt: FUTURE,
+    }).source).toBe('stripe')
+  })
+
   it('keeps a past_due visitor entitled while the dunning grace runs', () => {
     // The P0 bug: one failed charge revoked access immediately, even though
     // Stripe was still retrying the card.

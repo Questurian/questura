@@ -1,4 +1,4 @@
-export type MembershipSource = 'stripe' | null;
+export type MembershipSource = 'stripe' | 'complimentary' | null;
 
 export type VisitorPrincipal = {
   kind: 'visitor';
