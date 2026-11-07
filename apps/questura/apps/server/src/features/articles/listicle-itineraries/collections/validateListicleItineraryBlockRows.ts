@@ -287,7 +287,7 @@ export async function validateListicleItineraryBlockRows(params: {
     }
 
     if (blockType === 'itinerary-attractions') {
-      validateTourPicks({ blockTours: block.tours, sourceItem, itemLabel })
+      validateTourPicks({ blockTours: block.tours, itemLabel })
     }
 
     const mediaMode = getListicleMediaMode(block.mediaMode)

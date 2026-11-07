@@ -168,7 +168,6 @@ export const validateSingleTypeListicle: CollectionBeforeValidateHook = async ({
       if (item.blockType === 'data-attractions') {
         validateTourPicks({
           blockTours: item.tours,
-          sourceItem,
           itemLabel: `Item ${i + 1}`,
         })
       }

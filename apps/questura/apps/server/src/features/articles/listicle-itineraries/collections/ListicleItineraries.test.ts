@@ -256,13 +256,11 @@ describe('ListicleItineraries attraction tour-picks validation', () => {
     )
   })
 
-  it('rejects tour picks not linked to the selected attraction', async () => {
+  it('accepts tours that are not linked to the selected attraction', async () => {
     const data = buildData()
     data.items = [buildAttractionStop({ tours: [301, 999] })]
 
-    await expect(runBeforeValidate(data)).rejects.toThrow(
-      'Day 1 — Stop 1 tour pick 999 is not linked to the selected attraction.',
-    )
+    await expect(runBeforeValidate(data)).resolves.toEqual(data)
   })
 })
 
