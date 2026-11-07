@@ -221,6 +221,28 @@ describe('applySampleRule — listicle itineraries', () => {
     expect(JSON.stringify({ doc, outcome })).not.toMatch(/Isolina|Canta Rana|Juanito|street|555|worth it/)
   })
 
+  it('gives an activity add-on no pin of its own: it shares the place above', () => {
+    const lovePark = { id: 17, title: 'Love Park', latitude: -12.127, longitude: -77.037, location: 'peru|lima|miraflores' }
+    const doc: Record<string, unknown> = {
+      itineraryDays: [
+        {
+          items: [
+            { blockType: 'itinerary-attractions', item: lovePark },
+            { blockType: 'itinerary-attractions', item: lovePark, activityTitle: 'Paragliding' },
+            { blockType: 'itinerary-attractions', item: { ...lovePark, id: 22, latitude: -12.132 }, activityTitle: 'Sunset' },
+          ],
+        },
+      ],
+    }
+
+    const outcome = applySampleRule('listicle-itineraries', doc)
+
+    // The second stop is Love Park again with an activity: an add-on. The
+    // third is an activity on a different place, so it is a stop with a pin.
+    expect(outcome.pins).toHaveLength(2)
+    expectRoughly(outcome.pins?.[1], -12.132, -77.037)
+  })
+
   it('pins nothing for a stop with no usable coordinates', () => {
     const doc: Record<string, unknown> = {
       itineraryDays: [
