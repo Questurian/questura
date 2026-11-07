@@ -297,6 +297,8 @@ export function ItineraryListicleArticlePage({
   const stops = selectedDay.items ?? [];
   const introRaw = article.header?.intro;
   const introHtml = typeof introRaw === "string" ? introRaw : null;
+  // A magazine-style drop cap opens the plan, so only day 1's first stop.
+  const dropCap = article.header?.dropCap === true && dayIndex === 0;
 
   return (
     <article className="maps-listicle-article itinerary-article min-h-screen bg-background sm:max-w-[600px] sm:mx-auto">
@@ -362,7 +364,9 @@ export function ItineraryListicleArticlePage({
             </div>
           ) : null}
 
-          <StopList stops={stops} />
+          <div className={dropCap ? "itinerary-drop-cap" : undefined}>
+            <StopList stops={stops} />
+          </div>
         </ListicleMapRegion>
 
         {lockedSlot}

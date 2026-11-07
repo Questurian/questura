@@ -75,6 +75,7 @@ import * as migration_20261029_164239_article_show_table_of_contents from './202
 import * as migration_20261101_153353_itinerary_stops_blurb_only from './20261101_153353_itinerary_stops_blurb_only';
 import * as migration_20261103_032502_itinerary_activity_title from './20261103_032502_itinerary_activity_title';
 import * as migration_20261107_204912_add_visitor_complimentary_access from './20261107_204912_add_visitor_complimentary_access';
+import * as migration_20261107_224606_itinerary_drop_cap from './20261107_224606_itinerary_drop_cap';
 
 export const migrations = [
   {
@@ -460,6 +461,11 @@ export const migrations = [
   {
     up: migration_20261107_204912_add_visitor_complimentary_access.up,
     down: migration_20261107_204912_add_visitor_complimentary_access.down,
-    name: '20261107_204912_add_visitor_complimentary_access'
+    name: '20261107_204912_add_visitor_complimentary_access',
+  },
+  {
+    up: migration_20261107_224606_itinerary_drop_cap.up,
+    down: migration_20261107_224606_itinerary_drop_cap.down,
+    name: '20261107_224606_itinerary_drop_cap'
   },
 ];
