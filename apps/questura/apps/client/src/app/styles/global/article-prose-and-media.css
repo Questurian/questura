@@ -360,10 +360,10 @@
   margin-top: 0;
 }
 
-/* Drop cap (itinerary header toggle): the first letter of day 1's first stop
-   blurb drops three lines in the display serif, as a magazine opens a story.
-   Floated rather than initial-letter, which Firefox does not draw. */
-.itinerary-drop-cap > ol > li:first-child .maps-listicle-blurb > p:first-child::first-letter {
+/* Drop cap (itinerary header toggle): the intro's first letter drops three
+   lines in the display serif, as a magazine opens a story. Floated rather
+   than initial-letter, which Firefox does not draw. */
+.maps-listicle-intro.has-drop-cap > p:first-child::first-letter {
   float: left;
   margin: 0.05em 0.09em 0 -0.02em;
   font-family: var(--font-display);

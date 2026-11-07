@@ -22,7 +22,7 @@ export const headerSection: Field = {
       defaultValue: false,
       admin: {
         description:
-          'Open the first stop blurb of day 1 with a large drop cap, as a magazine opens a story.',
+          'Open the intro with a large drop cap, as a magazine opens a story.',
       },
     },
     {
