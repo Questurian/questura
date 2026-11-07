@@ -28,6 +28,8 @@ import { basicFields } from './fields'
  * - beforeDelete: Stripe cleanup for user deletion
  * - afterRead: Membership status overview computation
  */
+export const STAFF_SESSION_SECONDS = 10 * 365 * 24 * 60 * 60
+
 export const Users: CollectionConfig = {
   slug: 'users',
   auth: {
@@ -36,6 +38,12 @@ export const Users: CollectionConfig = {
     // Disable login lockouts
     lockTime: 0,
     maxLoginAttempts: 0,
+    // Staff stay signed in (owner, 2026-11-07). Payload's default is 2 hours,
+    // so every new AI Blog Writer session opened on the login page. Ten years
+    // is "never" for the JWT; browsers cap the cookie itself at 400 days.
+    // To end a session early: log out, reset the password, or disable the
+    // account. All three clear the server-side session.
+    tokenExpiration: STAFF_SESSION_SECONDS,
     // Widens `payload-token` past this host so the AI Blog Writer, which is a
     // sibling subdomain, receives it. See shared/config/session-cookie.ts.
     cookies: APP_CONFIG.sessionCookie,
