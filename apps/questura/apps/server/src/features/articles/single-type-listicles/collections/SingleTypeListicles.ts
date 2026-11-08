@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload'
 import { languageField } from '@/shared/i18n/languageField'
 import { accessTierField } from '@/shared/content/accessTier'
+import { mapTeaserField } from '@/shared/content/mapTeaser'
 import { singleTypeListicleAccess } from './access'
 import {
   articleType,
@@ -57,6 +58,7 @@ export const SingleTypeListicles: CollectionConfig = {
     status,
     languageField,
     accessTierField,
+    mapTeaserField,
     author,
     publishedAt,
     articleType,

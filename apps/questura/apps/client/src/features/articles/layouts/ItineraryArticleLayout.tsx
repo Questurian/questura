@@ -170,7 +170,8 @@ export function ItineraryArticleLayout({
   )
 
   return (
-    <ListicleMapSyncProvider points={points} days={mapDays} access={access} teaserKey={`itineraries:${article.id}`}>
+    <ListicleMapSyncProvider points={points} days={mapDays} access={access} teaserKey={`itineraries:${article.id}`}
+      teaser={article.mapTeaser ?? null}>
       <ListicleArticleLayout
         relatedArticles={relatedArticles}
         footer={footer}

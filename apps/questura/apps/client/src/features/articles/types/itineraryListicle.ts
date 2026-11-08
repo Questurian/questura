@@ -1,3 +1,4 @@
+import type { MapSnapshotEntry } from "@/features/articles/lib/mapSnapshot";
 import type {
   ArticleAuthor,
   ImageAttributionData,
@@ -143,6 +144,8 @@ export type ListicleItineraryArticle = {
   whereStaying?: ItineraryVenueBlock[] | null;
   items?: ItineraryStopBlock[] | null;
   seoSection?: SeoSection;
+  /** The saved map picture non-members see, taken in the studio (server `shared/content/mapTeaser.ts`). */
+  mapTeaser?: MapSnapshotEntry | null;
 };
 
 export function isListicleItineraryArticle(

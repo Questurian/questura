@@ -1,3 +1,4 @@
+import type { MapSnapshotEntry } from '@/features/articles/lib/mapSnapshot'
 /** Public API payload for `single-type-listicles` (served under `/maps/[slug]`). */
 import type { ArticleAuthor, SeoSection, ImageAttributionData } from '@/features/articles/types'
 
@@ -91,6 +92,8 @@ export type MapsListicleArticle = {
   header?: MapsListicleHeader | null
   items?: ListicleItemRow[]
   seoSection?: SeoSection
+  /** The saved map picture non-members see, taken in the studio (server `shared/content/mapTeaser.ts`). */
+  mapTeaser?: MapSnapshotEntry | null
 }
 
 export function isMapsListicleArticle(

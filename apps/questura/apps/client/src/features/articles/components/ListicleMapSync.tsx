@@ -11,6 +11,7 @@ import {
   type JSX,
   type ReactNode,
 } from 'react'
+import type { MapSnapshotEntry } from '@/features/articles/lib/mapSnapshot'
 import {
   initialListicleMapNavigationState,
   listicleMapNavigationReducer,
@@ -102,8 +103,10 @@ type ListicleMapSyncValue = {
   points: ListicleMapPoint[]
   /** Which map this reader gets: Google's, the drawn teaser, or plain paper (lib/mapAccess.ts). */
   access: ListicleMapAccess
-  /** `maps:<id>` or `itineraries:<id>`: finds the guide's saved map picture (data/mapTeasers.json). */
+  /** `maps:<id>` or `itineraries:<id>`: finds the guide's built-in map picture (data/mapTeasers.json). */
   teaserKey: string | null
+  /** The map picture saved on the guide itself (taken in the studio); tried before the built-in one. */
+  teaser: MapSnapshotEntry | null
   activeId: string | null
   registerEntry: (id: string, el: HTMLElement | null) => void
   scrollToEntry: (id: string) => void
@@ -114,6 +117,7 @@ const ListicleMapSyncContext = createContext<ListicleMapSyncValue>({
   points: [],
   access: 'open',
   teaserKey: null,
+  teaser: null,
   activeId: null,
   registerEntry: () => {},
   scrollToEntry: () => {},
@@ -160,12 +164,14 @@ export function ListicleMapSyncProvider({
   days = null,
   access = 'open',
   teaserKey = null,
+  teaser = null,
   children,
 }: {
   points: ListicleMapPoint[]
   days?: ListicleMapDays | null
   access?: ListicleMapAccess
   teaserKey?: string | null
+  teaser?: MapSnapshotEntry | null
   children: ReactNode
 }): JSX.Element {
   const [{ activeId }, dispatchNavigation] = useReducer(
@@ -359,8 +365,8 @@ export function ListicleMapSyncProvider({
   )
 
   const value = useMemo(
-    () => ({ days, points, access, teaserKey, activeId, registerEntry, scrollToEntry }),
-    [days, points, access, teaserKey, activeId, registerEntry, scrollToEntry],
+    () => ({ days, points, access, teaserKey, teaser, activeId, registerEntry, scrollToEntry }),
+    [days, points, access, teaserKey, teaser, activeId, registerEntry, scrollToEntry],
   )
 
   return <MapSyncProvider value={value}>{children}</MapSyncProvider>
