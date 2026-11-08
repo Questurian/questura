@@ -1,4 +1,4 @@
-import type { Field } from 'payload'
+import { APIError, type CollectionBeforeChangeHook, type Field } from 'payload'
 
 /**
  * The saved map picture a non-member sees on a locked guide or itinerary
@@ -89,4 +89,24 @@ export const mapTeaserField: Field = {
     description:
       'The OpenStreetMap picture non-members see instead of the Google map. Taken in the AI Blog Writer (Map picture tab); empty means the page uses its built-in picture or the plain drawing.',
   },
+}
+
+export const PUBLISH_NEEDS_MAP_PICTURE =
+  'Take the map picture first: in the AI Blog Writer, open the Map picture tab (or panel), frame the map and take it. A members-only guide does not go live without it, or readers who have not joined get a plain drawing instead of the map.'
+
+/**
+ * A members-only guide does not go live without its map picture (owner,
+ * 2026-11-07). Only the step from draft to published is checked: guides that
+ * are already live keep their built-in pictures until they are taken again,
+ * and saving a draft is never stopped. Whether a picture still holds every
+ * place is the studio's check (it needs the places as non-members get them).
+ */
+export const requireMapTeaserToPublish: CollectionBeforeChangeHook = ({ data, originalDoc }) => {
+  const publishing = data?.status === 'published' && originalDoc?.status !== 'published'
+  if (!publishing) return data
+  const access = data?.access ?? originalDoc?.access
+  if (access !== 'member') return data
+  const teaser = data?.mapTeaser !== undefined ? data.mapTeaser : originalDoc?.mapTeaser
+  if (teaser) return data
+  throw new APIError(PUBLISH_NEEDS_MAP_PICTURE, 400, undefined, true)
 }

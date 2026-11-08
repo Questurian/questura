@@ -10,7 +10,7 @@ import {
 import { syncLocationFields } from '@/shared/location/server/syncLocationFields'
 import { languageField } from '@/shared/i18n/languageField'
 import { accessTierField } from '@/shared/content/accessTier'
-import { mapTeaserField } from '@/shared/content/mapTeaser'
+import { mapTeaserField, requireMapTeaserToPublish } from '@/shared/content/mapTeaser'
 import { revalidateArticleCollection } from '@/features/public-revalidation/revalidate-client'
 import { syncSearchIndexForCollection } from '@/features/articles/public/search-index/hooks'
 import { gateExternalApiRead } from '@/features/articles/public/gateExternalApiRead'
@@ -159,6 +159,7 @@ export const ListicleItineraries: CollectionConfig = {
   ],
   hooks: {
     beforeChange: [
+      requireMapTeaserToPublish,
       async ({ data, req, originalDoc }) => {
         if (
           originalDoc?.status === 'published' &&
