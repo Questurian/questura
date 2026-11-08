@@ -353,6 +353,7 @@
 .maps-listicle-intro p {
   font-size: 16px;
   line-height: 1.65;
+  --intro-lh: 1.65;
   margin-bottom: 0.85rem;
 }
 
@@ -360,17 +361,59 @@
   margin-top: 0;
 }
 
-/* Drop cap (itinerary header toggle): the intro's first letter drops three
-   lines in the display serif, as a magazine opens a story. Floated rather
-   than initial-letter, which Firefox does not draw. */
-.maps-listicle-intro.has-drop-cap > p:first-child::first-letter {
+/* Drop cap (itinerary header toggle, lib/dropCap.ts): a paper letter on a
+   black plate whose top meets the first line's capitals and whose bottom sits
+   on the third line's baseline. Worked from Playfair's metrics (ascent 1.082,
+   descent 0.251, cap height 0.708 em) and the paragraph's --intro-lh, so it
+   stays three lines at every breakpoint. */
+.drop-cap {
+  --drop-cap-plate: calc(var(--intro-lh, 1.65) * 2em + 0.708em);
   float: left;
-  margin: 0.05em 0.09em 0 -0.02em;
+  position: relative;
+  isolation: isolate;
+  width: var(--drop-cap-plate);
+  height: var(--drop-cap-plate);
+  margin: calc(var(--intro-lh, 1.65) * 0.5em - 0.2925em) 0.75em 0 0;
+  background: var(--foreground);
+}
+
+.drop-cap svg {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.drop-cap text {
+  fill: var(--paper);
   font-family: var(--font-display);
-  font-size: 5.05em;
-  font-weight: 600;
-  line-height: 0.78;
-  color: var(--foreground);
+  font-weight: 700;
+}
+
+/* Offset frame: the site's 3px double rule, set down and right of the plate. */
+.drop-cap--offset-frame {
+  margin-right: 1.05em;
+}
+
+.drop-cap--offset-frame::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  transform: translate(0.3em, 0.3em);
+  border: 3px double var(--foreground);
+}
+
+/* Fine inner line: one paper hairline inset in the plate. */
+.drop-cap--inner-line::before {
+  content: "";
+  position: absolute;
+  inset: 0.3em;
+  z-index: 2;
+  border: 1px solid rgb(239 233 222 / 0.6);
+  pointer-events: none;
 }
 
 .maps-listicle-blurb p {
@@ -399,6 +442,7 @@
   .maps-listicle-intro p {
     font-size: 16px;
     line-height: 1.7;
+    --intro-lh: 1.7;
     margin-bottom: 1rem;
   }
 
@@ -413,6 +457,7 @@
   .maps-listicle-intro p {
     font-size: 16px;
     line-height: 1.75;
+    --intro-lh: 1.75;
     margin-bottom: 1.1rem;
   }
 
@@ -440,6 +485,7 @@
   .maps-listicle-intro p {
     font-size: 17px;
     line-height: 1.78;
+    --intro-lh: 1.78;
     margin-bottom: 1.2rem;
   }
 
@@ -564,6 +610,7 @@
   [data-listicle-type='maps'] .maps-listicle-intro p {
     font-size: 16px;
     line-height: 1.65;
+    --intro-lh: 1.65;
   }
 }
 
