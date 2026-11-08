@@ -19,6 +19,7 @@ import {
 } from "@/features/articles/lib/itineraryDays";
 import { groupItineraryStops } from "@/features/articles/lib/itineraryAddOns";
 import { photoCredit } from "@/features/articles/lib/photoCredit";
+import { isDropCapStyle, withDropCap } from "@/features/articles/lib/dropCap";
 import {
   formatPriceTier,
   isHttpUrl,
@@ -296,9 +297,14 @@ export function ItineraryListicleArticlePage({
   const whereStaying = populatedVenueStops(selectedDay.whereStaying);
   const stops = selectedDay.items ?? [];
   const introRaw = article.header?.intro;
-  const introHtml = typeof introRaw === "string" ? introRaw : null;
-  // A magazine-style drop cap on the intro's first letter.
-  const dropCap = article.header?.dropCap === true;
+  // A magazine-style drop cap on the intro's first letter, when switched on.
+  const dropCapStyle = article.header?.dropCapStyle;
+  const introHtml =
+    typeof introRaw !== "string"
+      ? null
+      : article.header?.dropCap === true
+        ? withDropCap(introRaw, isDropCapStyle(dropCapStyle) ? dropCapStyle : "offset-frame")
+        : introRaw;
 
   return (
     <article className="maps-listicle-article itinerary-article min-h-screen bg-background sm:max-w-[600px] sm:mx-auto">
@@ -307,7 +313,7 @@ export function ItineraryListicleArticlePage({
       {introHtml ? (
         <div className="relative px-3 pt-6 pb-2 380:px-4 380:pt-8 380:pb-3 480:px-5 480:pt-10 480:pb-4 550:px-6 sm:px-8 sm:pt-10 sm:pb-5">
           <div
-            className={`article-prose maps-listicle-intro max-w-none${dropCap ? " has-drop-cap" : ""}`}
+            className="article-prose maps-listicle-intro max-w-none"
             dangerouslySetInnerHTML={{ __html: introHtml }}
           />
           {/* Bounded by the intro, so a short one cannot push the fade up
