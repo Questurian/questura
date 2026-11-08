@@ -21,6 +21,28 @@
       "zoom": 15
     }
   },
+  "itineraries:13": {
+    "src": "/images/map-teasers/itineraries-13.webp",
+    "srcSmall": "/images/map-teasers/itineraries-13-782.webp",
+    "width": 782,
+    "height": 690,
+    "center": [
+      -77.028035,
+      -12.133318
+    ],
+    "zoom": 11.0483,
+    "tall": {
+      "src": "/images/map-teasers/itineraries-13-tall.webp",
+      "srcSmall": "/images/map-teasers/itineraries-13-tall-782.webp",
+      "width": 782,
+      "height": 1400,
+      "center": [
+        -77.028035,
+        -12.11701
+      ],
+      "zoom": 11.3532
+    }
+  },
   "itineraries:14": {
     "src": "/images/map-teasers/itineraries-14.webp",
     "srcSmall": "/images/map-teasers/itineraries-14-782.webp",
@@ -613,6 +635,28 @@
         19.420881
       ],
       "zoom": 15
+    }
+  },
+  "maps:33": {
+    "src": "/images/map-teasers/maps-33.webp",
+    "srcSmall": "/images/map-teasers/maps-33-782.webp",
+    "width": 782,
+    "height": 690,
+    "center": [
+      -77.036855,
+      -12.13639
+    ],
+    "zoom": 11.4303,
+    "tall": {
+      "src": "/images/map-teasers/maps-33-tall.webp",
+      "srcSmall": "/images/map-teasers/maps-33-tall-782.webp",
+      "width": 782,
+      "height": 1400,
+      "center": [
+        -77.036855,
+        -12.123876
+      ],
+      "zoom": 11.7351
     }
   }
 }
