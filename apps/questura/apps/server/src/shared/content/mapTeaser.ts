@@ -1,4 +1,5 @@
-import { APIError, type CollectionBeforeChangeHook, type Field } from 'payload'
+import type { CollectionBeforeChangeHook, Field } from 'payload'
+import { fieldRuleError } from '@/features/articles/shared/lib/fieldRuleError'
 
 /**
  * The saved map picture a non-member sees on a locked guide or itinerary
@@ -95,18 +96,31 @@ export const PUBLISH_NEEDS_MAP_PICTURE =
   'Take the map picture first: in the AI Blog Writer, open the Map picture tab (or panel), frame the map and take it. A members-only guide does not go live without it, or readers who have not joined get a plain drawing instead of the map.'
 
 /**
- * A members-only guide does not go live without its map picture (owner,
- * 2026-11-07). Only the step from draft to published is checked: guides that
- * are already live keep their built-in pictures until they are taken again,
- * and saving a draft is never stopped. Whether a picture still holds every
- * place is the studio's check (it needs the places as non-members get them).
+ * A live members-only guide always has a map picture (owner, 2026-11-07 and
+ * 2026-11-08): readers who have not joined never get the plain drawing because
+ * of a save. So a save is refused when it leaves a page live and members-only
+ * with no picture, whether it does that by publishing, by making a live free
+ * page members-only, or by clearing the picture.
+ *
+ * Only a guide that was already live and members-only with no saved picture is
+ * let through: those show their built-in pictures until they are taken again.
+ * Saving a draft is never stopped. Whether a picture still holds every place is
+ * the studio's check (it needs the places as non-members get them).
  */
-export const requireMapTeaserToPublish: CollectionBeforeChangeHook = ({ data, originalDoc }) => {
-  const publishing = data?.status === 'published' && originalDoc?.status !== 'published'
-  if (!publishing) return data
+export const requireMapTeaserToPublish: CollectionBeforeChangeHook = ({ collection, data, originalDoc }) => {
+  const status = data?.status ?? originalDoc?.status
   const access = data?.access ?? originalDoc?.access
-  if (access !== 'member') return data
+  if (status !== 'published' || access !== 'member') return data
   const teaser = data?.mapTeaser !== undefined ? data.mapTeaser : originalDoc?.mapTeaser
   if (teaser) return data
-  throw new APIError(PUBLISH_NEEDS_MAP_PICTURE, 400, undefined, true)
+  const alreadyLiveWithBuiltIn =
+    originalDoc?.status === 'published' && originalDoc?.access === 'member' && !originalDoc?.mapTeaser
+  if (alreadyLiveWithBuiltIn) return data
+  // A field rule, so the live site shows this sentence and not its generic error.
+  throw fieldRuleError({
+    collection: collection?.slug ?? 'articles',
+    path: 'mapTeaser',
+    label: 'Map picture',
+    message: PUBLISH_NEEDS_MAP_PICTURE,
+  })
 }

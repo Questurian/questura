@@ -53,8 +53,33 @@ describe('publishing needs a map picture', () => {
     expect(run({ status: 'published', access: 'free' }, { status: 'draft' })).toBeTruthy()
   })
 
-  it('never stops a draft save, or a guide that is already live', () => {
+  it('never stops a draft save', () => {
     expect(run({ status: 'draft', access: 'member' }, { status: 'draft' })).toBeTruthy()
-    expect(run({ status: 'published', access: 'member' }, { status: 'published' })).toBeTruthy()
+    expect(run({ status: 'draft', access: 'member', mapTeaser: null }, { status: 'published', access: 'member', mapTeaser: picture })).toBeTruthy()
+  })
+
+  it('lets a guide already live on its built-in picture keep saving', () => {
+    expect(run({ status: 'published', access: 'member' }, { status: 'published', access: 'member', mapTeaser: null })).toBeTruthy()
+    expect(run({ title: 'New title' }, { status: 'published', access: 'member' })).toBeTruthy()
+  })
+
+  it('stops a live guide losing its picture', () => {
+    expect(() => run({ mapTeaser: null }, { status: 'published', access: 'member', mapTeaser: picture })).toThrow(/map picture first/)
+  })
+
+  it('stops a live free page becoming members-only without one', () => {
+    expect(() => run({ access: 'member' }, { status: 'published', access: 'free' })).toThrow(/map picture first/)
+    expect(run({ access: 'member', mapTeaser: picture }, { status: 'published', access: 'free' })).toBeTruthy()
+    expect(run({ access: 'member' }, { status: 'published', access: 'free', mapTeaser: picture })).toBeTruthy()
+  })
+
+  it('refuses with a field rule, so the live site shows the reason', () => {
+    try {
+      run({ status: 'published', access: 'member' }, { status: 'draft' })
+      expect.unreachable()
+    } catch (error) {
+      expect((error as Error).name).toBe('ValidationError')
+      expect((error as { data?: { errors?: Array<{ path?: string }> } }).data?.errors?.[0]?.path).toBe('mapTeaser')
+    }
   })
 })
