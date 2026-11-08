@@ -49,6 +49,16 @@ describe('POST /api/studio-preview', () => {
     expect(serializeArticleByCollection).toHaveBeenCalledWith('listicle-itineraries', { title: 'Draft day' }, {})
   })
 
+  it('adds the dots a non-member map draws when asked, for framing the map picture', async () => {
+    const doc = { articleType: 'single-type-listicle', items: [{ item: { latitude: -12.12, longitude: -77.03 } }] }
+
+    const response = await POST(post({ doc, teaserPoints: true }))
+    const body = await response.json()
+
+    expect(body.teaserPoints).toHaveLength(1)
+    expect(Math.abs(body.teaserPoints[0].lat - -12.12)).toBeLessThan(0.006)
+  })
+
   it('serializes a single-type listicle as one', async () => {
     const doc = { articleType: 'single-type-listicle' }
 
