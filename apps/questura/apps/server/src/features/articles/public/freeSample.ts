@@ -379,14 +379,18 @@ function sampleItinerary(doc: Record<string, unknown>): SampleOutcome {
 
   // Read before the days are emptied below. Day lodging is not pinned: it is
   // withheld with its day, and the surviving top-level lodging has its own pin.
-  const pins = roughPins([
-    ...days.flatMap((day) =>
-      day && typeof day === 'object'
-        ? exactPinsForStops(asArray((day as { items?: unknown }).items) ?? [])
-        : [],
-    ),
-    ...exactPinsForStops(legacyItems),
-  ])
+  // The top-level `items` is the collection's copy of day 1 whenever there are
+  // days (ListicleItineraries' beforeValidate mirrors it), so it is pinned only
+  // for an itinerary that has no days; pinning both drew every day-1 stop twice.
+  const pins = roughPins(
+    days.length > 0
+      ? days.flatMap((day) =>
+          day && typeof day === 'object'
+            ? exactPinsForStops(asArray((day as { items?: unknown }).items) ?? [])
+            : [],
+        )
+      : exactPinsForStops(legacyItems),
+  )
 
   // Every day goes, including each day's own lodging -- per-day lodging lives
   // inside the day rows, and the policy is that no day survives. Only the

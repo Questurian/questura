@@ -175,6 +175,25 @@ describe('applySampleRule — listicle itineraries', () => {
     expect(doc.whereStaying).toHaveLength(1)
   })
 
+  it('pins each stop once: the top-level list is only the copy of day 1', () => {
+    const stop = (latitude: number) => ({ blockType: 'dining', item: { id: latitude, latitude, longitude: -77.03 } })
+    const day1 = [stop(-12.1), stop(-12.11)]
+    const doc: Record<string, unknown> = {
+      itineraryDays: [{ items: day1 }, { items: [stop(-12.2)] }],
+      items: day1,
+    }
+
+    expect(applySampleRule('listicle-itineraries', doc).pins).toHaveLength(3)
+  })
+
+  it('still pins an old itinerary that only has the top-level list', () => {
+    const doc: Record<string, unknown> = {
+      items: [{ blockType: 'dining', item: { id: 1, latitude: -12.1, longitude: -77.03 } }],
+    }
+
+    expect(applySampleRule('listicle-itineraries', doc).pins).toHaveLength(1)
+  })
+
   it('reports nothing applied for an itinerary with no body', () => {
     const doc: Record<string, unknown> = { whereStaying: [] }
 
@@ -253,10 +272,10 @@ describe('applySampleRule — listicle itineraries', () => {
             { blockType: 'dining', item: { latitude: Number.NaN, longitude: -77 } },
             { blockType: 'dining', item: 42 },
             null,
+            { blockType: 'dining', item: { latitude: -12.2, longitude: -77.1 } },
           ],
         },
       ],
-      items: [{ blockType: 'dining', item: { latitude: -12.2, longitude: -77.1 } }],
     }
 
     const pins = applySampleRule('listicle-itineraries', doc).pins
