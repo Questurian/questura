@@ -100,7 +100,7 @@ function JoinCall({ compact, href }: { compact: boolean; href: string }) {
  * the map and its call to join stay inside what is on screen.
  */
 export function MapTeaser({ insetBottomPx = 0 }: { insetBottomPx?: number }): JSX.Element {
-  const { points, scrollToEntry, teaserKey } = useListicleMapSync()
+  const { points, scrollToEntry, teaserKey, teaser } = useListicleMapSync()
   const pathname = usePathname()
   const boxRef = useRef<HTMLDivElement>(null)
   const [size, setSize] = useState({ width: 0, height: 0 })
@@ -132,15 +132,19 @@ export function MapTeaser({ insetBottomPx = 0 }: { insetBottomPx?: number }): JS
     [points],
   )
 
-  const entry = teaserKey ? SNAPSHOTS[teaserKey] : undefined
+  // The picture saved on the guide (taken in the studio) first, then the
+  // built-in one from data/mapTeasers.json for guides drawn before that.
+  const entries = useMemo(
+    () => [teaser, teaserKey ? SNAPSHOTS[teaserKey] : undefined].filter((e): e is MapSnapshotEntry => Boolean(e)),
+    [teaser, teaserKey],
+  )
   // The picture that fits the box with the least zooming, or the other one if
   // the guide's places have moved off it. On a phone's short split view the
   // join bar takes the bottom, and in a locked desktop column the join card
   // does, so the picture slides to keep the places in the strip above it.
   const view = useMemo(() => {
-    if (!entry) return null
     const box = { width: size.width, height: visibleHeight }
-    for (const picture of picturesForBox(entry, box)) {
+    for (const entry of entries) for (const picture of picturesForBox(entry, box)) {
       const focus = compact
         ? { top: 16, bottom: visibleHeight - JOIN_BAR_PX - 8 }
         : picture === entry.tall
@@ -150,7 +154,7 @@ export function MapTeaser({ insetBottomPx = 0 }: { insetBottomPx?: number }): JS
       if (layout) return { snapshot: picture, layout }
     }
     return null
-  }, [entry, teaserPoints, size.width, visibleHeight, compact])
+  }, [entries, teaserPoints, size.width, visibleHeight, compact])
   const snapshot = view?.snapshot
   const snapshotLayout = view?.layout ?? null
   const drawing = useMemo(

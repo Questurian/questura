@@ -77,6 +77,7 @@ import * as migration_20261103_032502_itinerary_activity_title from './20261103_
 import * as migration_20261107_204912_add_visitor_complimentary_access from './20261107_204912_add_visitor_complimentary_access';
 import * as migration_20261107_224606_itinerary_drop_cap from './20261107_224606_itinerary_drop_cap';
 import * as migration_20261108_000317_itinerary_drop_cap_style from './20261108_000317_itinerary_drop_cap_style';
+import * as migration_20261108_023115_map_teaser from './20261108_023115_map_teaser';
 
 export const migrations = [
   {
@@ -472,6 +473,11 @@ export const migrations = [
   {
     up: migration_20261108_000317_itinerary_drop_cap_style.up,
     down: migration_20261108_000317_itinerary_drop_cap_style.down,
-    name: '20261108_000317_itinerary_drop_cap_style'
+    name: '20261108_000317_itinerary_drop_cap_style',
+  },
+  {
+    up: migration_20261108_023115_map_teaser.up,
+    down: migration_20261108_023115_map_teaser.down,
+    name: '20261108_023115_map_teaser'
   },
 ];
