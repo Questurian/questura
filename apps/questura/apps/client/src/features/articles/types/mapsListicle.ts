@@ -74,10 +74,6 @@ export type ListicleItemRow = {
 
 export type MapsListicleHeader = {
   intro?: string | { root?: unknown }
-  /** Itineraries: open the intro with a drop cap. */
-  dropCap?: boolean | null
-  /** Itineraries: 'offset-frame' or 'inner-line' (lib/dropCap.ts). */
-  dropCapStyle?: string | null
   featuredImage?: ImageAttributionData & {
     url: string
     alt_text?: string

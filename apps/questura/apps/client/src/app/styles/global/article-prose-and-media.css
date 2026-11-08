@@ -361,11 +361,12 @@
   margin-top: 0;
 }
 
-/* Drop cap (itinerary header toggle, lib/dropCap.ts): a paper letter on a
-   black plate whose top meets the first line's capitals and whose bottom sits
-   on the third line's baseline. Worked from Playfair's metrics (ascent 1.082,
-   descent 0.251, cap height 0.708 em) and the paragraph's --intro-lh, so it
-   stays three lines at every breakpoint. */
+/* Drop cap (every itinerary intro, lib/dropCap.ts): a bold ink letter in a
+   page-coloured square with a fine ink edge, and a solid blue block set down
+   and right behind it (owner's pick, 2026-11-07). The square's top meets the
+   first line's capitals and its bottom the third line's baseline, worked from
+   Playfair's metrics (ascent 1.082, descent 0.251, cap height 0.708 em) and
+   the paragraph's --intro-lh, so it stays three lines at every breakpoint. */
 .drop-cap {
   --drop-cap-plate: calc(var(--intro-lh, 1.65) * 2em + 0.708em);
   float: left;
@@ -373,8 +374,18 @@
   isolation: isolate;
   width: var(--drop-cap-plate);
   height: var(--drop-cap-plate);
-  margin: calc(var(--intro-lh, 1.65) * 0.5em - 0.2925em) 0.75em 0 0;
-  background: var(--foreground);
+  margin: calc(var(--intro-lh, 1.65) * 0.5em - 0.2925em) 1.05em 0 0;
+}
+
+/* The blue block. It sits under the letter layer, whose page-coloured fill
+   hides the part behind the square. */
+.drop-cap::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  transform: translate(0.3em, 0.3em);
+  background: var(--accent);
 }
 
 .drop-cap svg {
@@ -384,36 +395,14 @@
   width: 100%;
   height: 100%;
   overflow: visible;
+  background: var(--background);
+  box-shadow: inset 0 0 0 1.5px var(--foreground);
 }
 
 .drop-cap text {
-  fill: var(--paper);
+  fill: var(--foreground);
   font-family: var(--font-display);
   font-weight: 700;
-}
-
-/* Offset frame: the site's 3px double rule, set down and right of the plate. */
-.drop-cap--offset-frame {
-  margin-right: 1.05em;
-}
-
-.drop-cap--offset-frame::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  transform: translate(0.3em, 0.3em);
-  border: 3px double var(--foreground);
-}
-
-/* Fine inner line: one paper hairline inset in the plate. */
-.drop-cap--inner-line::before {
-  content: "";
-  position: absolute;
-  inset: 0.3em;
-  z-index: 2;
-  border: 1px solid rgb(239 233 222 / 0.6);
-  pointer-events: none;
 }
 
 .maps-listicle-blurb p {

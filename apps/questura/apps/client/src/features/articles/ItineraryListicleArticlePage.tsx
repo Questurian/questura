@@ -19,7 +19,7 @@ import {
 } from "@/features/articles/lib/itineraryDays";
 import { groupItineraryStops } from "@/features/articles/lib/itineraryAddOns";
 import { photoCredit } from "@/features/articles/lib/photoCredit";
-import { isDropCapStyle, withDropCap } from "@/features/articles/lib/dropCap";
+import { withDropCap } from "@/features/articles/lib/dropCap";
 import {
   formatPriceTier,
   isHttpUrl,
@@ -297,14 +297,8 @@ export function ItineraryListicleArticlePage({
   const whereStaying = populatedVenueStops(selectedDay.whereStaying);
   const stops = selectedDay.items ?? [];
   const introRaw = article.header?.intro;
-  // A magazine-style drop cap on the intro's first letter, when switched on.
-  const dropCapStyle = article.header?.dropCapStyle;
-  const introHtml =
-    typeof introRaw !== "string"
-      ? null
-      : article.header?.dropCap === true
-        ? withDropCap(introRaw, isDropCapStyle(dropCapStyle) ? dropCapStyle : "offset-frame")
-        : introRaw;
+  // Every itinerary intro opens with the drop cap (owner, 2026-11-07).
+  const introHtml = typeof introRaw === "string" ? withDropCap(introRaw) : null;
 
   return (
     <article className="maps-listicle-article itinerary-article min-h-screen bg-background sm:max-w-[600px] sm:mx-auto">

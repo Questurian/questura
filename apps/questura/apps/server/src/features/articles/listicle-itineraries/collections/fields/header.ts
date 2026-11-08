@@ -16,14 +16,14 @@ export const headerSection: Field = {
         description: 'Intro text shown below the header title',
       },
     },
+    // Unused since 2026-11-07: every itinerary intro opens with the drop cap
+    // (client lib/dropCap.ts). Hidden, not removed, because removing them
+    // drops their columns; that cleanup needs a backup and owner approval.
     {
       name: 'dropCap',
       type: 'checkbox',
       defaultValue: false,
-      admin: {
-        description:
-          'Open the intro with a large drop cap, as a magazine opens a story.',
-      },
+      admin: { hidden: true },
     },
     {
       name: 'dropCapStyle',
@@ -33,29 +33,7 @@ export const headerSection: Field = {
         { label: 'Offset frame', value: 'offset-frame' },
         { label: 'Fine inner line', value: 'inner-line' },
       ],
-      admin: {
-        description:
-          'How the drop cap is drawn: a black plate with a double-line frame offset behind it, or a black plate with one fine line inside.',
-        condition: (_, siblingData) => Boolean(siblingData?.dropCap),
-      },
-    },
-    {
-      name: 'featuredMediaSet',
-      type: 'relationship',
-      relationTo: 'media-sets',
-      admin: {
-        description:
-          'Preferred: media set whose variants drive public image rendering. When set, used in preference to featuredImage.',
-      },
-    },
-    {
-      name: 'featuredImage',
-      type: 'upload',
-      relationTo: 'media-assets',
-      admin: {
-        description:
-          'Legacy featured image. Used as fallback when featuredMediaSet is not set. New itineraries should use featuredMediaSet.',
-      },
+      admin: { hidden: true },
     },
   ],
 }

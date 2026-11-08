@@ -1,18 +1,15 @@
 /**
- * Itinerary intro drop cap (header.dropCap / header.dropCapStyle).
+ * Itinerary intro drop cap, on every itinerary (owner, 2026-11-07).
  *
- * The first letter of the intro's first paragraph is drawn as a paper letter
- * on a black plate, three lines tall (CSS `.drop-cap` in
+ * The first letter of the intro's first paragraph is drawn as a bold ink
+ * letter in a page-coloured square with a fine ink edge and a solid blue block
+ * set down and right behind it, three lines tall (CSS `.drop-cap` in
  * article-prose-and-media.css). The letter is an SVG so it can be centred on
  * its ink rather than on the font's text box: each capital sits in a 100 x 100
  * box at the x, baseline y and font size below, measured from Playfair
  * Display 700 (cap height 0.6 of the plate, ink at most 66 wide, so W and M
  * shrink to keep their side margins).
  */
-
-export type DropCapStyle = 'offset-frame' | 'inner-line'
-
-export const DROP_CAP_STYLES: readonly DropCapStyle[] = ['offset-frame', 'inner-line']
 
 /** [x, baseline y, font size] in the plate's 100 x 100 viewBox. */
 const GLYPHS: Record<string, readonly [number, number, number]> = {
@@ -28,15 +25,11 @@ const GLYPHS: Record<string, readonly [number, number, number]> = {
   '8': [26.1, 80, 84.7], '9': [27.1, 80, 84.7],
 }
 
-export function isDropCapStyle(value: unknown): value is DropCapStyle {
-  return typeof value === 'string' && (DROP_CAP_STYLES as readonly string[]).includes(value)
-}
-
 function escapeText(value: string): string {
   return value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 }
 
-function dropCapMarkup(letter: string, style: DropCapStyle): string {
+function dropCapMarkup(letter: string): string {
   const glyph = GLYPHS[letter]
   // Letters outside the table (accented capitals, say) centre on their box.
   const text = glyph
@@ -44,7 +37,7 @@ function dropCapMarkup(letter: string, style: DropCapStyle): string {
     : '<text x="50" y="80" font-size="84.7" text-anchor="middle">'
   const safe = escapeText(letter)
   return (
-    `<span class="drop-cap drop-cap--${style}" aria-hidden="true">` +
+    '<span class="drop-cap" aria-hidden="true">' +
     `<svg viewBox="0 0 100 100" focusable="false">${text}${safe}</text></svg>` +
     `</span><span class="sr-only">${safe}</span>`
   )
@@ -55,7 +48,7 @@ function dropCapMarkup(letter: string, style: DropCapStyle): string {
  * Leaves the HTML alone when there is no paragraph or it opens with something
  * other than a letter or digit (a quote mark, an entity, an image).
  */
-export function withDropCap(html: string, style: DropCapStyle): string {
+export function withDropCap(html: string): string {
   const paragraph = html.search(/<p[\s>]/i)
   if (paragraph < 0) return html
 
@@ -82,5 +75,5 @@ export function withDropCap(html: string, style: DropCapStyle): string {
   const [letter] = Array.from(html.slice(index, index + 2))
   if (!letter || !/^[\p{L}\p{N}]$/u.test(letter)) return html
 
-  return html.slice(0, index) + dropCapMarkup(letter, style) + html.slice(index + letter.length)
+  return html.slice(0, index) + dropCapMarkup(letter) + html.slice(index + letter.length)
 }
