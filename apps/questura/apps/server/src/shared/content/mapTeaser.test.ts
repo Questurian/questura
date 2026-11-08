@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { mapTeaserField, mapTeaserProblem } from './mapTeaser'
+import { mapTeaserField, mapTeaserProblem, requireMapTeaserToPublish } from './mapTeaser'
 
 const picture = {
   src: 'https://cdn.example.com/map.webp',
@@ -32,5 +32,29 @@ describe('map picture field', () => {
 
   it('is stored as JSON on the guide and only written by the studio', () => {
     expect(mapTeaserField).toMatchObject({ name: 'mapTeaser', type: 'json', admin: { readOnly: true } })
+  })
+})
+
+describe('publishing needs a map picture', () => {
+  const run = (data: Record<string, unknown>, originalDoc?: Record<string, unknown>) =>
+    (requireMapTeaserToPublish as unknown as (args: { data: Record<string, unknown>; originalDoc?: Record<string, unknown> }) => unknown)({
+      data,
+      originalDoc,
+    })
+
+  it('stops a members-only guide going live without one', () => {
+    expect(() => run({ status: 'published', access: 'member' }, { status: 'draft' })).toThrow(/map picture first/)
+    expect(() => run({ status: 'published' }, { status: 'draft', access: 'member', mapTeaser: null })).toThrow(/map picture first/)
+  })
+
+  it('lets it go live with one, or when it is free', () => {
+    expect(run({ status: 'published', access: 'member', mapTeaser: picture }, { status: 'draft' })).toBeTruthy()
+    expect(run({ status: 'published' }, { status: 'draft', access: 'member', mapTeaser: picture })).toBeTruthy()
+    expect(run({ status: 'published', access: 'free' }, { status: 'draft' })).toBeTruthy()
+  })
+
+  it('never stops a draft save, or a guide that is already live', () => {
+    expect(run({ status: 'draft', access: 'member' }, { status: 'draft' })).toBeTruthy()
+    expect(run({ status: 'published', access: 'member' }, { status: 'published' })).toBeTruthy()
   })
 })

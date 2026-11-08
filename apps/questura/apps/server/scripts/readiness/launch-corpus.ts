@@ -42,6 +42,20 @@ import { sandboxDatabaseUri } from './database'
 import { assertPreflight } from './preflight'
 import { sandboxSettings } from './sandbox'
 
+/**
+ * A members-only guide does not publish without its map picture
+ * (shared/content/mapTeaser.ts), so the corpus's guides carry a stand-in.
+ * Its frame need not hold their places: the page then draws the plain map.
+ */
+const LAUNCH_MAP_TEASER = {
+  src: 'https://questurian.b-cdn.net/launch-corpus/map.webp',
+  srcSmall: 'https://questurian.b-cdn.net/launch-corpus/map-782.webp',
+  width: 782,
+  height: 690,
+  center: [0, 0],
+  zoom: 12,
+}
+
 const HERE = dirname(fileURLToPath(import.meta.url))
 export const LAUNCH_MANIFEST_PATH = resolve(HERE, '../../../../load/k6/manifests/launch-v1.json')
 
@@ -446,6 +460,7 @@ export async function seedLaunchCorpus(payload: PayloadLike, pool: Pool, seed: n
         step1_complete: true,
         header: { intro: lexical(`${marker.body} ${prose(index + 70, 40)}`), featuredImage: media[index % media.length] },
         items,
+        mapTeaser: LAUNCH_MAP_TEASER,
         status: draft ? 'draft' : 'published',
         language: 'en',
         author: authors[index % authors.length],
@@ -506,6 +521,7 @@ export async function seedLaunchCorpus(payload: PayloadLike, pool: Pool, seed: n
         dayCount: 3,
         seoSection: { metaDescription: `${marker.title}: ${prose(index + 82, 14)}`, title: marker.title },
         itineraryDays: days,
+        mapTeaser: LAUNCH_MAP_TEASER,
         status: draft ? 'draft' : 'published',
         access: member ? 'member' : 'free',
         language: 'en',

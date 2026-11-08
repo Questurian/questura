@@ -1,3 +1,4 @@
+import { requireMapTeaserToPublish } from '@/shared/content/mapTeaser'
 import type { CollectionConfig } from 'payload'
 import { revalidateArticleCollection } from '@/features/public-revalidation/revalidate-client'
 import { syncSearchIndexForCollection } from '@/features/articles/public/search-index/hooks'
@@ -19,6 +20,7 @@ const searchIndexSync = syncSearchIndexForCollection('single-type-listicles')
 
 export const singleTypeListicleHooks: CollectionConfig['hooks'] = {
   beforeChange: [
+    requireMapTeaserToPublish,
     preventSingleTypeListicleUnpublish,
     clearStaleSocialImagesOnFeaturedImageChange,
     applySingleTypeListicleMetadata,
