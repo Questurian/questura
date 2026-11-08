@@ -1,0 +1,57 @@
+name: Questura map picture check
+
+# Once a day, opens every map guide and itinerary in the live sitemap as a
+# reader who has not joined, on desktop and on a phone, and checks its map is a
+# real picture that loaded. A page drops to a drawing of dots with no error when
+# its picture is missing or a place moves outside it: nothing else notices.
+# Script: apps/questura/apps/e2e/scripts/check-map-pictures.mjs.
+# A failing page fails this job, and GitHub emails a failed scheduled run to
+# whoever last changed this file's schedule. The log names each page and why.
+#
+# Runs when QUESTURA_SCHEDULE_ENABLED=true (shared with the other daily checks).
+# No secrets: it reads public pages only. Run it by hand from Actions any time.
+
+on:
+  schedule:
+    - cron: '23 10 * * *'
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - apps/questura/apps/e2e/scripts/check-map-pictures*
+      - .github/workflows/questura-map-picture-check.yml
+
+concurrency:
+  group: questura-map-picture-check-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Map pictures on live pages
+    if: vars.QUESTURA_SCHEDULE_ENABLED == 'true' || github.event_name != 'schedule'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --filter @questura/e2e
+
+      # A pull request also proves the check still catches a broken page.
+      - name: Test the check
+        if: github.event_name == 'pull_request'
+        working-directory: apps/questura/apps/e2e
+        run: node --test scripts/check-map-pictures.test.mjs
+
+      # Launches the runner's own Google Chrome (channel: 'chrome').
+      - name: Check every live page
+        working-directory: apps/questura/apps/e2e
+        run: node scripts/check-map-pictures.mjs --site https://www.questurian.com

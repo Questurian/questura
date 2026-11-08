@@ -13,6 +13,7 @@ Stripe reconcile. Exchange rates had no timer there; they synced on each boot.
 | Uptime monitor | every 60 s; down after 3 failures | Sentry uptime monitor "API up (api.questurian.com/api/health/ready)" (project `questura-server`) | nothing; alerts through the Sentry email rule |
 | Uptime check (backup) | every 15 min on paper (:07, :22, :37, :52); 2–3 h apart in practice | GitHub Actions, `.github/workflows/questura-uptime-check.yml` | nothing (public URLs) |
 | Structured data check | 09:41 daily | GitHub Actions, `.github/workflows/questura-structured-data-check.yml`: every live article's Google label, pass/fail per page (`pnpm --dir apps/questura/apps/client check:structured-data` locally) | nothing (public pages) |
+| Map picture check | 10:23 daily | GitHub Actions, `.github/workflows/questura-map-picture-check.yml`: every live map guide and itinerary, logged out, desktop and phone; fails if a page shows the dots drawing or a broken picture (`node scripts/check-map-pictures.mjs` from `apps/questura/apps/e2e` locally) | nothing (public pages) |
 | Refresh drain | every 60 s | inside `questura-server` itself (ADR-0015) | nothing extra |
 
 The rule for where a job goes: **anything that needs the database or the
