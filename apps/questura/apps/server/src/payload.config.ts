@@ -44,6 +44,7 @@ import { poolSizes } from './shared/database/pool-budget'
 import { withHandledInitializing } from './shared/database/handled-initializing'
 import { anonymousApiBoundsPlugin } from './shared/payload/anonymous-api-bounds'
 import { reportPayloadError } from './shared/observability/payload-error-report'
+import { restorePublicErrorMessage } from './shared/observability/public-error-message'
 import { poolTimeoutOptions, servingTimeouts } from './shared/database/timeouts'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -66,7 +67,7 @@ export default buildConfig({
   // Payload answers its own errors, so a 500 from its REST or GraphQL
   // handlers would otherwise reach the logs and never Sentry.
   hooks: {
-    afterError: [reportPayloadError],
+    afterError: [reportPayloadError, restorePublicErrorMessage],
   },
   editor: lexicalEditor(),
   secret: APP_CONFIG.payloadSecret,
