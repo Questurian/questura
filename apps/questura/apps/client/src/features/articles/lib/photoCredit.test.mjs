@@ -77,3 +77,18 @@ test('a photo pair by one photographer shows one credit; by two, "Sources"', () 
   const uncredited = blockPhotoCredit([[{}], [{ photographer_credit: '27 Tapas' }]])
   assert.deepEqual(uncredited.sources, ['Questurian', '27 Tapas'])
 })
+
+test('one photo credit links to a valid source URL', () => {
+  const url = 'https://www.instagram.com/neujus/'
+  assert.equal(photoCredit({ sources: [{ credit: 'Juan Carlos', url }] }).creditUrl, url)
+  assert.equal(photoCredit({ sources: [{ credit: 'Juan Carlos', url: 'javascript:alert(1)' }] }).creditUrl, undefined)
+})
+
+test('a shared credit with different photo source URLs stays plain text', () => {
+  const credit = blockPhotoCredit([
+    [{ sources: [{ credit: 'Juan Carlos', url: 'https://example.com/first' }] }],
+    [{ sources: [{ credit: 'Juan Carlos', url: 'https://example.com/second' }] }],
+  ])
+  assert.equal(credit.credit, 'Juan Carlos')
+  assert.equal(credit.creditUrl, undefined)
+})
