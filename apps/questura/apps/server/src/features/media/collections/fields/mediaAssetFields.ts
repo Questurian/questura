@@ -68,8 +68,8 @@ export const mediaAssetFields: Field[] = [
     type: 'text',
     required: false,
     admin: {
-      description: 'Optional attribution (e.g., "Photo by John Smith" or "Unsplash/username")',
-      placeholder: 'Photographer name or source',
+      description: 'Optional. The photographer name only (e.g., "John Smith"). Do not add the site it came from, like Unsplash or Pexels.',
+      placeholder: 'Photographer name',
     },
   },
   {
