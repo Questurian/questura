@@ -31,7 +31,18 @@ export function PhotoCreditLine({
     >
       {credit.createdBy ? <p>Image created by {credit.createdBy}</p> : null}
       {credit.credit ? (
-        <p className="ml-auto text-right">{credit.credit}</p>
+        <p className="ml-auto text-right">
+          {credit.creditUrl ? (
+            <a
+              href={credit.creditUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline underline-offset-2 focus-visible:outline focus-visible:outline-1"
+            >
+              {credit.credit}
+            </a>
+          ) : credit.credit}
+        </p>
       ) : (
         <div className="group relative ml-auto shrink-0">
           <button

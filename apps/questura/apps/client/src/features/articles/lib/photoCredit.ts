@@ -14,6 +14,8 @@ export type PhotoCredit = {
   createdBy: string | null
   /** Right side, printed as is. Null when there are several sources. */
   credit: string | null
+  /** Optional link for the displayed credit when it has one clear destination. */
+  creditUrl?: string
   /** The names behind "Sources": deduplicated, one entry per platform. */
   sources: string[]
 }
@@ -21,12 +23,26 @@ export type PhotoCredit = {
 /** Anything carrying Payload's attribution fields: a media set, an asset, a resolved image. */
 export type AttributionCarrier = ImageAttributionData | number | string | null | undefined
 
-type ImageCredit = { names: string[]; createdBy: string | null }
+type ImageCredit = { names: string[]; urls: string[]; createdBy: string | null }
 
 const text = (value: unknown): string | null =>
   typeof value === 'string' && value.trim() ? value.trim() : null
 
 const unique = (values: string[]): string[] => [...new Set(values)]
+
+function safeSourceUrl(value: unknown): string | null {
+  const url = text(value)
+  if (!url) return null
+  try {
+    const parsed = new URL(url)
+    if ((parsed.protocol === 'http:' || parsed.protocol === 'https:') && !parsed.username && !parsed.password) {
+      return parsed.href
+    }
+  } catch {
+    // Treat an invalid URL as an unlinked credit.
+  }
+  return null
+}
 
 // Composites saved before per-photo sources existed hold their whole credit
 // line in `photographer_credit`: "Photos: A, B · Composite / edit: Questurian".
@@ -55,12 +71,14 @@ function imageCredit(carriers: AttributionCarrier[]): ImageCredit {
 
   const sources =
     first((record) => {
-      const names = (Array.isArray(record.sources) ? record.sources : []).flatMap((row) => {
-        const credit = text(row?.credit)
-        return credit ? [credit] : []
+      const rows = (Array.isArray(record.sources) ? record.sources : []).flatMap((row) => {
+        const name = text(row?.credit)
+        return name ? [{ name, url: safeSourceUrl(row?.url) }] : []
       })
-      return names.length ? names : null
+      return rows.length ? rows : null
     }) ?? []
+  const names = sources.map((source) => source.name)
+  const urls = sources.flatMap((source) => source.url ? [source.url] : [])
   let editor = first((record) => text(record.edit_credit))
 
   if (!sources.length) {
@@ -71,12 +89,12 @@ function imageCredit(carriers: AttributionCarrier[]): ImageCredit {
       ? text(photographer.replace(COMPOSED_EDIT, '').replace(COMPOSED_PREFIX, ''))
       : null
     // A photo nobody credited is ours.
-    sources.push(credit ?? HOUSE_CREDIT)
+    names.push(credit ?? HOUSE_CREDIT)
   }
 
   // Several originals in one image means someone put them together.
   const createdBy = editor ?? (sources.length > 1 ? HOUSE_CREDIT : null)
-  return { names: unique(sources), createdBy }
+  return { names: unique(names), urls, createdBy }
 }
 
 function creditFor(images: ImageCredit[]): PhotoCredit {
@@ -86,7 +104,13 @@ function creditFor(images: ImageCredit[]): PhotoCredit {
 
   if (names.length === 1) {
     // Our own photo, edited by us, needs our name once.
-    return { createdBy: createdBy === names[0] ? null : createdBy, credit: names[0], sources: names }
+    const urls = unique(images.flatMap((image) => image.urls))
+    return {
+      createdBy: createdBy === names[0] ? null : createdBy,
+      credit: names[0],
+      sources: names,
+      ...(urls.length === 1 ? { creditUrl: urls[0] } : {}),
+    }
   }
 
   // "Roxana / Airbnb" and "Ana / Airbnb" are both Airbnb.
