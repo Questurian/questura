@@ -278,6 +278,20 @@
   background-size: 100% 100%;
 }
 
+/* A photo credit that links to its source (an Instagram profile, say) looks
+   exactly like a plain credit: same grey, no underline, no hover highlight.
+   Only the pointer shows it is a link. */
+[data-photo-credit] a,
+[data-photo-credit] a:hover,
+.article-prose [data-photo-credit] a,
+.article-prose [data-photo-credit] a:hover,
+.article-prose [data-photo-credit] a:focus-visible {
+  color: inherit;
+  text-decoration: none;
+  background-image: none;
+  cursor: pointer;
+}
+
 /* Read more: the line takes the same highlight as a prose link. */
 .article-read-more-title {
   background-image: linear-gradient(rgb(var(--accent-rgb) / 0.13), rgb(var(--accent-rgb) / 0.13));
