@@ -8,7 +8,8 @@ import type { PhotoCredit } from '@/features/articles/lib/photoCredit'
  * its credit on the right. A composite or edited still says who made it on the
  * left. Several sources read "Sources", and hovering it (or tapping it on a
  * phone) shows their names in a small box. No arrow, no colour change: the
- * line should not pull the reader out of the article.
+ * line should not pull the reader out of the article. A credit with a source
+ * link looks the same as one without; only the pointer changes on hover.
  */
 export function PhotoCreditLine({
   credit,
@@ -37,7 +38,8 @@ export function PhotoCreditLine({
               href={credit.creditUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="underline underline-offset-2 focus-visible:outline focus-visible:outline-1"
+              // Styled in article-prose-and-media.css: same look as a plain credit, only the pointer changes.
+              className="focus-visible:outline focus-visible:outline-1"
             >
               {credit.credit}
             </a>
