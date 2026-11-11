@@ -1,4 +1,5 @@
 import { Block } from 'payload'
+import { stopNotesField } from '@/shared/content/stopNotes'
 import { createLocationFilter } from '../../shared/utils/locationFilter'
 import { createItineraryItemMediaFields } from './utils/itemMedia'
 import { itineraryMomentFields } from './utils/momentFields'
@@ -30,5 +31,6 @@ export const ItineraryKeyLocationsBlock: Block = {
         description: 'Editorial context for this stop',
       },
     },
+    stopNotesField,
   ],
 }

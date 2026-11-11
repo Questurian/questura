@@ -1,4 +1,5 @@
 import { Block } from 'payload'
+import { stopNotesField } from '@/shared/content/stopNotes'
 import { angleField } from './utils/angleField'
 import { selectionReasonField } from './utils/selectionReasonField'
 import { createLocationFilter } from '../../shared/utils/locationFilter'
@@ -46,5 +47,6 @@ export const ItineraryAttractionsBlock: Block = {
       },
     },
     selectionReasonField,
+    stopNotesField,
   ],
 }
