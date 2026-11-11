@@ -71,6 +71,8 @@ export type ItineraryVenueBlock = {
   selectedInstagramPost?: ListicleInstagramPost | number | string | null;
   /** Operator-curated Tour Picks on attraction stops (ordered, max 4). */
   tours?: ListicleTourPick[] | null;
+  /** Practical notes drawn under the stop (ADR 0048). */
+  stopNotes?: ItineraryStopNote[] | null;
 };
 
 export type ItineraryTourAgencyKeyLocation = {
@@ -158,3 +160,17 @@ export function isListicleItineraryArticle(
     (doc as ListicleItineraryArticle).articleType === "listicle-itinerary"
   );
 }
+
+/** A Stop Note (studio ADR 0048): practical information drawn under a stop. */
+export type ItineraryStopNote = {
+  id?: string;
+  label: string;
+  icon?: "clock" | "info" | "ticket" | "alert";
+  title: string;
+  subline?: string;
+  body?: string;
+  timelineLabel?: string;
+  timeline?: Array<{ time: string; text: string }>;
+  checklistLabel?: string;
+  checklist?: string[];
+};

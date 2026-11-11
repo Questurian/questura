@@ -15,6 +15,7 @@ import type { ListicleItemRow } from "@/features/articles/types/mapsListicle";
 import { ItineraryMomentBadge } from "@/features/articles/components/ItineraryMomentBadge";
 import { buildNightlifeDetailsCell } from "@/features/articles/components/ItineraryNightlifeDetails";
 import { ItineraryActivityAddOn } from "@/features/articles/components/ItineraryActivityAddOn";
+import { ItineraryStopNotes } from "@/features/articles/components/ItineraryStopNote";
 
 function stringArray(value: unknown): string[] {
   return Array.isArray(value)
@@ -146,8 +147,13 @@ export function ListicleVenueEntry({
         ) : null}
 
         {addOns.map((addOn) => (
-          <ItineraryActivityAddOn key={addOn.id} row={addOn} parentId={row.id} />
+          <div key={addOn.id} className="space-y-3 380:space-y-3.5 480:space-y-4 sm:space-y-5">
+            <ItineraryActivityAddOn row={addOn} parentId={row.id} />
+            <ItineraryStopNotes notes={addOn.stopNotes} />
+          </div>
         ))}
+
+        <ItineraryStopNotes notes={row.stopNotes} />
       </div>
     </li>
   );

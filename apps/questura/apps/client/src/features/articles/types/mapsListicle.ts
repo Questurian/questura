@@ -1,3 +1,4 @@
+import type { ItineraryStopNote } from '@/features/articles/types/itineraryListicle'
 import type { MapSnapshotEntry } from '@/features/articles/lib/mapSnapshot'
 /** Public API payload for `single-type-listicles` (served under `/maps/[slug]`). */
 import type { ArticleAuthor, SeoSection, ImageAttributionData } from '@/features/articles/types'
@@ -71,6 +72,8 @@ export type ListicleItemRow = {
   tours?: ListicleTourPick[] | null
   /** Optional moment; neighbouring rows that share one sit under one heading. */
   moment?: string | null
+  /** Practical notes drawn under the stop (itineraries only, ADR 0048). */
+  stopNotes?: ItineraryStopNote[]
 }
 
 export type MapsListicleHeader = {

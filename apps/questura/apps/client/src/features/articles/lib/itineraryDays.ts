@@ -6,6 +6,7 @@ import type {
   ListicleItineraryArticle,
 } from '@/features/articles/types/itineraryListicle'
 import { blurbHtml } from '@/features/articles/lib/lexicalHtml'
+import { usableStopNotes } from '@/features/articles/lib/itineraryStopNotes'
 import {
   isListicleVenue,
   type ListicleItemRow,
@@ -55,6 +56,7 @@ export function venueRowFromBlock(
     selectedPhotos: block.selectedPhotos ?? undefined,
     selectedInstagramPost: block.selectedInstagramPost,
     tours: block.tours,
+    stopNotes: usableStopNotes(block.stopNotes),
   }
 }
 
