@@ -1,5 +1,8 @@
 import { lazy, Suspense, useCallback, type JSX } from "react";
 const InstagramEmbedBlock = lazy(() => import("./InstagramEmbedBlock").then((module) => ({ default: module.InstagramEmbedBlock })));
+// Stop Notes (ADR 0048) are rare and sit below the fold, so they stay out of the
+// itinerary page's first-load JS (safety net budget) and load only when drawn.
+const ItineraryStopNotes = lazy(() => import("./ItineraryStopNote").then((module) => ({ default: module.ItineraryStopNotes })));
 import { useListicleMapSync } from "@/features/articles/components/ListicleMapSync";
 import { ListiclePhotoCarousel } from "@/features/articles/components/ListiclePhotoCarousel";
 import { ListicleTourPicks } from "@/features/articles/components/ListicleTourPicks";
@@ -15,7 +18,6 @@ import type { ListicleItemRow } from "@/features/articles/types/mapsListicle";
 import { ItineraryMomentBadge } from "@/features/articles/components/ItineraryMomentBadge";
 import { buildNightlifeDetailsCell } from "@/features/articles/components/ItineraryNightlifeDetails";
 import { ItineraryActivityAddOn } from "@/features/articles/components/ItineraryActivityAddOn";
-import { ItineraryStopNotes } from "@/features/articles/components/ItineraryStopNote";
 
 function stringArray(value: unknown): string[] {
   return Array.isArray(value)
@@ -149,11 +151,15 @@ export function ListicleVenueEntry({
         {addOns.map((addOn) => (
           <div key={addOn.id} className="space-y-3 380:space-y-3.5 480:space-y-4 sm:space-y-5">
             <ItineraryActivityAddOn row={addOn} parentId={row.id} />
-            <ItineraryStopNotes notes={addOn.stopNotes} />
+            {addOn.stopNotes?.length ? (
+              <Suspense fallback={null}><ItineraryStopNotes notes={addOn.stopNotes} /></Suspense>
+            ) : null}
           </div>
         ))}
 
-        <ItineraryStopNotes notes={row.stopNotes} />
+        {row.stopNotes?.length ? (
+          <Suspense fallback={null}><ItineraryStopNotes notes={row.stopNotes} /></Suspense>
+        ) : null}
       </div>
     </li>
   );
