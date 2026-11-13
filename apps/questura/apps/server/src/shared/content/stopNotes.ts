@@ -14,8 +14,19 @@ import type { Field } from 'payload'
 export const STOP_NOTE_ICONS = ['clock', 'info', 'ticket', 'alert'] as const
 export type StopNoteIcon = (typeof STOP_NOTE_ICONS)[number]
 
+/**
+ * A note with a kind is an inline note: one short line drawn inside the stop's
+ * text ("What to order: ...", "Getting in: ...") instead of a box under the
+ * stop. dish, drink and tip are offered on food and drink stops; entry and tip
+ * on attractions. Matches the client's `INLINE_NOTE_KINDS`.
+ */
+export const INLINE_NOTE_KINDS = ['dish', 'tip', 'drink', 'entry'] as const
+export type InlineNoteKind = (typeof INLINE_NOTE_KINDS)[number]
+
 export type StopNote = {
   id?: string
+  /** Set on an inline note; absent on a boxed note. */
+  kind?: InlineNoteKind
   /** The short blue kicker: "Before tomorrow". */
   label: string
   icon?: StopNoteIcon
@@ -65,6 +76,9 @@ function noteProblem(value: unknown, position: number): string | null {
   if (!isOptionalText(note.body, L.body)) return `${where}: the text is longer than ${L.body} characters`
   if (!isOptionalText(note.timelineLabel, L.listLabel) || !isOptionalText(note.checklistLabel, L.listLabel)) {
     return `${where}: list headings are up to ${L.listLabel} characters`
+  }
+  if (note.kind !== undefined && note.kind !== null && !INLINE_NOTE_KINDS.includes(note.kind as InlineNoteKind)) {
+    return `${where}: the kind must be one of ${INLINE_NOTE_KINDS.join(', ')}`
   }
   if (note.icon !== undefined && note.icon !== null && !STOP_NOTE_ICONS.includes(note.icon as StopNoteIcon)) {
     return `${where}: the icon must be one of ${STOP_NOTE_ICONS.join(', ')}`

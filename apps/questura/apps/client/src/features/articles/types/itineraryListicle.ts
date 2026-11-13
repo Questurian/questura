@@ -182,6 +182,8 @@ export function isListicleItineraryArticle(
 /** A Stop Note (studio ADR 0048): practical information drawn under a stop. */
 export type ItineraryStopNote = {
   id?: string;
+  /** Set on an inline note: one short line drawn inside the stop's text. */
+  kind?: "dish" | "tip" | "drink" | "entry";
   label: string;
   icon?: "clock" | "info" | "ticket" | "alert";
   title: string;

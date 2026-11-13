@@ -31,6 +31,11 @@ describe('stop notes (ADR 0048)', () => {
     expect(stopNotesProblem([{ ...note, checklist: ['ok', ''] }])).toMatch(/checklist/)
   })
 
+  it('accepts an inline note kind and refuses an unknown one', () => {
+    expect(stopNotesProblem([{ kind: 'entry', label: 'Getting in', title: 'Pay at the door, about S/30.' }])).toBeNull()
+    expect(stopNotesProblem([{ kind: 'poster', label: 'Getting in', title: 'Free.' }])).toMatch(/kind/)
+  })
+
   it('caps the notes on one stop', () => {
     expect(stopNotesProblem([note, note, note])).toBeNull()
     expect(stopNotesProblem([note, note, note, note])).toMatch(/up to 3/)
