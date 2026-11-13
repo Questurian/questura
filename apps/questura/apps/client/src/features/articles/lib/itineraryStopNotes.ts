@@ -2,6 +2,14 @@ import type { ItineraryStopNote } from '@/features/articles/types/itineraryListi
 
 const ICONS = new Set(['clock', 'info', 'ticket', 'alert'])
 
+/**
+ * Inline notes: a note with a `kind` is one short line inside the stop's text
+ * ("What to order:", "Getting in:") rather than a box under the stop. Matches
+ * the server's `INLINE_NOTE_KINDS` and the AI Blog Writer's note kinds.
+ */
+export const INLINE_NOTE_KINDS = ['dish', 'tip', 'drink', 'entry'] as const
+const KINDS = new Set<string>(INLINE_NOTE_KINDS)
+
 const text = (value: unknown): string =>
   typeof value === 'string' ? value.trim() : ''
 
@@ -35,6 +43,9 @@ export function usableStopNotes(value: unknown): ItineraryStopNote[] | undefined
         : 'info'
       return {
         id: text(note.id) || `note-${index}`,
+        ...(typeof note.kind === 'string' && KINDS.has(note.kind)
+          ? { kind: note.kind as ItineraryStopNote['kind'] }
+          : {}),
         label,
         icon,
         title,

@@ -23,3 +23,12 @@ test('drops notes the page cannot draw', () => {
   assert.equal(usableStopNotes(null), undefined)
   assert.equal(usableStopNotes([{ label: 'x' }, 'y']), undefined)
 })
+
+test('keeps a known inline kind and drops an unknown one', () => {
+  const notes = usableStopNotes([
+    { kind: 'entry', label: 'Getting in', title: 'Pay at the door, about S/30.' },
+    { kind: 'poster', label: 'Good to know', title: 'Closed Mondays.' },
+  ])
+  assert.equal(notes[0].kind, 'entry')
+  assert.equal(notes[1].kind, undefined)
+})

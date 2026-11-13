@@ -18,6 +18,7 @@ import type { ListicleItemRow } from "@/features/articles/types/mapsListicle";
 import { ItineraryMomentBadge } from "@/features/articles/components/ItineraryMomentBadge";
 import { buildNightlifeDetailsCell } from "@/features/articles/components/ItineraryNightlifeDetails";
 import { ItineraryActivityAddOn } from "@/features/articles/components/ItineraryActivityAddOn";
+import { InlineMarkdown } from "@/features/articles/components/InlineMarkdown";
 
 function stringArray(value: unknown): string[] {
   return Array.isArray(value)
@@ -59,6 +60,10 @@ export function ListicleVenueEntry({
   const images = listicleItemImagesFromRow(row);
   const price = priceLevelLabel(row.item.priceLevel);
   const idealFor = stringArray(row.item.idealFor);
+  // A note with a kind ("What to order", "Getting in") is one line inside the
+  // stop's text; the rest are boxes under the stop (ADR 0048).
+  const inlineNotes = row.stopNotes?.filter((note) => note.kind);
+  const boxNotes = row.stopNotes?.filter((note) => !note.kind);
   const blurb = row.blurb;
   const instagramCode = listicleInstagramEmbedCode(row);
   const nightlifeDetailsCell =
@@ -118,11 +123,23 @@ export function ListicleVenueEntry({
           ) : null}
         </div>
 
-        {editorialBlurbHtml ? (
-          <div
-            className="article-prose maps-listicle-blurb maps-listicle-venue-blurb max-w-none pb-1"
-            dangerouslySetInnerHTML={{ __html: editorialBlurbHtml }}
-          />
+        {editorialBlurbHtml || inlineNotes?.length ? (
+          <div className="article-prose maps-listicle-blurb maps-listicle-venue-blurb max-w-none pb-1">
+            {editorialBlurbHtml ? (
+              <div className="not-last:mb-3" dangerouslySetInnerHTML={{ __html: editorialBlurbHtml }} />
+            ) : null}
+            {inlineNotes?.map((note) => (
+              <p key={note.id}>
+                <strong>{note.label}:</strong> {note.title}
+                {note.body ? (
+                  <>
+                    {/[.!?…]$/.test(note.title) ? " " : ". "}
+                    <InlineMarkdown text={note.body} />
+                  </>
+                ) : null}
+              </p>
+            ))}
+          </div>
         ) : null}
 
         <ListicleTourPicks tours={row.tours} />
@@ -157,8 +174,8 @@ export function ListicleVenueEntry({
           </div>
         ))}
 
-        {row.stopNotes?.length ? (
-          <Suspense fallback={null}><ItineraryStopNotes notes={row.stopNotes} /></Suspense>
+        {boxNotes?.length ? (
+          <Suspense fallback={null}><ItineraryStopNotes notes={boxNotes} /></Suspense>
         ) : null}
       </div>
     </li>
