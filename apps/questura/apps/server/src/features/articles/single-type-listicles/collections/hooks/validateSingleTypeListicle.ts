@@ -15,6 +15,10 @@ import {
   fetchListicleSourceItem,
   getSourceCollectionForBlockType,
 } from '../../../shared/utils/itemMedia/sourceItems'
+import {
+  collectSavedPhotoPicks,
+  isSavedPhotoPick,
+} from '../../../shared/utils/itemMedia/savedPhotoPicks'
 import { validateTourPicks } from '../../../shared/utils/tourPicks'
 import {
   getArticleLocationScope,
@@ -32,6 +36,7 @@ const validationError = (message: string): APIError => new APIError(message, 400
 export const validateSingleTypeListicle: CollectionBeforeValidateHook = async ({
   data,
   operation,
+  originalDoc,
   req,
 }) => {
   const sharedNeighborhoodValidation = await validateSharedNeighborhoodSelection(req.payload, {
@@ -127,6 +132,9 @@ export const validateSingleTypeListicle: CollectionBeforeValidateHook = async ({
     })
     const sourceItemCache = new Map<string, Record<string, unknown> | null>()
     const seenSourceItems = new Map<string, number>()
+    const savedPhotoPicks = collectSavedPhotoPicks(
+      Array.isArray(originalDoc?.items) ? originalDoc.items : [],
+    )
 
     for (let i = 0; i < data.items.length; i++) {
       const item = data.items[i]
@@ -199,7 +207,9 @@ export const validateSingleTypeListicle: CollectionBeforeValidateHook = async ({
         }
 
         const invalidPhotoId = selectedPhotoIds.find(
-          (photoId) => !availablePhotoKeys.has(relationshipIdToKey(photoId)),
+          (photoId) =>
+            !availablePhotoKeys.has(relationshipIdToKey(photoId))
+            && !isSavedPhotoPick(savedPhotoPicks, sourceCollection, sourceItemId, photoId),
         )
 
         if (invalidPhotoId !== undefined) {

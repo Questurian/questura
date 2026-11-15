@@ -80,15 +80,18 @@ function buildData(itemOverrides: Record<string, unknown> = {}): Record<string, 
   }
 }
 
-async function runBeforeValidate(data: Record<string, unknown>) {
+async function runBeforeValidate(
+  data: Record<string, unknown>,
+  originalDoc?: Record<string, unknown>,
+) {
   if (!beforeValidateHook) {
     throw new Error('ListicleItineraries beforeValidate hook is unavailable')
   }
 
   return beforeValidateHook({
     data,
-    originalDoc: undefined,
-    operation: 'create',
+    originalDoc,
+    operation: originalDoc ? 'update' : 'create',
     req: buildReq(),
   } as never)
 }
@@ -284,6 +287,34 @@ describe('ListicleItineraries stop media', () => {
     data.items = [buildAttractionStop({ selectedPhotos: [] })]
 
     await expect(runBeforeValidate(data)).rejects.toThrow('must select between 1 and 6 photos')
+  })
+})
+
+describe('ListicleItineraries photos a gallery sync dropped', () => {
+  const stalePick = () => buildAttractionStop({ selectedPhotos: [700, 588] })
+
+  it('keeps accepting a photo already saved on the same stop place', async () => {
+    const data = buildData()
+    data.itineraryDays = [{ whereStaying: [], items: [stalePick()] }]
+
+    await expect(
+      runBeforeValidate(data, {
+        ...buildData(),
+        itineraryDays: [{ whereStaying: [], items: [stalePick()] }],
+      }),
+    ).resolves.toBeTruthy()
+  })
+
+  it('still refuses a new pick that is not in the gallery', async () => {
+    const data = buildData()
+    data.itineraryDays = [{ whereStaying: [], items: [stalePick()] }]
+
+    await expect(
+      runBeforeValidate(data, {
+        ...buildData(),
+        itineraryDays: [{ whereStaying: [], items: [buildAttractionStop()] }],
+      }),
+    ).rejects.toThrow('selected photo 588 is not in the source gallery')
   })
 })
 

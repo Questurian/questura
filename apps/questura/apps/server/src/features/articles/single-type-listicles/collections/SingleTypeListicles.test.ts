@@ -162,9 +162,13 @@ describe('SingleTypeListicles featured image SEO sync', () => {
   })
 })
 
-async function runBeforeValidate(data: Record<string, unknown>) {
+async function runBeforeValidate(
+  data: Record<string, unknown>,
+  originalDoc?: Record<string, unknown>,
+) {
   return validateSingleTypeListicle({
     data,
+    originalDoc,
     operation: 'update',
     req: {
       payload: {
@@ -259,6 +263,38 @@ describe('SingleTypeListicles sync validation errors', () => {
       isPublic: true,
       message: 'Item 1 must select between 1 and 6 photos.',
     })
+  })
+})
+
+describe('SingleTypeListicles photos a gallery sync dropped', () => {
+  // Photo 588 left the place's gallery (the 20-photo cap) after the guide saved it.
+  const stalePick = () => ({ ...buildVenueRow('row-a', 296), selectedPhotos: [1, 588] })
+
+  it('keeps accepting a photo already saved on the same place', async () => {
+    await expect(
+      runBeforeValidate(
+        { step1_complete: true, targetItemCount: 10, items: [stalePick()] },
+        { items: [stalePick()] },
+      ),
+    ).resolves.toBeTruthy()
+  })
+
+  it('still refuses a new pick that is not in the gallery', async () => {
+    await expect(
+      runBeforeValidate(
+        { step1_complete: true, targetItemCount: 10, items: [stalePick()] },
+        { items: [buildVenueRow('row-a', 296)] },
+      ),
+    ).rejects.toThrow('Item 1 selected photo 588 is not in the source gallery.')
+  })
+
+  it('does not let a photo saved on another place move to this one', async () => {
+    await expect(
+      runBeforeValidate(
+        { step1_complete: true, targetItemCount: 10, items: [stalePick()] },
+        { items: [{ ...buildVenueRow('row-a', 304), selectedPhotos: [588] }] },
+      ),
+    ).rejects.toThrow('Item 1 selected photo 588 is not in the source gallery.')
   })
 })
 

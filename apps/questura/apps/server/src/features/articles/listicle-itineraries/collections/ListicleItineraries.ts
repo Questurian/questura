@@ -49,6 +49,7 @@ import {
   type ComputedItineraryBlock,
   validateListicleItineraryBlockRows,
 } from './validateListicleItineraryBlockRows'
+import { collectSavedPhotoPicks } from '../../shared/utils/itemMedia/savedPhotoPicks'
 
 const articleRevalidation = revalidateArticleCollection('listicle-itineraries')
 const searchIndexSync = syncSearchIndexForCollection('listicle-itineraries')
@@ -307,6 +308,20 @@ export const ListicleItineraries: CollectionConfig = {
 
         const sourceItemCache = new Map<string, Record<string, unknown> | null>()
         const instagramPostCache = new Map<string, boolean>()
+        const storedDays = Array.isArray(originalDoc?.itineraryDays)
+          ? (originalDoc.itineraryDays as unknown[])
+          : []
+        const savedPhotoPicks = collectSavedPhotoPicks([
+          ...storedDays.flatMap((day) => {
+            const row = day && typeof day === 'object' ? (day as Record<string, unknown>) : {}
+            return [
+              ...(Array.isArray(row.whereStaying) ? row.whereStaying : []),
+              ...(Array.isArray(row.items) ? row.items : []),
+            ]
+          }),
+          ...(Array.isArray(originalDoc?.whereStaying) ? originalDoc.whereStaying : []),
+          ...(Array.isArray(originalDoc?.items) ? originalDoc.items : []),
+        ])
 
         const computed: ComputedItineraryBlock[] = []
 
@@ -322,6 +337,7 @@ export const ListicleItineraries: CollectionConfig = {
             pathAt: (i) => `itineraryDays.${dayIndex}.whereStaying.${i}`,
             sourceItemCache,
             instagramPostCache,
+            savedPhotoPicks,
           })
 
           const computedStops = await validateListicleItineraryBlockRows({
@@ -332,6 +348,7 @@ export const ListicleItineraries: CollectionConfig = {
             pathAt: (i) => `itineraryDays.${dayIndex}.items.${i}`,
             sourceItemCache,
             instagramPostCache,
+            savedPhotoPicks,
           })
 
           computed.push(...computedWhere, ...computedStops)
