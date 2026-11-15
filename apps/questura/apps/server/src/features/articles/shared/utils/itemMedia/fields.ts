@@ -4,7 +4,7 @@ import {
   requiresInstagram,
   requiresPhotos,
 } from './mediaMode'
-import { normalizeRelationshipId } from './relationshipIds'
+import { normalizeRelationshipId, normalizeRelationshipIds } from './relationshipIds'
 import {
   extractSourceItemMediaIds,
   fetchListicleSourceItem,
@@ -63,7 +63,7 @@ const getSelectedItemIdFromBlock = (
   return null
 }
 
-const createSourceMediaFilterOptions = (
+export const createSourceMediaFilterOptions = (
   sourceCollection: ItemMediaSourceCollection,
   mediaType: 'photos' | 'instagram',
 ) => {
@@ -79,7 +79,19 @@ const createSourceMediaFilterOptions = (
     }
 
     const { photoIds, instagramPostIds } = extractSourceItemMediaIds(sourceItem)
-    const allowedIds = mediaType === 'photos' ? photoIds : instagramPostIds
+    // Photos already on this row stay choosable: a Location Manager sync can drop
+    // an older photo from the gallery (20-photo cap) while the guide still shows
+    // it. Payload re-runs this filter on every save, so without them the guide
+    // could never be saved again. Whether such a photo may stay is decided by
+    // the collection's beforeValidate hook, which only lets photos already saved
+    // for this same place through (savedPhotoPicks.ts).
+    const allowedIds =
+      mediaType === 'photos'
+        ? [
+            ...photoIds,
+            ...(isRecord(siblingData) ? normalizeRelationshipIds(siblingData.selectedPhotos) : []),
+          ]
+        : instagramPostIds
 
     if (!allowedIds.length) {
       return emptyFilterWhere
