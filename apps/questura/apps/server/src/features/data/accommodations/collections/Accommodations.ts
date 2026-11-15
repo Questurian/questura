@@ -292,7 +292,7 @@ export const Accommodations: CollectionConfig = {
               name: 'gallery',
               type: 'array',
               minRows: 1,
-              maxRows: 20,
+              maxRows: 40,
               admin: {
                 description: 'Image gallery for this accommodation (first image is featured)',
               },
@@ -322,7 +322,7 @@ export const Accommodations: CollectionConfig = {
               type: 'array',
               label: 'Instagram Gallery',
               minRows: 0,
-              maxRows: 20,
+              maxRows: 40,
               admin: {
                 description: 'Instagram posts gallery for this entry',
               },

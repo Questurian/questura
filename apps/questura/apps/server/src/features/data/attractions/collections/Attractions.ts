@@ -145,7 +145,7 @@ export const Attractions: CollectionConfig = {
               name: 'gallery',
               type: 'array',
               minRows: 1,
-              maxRows: 20,
+              maxRows: 40,
               admin: {
                 description: 'Image gallery for this attraction (first image is featured)',
               },
@@ -173,7 +173,7 @@ export const Attractions: CollectionConfig = {
               type: 'array',
               label: 'Instagram Gallery',
               minRows: 0,
-              maxRows: 20,
+              maxRows: 40,
               admin: {
                 description: 'Instagram posts gallery for this entry',
               },

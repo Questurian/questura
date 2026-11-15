@@ -14,7 +14,7 @@ export const savedPhotoPickKey = (sourceCollection: string, sourceItemId: string
  * Collects the photos each place already had picked on the stored guide.
  *
  * A Location Manager sync can drop a photo from a place's gallery (the gallery
- * holds at most 20) while a guide still shows it. The gallery rule exists so a
+ * holds at most 40) while a guide still shows it. The gallery rule exists so a
  * new pick comes from that place; a photo already saved on the same place
  * stays allowed, or every later save of the guide (a map picture, a typo fix)
  * is refused for a pick nobody touched.
