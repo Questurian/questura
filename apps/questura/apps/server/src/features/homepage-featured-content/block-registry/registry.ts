@@ -241,7 +241,7 @@ const CURATED_BLOCK_DEFINITIONS: readonly CuratedBlockDefinition[] = [
   }),
   defineCuratedBlock({
     block: ArticleListBlock,
-    slotCounts: { min: 5, max: 25, default: 5 },
+    slotCounts: { min: 1, max: 25, default: 5 },
     convertibleWhenEmpty: false,
     publicPayloadKind: ARTICLE_PUBLIC_PAYLOAD,
   }),

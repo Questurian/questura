@@ -17,10 +17,10 @@ export const ArticleListBlock: Block = {
       name: 'slotCount',
       type: 'number',
       required: true,
-      min: 5,
+      min: 1,
       max: 25,
       admin: {
-        description: 'How many article slots this block contains (5–25).',
+        description: 'How many article slots this block contains (1–25).',
       },
     },
     {

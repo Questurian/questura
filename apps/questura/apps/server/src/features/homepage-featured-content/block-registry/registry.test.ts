@@ -174,7 +174,7 @@ describe('curatedBlockRegistry', () => {
         'things-to-do-listicles': { min: 3, max: 12, default: 4 },
         'things-to-do-attractions': { min: 3, max: 12, default: 4 },
         'newsletter-signup': { min: 0, max: 0, default: 0 },
-        'article-list': { min: 5, max: 25, default: 5 },
+        'article-list': { min: 1, max: 25, default: 5 },
         'page-hero': { min: 0, max: 0, default: 0 },
         'photo-pile': { min: 0, max: 0, default: 0 },
         'ad-slot': { min: 0, max: 0, default: 0 },
