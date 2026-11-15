@@ -24,10 +24,10 @@ export type GateState = {
    */
   mapPins?: SamplePin[]
   /**
-   * Locked listicles only: the moment of every place in the full list, so the
-   * page can render the headings a member's full list will need.
+   * Locked listicles only: the section of every place in the full list, so
+   * the page can render the headings a member's full list will need.
    */
-  itemMoments?: Array<string | null>
+  itemSections?: Array<string | null>
 }
 
 /**
@@ -71,7 +71,7 @@ export function gatePublicArticle(
     shown: outcome.shown,
     total: outcome.total,
     ...(outcome.pins ? { mapPins: outcome.pins } : {}),
-    ...(outcome.itemMoments ? { itemMoments: outcome.itemMoments } : {}),
+    ...(outcome.itemSections ? { itemSections: outcome.itemSections } : {}),
   }
 
   doc.gate = state

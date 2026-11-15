@@ -81,6 +81,7 @@ import * as migration_20261108_023115_map_teaser from './20261108_023115_map_tea
 import * as migration_20261111_154239_itinerary_stop_notes from './20261111_154239_itinerary_stop_notes';
 import * as migration_20261112_191440_add_more_itinerary_moments from './20261112_191440_add_more_itinerary_moments';
 import * as migration_20261115_213048_add_rooftop_listicle_moments from './20261115_213048_add_rooftop_listicle_moments';
+import * as migration_20261115_233849_add_listicle_item_section from './20261115_233849_add_listicle_item_section';
 
 export const migrations = [
   {
@@ -496,6 +497,11 @@ export const migrations = [
   {
     up: migration_20261115_213048_add_rooftop_listicle_moments.up,
     down: migration_20261115_213048_add_rooftop_listicle_moments.down,
-    name: '20261115_213048_add_rooftop_listicle_moments'
+    name: '20261115_213048_add_rooftop_listicle_moments',
+  },
+  {
+    up: migration_20261115_233849_add_listicle_item_section.up,
+    down: migration_20261115_233849_add_listicle_item_section.down,
+    name: '20261115_233849_add_listicle_item_section'
   },
 ];

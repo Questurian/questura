@@ -2,7 +2,7 @@ import { ListicleArticleFooter } from '@/features/articles/components/ListicleAr
 import { MapsPageHeader } from '@/features/articles/components/MapsPageHeader'
 import { notFound } from 'next/navigation'
 import { JsonLd } from '@/components/seo/JsonLd'
-import { renderListicleMomentHeadings } from '@/features/articles/components/ListicleMomentHeading'
+import { renderListicleSectionHeadings } from '@/features/articles/components/ListicleSectionHeading'
 import { PaywallNotice } from '@/features/articles/components/PaywallNotice'
 import { buildArticleBreadcrumbJsonLd } from '@/features/articles/lib/articleBreadcrumbJsonLd'
 import { buildArticlePageJsonLd } from '@/features/articles/lib/articlePageJsonLd'
@@ -46,11 +46,10 @@ export async function renderMapsArticleRoute({
   const gate = readGate(article)
   const locked = gate?.locked === true
   // A locked list arrives cut to its sample, but a member's full list is
-  // swapped in on the client, where the heading icons are not allowed (see
-  // renderListicleMomentHeadings). The server sends every place's moment, so
-  // the headings for the whole list are rendered here once.
-  const momentSource = gate?.locked
-    ? gate.itemMoments.map((moment) => ({ moment }))
+  // swapped in on the client. The server sends every place's section, so the
+  // headings for the whole list are rendered here once.
+  const sectionSource = gate?.locked
+    ? gate.itemSections.map((section) => ({ section }))
     : (article.items ?? [])
 
   return (
@@ -69,7 +68,7 @@ export async function renderMapsArticleRoute({
       <MapsArticleLayout
         article={article}
         header={<MapsPageHeader article={article} bookmark={{ targetType: 'maps', targetId: article.id }} />}
-        momentHeadings={renderListicleMomentHeadings(momentSource)}
+        sectionHeadings={renderListicleSectionHeadings(sectionSource)}
         relatedArticles={relatedArticles}
         footer={footerLinks ? <ListicleArticleFooter links={footerLinks} country={scope.country} city={scope.city} /> : null}
         country={scope.country}

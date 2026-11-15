@@ -26,18 +26,18 @@ export type GateState = {
    */
   mapPins: GateMapPin[]
   /**
-   * Locked listicles: the moment of every place in the full list, null where a
-   * place has none. Lets the server render the moment headings a member's full
-   * list needs. Empty for everything else.
+   * Locked listicles: the section of every place in the full list, null where
+   * a place has none. Lets the server render the section headings a member's
+   * full list needs. Empty for everything else.
    */
-  itemMoments: Array<string | null>
+  itemSections: Array<string | null>
 }
 
 export type GateMapPin = { lat: number; lng: number; area: string | null }
 
-function readItemMoments(value: unknown): Array<string | null> {
+function readItemSections(value: unknown): Array<string | null> {
   if (!Array.isArray(value)) return []
-  return value.map((entry) => (typeof entry === 'string' && entry !== '' ? entry : null))
+  return value.map((entry) => (typeof entry === 'string' && entry.trim() !== '' ? entry.trim() : null))
 }
 
 function readMapPins(value: unknown): GateMapPin[] {
@@ -70,7 +70,7 @@ export function readGate(article: unknown): GateState | null {
     shown: Number.isFinite(candidate.shown) ? Number(candidate.shown) : 0,
     total: Number.isFinite(candidate.total) ? Number(candidate.total) : 0,
     mapPins: readMapPins(candidate.mapPins),
-    itemMoments: readItemMoments(candidate.itemMoments),
+    itemSections: readItemSections(candidate.itemSections),
   }
 }
 

@@ -126,7 +126,10 @@ export const listicleMomentField: Field = {
   enumName: 'listicle_moment',
   options: [...LISTICLE_MOMENT_OPTIONS],
   admin: {
+    // Replaced by the typed Section field (2026-11-15). Kept, hidden, so the
+    // column and any old values stay; nothing reads it any more.
+    hidden: true,
     description:
-      'Optional. Places next to each other with the same moment are shown together under one heading.',
+      'Replaced by Section.',
   },
 }

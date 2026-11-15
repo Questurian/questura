@@ -5,6 +5,7 @@ import { createTourPicksField } from '../../shared/utils/tourPicks'
 import { createItemMediaFields } from './utils/itemMedia'
 import { angleField } from './utils/angleField'
 import { listicleMomentField } from './utils/momentFields'
+import { listicleSectionField } from './utils/sectionField'
 
 type DataListicleBlockConfig = {
   /** Block slug, e.g. `data-dining`. */
@@ -22,7 +23,7 @@ type DataListicleBlockConfig = {
 /**
  * Factory for the single-type listicle "data" blocks. Every block in this family
  * is a ranked item: a location-scoped relationship picker, the shared item-media
- * fields, an optional moment (group heading), an editorial angle, and a blurb. They differ only by collection, slug,
+ * fields, an optional section (group heading), an editorial angle, and a blurb. They differ only by collection, slug,
  * labels, and picker copy — so they are expressed as configuration here rather
  * than as four near-identical files.
  */
@@ -49,6 +50,7 @@ export const createDataListicleBlock = ({
         description: itemDescription,
       },
     },
+    listicleSectionField,
     listicleMomentField,
     // Tour Picks exist only where the source records carry LM-linked tours.
     ...(relationTo === 'attractions' ? [createTourPicksField()] : []),
