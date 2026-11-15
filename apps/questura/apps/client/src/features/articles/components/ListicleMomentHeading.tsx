@@ -1,212 +1,134 @@
 import "server-only";
 import type { JSX } from "react";
-import {
-  Armchair,
-  Baby,
-  BedSingle,
-  Beer,
-  Bike,
-  Briefcase,
-  Building,
-  Building2,
-  CalendarDays,
-  Camera,
-  Car,
-  Castle,
-  ChefHat,
-  Church,
-  Clock,
-  CloudRain,
-  Coffee,
-  Compass,
-  CookingPot,
-  Croissant,
-  Crown,
-  Dices,
-  Disc3,
-  Dog,
-  Drama,
-  Droplets,
-  Drum,
-  Egg,
-  Feather,
-  Fish,
-  Flame,
-  Flower2,
-  Footprints,
-  Gamepad2,
-  Gem,
-  Gift,
-  GlassWater,
-  Guitar,
-  HandPlatter,
-  Headphones,
-  Heart,
-  IceCreamBowl,
-  KeyRound,
-  Landmark,
-  Laptop,
-  Leaf,
-  Map,
-  MapPin,
-  MapPinned,
-  Martini,
-  Mic,
-  Moon,
-  Mountain,
-  Music2,
-  Palette,
-  PartyPopper,
-  Piano,
-  PiggyBank,
-  Pizza,
-  Plane,
-  Rainbow,
-  Sailboat,
-  Salad,
-  ScrollText,
-  ShoppingBag,
-  Sofa,
-  Soup,
-  Sparkles,
-  Speaker,
-  Sprout,
-  Store,
-  Sunset,
-  Timer,
-  Trees,
-  Trophy,
-  Umbrella,
-  University,
-  Users,
-  UtensilsCrossed,
-  Wallet,
-  Waves,
-  Wheat,
-  Wifi,
-  Wine,
-  Zap,
-  type LucideIcon,
-} from "lucide-react";
+import { Playfair_Display } from "next/font/google";
 import {
   groupListicleItemsByMoment,
   listicleMomentHeadingId,
 } from "@/features/articles/lib/listicleMomentGroups";
 
 /**
- * Display copy and icon for every single-type listicle moment. Mirrors
+ * Playfair at 900 for the section heading only. The root layout loads the
+ * family up to 700; declaring the black cut here means next/font preloads it
+ * on the routes that render a listicle, not on every page.
+ */
+const playfairBlack = Playfair_Display({ weight: "900", subsets: ["latin"], display: "swap" });
+
+/**
+ * Heading copy for every single-type listicle moment. Mirrors
  * `LISTICLE_MOMENT_OPTIONS` on the server; an unknown value renders no heading.
  */
-const MOMENT_CONFIG: Record<string, { label: string; Icon: LucideIcon }> = {
-  "with-a-view": { label: "With a view", Icon: Sunset },
-  rooftop: { label: "Rooftops", Icon: Building2 },
-  "by-the-water": { label: "By the water", Icon: Waves },
-  "on-a-budget": { label: "On a budget", Icon: Wallet },
-  splurge: { label: "Worth the splurge", Icon: Crown },
-  "date-night": { label: "Date night", Icon: Heart },
-  "local-favorite": { label: "Local favorites", Icon: MapPin },
-  "hidden-gem": { label: "Hidden gems", Icon: Compass },
-  "family-friendly": { label: "Family-friendly", Icon: Baby },
-  "big-groups": { label: "Big groups", Icon: Users },
-  wellness: { label: "Wellness & spas", Icon: Flower2 },
-  shows: { label: "Shows & performances", Icon: Drama },
-  "fine-dining": { label: "Fine dining", Icon: Gem },
-  "special-occasion": { label: "Special occasion", Icon: Sparkles },
-  "tasting-menu": { label: "Tasting menus", Icon: HandPlatter },
-  "chef-driven": { label: "Chef-driven", Icon: ChefHat },
-  "old-school-classic": { label: "Old-school classics", Icon: Clock },
-  "new-and-buzzy": { label: "New & buzzy", Icon: Zap },
-  "quick-lunch": { label: "Quick lunch", Icon: Timer },
-  "street-food": { label: "Street food", Icon: CookingPot },
-  "markets-food-halls": { label: "Markets & food halls", Icon: Store },
-  casual: { label: "Casual & laid-back", Icon: Sofa },
-  breakfast: { label: "Breakfast", Icon: Croissant },
-  brunch: { label: "Brunch", Icon: Egg },
-  coffee: { label: "Coffee & cafés", Icon: Coffee },
-  bakeries: { label: "Bakeries", Icon: Wheat },
-  sweets: { label: "Sweets & desserts", Icon: IceCreamBowl },
-  seafood: { label: "Seafood", Icon: Fish },
-  grill: { label: "Grill & meat", Icon: Flame },
-  pizza: { label: "Pizza", Icon: Pizza },
-  "noodles-soups": { label: "Noodles & soups", Icon: Soup },
-  "plant-based": { label: "Plant-based", Icon: Leaf },
-  healthy: { label: "Healthy & fresh", Icon: Salad },
-  "outdoor-seating": { label: "Outdoor seating", Icon: Trees },
-  "late-night-eats": { label: "Late-night eats", Icon: Moon },
-  "laptop-friendly": { label: "Laptop-friendly", Icon: Laptop },
-  "wine-lovers": { label: "Wine lovers", Icon: Wine },
-  "big-loud-venues": { label: "Big, loud venues", Icon: Speaker },
-  "live-bands": { label: "Live bands", Icon: Guitar },
-  "live-music": { label: "Live music", Icon: Music2 },
-  "house-techno": { label: "House & techno", Icon: Disc3 },
-  "dj-sets": { label: "DJ sets", Icon: Headphones },
-  "latin-nights": { label: "Salsa & Latin", Icon: Drum },
-  "jazz-blues": { label: "Jazz & blues", Icon: Piano },
-  karaoke: { label: "Karaoke", Icon: Mic },
-  "dance-floors": { label: "Dance floors", Icon: PartyPopper },
-  "local-hotspot": { label: "Local hotspots", Icon: Flame },
-  "cocktail-bars": { label: "Cocktail bars", Icon: Martini },
-  "wine-bars": { label: "Wine bars", Icon: Wine },
-  "craft-beer": { label: "Craft beer", Icon: Beer },
-  "dive-bars": { label: "Dive bars", Icon: Dices },
-  speakeasies: { label: "Speakeasies", Icon: KeyRound },
-  "chill-lounges": { label: "Chill lounges", Icon: Armchair },
-  "lgbtq-friendly": { label: "LGBTQ+ friendly", Icon: Rainbow },
-  "after-hours": { label: "After hours", Icon: Moon },
-  "early-evening": { label: "Early evening", Icon: Sunset },
-  "sports-bars": { label: "Sports bars", Icon: Trophy },
-  "games-bars": { label: "Bars with games", Icon: Gamepad2 },
-  "must-see": { label: "Must-see", Icon: Landmark },
-  museums: { label: "Museums", Icon: University },
-  history: { label: "History", Icon: ScrollText },
-  "art-galleries": { label: "Art & galleries", Icon: Palette },
-  architecture: { label: "Architecture", Icon: Building },
-  "sacred-sites": { label: "Churches & temples", Icon: Church },
-  "parks-gardens": { label: "Parks & gardens", Icon: Trees },
-  nature: { label: "Nature", Icon: Mountain },
-  beaches: { label: "Beaches", Icon: Umbrella },
-  markets: { label: "Markets", Icon: Store },
-  shopping: { label: "Shopping", Icon: ShoppingBag },
-  free: { label: "Free to visit", Icon: Gift },
-  "rainy-day": { label: "Rainy-day picks", Icon: CloudRain },
-  adventure: { label: "Adventure", Icon: Bike },
-  "on-the-water": { label: "On the water", Icon: Sailboat },
-  "day-trips": { label: "Day trips", Icon: Car },
-  tours: { label: "Tours", Icon: Map },
-  walks: { label: "Walks", Icon: Footprints },
-  "photo-spots": { label: "Photo spots", Icon: Camera },
-  "sunset-spots": { label: "Sunset spots", Icon: Sunset },
-  luxury: { label: "Luxury", Icon: Gem },
-  boutique: { label: "Boutique", Icon: Sparkles },
-  "design-hotels": { label: "Design hotels", Icon: Palette },
-  "historic-stays": { label: "Historic stays", Icon: Castle },
-  "good-value": { label: "Good value", Icon: PiggyBank },
-  hostels: { label: "Hostels", Icon: BedSingle },
-  apartments: { label: "Apartments & rentals", Icon: KeyRound },
-  romantic: { label: "Romantic", Icon: Heart },
-  beachfront: { label: "Beachfront", Icon: Umbrella },
-  "with-a-pool": { label: "With a pool", Icon: Droplets },
-  central: { label: "Right in the center", Icon: MapPinned },
-  "quiet-escape": { label: "Quiet escapes", Icon: Feather },
-  "eco-stays": { label: "Eco stays", Icon: Sprout },
-  "pet-friendly": { label: "Pet-friendly", Icon: Dog },
-  "adults-only": { label: "Adults only", Icon: GlassWater },
-  "all-inclusive": { label: "All-inclusive", Icon: UtensilsCrossed },
-  "long-stays": { label: "Long stays", Icon: CalendarDays },
-  "remote-work": { label: "Good for remote work", Icon: Wifi },
-  "near-airport": { label: "Near the airport", Icon: Plane },
-  business: { label: "Business trips", Icon: Briefcase },
-  "locals-rooftops": { label: "The locals' rooftops", Icon: Martini },
-  "party-rooftops": { label: "Party rooftops", Icon: Disc3 },
+const MOMENT_LABELS: Record<string, string> = {
+  "with-a-view": "With a view",
+  rooftop: "Rooftops",
+  "by-the-water": "By the water",
+  "on-a-budget": "On a budget",
+  splurge: "Worth the splurge",
+  "date-night": "Date night",
+  "local-favorite": "Local favorites",
+  "hidden-gem": "Hidden gems",
+  "family-friendly": "Family-friendly",
+  "big-groups": "Big groups",
+  wellness: "Wellness & spas",
+  shows: "Shows & performances",
+  "fine-dining": "Fine dining",
+  "special-occasion": "Special occasion",
+  "tasting-menu": "Tasting menus",
+  "chef-driven": "Chef-driven",
+  "old-school-classic": "Old-school classics",
+  "new-and-buzzy": "New & buzzy",
+  "quick-lunch": "Quick lunch",
+  "street-food": "Street food",
+  "markets-food-halls": "Markets & food halls",
+  casual: "Casual & laid-back",
+  breakfast: "Breakfast",
+  brunch: "Brunch",
+  coffee: "Coffee & cafés",
+  bakeries: "Bakeries",
+  sweets: "Sweets & desserts",
+  seafood: "Seafood",
+  grill: "Grill & meat",
+  pizza: "Pizza",
+  "noodles-soups": "Noodles & soups",
+  "plant-based": "Plant-based",
+  healthy: "Healthy & fresh",
+  "outdoor-seating": "Outdoor seating",
+  "late-night-eats": "Late-night eats",
+  "laptop-friendly": "Laptop-friendly",
+  "wine-lovers": "Wine lovers",
+  "big-loud-venues": "Big, loud venues",
+  "live-bands": "Live bands",
+  "live-music": "Live music",
+  "house-techno": "House & techno",
+  "dj-sets": "DJ sets",
+  "latin-nights": "Salsa & Latin",
+  "jazz-blues": "Jazz & blues",
+  karaoke: "Karaoke",
+  "dance-floors": "Dance floors",
+  "local-hotspot": "Local hotspots",
+  "cocktail-bars": "Cocktail bars",
+  "wine-bars": "Wine bars",
+  "craft-beer": "Craft beer",
+  "dive-bars": "Dive bars",
+  speakeasies: "Speakeasies",
+  "chill-lounges": "Chill lounges",
+  "lgbtq-friendly": "LGBTQ+ friendly",
+  "after-hours": "After hours",
+  "early-evening": "Early evening",
+  "sports-bars": "Sports bars",
+  "games-bars": "Bars with games",
+  "must-see": "Must-see",
+  museums: "Museums",
+  history: "History",
+  "art-galleries": "Art & galleries",
+  architecture: "Architecture",
+  "sacred-sites": "Churches & temples",
+  "parks-gardens": "Parks & gardens",
+  nature: "Nature",
+  beaches: "Beaches",
+  markets: "Markets",
+  shopping: "Shopping",
+  free: "Free to visit",
+  "rainy-day": "Rainy-day picks",
+  adventure: "Adventure",
+  "on-the-water": "On the water",
+  "day-trips": "Day trips",
+  tours: "Tours",
+  walks: "Walks",
+  "photo-spots": "Photo spots",
+  "sunset-spots": "Sunset spots",
+  luxury: "Luxury",
+  boutique: "Boutique",
+  "design-hotels": "Design hotels",
+  "historic-stays": "Historic stays",
+  "good-value": "Good value",
+  hostels: "Hostels",
+  apartments: "Apartments & rentals",
+  romantic: "Romantic",
+  beachfront: "Beachfront",
+  "with-a-pool": "With a pool",
+  central: "Right in the center",
+  "quiet-escape": "Quiet escapes",
+  "eco-stays": "Eco stays",
+  "pet-friendly": "Pet-friendly",
+  "adults-only": "Adults only",
+  "all-inclusive": "All-inclusive",
+  "long-stays": "Long stays",
+  "remote-work": "Good for remote work",
+  "near-airport": "Near the airport",
+  business: "Business trips",
+  "locals-rooftops": "The It List",
+  "party-rooftops": "After dark",
 };
 
 function hasListicleMoment(moment: string | null | undefined): boolean {
-  return typeof moment === "string" && Object.hasOwn(MOMENT_CONFIG, moment);
+  return typeof moment === "string" && Object.hasOwn(MOMENT_LABELS, moment);
 }
 
 /**
- * Opens a group of places in a single-type listicle: accent icon and sans
- * label sitting on a hairline that runs to the column edge.
+ * Opens a group of places in a single-type listicle: the label in heavy
+ * Playfair capitals, centred between two double accent rules that run to the
+ * column edges (owner, 2026-11-15). Labels are kept to 12 characters so the
+ * heading stays on one line on a phone; the studio only offers those.
  */
 export function ListicleMomentHeading({
   moment,
@@ -216,22 +138,20 @@ export function ListicleMomentHeading({
   id?: string;
 }): JSX.Element | null {
   if (!hasListicleMoment(moment)) return null;
-  const { Icon, label } = MOMENT_CONFIG[moment];
+  const label = MOMENT_LABELS[moment];
+  const rule =
+    "h-[8px] min-w-[18px] flex-1 border-y-[2.5px] border-accent sm:h-[9px] sm:min-w-6 sm:border-y-[3px]";
 
   return (
     <h2
       id={id}
-      className="m-0 flex items-center gap-2.5 text-accent 380:gap-3 480:gap-3.5 sm:gap-4"
+      className="m-0 flex items-center gap-3 text-foreground sm:gap-4"
     >
-      <Icon
-        className="size-[24px] shrink-0 380:size-[26px] 480:size-[29px] sm:size-[32px]"
-        strokeWidth={1.6}
-        aria-hidden
-      />
-      <span className="shrink-0 text-[14px] font-bold uppercase leading-none tracking-[0.16em] [font-family:var(--font-dm-sans)] 380:text-[15px] 480:text-[17px] sm:text-[19px]">
+      <span aria-hidden className={rule} />
+      <span className={`${playfairBlack.className} min-w-0 text-center text-[clamp(22px,7.2vw,40px)] font-black uppercase leading-[1.05] tracking-[0.01em] [text-wrap:balance]`}>
         {label}
       </span>
-      <span aria-hidden className="h-px min-w-8 flex-1 bg-foreground/18" />
+      <span aria-hidden className={rule} />
     </h2>
   );
 }
@@ -242,8 +162,8 @@ export type ListicleMomentHeadings = Readonly<Record<number, JSX.Element>>;
 /**
  * Renders every moment heading a listicle needs. Call it from a server
  * component and pass the result down: the listicle page renders inside a
- * client layout, and importing the icon set there adds ~10 kB gzip to the
- * route's first-load JS. `server-only` above fails the build if that happens.
+ * client layout, and the full label table would otherwise ship in the route's
+ * first-load JS. `server-only` above fails the build if that happens.
  */
 export function renderListicleMomentHeadings(
   items: readonly { moment?: string | null }[],
@@ -263,11 +183,11 @@ export function renderListicleMomentHeadings(
 
 /**
  * One heading for every moment there is, for the studio preview: its list
- * changes in the browser, where the icon set is not allowed, so the server
+ * changes in the browser, where the label table is not shipped, so the server
  * renders them all once and the page picks.
  */
 export function renderEveryListicleMomentHeading(): Readonly<Record<string, JSX.Element>> {
   return Object.fromEntries(
-    Object.keys(MOMENT_CONFIG).map((moment) => [moment, <ListicleMomentHeading key={moment} moment={moment} />]),
+    Object.keys(MOMENT_LABELS).map((moment) => [moment, <ListicleMomentHeading key={moment} moment={moment} />]),
   );
 }
