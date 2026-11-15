@@ -87,7 +87,8 @@
 @media (min-width: 1024px) {
   .city-featured-three-layout {
     display: grid;
-    grid-template-columns: 1.5fr 1fr;
+    /* Square lead, a narrow stack beside it (owner, 2026-11-15). */
+    grid-template-columns: 2fr 1fr;
     align-items: stretch;
     gap: 0;
     width: 100%;
@@ -110,6 +111,7 @@
     padding-left: 32px;
     display: flex;
     flex-direction: column;
+    gap: 32px;
   }
 
   .city-three-hero-card {
@@ -119,7 +121,7 @@
   }
 
   .city-three-hero-image {
-    aspect-ratio: 4 / 3;
+    aspect-ratio: 1 / 1;
   }
 
   .city-three-hero-card h2 {
@@ -135,16 +137,18 @@
     margin-top: 16px;
   }
 
+  /* The stack sits at the top of its column, white space between the two
+     stories rather than a rule, and leaves the rest to the square lead. */
   .city-three-stack-card {
-    flex: 1;
-    padding: 0 0 24px;
-    gap: 14px;
+    flex: none;
+    padding: 0;
+    gap: 12px;
     background: transparent;
   }
 
   .city-three-stack-card + .city-three-stack-card {
-    padding: 24px 0 0;
-    border-top: 1px solid rgba(95, 89, 82, 0.22);
+    padding: 0;
+    border-top: none;
   }
 
   .city-featured-three-fc-layout {
