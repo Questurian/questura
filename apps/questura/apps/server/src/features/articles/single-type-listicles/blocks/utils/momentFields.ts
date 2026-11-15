@@ -115,8 +115,8 @@ export const LISTICLE_MOMENT_OPTIONS = [
   { label: 'Near the airport', value: 'near-airport' },
   { label: 'Business trips', value: 'business' },
   // Nightlife, added 2026-11-15
-  { label: "The locals' rooftops", value: 'locals-rooftops' },
-  { label: 'Party rooftops', value: 'party-rooftops' },
+  { label: 'The It List', value: 'locals-rooftops' },
+  { label: 'After dark', value: 'party-rooftops' },
 ] as const
 
 export const listicleMomentField: Field = {
