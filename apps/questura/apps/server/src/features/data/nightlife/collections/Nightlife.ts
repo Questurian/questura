@@ -184,7 +184,7 @@ export const Nightlife: CollectionConfig = {
               name: 'gallery',
               type: 'array',
               minRows: 1,
-              maxRows: 20,
+              maxRows: 40,
               admin: {
                 description: 'Image gallery for this nightlife venue (first image is featured)',
               },
@@ -212,7 +212,7 @@ export const Nightlife: CollectionConfig = {
               type: 'array',
               label: 'Instagram Gallery',
               minRows: 0,
-              maxRows: 20,
+              maxRows: 40,
               admin: {
                 description: 'Instagram posts gallery for this entry',
               },

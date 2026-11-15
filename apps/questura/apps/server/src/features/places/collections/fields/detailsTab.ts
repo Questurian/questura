@@ -7,7 +7,7 @@ export const placeDetailsTab: Tab = {
       name: 'gallery',
       type: 'array',
       minRows: 0,
-      maxRows: 20,
+      maxRows: 40,
       admin: {
         description: 'Image gallery for this place (first image is featured)',
       },
@@ -35,7 +35,7 @@ export const placeDetailsTab: Tab = {
       type: 'array',
       label: 'Instagram Gallery',
       minRows: 0,
-      maxRows: 20,
+      maxRows: 40,
       admin: {
         description: 'Instagram posts gallery for this place',
       },

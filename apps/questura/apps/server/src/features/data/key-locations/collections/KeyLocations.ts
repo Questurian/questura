@@ -131,7 +131,7 @@ export const KeyLocations: CollectionConfig = {
               name: 'gallery',
               type: 'array',
               minRows: 0,
-              maxRows: 20,
+              maxRows: 40,
               admin: {
                 description: 'Image gallery for this key location',
               },
@@ -159,7 +159,7 @@ export const KeyLocations: CollectionConfig = {
               type: 'array',
               label: 'Instagram Gallery',
               minRows: 0,
-              maxRows: 20,
+              maxRows: 40,
               admin: {
                 description: 'Instagram posts gallery for this key location',
               },
