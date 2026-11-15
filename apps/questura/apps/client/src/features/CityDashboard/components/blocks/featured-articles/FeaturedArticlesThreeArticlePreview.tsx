@@ -49,15 +49,11 @@ type HeroArticleCardProps = {
   imagePriority: ImagePriority
 }
 
-// Slot 1 in the hero-left layout: large image over copy, mirrors the four-slot hero.
+// Slot 1 in the hero-left layout: a large square photo over copy, square at
+// every width (owner, 2026-11-15, after Condé Nast Traveler's lead story), so
+// the square crop is the only one it needs.
 function HeroArticleCard({ article, imagePriority }: HeroArticleCardProps): JSX.Element {
-  const mobileImageUrl = article.imageUrlSquare ?? article.imageUrl ?? null
-  const desktopImageUrl = article.imageUrl ?? article.imageUrlSquare ?? null
-  // `<picture>` resolves to the <img> when no <source> matches, so the mobile
-  // crop is the one that has to exist. Aliasing the check lets TypeScript carry
-  // the narrowing into the JSX below.
-  const fallbackImageUrl = mobileImageUrl ?? desktopImageUrl
-  const hasImage = fallbackImageUrl !== null
+  const imageUrl = article.imageUrlSquare ?? article.imageUrl ?? null
 
   const articleTypeLabel = getArticleTypeLabel(article)
   const excerpt = article.excerpt ?? 'Meta description not set'
@@ -66,20 +62,15 @@ function HeroArticleCard({ article, imagePriority }: HeroArticleCardProps): JSX.
   return (
     <section className="city-article-card city-three-hero-card">
       <div className="city-article-image-shell city-three-hero-image relative aspect-square overflow-hidden bg-[#d7dcde]">
-        {hasImage ? (
-          <picture className="block h-full w-full">
-            {desktopImageUrl ? (
-              <PublicSource media="(min-width: 1024px)" src={desktopImageUrl} sizes={BLOCK_IMAGE_SIZES.hero} />
-            ) : null}
-            <PublicImage
-              src={fallbackImageUrl}
-              alt=""
-              className="relative z-10 h-full w-full object-cover"
-              decoding="async"
-              {...imagePriority}
-              sizes={BLOCK_IMAGE_SIZES.hero}
-            />
-          </picture>
+        {imageUrl ? (
+          <PublicImage
+            src={imageUrl}
+            alt=""
+            className="relative z-10 h-full w-full object-cover"
+            decoding="async"
+            {...imagePriority}
+            sizes={BLOCK_IMAGE_SIZES.squareLead}
+          />
         ) : null}
         <NavigableImageTarget href={article.articlePath} label={`Read ${article.title}`} />
       </div>
@@ -137,7 +128,11 @@ function StackedWideCard({ article, variant = 'stack' }: StackedWideCardProps): 
     >
       <div className="city-article-image-shell city-three-stack-image">
         {imageUrl ? (
-          <PhoneSquareImage article={article} priority={LAZY_IMAGE} sizes={BLOCK_IMAGE_SIZES.halfColumn} />
+          <PhoneSquareImage
+            article={article}
+            priority={LAZY_IMAGE}
+            sizes={variant === 'fc-side' ? BLOCK_IMAGE_SIZES.halfColumn : BLOCK_IMAGE_SIZES.thirdColumn}
+          />
         ) : null}
         <NavigableImageTarget href={article.articlePath} label={`Read ${article.title}`} />
       </div>

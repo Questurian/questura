@@ -24,6 +24,9 @@ export const BLOCK_IMAGE_SIZES = {
   /** The lead card of a block: 1.5fr of a 1.5fr/1fr split. Measured at 762px. */
   hero: '(min-width: 1024px) 780px, 100vw',
 
+  /** The square lead of the three-slot block: 2fr of a 2fr/1fr split, so ~853px. */
+  squareLead: '(min-width: 1024px) 880px, 100vw',
+
   /** The left card of the seven- and eight-slot blocks. Measured at 347px. */
   featuredLeftCard: '(min-width: 1024px) 360px, 100vw',
 
@@ -39,7 +42,7 @@ export const BLOCK_IMAGE_SIZES = {
   /** The 1fr partner of a hero-left split, so ~541px. */
   halfColumn: '(min-width: 1024px) 560px, 100vw',
 
-  /** Three across the content width, so ~447px. */
+  /** Three across the content width, so ~447px. Also the three-slot block's side stack (~403px). */
   thirdColumn: '(min-width: 768px) 450px, 100vw',
 
   /** Four across the content width, so ~338px. */
