@@ -51,6 +51,9 @@ export function MapsListicleArticlePage({
   const headerOnly = paywalled && items.length === 0
   const runs = groupListicleItemsByMoment(items)
   const isGrouped = runs.some((run) => momentHeadings[run.start] !== undefined)
+  // A section heading's double rules already close the intro, so the diamond
+  // separator would stack a second border on top (owner, 2026-11-15).
+  const opensWithHeading = runs.length > 0 && momentHeadings[runs[0].start] !== undefined
   const ads = planListicleAds(items.length, {
     enabled: ADS_ENABLED,
     hasIntro: Boolean(introHtml),
@@ -80,7 +83,7 @@ export function MapsListicleArticlePage({
         </div>
       ) : null}
 
-      {headerOnly ? null : <ListicleSeparator />}
+      {headerOnly || opensWithHeading ? null : <ListicleSeparator />}
 
       {headerOnly ? (
         <div className="px-3 pb-20 380:px-4 480:px-5 480:pb-24 550:px-6 sm:px-8 sm:pb-32">
