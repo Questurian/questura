@@ -114,6 +114,9 @@ export const LISTICLE_MOMENT_OPTIONS = [
   { label: 'Good for remote work', value: 'remote-work' },
   { label: 'Near the airport', value: 'near-airport' },
   { label: 'Business trips', value: 'business' },
+  // Nightlife, added 2026-11-15
+  { label: "The locals' rooftops", value: 'locals-rooftops' },
+  { label: 'Party rooftops', value: 'party-rooftops' },
 ] as const
 
 export const listicleMomentField: Field = {
