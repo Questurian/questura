@@ -6,7 +6,6 @@ import {
   BedSingle,
   Beer,
   Bike,
-  Binoculars,
   Briefcase,
   Building,
   Building2,
@@ -99,7 +98,7 @@ import {
  * `LISTICLE_MOMENT_OPTIONS` on the server; an unknown value renders no heading.
  */
 const MOMENT_CONFIG: Record<string, { label: string; Icon: LucideIcon }> = {
-  "with-a-view": { label: "With a view", Icon: Binoculars },
+  "with-a-view": { label: "With a view", Icon: Sunset },
   rooftop: { label: "Rooftops", Icon: Building2 },
   "by-the-water": { label: "By the water", Icon: Waves },
   "on-a-budget": { label: "On a budget", Icon: Wallet },
@@ -197,6 +196,8 @@ const MOMENT_CONFIG: Record<string, { label: string; Icon: LucideIcon }> = {
   "remote-work": { label: "Good for remote work", Icon: Wifi },
   "near-airport": { label: "Near the airport", Icon: Plane },
   business: { label: "Business trips", Icon: Briefcase },
+  "locals-rooftops": { label: "The locals' rooftops", Icon: Martini },
+  "party-rooftops": { label: "Party rooftops", Icon: Disc3 },
 };
 
 function hasListicleMoment(moment: string | null | undefined): boolean {
