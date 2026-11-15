@@ -140,15 +140,15 @@ export function ListicleMomentHeading({
   if (!hasListicleMoment(moment)) return null;
   const label = MOMENT_LABELS[moment];
   const rule =
-    "h-[8px] min-w-[18px] flex-1 border-y-[2.5px] border-accent sm:h-[9px] sm:min-w-6 sm:border-y-[3px]";
+    "h-[7px] min-w-[18px] flex-1 border-y-2 border-accent sm:h-[8px] sm:min-w-6 sm:border-y-[2.5px]";
 
   return (
     <h2
       id={id}
-      className="m-0 flex items-center gap-3 text-foreground sm:gap-4"
+      className="m-0 flex items-center gap-3 text-foreground"
     >
       <span aria-hidden className={rule} />
-      <span className={`${playfairBlack.className} min-w-0 text-center text-[clamp(22px,7.2vw,40px)] font-black uppercase leading-[1.05] tracking-[0.01em] [text-wrap:balance]`}>
+      <span className={`${playfairBlack.className} min-w-0 text-center text-[clamp(18px,4.6vw,26px)] font-black uppercase leading-[1.05] tracking-[0.01em] [text-wrap:balance]`}>
         {label}
       </span>
       <span aria-hidden className={rule} />
