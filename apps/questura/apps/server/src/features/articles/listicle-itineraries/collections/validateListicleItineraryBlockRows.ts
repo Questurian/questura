@@ -17,6 +17,10 @@ import {
 import { fieldRuleError } from '../../shared/lib/fieldRuleError'
 import { validateTourPicks } from '../../shared/utils/tourPicks'
 import { isPriceTier, normalizePriceTier } from '@/shared/content/priceTier'
+import {
+  isSavedPhotoPick,
+  type SavedPhotoPicks,
+} from '../../shared/utils/itemMedia/savedPhotoPicks'
 
 // Ticks are accepted as input and stored as 1-4; see shared/content/priceTier.
 const isTourAgencyPriceTier = (value: unknown): boolean => isPriceTier(normalizePriceTier(value))
@@ -99,8 +103,10 @@ export async function validateListicleItineraryBlockRows(params: {
   pathAt: (index: number) => string
   sourceItemCache: Map<string, Record<string, unknown> | null>
   instagramPostCache: Map<string, boolean>
+  /** Photos the stored itinerary already shows per place; they stay allowed after a gallery sync drops them. */
+  savedPhotoPicks?: SavedPhotoPicks
 }): Promise<ComputedItineraryBlock[]> {
-  const { req, blocks, section, labelAt, pathAt, sourceItemCache, instagramPostCache } = params
+  const { req, blocks, section, labelAt, pathAt, sourceItemCache, instagramPostCache, savedPhotoPicks } = params
 
   const computed: ComputedItineraryBlock[] = []
 
@@ -316,7 +322,9 @@ export async function validateListicleItineraryBlockRows(params: {
       }
 
       const invalidPhotoId = selectedPhotoIds.find(
-        (photoId) => !availablePhotoKeys.has(relationshipIdToKey(photoId)),
+        (photoId) =>
+          !availablePhotoKeys.has(relationshipIdToKey(photoId))
+          && !isSavedPhotoPick(savedPhotoPicks, sourceCollection, sourceItemId, photoId),
       )
 
       if (invalidPhotoId !== undefined) {
