@@ -70,8 +70,10 @@ export type ListicleItemRow = {
   selectedInstagramPost?: ListicleInstagramPost | number | string | null
   /** Operator-curated Tour Picks on attraction rows (ordered, max 4). */
   tours?: ListicleTourPick[] | null
-  /** Optional moment; neighbouring rows that share one sit under one heading. */
+  /** Itinerary stops: the moment badge drawn on the stop. */
   moment?: string | null
+  /** Single-type listicles: typed section name; neighbouring rows that share one sit under one heading. */
+  section?: string | null
   /** Practical notes drawn under the stop (itineraries only, ADR 0048). */
   stopNotes?: ItineraryStopNote[]
 }

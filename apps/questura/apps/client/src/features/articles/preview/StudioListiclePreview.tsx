@@ -3,7 +3,7 @@
 import { useMemo, type JSX } from 'react'
 import { MapsPageHeader } from '@/features/articles/components/MapsPageHeader'
 import { MapsArticleLayout } from '@/features/articles/layouts/MapsArticleLayout'
-import { groupListicleItemsByMoment, listicleMomentHeadingId } from '@/features/articles/lib/listicleMomentGroups'
+import { renderListicleSectionHeadings } from '@/features/articles/components/ListicleSectionHeading'
 import {
   StudioPreviewWaiting,
   studioPreviewPlace,
@@ -12,21 +12,10 @@ import {
 import { isMapsListicleArticle } from '@/features/articles/types/mapsListicle'
 
 /** The real single-type listicle page, drawn from whatever the AI Blog Writer posts in. */
-export function StudioListiclePreview({
-  headingsByMoment,
-}: {
-  headingsByMoment: Readonly<Record<string, JSX.Element>>
-}): JSX.Element {
+export function StudioListiclePreview(): JSX.Element {
   const { article } = useStudioPreviewMessages(isMapsListicleArticle)
 
-  const momentHeadings = useMemo(() => {
-    const headings: Record<number, JSX.Element> = {}
-    for (const run of groupListicleItemsByMoment(article?.items ?? [])) {
-      const heading = run.moment ? headingsByMoment[run.moment] : undefined
-      if (heading) headings[run.start] = <div id={listicleMomentHeadingId(run.start)}>{heading}</div>
-    }
-    return headings
-  }, [article, headingsByMoment])
+  const sectionHeadings = useMemo(() => renderListicleSectionHeadings(article?.items ?? []), [article])
 
   if (!article) return <StudioPreviewWaiting />
 
@@ -36,7 +25,7 @@ export function StudioListiclePreview({
     <MapsArticleLayout
       article={article}
       header={<MapsPageHeader article={article} bookmark={null} />}
-      momentHeadings={momentHeadings}
+      sectionHeadings={sectionHeadings}
       relatedArticles={[]}
       country={country}
       city={city}

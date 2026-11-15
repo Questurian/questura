@@ -30,8 +30,8 @@ import type { ArticleCollectionSlug } from './serializeArticleBlocks'
  *   that left them ungated for ads). The owner may open the first place or
  *   two later; `listicleItems` is the one number to change.
  *   As with itineraries, each withheld place keeps only its rough position, and
- *   the moment each place sits under, so a member's full list can be headed
- *   by the server-rendered moment headings. Its stored JSON-LD is dropped
+ *   the section each place sits under, so a member's full list can be headed
+ *   by the server-rendered section headings. Its stored JSON-LD is dropped
  *   whole: it is an ItemList naming every place.
  *
  * This module only derives; it does not decide who gets the sample. Callers
@@ -122,11 +122,11 @@ export type SampleOutcome = {
   /** Itineraries and listicles: one rough pin per withheld stop that has coordinates. */
   pins?: SamplePin[]
   /**
-   * Listicles only: the moment of every place in the full list, in order, or
-   * null where a place has none. Kept so the page can render the moment
+   * Listicles only: the section of every place in the full list, in order, or
+   * null where a place has none. Kept so the page can render the section
    * headings a member's full list needs; it names no place.
    */
-  itemMoments?: Array<string | null>
+  itemSections?: Array<string | null>
 }
 
 function asArray(value: unknown): unknown[] | null {
@@ -261,10 +261,12 @@ function dropStoredStructuredData(doc: Record<string, unknown>): void {
   delete (seo as Record<string, unknown>).structuredData
 }
 
-function momentOf(row: unknown): string | null {
+function sectionOf(row: unknown): string | null {
   if (!row || typeof row !== 'object') return null
-  const moment = (row as { moment?: unknown }).moment
-  return typeof moment === 'string' && moment !== '' ? moment : null
+  const section = (row as { section?: unknown }).section
+  if (typeof section !== 'string') return null
+  const trimmed = section.trim()
+  return trimmed === '' ? null : trimmed
 }
 
 function sampleListicle(doc: Record<string, unknown>, limits: SampleLimits): SampleOutcome {
@@ -280,7 +282,7 @@ function sampleListicle(doc: Record<string, unknown>, limits: SampleLimits): Sam
     shown: kept.length,
     total: items.length,
     pins: roughPins(exactPinsForStops(withheld)),
-    itemMoments: items.map(momentOf),
+    itemSections: items.map(sectionOf),
   }
 }
 

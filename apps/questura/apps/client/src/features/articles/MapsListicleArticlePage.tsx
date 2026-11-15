@@ -3,13 +3,13 @@ import { ListicleMapRegion } from '@/features/articles/components/ListicleMapReg
 import { ListicleSeparator } from '@/features/articles/components/ListicleSeparator'
 import { ListicleAd } from '@/features/articles/components/ListicleAd'
 import { ListicleVenueEntry } from '@/features/articles/components/ListicleVenueEntry'
-import type { ListicleMomentHeadings } from '@/features/articles/components/ListicleMomentHeading'
+import type { ListicleSectionHeadings } from '@/features/articles/components/ListicleSectionHeading'
 import { InArticleAd } from '@/features/articles/components/InArticleAd'
 import { planListicleAds } from '@/features/articles/lib/listicleAdPlacement'
 import {
-  groupListicleItemsByMoment,
-  listicleMomentHeadingId,
-} from '@/features/articles/lib/listicleMomentGroups'
+  groupListicleItemsBySection,
+  listicleSectionHeadingId,
+} from '@/features/articles/lib/listicleSectionGroups'
 import { ADS_ENABLED } from '@/features/articles/lib/ads'
 import { NewsletterArticleBand } from '@/features/newsletter/components/NewsletterArticleBand'
 import { PaywallFade } from '@/features/articles/components/PaywallFade'
@@ -18,8 +18,8 @@ import type { MapsListicleArticle } from '@/features/articles/types/mapsListicle
 type MapsListicleArticlePageProps = {
   header: ReactNode;
   article: MapsListicleArticle
-  /** Moment headings rendered on the server, keyed by the run they open. */
-  momentHeadings?: ListicleMomentHeadings
+  /** Section headings, keyed by the run they open. */
+  sectionHeadings?: ListicleSectionHeadings
   /**
    * What stands after the last place on a locked list: the paywall notice, or
    * the loading and error states while a member's full list is fetched.
@@ -33,12 +33,12 @@ type MapsListicleArticlePageProps = {
   paywalled?: boolean
 }
 
-const NO_MOMENT_HEADINGS: ListicleMomentHeadings = {}
+const NO_SECTION_HEADINGS: ListicleSectionHeadings = {}
 
 export function MapsListicleArticlePage({
   article,
   header,
-  momentHeadings = NO_MOMENT_HEADINGS,
+  sectionHeadings = NO_SECTION_HEADINGS,
   lockedSlot = null,
   paywalled = false,
 }: MapsListicleArticlePageProps): JSX.Element {
@@ -49,11 +49,11 @@ export function MapsListicleArticlePage({
   // Nothing but the header and intro: the list, its separator and the space
   // they keep are dropped so the notice meets the intro's fade.
   const headerOnly = paywalled && items.length === 0
-  const runs = groupListicleItemsByMoment(items)
-  const isGrouped = runs.some((run) => momentHeadings[run.start] !== undefined)
+  const runs = groupListicleItemsBySection(items)
+  const isGrouped = runs.some((run) => sectionHeadings[run.start] !== undefined)
   // A section heading's double rules already close the intro, so the diamond
   // separator would stack a second border on top (owner, 2026-11-15).
-  const opensWithHeading = runs.length > 0 && momentHeadings[runs[0].start] !== undefined
+  const opensWithHeading = runs.length > 0 && sectionHeadings[runs[0].start] !== undefined
   const ads = planListicleAds(items.length, {
     enabled: ADS_ENABLED,
     hasIntro: Boolean(introHtml),
@@ -96,9 +96,9 @@ export function MapsListicleArticlePage({
         <div className="maps-listicle-entries px-3 pb-20 pt-4 380:px-4 380:pt-6 480:px-5 480:pt-8 480:pb-24 550:px-6 550:pt-10 sm:px-8 sm:pt-8 sm:pb-32">
           <ListicleMapRegion>
             {runs.map((run, runIndex) => {
-              const heading = momentHeadings[run.start]
+              const heading = sectionHeadings[run.start]
               const hasHeading = heading !== undefined
-              const headingId = listicleMomentHeadingId(run.start)
+              const headingId = listicleSectionHeadingId(run.start)
               const list = (
                 <ol start={run.start + 1} className="m-0 list-none p-0">
                   {run.items.map((row, offset) => {
@@ -118,7 +118,7 @@ export function MapsListicleArticlePage({
               )
               if (!isGrouped) return <Fragment key={run.start}>{list}</Fragment>
 
-              // A run without a moment after a grouped one gets a bare hairline,
+              // A run without a section after a grouped one gets a bare hairline,
               // so its places do not read as part of the heading above.
               return (
                 <section

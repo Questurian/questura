@@ -78,7 +78,7 @@ describe('gatePublicArticle', () => {
       access: 'member',
       items: Array.from({ length: 5 }, (_, i) => ({
         blockType: 'data-dining',
-        moment: i === 4 ? 'late-night' : null,
+        section: i === 4 ? 'After dark' : null,
         item: { title: `Place ${i}`, latitude: i, longitude: i },
       })),
     }
@@ -91,7 +91,7 @@ describe('gatePublicArticle', () => {
       unit: 'items',
       shown: 0,
       total: 5,
-      itemMoments: [null, null, null, null, 'late-night'],
+      itemSections: [null, null, null, null, 'After dark'],
     })
     // One rough pin per place, near its spot and never on it (freeSample.test.ts).
     expect(state?.mapPins).toHaveLength(5)

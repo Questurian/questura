@@ -6,7 +6,7 @@ import {
   ListicleMapSyncProvider,
   type ListicleMapPoint,
 } from '@/features/articles/components/ListicleMapSync'
-import type { ListicleMomentHeadings } from '@/features/articles/components/ListicleMomentHeading'
+import type { ListicleSectionHeadings } from '@/features/articles/components/ListicleSectionHeading'
 import { GatedBodySkeleton, GatedLoadError } from '@/features/articles/components/GatedStates'
 import { ListicleArticleLayout } from '@/features/articles/layouts/ListicleArticleLayout'
 import type { GateState } from '@/features/articles/lib/gate'
@@ -19,7 +19,7 @@ import type { MapsListicleArticle } from '@/features/articles/types/mapsListicle
 interface MapsArticleLayoutProps {
   header: ReactNode
   article: MapsListicleArticle
-  momentHeadings: ListicleMomentHeadings
+  sectionHeadings: ListicleSectionHeadings
   relatedArticles: RelatedMapsArticleTeaser[]
   footer?: ReactNode
   country: string
@@ -37,7 +37,7 @@ interface MapsArticleLayoutProps {
 export function MapsArticleLayout({
   article,
   header,
-  momentHeadings,
+  sectionHeadings,
   relatedArticles,
   footer,
   country,
@@ -111,7 +111,7 @@ export function MapsArticleLayout({
         <MapsListicleArticlePage
           article={effectiveArticle}
           header={header}
-          momentHeadings={momentHeadings}
+          sectionHeadings={sectionHeadings}
           paywalled={paywalled}
           lockedSlot={
             locked && gate ? (

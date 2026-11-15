@@ -363,16 +363,21 @@ describe('applySampleRule — single-type listicles', () => {
     expect(JSON.stringify(outcome)).not.toContain('No coordinates')
   })
 
-  it('reports the moment of every place, so a full list can be headed', () => {
+  it('reports the section of every place, so a full list can be headed', () => {
     const doc: Record<string, unknown> = {
-      items: [place(0, { moment: 'rooftop' }), place(1), place(2), place(3, { moment: 'late-night' })],
+      items: [
+        place(0, { section: 'The It List' }),
+        place(1, { section: '  ' }),
+        place(2),
+        place(3, { section: ' After dark ' }),
+      ],
     }
 
-    expect(applySampleRule('single-type-listicles', doc).itemMoments).toEqual([
-      'rooftop',
+    expect(applySampleRule('single-type-listicles', doc).itemSections).toEqual([
+      'The It List',
       null,
       null,
-      'late-night',
+      'After dark',
     ])
   })
 
