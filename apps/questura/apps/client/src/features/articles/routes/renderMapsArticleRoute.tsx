@@ -11,6 +11,7 @@ import { fetchArticle } from '@/features/articles/lib/fetchArticle'
 import { fetchListicleFooterLinks } from '@/features/articles/lib/fetchListicleFooterLinks'
 import { fetchRelatedMapsArticles } from '@/features/articles/lib/fetchRelatedMapsArticles'
 import { readGate } from '@/features/articles/lib/gate'
+import { listicleSectionAnchors } from '@/features/articles/lib/listicleSectionGroups'
 import { MapsArticleLayout } from '@/features/articles/layouts/MapsArticleLayout'
 import { isMapsListicleArticle } from '@/features/articles/types/mapsListicle'
 import type { ArticleScope } from '@/features/articles/lib/articleScope'
@@ -69,6 +70,7 @@ export async function renderMapsArticleRoute({
         article={article}
         header={<MapsPageHeader article={article} bookmark={{ targetType: 'maps', targetId: article.id }} />}
         sectionHeadings={renderListicleSectionHeadings(sectionSource)}
+        sectionAnchorIds={listicleSectionAnchors(sectionSource).map((anchor) => anchor.id)}
         relatedArticles={relatedArticles}
         footer={footerLinks ? <ListicleArticleFooter links={footerLinks} country={scope.country} city={scope.city} /> : null}
         country={scope.country}

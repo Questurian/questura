@@ -20,6 +20,8 @@ interface MapsArticleLayoutProps {
   header: ReactNode
   article: MapsListicleArticle
   sectionHeadings: ListicleSectionHeadings
+  /** Ids of every section heading in the whole list, for the intro's jump links. */
+  sectionAnchorIds?: readonly string[]
   relatedArticles: RelatedMapsArticleTeaser[]
   footer?: ReactNode
   country: string
@@ -38,6 +40,7 @@ export function MapsArticleLayout({
   article,
   header,
   sectionHeadings,
+  sectionAnchorIds,
   relatedArticles,
   footer,
   country,
@@ -112,6 +115,7 @@ export function MapsArticleLayout({
           article={effectiveArticle}
           header={header}
           sectionHeadings={sectionHeadings}
+          sectionAnchorIds={sectionAnchorIds}
           paywalled={paywalled}
           lockedSlot={
             locked && gate ? (

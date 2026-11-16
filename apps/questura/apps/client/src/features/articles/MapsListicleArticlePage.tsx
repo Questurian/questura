@@ -8,7 +8,7 @@ import { InArticleAd } from '@/features/articles/components/InArticleAd'
 import { planListicleAds } from '@/features/articles/lib/listicleAdPlacement'
 import {
   groupListicleItemsBySection,
-  listicleSectionHeadingId,
+  listicleSectionAnchors,
 } from '@/features/articles/lib/listicleSectionGroups'
 import { ADS_ENABLED } from '@/features/articles/lib/ads'
 import { NewsletterArticleBand } from '@/features/newsletter/components/NewsletterArticleBand'
@@ -20,6 +20,13 @@ type MapsListicleArticlePageProps = {
   article: MapsListicleArticle
   /** Section headings, keyed by the run they open. */
   sectionHeadings?: ListicleSectionHeadings
+  /**
+   * The id of every section heading in the whole list, in order. A locked list
+   * shows only some of its headings; the rest are left as empty targets at the
+   * notice, so a link to them in the intro lands on the notice instead of
+   * doing nothing.
+   */
+  sectionAnchorIds?: readonly string[]
   /**
    * What stands after the last place on a locked list: the paywall notice, or
    * the loading and error states while a member's full list is fetched.
@@ -34,11 +41,25 @@ type MapsListicleArticlePageProps = {
 }
 
 const NO_SECTION_HEADINGS: ListicleSectionHeadings = {}
+const NO_SECTION_ANCHORS: readonly string[] = []
+
+/** Targets for the sections a locked list holds back: zero-size, at the notice. */
+function HeldBackSectionTargets({ ids }: { ids: readonly string[] }): JSX.Element | null {
+  if (ids.length === 0) return null
+  return (
+    <div aria-hidden="true">
+      {ids.map((id) => (
+        <span key={id} id={id} className="listicle-section-target block" />
+      ))}
+    </div>
+  )
+}
 
 export function MapsListicleArticlePage({
   article,
   header,
   sectionHeadings = NO_SECTION_HEADINGS,
+  sectionAnchorIds = NO_SECTION_ANCHORS,
   lockedSlot = null,
   paywalled = false,
 }: MapsListicleArticlePageProps): JSX.Element {
@@ -50,6 +71,10 @@ export function MapsListicleArticlePage({
   // they keep are dropped so the notice meets the intro's fade.
   const headerOnly = paywalled && items.length === 0
   const runs = groupListicleItemsBySection(items)
+  const headingIds = new Map(listicleSectionAnchors(items).map((anchor) => [anchor.start, anchor.id]))
+  const heldBackIds = lockedSlot
+    ? sectionAnchorIds.filter((id) => ![...headingIds.values()].includes(id))
+    : NO_SECTION_ANCHORS
   const isGrouped = runs.some((run) => sectionHeadings[run.start] !== undefined)
   // A section heading's double rules already close the intro, so the diamond
   // separator would stack a second border on top (owner, 2026-11-15).
@@ -90,6 +115,7 @@ export function MapsListicleArticlePage({
           {/* Empty, but the phone map reads where the list ends from it, as on
               a locked itinerary. */}
           <ListicleMapRegion>{null}</ListicleMapRegion>
+          <HeldBackSectionTargets ids={heldBackIds} />
           {lockedSlot}
         </div>
       ) : (
@@ -98,7 +124,7 @@ export function MapsListicleArticlePage({
             {runs.map((run, runIndex) => {
               const heading = sectionHeadings[run.start]
               const hasHeading = heading !== undefined
-              const headingId = listicleSectionHeadingId(run.start)
+              const headingId = headingIds.get(run.start)
               const list = (
                 <ol start={run.start + 1} className="m-0 list-none p-0">
                   {run.items.map((row, offset) => {
@@ -109,6 +135,7 @@ export function MapsListicleArticlePage({
                           row={row}
                           index={i}
                           headingLevel={hasHeading ? 3 : 2}
+                          divider="diamond"
                         />
                         {ads.afterItem.has(i) ? <ListicleAd slotId={`listicle-${i}`} /> : null}
                       </Fragment>
@@ -138,7 +165,12 @@ export function MapsListicleArticlePage({
               )
             })}
           </ListicleMapRegion>
-          {lockedSlot ? <div className="pt-10 480:pt-12 sm:pt-14">{lockedSlot}</div> : null}
+          {lockedSlot ? (
+            <div className="pt-10 480:pt-12 sm:pt-14">
+              <HeldBackSectionTargets ids={heldBackIds} />
+              {lockedSlot}
+            </div>
+          ) : null}
         </div>
       )}
 
