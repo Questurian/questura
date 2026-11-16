@@ -344,8 +344,24 @@
   }
 }
 
+/* Map listicle sections: a link in the intro (`#sunset`) lands on the
+   section heading below the sticky navbar. A locked list keeps the targets of
+   the sections it holds back at its notice (MapsListicleArticlePage). */
+.listicle-section-heading,
+.listicle-section-target {
+  scroll-margin-top: 80px;
+}
+
+@media (min-width: 1024px) {
+  .listicle-section-heading,
+  .listicle-section-target {
+    scroll-margin-top: calc(var(--navbar-height, 6rem) + 16px);
+  }
+}
+
 @media (prefers-reduced-motion: no-preference) {
-  html:has(.article-contents) {
+  html:has(.article-contents),
+  html:has(.maps-listicle-intro a[href^="#"]) {
     scroll-behavior: smooth;
   }
 }

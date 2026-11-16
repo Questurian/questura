@@ -2,7 +2,7 @@ import type { JSX } from "react";
 import { Playfair_Display } from "next/font/google";
 import {
   groupListicleItemsBySection,
-  listicleSectionHeadingId,
+  listicleSectionAnchors,
 } from "@/features/articles/lib/listicleSectionGroups";
 
 /**
@@ -29,7 +29,7 @@ export function ListicleSectionHeading({
   id?: string;
 }): JSX.Element {
   return (
-    <h2 id={id} className="m-0 flex items-center gap-3 text-foreground">
+    <h2 id={id} className="listicle-section-heading m-0 flex items-center gap-3 text-foreground">
       <span aria-hidden className={RULE} />
       <span
         className={`${playfairBlack.className} min-w-0 text-center text-[clamp(18px,4.6vw,26px)] font-black uppercase leading-[1.05] tracking-[0.01em] [text-wrap:balance]`}
@@ -49,11 +49,10 @@ export function renderListicleSectionHeadings(
   items: readonly { section?: string | null }[],
 ): ListicleSectionHeadings {
   const headings: Record<number, JSX.Element> = {};
+  const ids = new Map(listicleSectionAnchors(items).map((anchor) => [anchor.start, anchor.id]));
   for (const run of groupListicleItemsBySection(items)) {
     if (!run.section) continue;
-    headings[run.start] = (
-      <ListicleSectionHeading id={listicleSectionHeadingId(run.start)} title={run.section} />
-    );
+    headings[run.start] = <ListicleSectionHeading id={ids.get(run.start)} title={run.section} />;
   }
   return headings;
 }

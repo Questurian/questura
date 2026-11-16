@@ -1,3 +1,4 @@
+import { ListicleDiamondDivider } from "@/features/articles/components/ListicleDiamondDivider";
 import { lazy, Suspense, useCallback, type JSX } from "react";
 const InstagramEmbedBlock = lazy(() => import("./InstagramEmbedBlock").then((module) => ({ default: module.InstagramEmbedBlock })));
 // Stop Notes (ADR 0048) are rare and sit below the fold, so they stay out of the
@@ -44,6 +45,7 @@ export function ListicleVenueEntry({
   momentLabel,
   autoAdvancePhotos = false,
   headingLevel,
+  divider = "double",
   addOns = [],
 }: {
   row: ListicleItemRow;
@@ -53,6 +55,11 @@ export function ListicleVenueEntry({
   /** Cycle this stop's photos while the map is showing it (itineraries). */
   autoAdvancePhotos?: boolean;
   headingLevel?: 2 | 3;
+  /**
+   * What sets this place off from the one before it: the double accent rule
+   * (itineraries), or the hairline diamond (map listicles).
+   */
+  divider?: "double" | "diamond";
   /** Itinerary activities done at this place, drawn at the foot of its entry. */
   addOns?: ListicleItemRow[];
 }): JSX.Element {
@@ -95,8 +102,15 @@ export function ListicleVenueEntry({
   return (
     <li
       ref={entryRef}
-      className="maps-listicle-entry scroll-mt-4 border-t-[3px] border-double border-accent/60 first:border-t-0 first:pt-0 pt-7 pb-7 last:pb-1 max-[379px]:pt-6 max-[379px]:pb-6 480:pt-9 480:pb-9 550:pt-11 550:pb-11 sm:pt-12 sm:pb-12"
+      className={
+        divider === "diamond"
+          ? "group/entry maps-listicle-entry scroll-mt-4 pb-7 last:pb-1 max-[379px]:pb-6 480:pb-9 550:pb-11 sm:pb-12"
+          : "maps-listicle-entry scroll-mt-4 border-t-[3px] border-double border-accent/60 first:border-t-0 first:pt-0 pt-7 pb-7 last:pb-1 max-[379px]:pt-6 max-[379px]:pb-6 480:pt-9 480:pb-9 550:pt-11 550:pb-11 sm:pt-12 sm:pb-12"
+      }
     >
+      {divider === "diamond" ? (
+        <ListicleDiamondDivider className="mb-7 group-first/entry:hidden max-[379px]:mb-6 480:mb-9 550:mb-11 sm:mb-12" />
+      ) : null}
       <div className="maps-listicle-entry-content min-w-0 space-y-3 380:space-y-3.5 480:space-y-4 sm:space-y-5">
         <ItineraryMomentBadge moment={moment} label={momentLabel} />
 

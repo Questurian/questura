@@ -38,7 +38,39 @@ export function groupListicleItemsBySection<T extends { section?: string | null 
   return runs
 }
 
-/** DOM id of the heading that opens the run starting at `start`. */
-export function listicleSectionHeadingId(start: number): string {
-  return `listicle-section-${start}`
+/** A jump target for one section heading: where its run starts, and its DOM id. */
+export type ListicleSectionAnchor = { start: number; id: string }
+
+/** "After dark" -> "after-dark"; accents dropped, anything else becomes a hyphen. */
+function slugifySection(section: string): string {
+  return section
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+}
+
+/**
+ * The DOM id of every section heading, in list order. Ids come from the
+ * section's name (`#sunset`, `#after-dark`), so a link written into the intro
+ * keeps pointing at its section when the editor reorders the list. A name
+ * that leaves nothing to slug falls back to its position, and a name used for
+ * two separate runs gets `-2`, `-3` on the later ones. Computing ids over a
+ * prefix of the list gives the same ids as over the whole list, so a locked
+ * list's sample and the member's full list agree.
+ */
+export function listicleSectionAnchors(
+  items: readonly { section?: string | null }[],
+): ListicleSectionAnchor[] {
+  const used = new Map<string, number>()
+  const anchors: ListicleSectionAnchor[] = []
+  for (const run of groupListicleItemsBySection(items)) {
+    if (!run.section) continue
+    const base = slugifySection(run.section) || `listicle-section-${run.start}`
+    const seen = used.get(base) ?? 0
+    used.set(base, seen + 1)
+    anchors.push({ start: run.start, id: seen === 0 ? base : `${base}-${seen + 1}` })
+  }
+  return anchors
 }
