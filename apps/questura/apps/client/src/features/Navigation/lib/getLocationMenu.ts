@@ -1,5 +1,5 @@
 import { config } from '@/lib/config'
-import type { LocationMenuResponse } from './fetchLocationMenu'
+import { visibleLocationMenu, type LocationMenuResponse } from './fetchLocationMenu'
 import { readLocationMenu } from './readLocationMenu'
 
 export {
@@ -21,5 +21,6 @@ export {
  * rules live in `readLocationMenu`.
  */
 export async function getLocationMenu(): Promise<LocationMenuResponse | null> {
-  return readLocationMenu(config.backendUrl)
+  const menu = await readLocationMenu(config.backendUrl)
+  return menu ? visibleLocationMenu(menu) : null
 }

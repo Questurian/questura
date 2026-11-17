@@ -1,6 +1,7 @@
 import { config } from '@/lib/config'
 import { DEFAULT_LOCALE } from '@/lib/i18n/locales'
 import { renderHeaders } from '@/lib/cache/public-cache'
+import { isPublicPageEnabled } from './peruLaunch'
 
 /**
  * The one build-time read of every public URL, shared by the
@@ -86,7 +87,9 @@ async function loadPublicUrlIndex(): Promise<PublicUrlIndex> {
   }
 
   return {
-    pages: [...data.hubs, ...data.indexes, ...data.content].map((entry) => entry.url),
+    pages: [...data.hubs, ...data.indexes, ...data.content]
+      .map((entry) => entry.url)
+      .filter(isPublicPageEnabled),
     authorSlugs: data.authors.map((entry) => entry.url.replace(/^\/authors\//, '')),
   }
 }

@@ -12,7 +12,7 @@ import {
 // navbar text.
 export const metadata: Metadata = {
   description:
-    'Curated city guides, travel maps and itineraries: where to eat, drink, stay and explore in Lima and across Latin America, with new cities on the way.',
+    'Curated travel guides, maps and itineraries for Peru, starting with where to eat, drink, stay and explore in Lima.',
 }
 
 /**

@@ -10,6 +10,7 @@ import {
 import { LocationComingSoon } from '@/features/search/components/LocationComingSoon';
 import { LocationContentList } from '@/features/search/components/LocationContentList';
 import { fetchLocationContent } from '@/features/search/lib/fetchSearch';
+import { LIMA_HREF } from '@/lib/routing/peruLaunch';
 import { cityParams } from '@/lib/routing/publicRouteParams';
 import { publicUrlIndex } from '@/lib/routing/publicStaticParams';
 
@@ -60,10 +61,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   // The homepage endpoint carries the location's display name, so a curated
   // city needs no second call to learn what it is called.
   const homepage = await fetchCityHomepage(country, city);
-  const data = curatedHomepage(homepage);
-  const content = data ? null : await fetchFallbackContent(country, city);
+  const hasHomepage = `/${country}/${city}` === LIMA_HREF ? homepage : curatedHomepage(homepage);
+  const content = hasHomepage ? null : await fetchFallbackContent(country, city);
 
-  if (!data && !content) return {};
+  if (!hasHomepage && !content) return {};
 
   const fallbackLabel = `${formatRouteLabel(city)}, ${formatRouteLabel(country)}`;
   const locationLabel =
@@ -83,10 +84,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function CityPage({ params }: Props) {
   const { country, city } = await params;
 
-  // A homepage with zero blocks rendered header, nothing, footer
-  // (/colombia/medellin, 2026-09-26). It takes the article-list path instead.
-  const data = curatedHomepage(await fetchCityHomepage(country, city));
+  const homepage = await fetchCityHomepage(country, city);
+  const data = curatedHomepage(homepage);
 
+  if (!data && homepage && `/${country}/${city}` === LIMA_HREF) {
+    return (
+      <section className="min-h-[70vh] bg-background">
+        <h1 className="sr-only">{homepage.location?.label ?? 'Lima, Peru'}</h1>
+      </section>
+    );
+  }
   if (!data) {
     const content = await fetchFallbackContent(country, city);
     if (!content) {

@@ -1,5 +1,6 @@
 import { config } from '@/lib/config'
 import { renderHeaders } from '@/lib/cache/public-cache'
+import { LIMA_HREF, PERU_LAUNCH_ENABLED } from '@/lib/routing/peruLaunch'
 
 export type LocationMenuCity = {
   locationKey: string
@@ -20,6 +21,17 @@ export type LocationMenuResponse = {
   countries: LocationMenuCountry[]
 }
 
+export function visibleLocationMenu(menu: LocationMenuResponse): LocationMenuResponse {
+  if (!PERU_LAUNCH_ENABLED) return menu
+  return {
+    countries: menu.countries.filter((country) => country.locationKey === 'peru').map((country) => ({
+      ...country,
+      href: '/',
+      cities: country.cities.filter((city) => city.href === LIMA_HREF),
+    })),
+  }
+}
+
 export async function fetchLocationMenu(): Promise<LocationMenuResponse> {
   const url = `${config.backendUrl}/api/public/locations/menu`
   const res = await fetch(url, {
@@ -30,5 +42,5 @@ export async function fetchLocationMenu(): Promise<LocationMenuResponse> {
     throw new Error(`Failed to fetch location menu: ${res.status}`)
   }
 
-  return res.json() as Promise<LocationMenuResponse>
+  return visibleLocationMenu(await res.json() as LocationMenuResponse)
 }

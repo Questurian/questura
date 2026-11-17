@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 
 import Link from "@/components/navigation/PublicLink";
 import { rateLimitedMessage } from "@/lib/api";
+import { LIMA_HREF, PERU_LAUNCH_ENABLED } from "@/lib/routing/peruLaunch";
 import { confirmNewsletter, type NewsletterConfirmStatus } from "../services/newsletter.service";
 
 type State =
@@ -20,11 +21,11 @@ const RESULT: Record<NewsletterConfirmStatus, { title: string; body: string }> =
   },
   expired: {
     title: "This link has expired.",
-    body: "Confirmation links work for 7 days. Sign up again and we'll send a fresh one.",
+    body: "Confirmation links work for 7 days.",
   },
   invalid: {
     title: "This link doesn't work.",
-    body: "It may have been replaced by a newer email, or copied incompletely. Sign up again and we'll send a fresh link.",
+    body: "It may have been replaced by a newer email, or copied incompletely.",
   },
 };
 
@@ -51,17 +52,21 @@ export function NewsletterConfirm(): JSX.Element {
 
   if (state.kind === "done") {
     const result = RESULT[state.status];
+    const confirmed = state.status === "confirmed";
+    const recovery = PERU_LAUNCH_ENABLED
+      ? " Sign up at the end of a guide and we'll send a fresh link."
+      : " Sign up again and we'll send a fresh link.";
     return (
       <div role="status">
         <h1 className="font-display text-[2.4rem] font-medium leading-[1.05] tracking-[-0.02em] text-foreground 768:text-[3.2rem]">
           {result.title}
         </h1>
         <p className="mt-4 max-w-[34rem] font-[family-name:var(--font-editorial-serif)] text-[1.1rem] leading-[1.5] text-foreground/80">
-          {result.body}
+          {result.body}{confirmed ? "" : recovery}
         </p>
         <p className="mt-8 font-[family-name:var(--font-dm-sans)] text-[0.95rem] font-semibold">
-          {state.status === "confirmed" ? (
-            <Link href="/" className="text-accent hover:underline">
+          {PERU_LAUNCH_ENABLED || confirmed ? (
+            <Link href={PERU_LAUNCH_ENABLED ? `${LIMA_HREF}/articles` : "/"} className="text-accent hover:underline">
               Read the latest guides →
             </Link>
           ) : (

@@ -26,16 +26,16 @@ export const SECTION_PAGES = {
     name: 'Eat',
     metaTitle: 'Where to Eat: Restaurant Guides & Food Maps — Questurian',
     description:
-      'Where to eat in Lima, Medellín, Mexico City and across Latin America: Questurian restaurant guides and food maps, from ceviche and chifa to tacos al pastor, coffee and fine dining.',
+      'Where to eat in Lima, Peru: Questurian restaurant guides and food maps, from ceviche and chifa to coffee and fine dining.',
     kicker: 'Restaurant guides & food maps',
-    dek: 'The ceviche counters, chifas, taquerías, coffee bars and dining rooms worth building a day around, mapped city by city across Latin America.',
+    dek: 'The ceviche counters, chifas, coffee bars and dining rooms worth building a day around in Lima.',
   },
   stay: {
     path: '/stay',
     name: 'Stay',
     metaTitle: 'Where to Stay: Hotel & Neighborhood Guides — Questurian',
     description:
-      'Where to stay in Lima and across Latin America: Questurian guides to hotels, apartments and the neighborhoods worth basing yourself in.',
+      'Where to stay in Lima, Peru: Questurian guides to hotels, apartments and the neighborhoods worth basing yourself in.',
     kicker: 'Hotels, rentals & neighborhoods',
     dek: 'Hotels, apartments and the neighborhoods worth basing yourself in, so the trip starts from the right front door.',
   },
@@ -44,7 +44,7 @@ export const SECTION_PAGES = {
     name: 'Itineraries',
     metaTitle: 'Travel Itineraries: Day-by-Day City Plans — Questurian',
     description:
-      'Day-by-day travel itineraries for Lima and across Latin America from Questurian: where to go, eat and drink, planned around how a city actually moves.',
+      'Day-by-day travel itineraries for Lima, Peru: where to go, eat and drink, planned around how the city actually moves.',
     kicker: 'Day-by-day city plans',
     dek: 'Plans that string a city together, from the first coffee to the last drink, planned around how it actually moves.',
   },

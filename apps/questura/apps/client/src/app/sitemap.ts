@@ -3,6 +3,7 @@ import { publicCacheTags, publicFetchOptions } from '@/lib/cache/public-cache'
 import { readPublicResponse } from '@/lib/cache/readPublicResponse'
 import { config } from '@/lib/config'
 import { DEFAULT_LOCALE } from '@/lib/i18n/locales'
+import { isPublicPageEnabled } from '@/lib/routing/peruLaunch'
 import { getPublicBaseUrl } from '@/lib/seo/publicBaseUrl'
 import { SITEMAP_PRIORITY } from '@/lib/seo/sitemapPriority.mjs'
 
@@ -50,8 +51,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   return [
     home,
-    ...data.hubs.filter((entry) => !entry.comingSoon).map((entry) => toEntry(entry, SITEMAP_PRIORITY.hub)),
-    ...data.indexes.map((entry) => toEntry(entry, SITEMAP_PRIORITY.index)),
-    ...data.content.map((entry) => toEntry(entry, SITEMAP_PRIORITY.content)),
+    ...data.hubs.filter((entry) => !entry.comingSoon && isPublicPageEnabled(entry.url))
+      .map((entry) => toEntry(entry, SITEMAP_PRIORITY.hub)),
+    ...data.indexes.filter((entry) => isPublicPageEnabled(entry.url))
+      .map((entry) => toEntry(entry, SITEMAP_PRIORITY.index)),
+    ...data.content.filter((entry) => isPublicPageEnabled(entry.url))
+      .map((entry) => toEntry(entry, SITEMAP_PRIORITY.content)),
   ]
 }
