@@ -10,6 +10,7 @@ import LoadingSpinner from '@/components/shared/ui/LoadingSpinner';
 import { PublicImage } from '@/components/media/PublicImage';
 import { useAuth } from '@/lib/user/hooks';
 import { getPublicBaseUrl } from '@/lib/seo/publicBaseUrl';
+import { LIMA_HREF, PERU_LAUNCH_ENABLED } from '@/lib/routing/peruLaunch';
 import { ArticleShareButton } from '@/features/articles/components/ArticleShareButton';
 import { BookmarkButton } from '../components/BookmarkButton';
 import { useBookmarkPage } from '../hooks/useBookmarkPage';
@@ -139,7 +140,7 @@ function EmptyState({ filtered }: { filtered: boolean }) {
           : 'Tap Bookmark on any article, map or itinerary and it will be waiting here.'}
       </p>
       <Link
-        href="/articles"
+        href={PERU_LAUNCH_ENABLED ? `${LIMA_HREF}/articles` : '/articles'}
         className="mt-6 inline-block border-b border-accent pb-0.5 font-display text-[11px] uppercase tracking-[0.18em] text-accent hover:opacity-70"
       >
         Browse articles
