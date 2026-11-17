@@ -1,6 +1,8 @@
 import Link from '@/components/navigation/PublicLink'
 import type { Metadata } from 'next'
 import { ArrowUpRight, Search } from 'lucide-react'
+import { notFound } from 'next/navigation'
+import { publicLocationHref } from '@/lib/routing/peruLaunch'
 
 import { InfiniteResultList } from '@/features/search/components/InfiniteResultList'
 import {
@@ -32,14 +34,6 @@ function searchHref(q: string, page: number): string {
   return `/search?${params.toString()}`
 }
 
-// Href of the location page: countries and cities have pages; neighborhoods
-// roll up to their parent city page until a neighborhood route exists.
-function resolveLocationPageHref(locationKey: string): string | null {
-  const [country, city] = locationKey.split('|')
-  if (!city) return `/${country}`
-  return `/${country}/${city}`
-}
-
 export default async function SearchPage({ searchParams }: Props) {
   const { q, location, page: pageParam } = await searchParams
   const query = q?.trim() ?? ''
@@ -51,6 +45,7 @@ export default async function SearchPage({ searchParams }: Props) {
   let unavailable = false
 
   if (location) {
+    if (!publicLocationHref(location)) notFound()
     content = await fetchLocationContent(location, page)
   } else if (query) {
     const answer = await searchArticles(query, page)
@@ -63,7 +58,7 @@ export default async function SearchPage({ searchParams }: Props) {
   }
 
   const locationPageHref = content
-    ? resolveLocationPageHref(content.location.locationKey)
+    ? publicLocationHref(content.location.locationKey)
     : null
 
   return (

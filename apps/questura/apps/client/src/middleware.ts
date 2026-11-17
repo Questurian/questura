@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { canonicalRedirect } from '@/lib/routing/canonicalHost'
+import { isPublicPageEnabled } from '@/lib/routing/peruLaunch'
 import { sameSiteLocation } from '@/lib/routing/sameSiteRedirect'
 import { originFromRequest } from '@/lib/seo/requestOrigin'
 import {
@@ -88,6 +89,10 @@ export function middleware(request: NextRequest) {
   if (stripped) {
     const redirect = redirectToPublicLocation(request, stripped, 301)
     if (redirect) return redirect
+  }
+
+  if (!isPublicPageEnabled(pathname)) {
+    return new NextResponse('Not Found', { status: 404 })
   }
 
   return NextResponse.next()
