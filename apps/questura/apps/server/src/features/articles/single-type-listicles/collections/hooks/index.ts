@@ -14,6 +14,7 @@ import {
   preventSingleTypeListicleUnpublish,
 } from './lifecycle'
 import { validateSingleTypeListicle } from './validateSingleTypeListicle'
+import { redirectOnListicleUrlChange } from '@/features/articles/redirects/lib/listicleUrlRedirect'
 
 const articleRevalidation = revalidateArticleCollection('single-type-listicles')
 const searchIndexSync = syncSearchIndexForCollection('single-type-listicles')
@@ -24,6 +25,7 @@ export const singleTypeListicleHooks: CollectionConfig['hooks'] = {
     preventSingleTypeListicleUnpublish,
     clearStaleSocialImagesOnFeaturedImageChange,
     applySingleTypeListicleMetadata,
+    redirectOnListicleUrlChange('maps'),
   ],
   beforeValidate: [
     syncLocationFields(),

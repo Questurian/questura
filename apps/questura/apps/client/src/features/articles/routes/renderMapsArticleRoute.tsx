@@ -1,6 +1,7 @@
 import { ListicleArticleFooter } from '@/features/articles/components/ListicleArticleFooter'
 import { MapsPageHeader } from '@/features/articles/components/MapsPageHeader'
-import { notFound } from 'next/navigation'
+import { notFound, permanentRedirect } from 'next/navigation'
+import { fetchRedirectByPath } from '@/features/articles/lib/fetchArticleByCanonicalPath'
 import { JsonLd } from '@/components/seo/JsonLd'
 import { renderListicleSectionHeadings } from '@/features/articles/components/ListicleSectionHeading'
 import { PaywallNotice } from '@/features/articles/components/PaywallNotice'
@@ -40,6 +41,11 @@ export async function renderMapsArticleRoute({
   ])
 
   if (!article || !isMapsListicleArticle(article)) {
+    // A guide whose address changed leaves a redirect behind (server hook
+    // redirectOnListicleUrlChange), so old links and search results land on
+    // the new address instead of a missing page.
+    const redirect = await fetchRedirectByPath(articleHrefForScope(scope, 'maps', slug))
+    if (redirect) permanentRedirect(redirect.newPath)
     notFound()
   }
 
