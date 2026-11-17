@@ -29,6 +29,7 @@ export function StudioItineraryPreview(): JSX.Element {
       city={city}
       gate={null}
       followDayIndex={dayIndex}
+      studioPreview
     />
   )
 }

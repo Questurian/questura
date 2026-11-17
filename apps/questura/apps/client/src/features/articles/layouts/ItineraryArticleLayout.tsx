@@ -40,6 +40,7 @@ interface ItineraryArticleLayoutProps {
   paywallNotice?: ReactNode
   /** The studio preview follows the day being edited. Readers never pass this. */
   followDayIndex?: number
+  studioPreview?: boolean
 }
 
 export function ItineraryArticleLayout({
@@ -53,6 +54,7 @@ export function ItineraryArticleLayout({
   gate,
   paywallNotice = null,
   followDayIndex,
+  studioPreview,
 }: ItineraryArticleLayoutProps): JSX.Element {
   // `gate` comes from the server once, so `gate.mapPins` keeps one identity
   // across renders: a fresh array would rebuild every marker and re-frame the
@@ -170,8 +172,14 @@ export function ItineraryArticleLayout({
   )
 
   return (
-    <ListicleMapSyncProvider points={points} days={mapDays} access={access} teaserKey={`itineraries:${article.id}`}
-      teaser={article.mapTeaser ?? null}>
+    <ListicleMapSyncProvider
+      points={points}
+      days={mapDays}
+      access={access}
+      teaserKey={`itineraries:${article.id}`}
+      teaser={article.mapTeaser ?? null}
+      studioPreview={studioPreview}
+    >
       <ListicleArticleLayout
         relatedArticles={relatedArticles}
         footer={footer}
