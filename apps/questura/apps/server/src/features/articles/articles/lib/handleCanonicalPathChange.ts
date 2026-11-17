@@ -1,5 +1,6 @@
 import type { PayloadRequest } from 'payload'
 import { buildCanonicalPath, resolveCategorySlug } from './canonicalPath'
+import { recordPathRedirect } from '../../redirects/lib/recordPathRedirect'
 
 type AnyDoc = Record<string, unknown>
 
@@ -56,80 +57,13 @@ export async function handleCanonicalPathChange({
     return null
   })()
 
-  // 1. Upsert redirect: oldPath -> newPath
-  const existing = await payload.find({
-    collection: 'article-redirects',
-    where: { oldPath: { equals: oldPath } },
-    limit: 1,
-    depth: 0,
-    overrideAccess: true,
+  await recordPathRedirect({
+    payload,
+    oldPath,
+    newPath,
+    articleId,
+    source: 'article-url-change',
   })
-
-  if (existing.totalDocs > 0) {
-    const row = existing.docs[0] as unknown as { id: string | number }
-    await payload.update({
-      collection: 'article-redirects',
-      id: row.id,
-      data: {
-        newPath,
-        article: articleId as number | null,
-        source: 'article-url-change',
-        statusCode: '301',
-      },
-      overrideAccess: true,
-    })
-  } else {
-    await payload.create({
-      collection: 'article-redirects',
-      data: {
-        oldPath,
-        newPath,
-        article: articleId as number | null,
-        source: 'article-url-change',
-        statusCode: '301',
-      },
-      overrideAccess: true,
-    })
-  }
-
-  // 2. Flatten chains — any redirect already pointing at oldPath should now
-  // point at the new canonical path.
-  const chained = await payload.find({
-    collection: 'article-redirects',
-    where: { newPath: { equals: oldPath } },
-    limit: 1000,
-    depth: 0,
-    overrideAccess: true,
-  })
-  for (const doc of chained.docs) {
-    const row = doc as unknown as { id: string | number; oldPath?: string }
-    if (row.oldPath === newPath) continue
-    await payload.update({
-      collection: 'article-redirects',
-      id: row.id,
-      data: { newPath },
-      overrideAccess: true,
-    })
-  }
-
-  // 3. If a redirect with oldPath === newPath exists (article moved back to a
-  // path that was previously a redirect source), delete it — newPath is now a
-  // live article URL.
-  const selfRef = await payload.find({
-    collection: 'article-redirects',
-    where: { oldPath: { equals: newPath } },
-    limit: 100,
-    depth: 0,
-    overrideAccess: true,
-  })
-  for (const doc of selfRef.docs) {
-    const row = doc as unknown as { id: string | number }
-    await payload.delete({
-      collection: 'article-redirects',
-      id: row.id,
-      overrideAccess: true,
-    })
-  }
 }
 
 function stringOrNull(value: unknown): string | null {

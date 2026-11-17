@@ -1,3 +1,4 @@
+import { redirectOnListicleUrlChange } from '@/features/articles/redirects/lib/listicleUrlRedirect'
 import { staffUser } from '@/features/auth/lib/staff-user'
 import { CollectionConfig } from 'payload'
 import {
@@ -191,6 +192,7 @@ export const ListicleItineraries: CollectionConfig = {
 
         return data
       },
+      redirectOnListicleUrlChange('itineraries'),
       clearStaleSocialImagesOnFeaturedImageChange,
     ],
     beforeValidate: [

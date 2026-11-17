@@ -1,7 +1,8 @@
 import { ArticleAuthorBanner } from '@/features/articles/components/ArticleAuthorBanner'
 import { ListicleArticleFooter } from '@/features/articles/components/ListicleArticleFooter'
 import { ItineraryPageHeader } from '@/features/articles/components/ItineraryPageHeader'
-import { notFound } from 'next/navigation'
+import { notFound, permanentRedirect } from 'next/navigation'
+import { fetchRedirectByPath } from '@/features/articles/lib/fetchArticleByCanonicalPath'
 import { JsonLd } from '@/components/seo/JsonLd'
 import { PaywallNotice } from '@/features/articles/components/PaywallNotice'
 import { buildArticlePageJsonLd } from '@/features/articles/lib/articlePageJsonLd'
@@ -38,6 +39,11 @@ export async function renderItineraryArticleRoute({
   ])
 
   if (!article || !isListicleItineraryArticle(article)) {
+    // A guide whose address changed leaves a redirect behind (server hook
+    // redirectOnListicleUrlChange), so old links and search results land on
+    // the new address instead of a missing page.
+    const redirect = await fetchRedirectByPath(articleHrefForScope(scope, 'itineraries', slug))
+    if (redirect) permanentRedirect(redirect.newPath)
     notFound()
   }
 
