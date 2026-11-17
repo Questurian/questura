@@ -165,6 +165,7 @@ export function ListicleMapSyncProvider({
   access = 'open',
   teaserKey = null,
   teaser = null,
+  studioPreview = false,
   children,
 }: {
   points: ListicleMapPoint[]
@@ -172,6 +173,7 @@ export function ListicleMapSyncProvider({
   access?: ListicleMapAccess
   teaserKey?: string | null
   teaser?: MapSnapshotEntry | null
+  studioPreview?: boolean
   children: ReactNode
 }): JSX.Element {
   const [{ activeId }, dispatchNavigation] = useReducer(
@@ -185,57 +187,71 @@ export function ListicleMapSyncProvider({
   const navigationCleanup = useRef<(() => void) | null>(null)
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          const id = idsByElement.current.get(entry.target)
-          if (!id) continue
-          if (entry.isIntersecting) inBand.current.add(id)
-          else inBand.current.delete(id)
-        }
+    const handleEntries: IntersectionObserverCallback = (entries, observer) => {
+      if (observer !== observerRef.current) return
+      for (const entry of entries) {
+        const id = idsByElement.current.get(entry.target)
+        if (!id) continue
+        if (entry.isIntersecting) inBand.current.add(id)
+        else inBand.current.delete(id)
+      }
 
-        let nextId: string | null = null
-        let nextTop = Infinity
-        for (const id of inBand.current) {
-          const el = elementsById.current.get(id)
-          if (!el) continue
+      let nextId: string | null = null
+      let nextTop = Infinity
+      for (const id of inBand.current) {
+        const el = elementsById.current.get(id)
+        if (!el) continue
+        const top = el.getBoundingClientRect().top
+        if (top < nextTop) {
+          nextTop = top
+          nextId = id
+        }
+      }
+      // Nothing in the band is ambiguous: the reader is either above the
+      // list entirely (map should show every pin) or passing through a gap
+      // between entries - an ad slot, a separator, a tall photo - where the
+      // map must hold its place. Distinguish them by asking whether every
+      // entry still sits below the band.
+      let aboveList = false
+      if (nextId === null) {
+        const bandBottom = window.innerHeight * READING_BAND_BOTTOM
+        let topmost = Infinity
+        for (const el of elementsById.current.values()) {
           const top = el.getBoundingClientRect().top
-          if (top < nextTop) {
-            nextTop = top
-            nextId = id
-          }
+          if (top < topmost) topmost = top
         }
-        // Nothing in the band is ambiguous: the reader is either above the
-        // list entirely (map should show every pin) or passing through a gap
-        // between entries - an ad slot, a separator, a tall photo - where the
-        // map must hold its place. Distinguish them by asking whether every
-        // entry still sits below the band.
-        let aboveList = false
-        if (nextId === null) {
-          const bandBottom = window.innerHeight * READING_BAND_BOTTOM
-          let topmost = Infinity
-          for (const el of elementsById.current.values()) {
-            const top = el.getBoundingClientRect().top
-            if (top < topmost) topmost = top
-          }
-          aboveList = topmost === Infinity || topmost > bandBottom
-        }
+        aboveList = topmost === Infinity || topmost > bandBottom
+      }
 
-        dispatchNavigation({ type: 'observe', id: nextId, aboveList })
-      },
-      // Band from 35% to 45% of viewport height: the entry crossing it is
-      // the one the reader is looking at.
-      { rootMargin: '-35% 0px -55% 0px', threshold: 0 },
-    )
+      dispatchNavigation({ type: 'observe', id: nextId, aboveList })
+    }
 
-    observerRef.current = observer
-    for (const el of elementsById.current.values()) observer.observe(el)
+    const connectObserver = () => {
+      observerRef.current?.disconnect()
+      inBand.current.clear()
+      // In the cross-origin Studio frame, implicit-root margins are ignored.
+      // The explicit document root uses the frame's own viewport.
+      const height = window.innerHeight
+      const observer = new IntersectionObserver(handleEntries, {
+        root: studioPreview ? document : null,
+        rootMargin: studioPreview
+          ? `-${height * READING_BAND_TOP}px 0px -${height * (1 - READING_BAND_BOTTOM)}px 0px`
+          : '-35% 0px -55% 0px',
+        threshold: 0,
+      })
+      observerRef.current = observer
+      for (const element of elementsById.current.values()) observer.observe(element)
+    }
+
+    connectObserver()
+    if (studioPreview) window.addEventListener('resize', connectObserver)
 
     return () => {
-      observer.disconnect()
+      if (studioPreview) window.removeEventListener('resize', connectObserver)
+      observerRef.current?.disconnect()
       observerRef.current = null
     }
-  }, [])
+  }, [studioPreview])
 
   const registerEntry = useCallback((id: string, el: HTMLElement | null) => {
     const previous = elementsById.current.get(id)
