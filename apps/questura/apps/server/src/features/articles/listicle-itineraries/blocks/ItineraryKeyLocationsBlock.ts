@@ -1,6 +1,7 @@
 import { Block } from 'payload'
 import { stopNotesField } from '@/shared/content/stopNotes'
 import { createLocationFilter } from '../../shared/utils/locationFilter'
+import { createVisitorDetailsFields } from './utils/visitorDetailsFields'
 import { createItineraryItemMediaFields } from './utils/itemMedia'
 import { itineraryMomentFields } from './utils/momentFields'
 
@@ -22,6 +23,7 @@ export const ItineraryKeyLocationsBlock: Block = {
       },
     },
     ...itineraryMomentFields,
+    ...createVisitorDetailsFields(),
     ...createItineraryItemMediaFields('key-locations'),
     {
       name: 'blurb',

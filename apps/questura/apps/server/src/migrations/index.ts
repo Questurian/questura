@@ -78,8 +78,10 @@ import * as migration_20261107_204912_add_visitor_complimentary_access from './2
 import * as migration_20261107_224606_itinerary_drop_cap from './20261107_224606_itinerary_drop_cap';
 import * as migration_20261108_000317_itinerary_drop_cap_style from './20261108_000317_itinerary_drop_cap_style';
 import * as migration_20261108_023115_map_teaser from './20261108_023115_map_teaser';
+import * as migration_20261109_233859_itinerary_visitor_details from './20261109_233859_itinerary_visitor_details';
 import * as migration_20261111_154239_itinerary_stop_notes from './20261111_154239_itinerary_stop_notes';
 import * as migration_20261112_191440_add_more_itinerary_moments from './20261112_191440_add_more_itinerary_moments';
+import * as migration_20261113_052424_itinerary_hide_website from './20261113_052424_itinerary_hide_website';
 import * as migration_20261115_213048_add_rooftop_listicle_moments from './20261115_213048_add_rooftop_listicle_moments';
 import * as migration_20261115_233849_add_listicle_item_section from './20261115_233849_add_listicle_item_section';
 
@@ -485,6 +487,11 @@ export const migrations = [
     name: '20261108_023115_map_teaser',
   },
   {
+    up: migration_20261109_233859_itinerary_visitor_details.up,
+    down: migration_20261109_233859_itinerary_visitor_details.down,
+    name: '20261109_233859_itinerary_visitor_details',
+  },
+  {
     up: migration_20261111_154239_itinerary_stop_notes.up,
     down: migration_20261111_154239_itinerary_stop_notes.down,
     name: '20261111_154239_itinerary_stop_notes',
@@ -493,6 +500,11 @@ export const migrations = [
     up: migration_20261112_191440_add_more_itinerary_moments.up,
     down: migration_20261112_191440_add_more_itinerary_moments.down,
     name: '20261112_191440_add_more_itinerary_moments',
+  },
+  {
+    up: migration_20261113_052424_itinerary_hide_website.up,
+    down: migration_20261113_052424_itinerary_hide_website.down,
+    name: '20261113_052424_itinerary_hide_website',
   },
   {
     up: migration_20261115_213048_add_rooftop_listicle_moments.up,

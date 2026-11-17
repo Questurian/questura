@@ -4,6 +4,7 @@ import { angleField } from './utils/angleField'
 import { selectionReasonField } from './utils/selectionReasonField'
 import { createLocationFilter } from '../../shared/utils/locationFilter'
 import { createTourPicksField } from '../../shared/utils/tourPicks'
+import { createVisitorDetailsFields } from './utils/visitorDetailsFields'
 import { createItineraryItemMediaFields } from './utils/itemMedia'
 import { itineraryMomentFields } from './utils/momentFields'
 
@@ -36,6 +37,7 @@ export const ItineraryAttractionsBlock: Block = {
       },
     },
     createTourPicksField(),
+    ...createVisitorDetailsFields(),
     ...createItineraryItemMediaFields('attractions'),
     angleField,
     {

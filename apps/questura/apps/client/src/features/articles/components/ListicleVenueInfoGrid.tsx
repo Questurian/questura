@@ -30,11 +30,17 @@ export type GridCell = {
 
 export function ListicleVenueInfoGrid({
   item,
+  hideHours = false,
+  hidePhone = false,
+  hideWebsite = false,
   extraCells = [],
   variant = 'grid',
   actionVariant = 'card',
 }: {
   item: ListicleVenue
+  hideHours?: boolean
+  hidePhone?: boolean
+  hideWebsite?: boolean
   /** Additional cells; list mode places them after address, grid mode appends them. */
   extraCells?: GridCell[]
   /** Stacked rows mirror the compact contact list used by accommodation cards. */
@@ -81,7 +87,7 @@ export function ListicleVenueInfoGrid({
     })
   }
 
-  if (phoneDisplay) {
+  if (!hidePhone && phoneDisplay) {
     const tel = phoneDisplay.replace(/[^\d+]/g, '')
     cells.push({
       key: 'phone',
@@ -94,7 +100,7 @@ export function ListicleVenueInfoGrid({
     })
   }
 
-  if (hoursRows && hoursRows.length > 0) {
+  if (!hideHours && hoursRows && hoursRows.length > 0) {
     cells.push({
       key: 'hours',
       icon: <Clock className={accentClass} strokeWidth={1.75} aria-hidden />,
@@ -104,7 +110,7 @@ export function ListicleVenueInfoGrid({
     })
   }
 
-  if (websiteRaw) {
+  if (!hideWebsite && websiteRaw) {
     cells.push({
       key: 'website',
       icon: <Globe className={accentClass} strokeWidth={1.75} aria-hidden />,

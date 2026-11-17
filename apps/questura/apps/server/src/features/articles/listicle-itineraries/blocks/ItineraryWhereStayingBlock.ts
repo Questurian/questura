@@ -2,6 +2,7 @@ import { Block } from 'payload'
 import { angleField } from './utils/angleField'
 import { selectionReasonField } from './utils/selectionReasonField'
 import { createLocationFilter } from '../../shared/utils/locationFilter'
+import { createVisitorDetailsFields } from './utils/visitorDetailsFields'
 import { createItineraryItemMediaFields } from './utils/itemMedia'
 
 export const ItineraryWhereStayingBlock: Block = {
@@ -21,6 +22,7 @@ export const ItineraryWhereStayingBlock: Block = {
         description: 'Select the accommodation for this night or segment (separate from timed stops)',
       },
     },
+    ...createVisitorDetailsFields(),
     ...createItineraryItemMediaFields('accommodations'),
     angleField,
     {

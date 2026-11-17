@@ -53,7 +53,7 @@ function list(value: unknown): string[] {
     .map((entry) => displayText(entry))
 }
 
-function buildNightlifeRows(item: ListicleVenue): ItineraryDetailRow[] {
+function buildNightlifeRows(item: ListicleVenue, hideHours: boolean): ItineraryDetailRow[] {
   const raw = item as unknown as Record<string, unknown>
   const profile = group(raw, 'nightlifeDetails')
   const core = group(profile, 'core')
@@ -181,7 +181,7 @@ function buildNightlifeRows(item: ListicleVenue): ItineraryDetailRow[] {
     scene.crowdProfile,
   )
 
-  const operationHours = formatListicleOperationHours(details.operationHours)
+  const operationHours = hideHours ? null : formatListicleOperationHours(details.operationHours)
   push(
     'hours',
     <Clock className={accentClass} strokeWidth={1.75} aria-hidden />,
@@ -230,8 +230,8 @@ function buildFinePrint(item: ListicleVenue): string[] {
   return parts
 }
 
-export function buildNightlifeDetailsCell(item: ListicleVenue): GridCell | null {
-  const rows = buildNightlifeRows(item)
+export function buildNightlifeDetailsCell(item: ListicleVenue, hideHours = false): GridCell | null {
+  const rows = buildNightlifeRows(item, hideHours)
   const finePrint = buildFinePrint(item)
   if (rows.length === 0 && finePrint.length === 0) return null
 
