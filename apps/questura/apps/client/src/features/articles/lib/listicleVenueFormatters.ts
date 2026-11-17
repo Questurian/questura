@@ -242,6 +242,7 @@ export function formatListicleOperationHours(raw: unknown): string | null {
   if (!rows || rows.length === 0) {
     return null
   }
+  if (areListicleHoursAlwaysOpen(rows)) return 'Always Open'
   if (rows.length === 1) {
     return `${rows[0].day}: ${rows[0].hours}`
   }

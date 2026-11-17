@@ -58,6 +58,9 @@ export type ListicleTourPick = {
 }
 
 export type ListicleItemRow = {
+  hideHours?: boolean
+  hidePhone?: boolean
+  hideWebsite?: boolean
   id: string
   blurb?: string
   item: ListicleVenue

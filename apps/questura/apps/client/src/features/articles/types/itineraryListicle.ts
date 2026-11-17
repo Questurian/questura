@@ -79,6 +79,9 @@ export type ItineraryVenueBlock = {
   blockName?: string | null;
   blockType: ItineraryVenueBlockType;
   item: ListicleVenue;
+  hideHours?: boolean | null;
+  hidePhone?: boolean | null;
+  hideWebsite?: boolean | null;
   moment?: ItineraryMoment | null;
   momentLabel?: string | null;
   /** Something you do at this place; heads the card instead of the place name. */

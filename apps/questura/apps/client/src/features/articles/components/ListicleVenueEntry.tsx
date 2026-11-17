@@ -66,7 +66,8 @@ export function ListicleVenueEntry({
   const { registerEntry, activeId } = useListicleMapSync();
   const images = listicleItemImagesFromRow(row);
   const price = priceLevelLabel(row.item.priceLevel);
-  const idealFor = stringArray(row.item.idealFor);
+  const isItineraryDining = row.blockType === "itinerary-dining";
+  const idealFor = isItineraryDining ? [] : stringArray(row.item.idealFor);
   // A note with a kind ("What to order", "Getting in") is one line inside the
   // stop's text; the rest are boxes under the stop (ADR 0048).
   const inlineNotes = row.stopNotes?.filter((note) => note.kind);
@@ -75,7 +76,7 @@ export function ListicleVenueEntry({
   const instagramCode = listicleInstagramEmbedCode(row);
   const nightlifeDetailsCell =
     row.blockType === "itinerary-nightlife" || row.blockType === "data-nightlife"
-      ? buildNightlifeDetailsCell(row.item)
+      ? buildNightlifeDetailsCell(row.item, row.hideHours)
       : null;
   const diningPriceLevel =
     (row.blockType === "itinerary-dining" || row.blockType === "data-dining") &&
@@ -160,6 +161,9 @@ export function ListicleVenueEntry({
 
         <ListicleVenueInfoGrid
           item={row.item}
+          hideHours={row.hideHours}
+          hidePhone={row.hidePhone}
+          hideWebsite={row.hideWebsite}
           extraCells={nightlifeDetailsCell ? [nightlifeDetailsCell] : []}
           variant="list"
           actionVariant="editorial"

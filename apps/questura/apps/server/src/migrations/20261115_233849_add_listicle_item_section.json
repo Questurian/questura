@@ -7087,6 +7087,27 @@
           "type": "varchar",
           "primaryKey": false,
           "notNull": false
+        },
+        "hide_hours": {
+          "name": "hide_hours",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "hide_phone": {
+          "name": "hide_phone",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "hide_website": {
+          "name": "hide_website",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
         }
       },
       "indexes": {
@@ -7303,6 +7324,27 @@
           "type": "varchar",
           "primaryKey": false,
           "notNull": false
+        },
+        "hide_hours": {
+          "name": "hide_hours",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "hide_phone": {
+          "name": "hide_phone",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "hide_website": {
+          "name": "hide_website",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
         }
       },
       "indexes": {
@@ -7519,6 +7561,27 @@
           "type": "varchar",
           "primaryKey": false,
           "notNull": false
+        },
+        "hide_hours": {
+          "name": "hide_hours",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "hide_phone": {
+          "name": "hide_phone",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "hide_website": {
+          "name": "hide_website",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
         }
       },
       "indexes": {
@@ -7741,6 +7804,27 @@
           "type": "varchar",
           "primaryKey": false,
           "notNull": false
+        },
+        "hide_hours": {
+          "name": "hide_hours",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "hide_phone": {
+          "name": "hide_phone",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "hide_website": {
+          "name": "hide_website",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
         }
       },
       "indexes": {
@@ -7957,6 +8041,27 @@
           "type": "varchar",
           "primaryKey": false,
           "notNull": false
+        },
+        "hide_hours": {
+          "name": "hide_hours",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "hide_phone": {
+          "name": "hide_phone",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "hide_website": {
+          "name": "hide_website",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
         }
       },
       "indexes": {
@@ -8160,6 +8265,27 @@
           "type": "varchar",
           "primaryKey": false,
           "notNull": false
+        },
+        "hide_hours": {
+          "name": "hide_hours",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "hide_phone": {
+          "name": "hide_phone",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "hide_website": {
+          "name": "hide_website",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
         }
       },
       "indexes": {

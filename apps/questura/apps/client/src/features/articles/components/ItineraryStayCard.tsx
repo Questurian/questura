@@ -99,6 +99,9 @@ export function ItineraryStayCard({ row }: { row: ListicleItemRow }): JSX.Elemen
 
       <ListicleVenueInfoGrid
         item={row.item}
+        hideHours={row.hideHours}
+        hidePhone={row.hidePhone}
+        hideWebsite={row.hideWebsite}
         extraCells={amenitiesCell ? [amenitiesCell] : []}
         variant="list"
       />
