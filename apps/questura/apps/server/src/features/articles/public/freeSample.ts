@@ -293,10 +293,20 @@ function sampleArticle(doc: Record<string, unknown>, limits: SampleLimits): Samp
   const total = blocks.length
   const kept: unknown[] = []
   let counted = 0
+  let withheldCard = false
 
   for (const block of blocks) {
     if (counted >= limits.articleTextBlocks) break
     const type = blockTypeOf(block)
+    if (type === 'airbnb-card') {
+      const { id, stayContent } = block as Record<string, unknown>
+      if (typeof stayContent === 'string' && stayContent.trim()) {
+        kept.push({ id, blockType: 'text', content: stayContent })
+        counted++
+        withheldCard = true
+      }
+      continue
+    }
     if (!SAMPLEABLE_ARTICLE_BLOCKS.has(type)) continue
     kept.push(block)
     if (COUNTED_ARTICLE_BLOCKS.has(type)) counted++
@@ -305,7 +315,7 @@ function sampleArticle(doc: Record<string, unknown>, limits: SampleLimits): Samp
   doc.contentBlocks = kept
 
   return {
-    applied: kept.length < total,
+    applied: withheldCard || kept.length < total,
     unit: 'blocks',
     shown: kept.length,
     total,

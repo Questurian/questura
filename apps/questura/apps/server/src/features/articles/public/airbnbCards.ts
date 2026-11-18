@@ -123,11 +123,14 @@ export async function sanitizeAirbnbCards(
         ? toPublicAirbnbCard(airbnb as Record<string, unknown>)
         : null
     block.airbnb = card
+    const photoOrder = block.photoOrder
+    delete block.photoOrder
     if (!card) continue
-    const mediaSetIds = galleryMediaSetIds(airbnb as Record<string, unknown>).slice(
-      0,
-      AIRBNB_CARD_PHOTO_LIMIT,
-    )
+    const galleryIds = galleryMediaSetIds(airbnb as Record<string, unknown>)
+    const requested = Array.isArray(photoOrder)
+      ? photoOrder.filter((id): id is number => typeof id === 'number' && galleryIds.includes(id))
+      : []
+    const mediaSetIds = [...new Set([...requested, ...galleryIds])].slice(0, AIRBNB_CARD_PHOTO_LIMIT)
     if (mediaSetIds.length > 0) pending.push({ card, mediaSetIds })
   }
 

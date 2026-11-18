@@ -64,7 +64,7 @@ export function AirbnbCardBlockRenderer({ block }: { block: AirbnbCardBlock }): 
   const photos = boxPhotos(airbnb)
   // The box keeps the level of the heading it took in, so the outline holds.
   const Heading = lead?.level === 2 ? 'h2' : 'h3'
-  const headingId = `stay-${block.id}`
+  const headingId = (block.stayContent ? lead?.headingId : undefined) ?? `stay-${block.id}`
   // A heading that names the stay titles the box; one that only gives an
   // angle ("Best for a long stay") sits under the Airbnb's own name.
   const headingHtml = lead && position ? withoutListNumber(lead.headingHtml) : lead?.headingHtml

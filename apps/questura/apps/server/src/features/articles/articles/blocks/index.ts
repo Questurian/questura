@@ -272,8 +272,8 @@ export const FAQBlock: Block = {
 
 /**
  * Airbnb Card - one saved Airbnb shown inside a standard article. The card
- * holds only the reference: photo, title, price, rating and link are read
- * from the Airbnb at render time, so editing the Airbnb updates every article.
+ * reads listing details from the Airbnb and keeps the article's write-up and
+ * photo order on the card.
  */
 export const AirbnbCardBlock: Block = {
   slug: 'airbnb-card',
@@ -290,6 +290,18 @@ export const AirbnbCardBlock: Block = {
       required: true,
       admin: {
         description: 'The Airbnb to show',
+      },
+    },
+    {
+      name: 'stayContent',
+      type: 'richText',
+      editor: lexicalEditor(),
+    },
+    {
+      name: 'photoOrder',
+      type: 'json',
+      admin: {
+        description: 'Ordered gallery media-set IDs for this article.',
       },
     },
   ],

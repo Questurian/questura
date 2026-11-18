@@ -52,6 +52,11 @@ const searchIndexSync = syncSearchIndexForCollection('articles')
 
 export const Articles: CollectionConfig = {
   slug: 'articles',
+  endpoints: [{
+    path: '/airbnb-card-fields',
+    method: 'get',
+    handler: () => Response.json({ stayContent: true, photoOrder: true }),
+  }],
   labels: {
     singular: 'Standard Article',
     plural: 'Standard Articles',

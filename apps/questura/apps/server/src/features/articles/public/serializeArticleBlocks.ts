@@ -141,9 +141,15 @@ async function serializeStandardArticleBlocks(
   await sanitizeHotelCards(blocks, payload)
   await sanitizeStayLists(blocks, payload)
   await Promise.all(
-    blocks.map(async (block) => {
+    blocks.map(async (block, index) => {
       if (block.blockType === 'text' && block.content) {
         block.content = await toLexicalHTML(block.content)
+      }
+      if (block.blockType === 'airbnb-card' && block.stayContent) {
+        const writeUp = await toLexicalHTML(block.stayContent)
+        if (block.airbnb) block.stayContent = writeUp
+        else if (writeUp.trim()) blocks[index] = { id: block.id, blockType: 'text', content: writeUp }
+        else delete block.stayContent
       }
     }),
   )

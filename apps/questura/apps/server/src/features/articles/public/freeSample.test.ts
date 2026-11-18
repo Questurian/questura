@@ -19,6 +19,18 @@ function expectRoughly(pin: SamplePin | undefined, lat: number, lng: number) {
 const text = (i: number) => ({ blockType: 'text', content: `para ${i}` })
 
 describe('applySampleRule — standard articles', () => {
+  it('counts Airbnb write-ups as prose without exposing the listing or gallery', () => {
+    const doc = {
+      contentBlocks: [
+        text(0),
+        { id: 'stay', blockType: 'airbnb-card', stayContent: '<p>About the stay.</p>', airbnb: { images: ['private'] } },
+        text(2),
+      ],
+    }
+    expect(applySampleRule('articles', doc)).toMatchObject({ applied: true, shown: 2 })
+    expect(doc.contentBlocks).toEqual([text(0), { id: 'stay', blockType: 'text', content: '<p>About the stay.</p>' }])
+  })
+
   it('keeps the opening prose and nothing else', () => {
     const doc: Record<string, unknown> = {
       contentBlocks: [text(0), text(1), text(2), text(3)],
