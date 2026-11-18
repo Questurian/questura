@@ -23,6 +23,10 @@ import {
   parseEditorialFeatureFields,
 } from '../../editorial-feature/service'
 import { hasPageHeroFieldUpdates, parsePageHeroFields } from '../../page-hero/service'
+import {
+  hasDestinationHeaderFieldUpdates,
+  parseDestinationHeaderFields,
+} from '../../destination-header/service'
 import { hasPhotoPileFieldUpdates, parsePhotoPileFields } from '../../photo-pile/service'
 import {
   homepageBlockSupportsSectionHeading,
@@ -45,6 +49,7 @@ type AdSlotSizeParse = ReturnType<typeof parseAdSlotSizeBodyField>
 type CreatorKickerParse = ReturnType<typeof parseCreatorKickerBodyField>
 type EditorialFeatureFieldsParse = ReturnType<typeof parseEditorialFeatureFields>
 type PageHeroFieldsParse = ReturnType<typeof parsePageHeroFields>
+type DestinationHeaderFieldsParse = ReturnType<typeof parseDestinationHeaderFields>
 type PhotoPileFieldsParse = ReturnType<typeof parsePhotoPileFields>
 type AuthorFeatureCardsParse = ReturnType<typeof parseAuthorFeatureCardsBodyField>
 type AuthorFeatureDescriptionModeParse = ReturnType<
@@ -74,6 +79,12 @@ export type ParsedBlockUpdateFields = {
   }
   pageHero: {
     [K in keyof PageHeroFieldsParse]: Extract<PageHeroFieldsParse[K], { ok: true }>
+  }
+  destinationHeader: {
+    [K in keyof DestinationHeaderFieldsParse]: Extract<
+      DestinationHeaderFieldsParse[K],
+      { ok: true }
+    >
   }
   photoPile: {
     [K in keyof PhotoPileFieldsParse]: Extract<PhotoPileFieldsParse[K], { ok: true }>
@@ -172,6 +183,11 @@ export function parseBlockUpdateBody(body: unknown): ParseBlockUpdateResult {
     if (!field.ok) return { ok: false, status: 400, message: field.message }
   }
 
+  const destinationHeader = parseDestinationHeaderFields(bodyRecord)
+  for (const field of Object.values(destinationHeader)) {
+    if (!field.ok) return { ok: false, status: 400, message: field.message }
+  }
+
   const photoPile = parsePhotoPileFields(bodyRecord)
   for (const field of Object.values(photoPile)) {
     if (!field.ok) return { ok: false, status: 400, message: field.message }
@@ -203,6 +219,7 @@ export function parseBlockUpdateBody(body: unknown): ParseBlockUpdateResult {
     creatorKicker,
     editorialFeature: editorialFeature as ParsedBlockUpdateFields['editorialFeature'],
     pageHero: pageHero as ParsedBlockUpdateFields['pageHero'],
+    destinationHeader: destinationHeader as ParsedBlockUpdateFields['destinationHeader'],
     photoPile: photoPile as ParsedBlockUpdateFields['photoPile'],
     authorFeature: authorFeature as ParsedBlockUpdateFields['authorFeature'],
   }
@@ -252,6 +269,7 @@ export function hasBlockFieldUpdates(fields: ParsedBlockUpdateFields): boolean {
     !fields.creatorKicker.omit ||
     hasEditorialFeatureFieldUpdates(fields.editorialFeature) ||
     hasPageHeroFieldUpdates(fields.pageHero) ||
+    hasDestinationHeaderFieldUpdates(fields.destinationHeader) ||
     hasPhotoPileFieldUpdates(fields.photoPile) ||
     hasAuthorFeatureFieldUpdates(fields.authorFeature)
   )
@@ -329,6 +347,13 @@ export function validateBlockUpdateFields(
 
   if (hasPageHeroFieldUpdates(fields.pageHero) && block.blockType !== 'page-hero') {
     return { message: 'Page hero fields are only supported for page-hero blocks.' }
+  }
+
+  if (
+    hasDestinationHeaderFieldUpdates(fields.destinationHeader) &&
+    block.blockType !== 'destination-header'
+  ) {
+    return { message: 'Destination header fields are only supported for destination-header blocks.' }
   }
 
   if (hasPhotoPileFieldUpdates(fields.photoPile) && block.blockType !== 'photo-pile') {

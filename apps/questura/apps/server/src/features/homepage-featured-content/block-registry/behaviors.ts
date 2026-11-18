@@ -38,6 +38,10 @@ import {
 } from '../location-grid/service'
 import type { LocationGridScope } from '../location-grid/types'
 import { getPageHeroPublishBlockers, resolvePageHeroFields } from '../page-hero/service'
+import {
+  getDestinationHeaderPublishBlockers,
+  resolveDestinationHeaderFields,
+} from '../destination-header/service'
 import { getPhotoPilePublishBlockers, resolvePhotoPileFields } from '../photo-pile/service'
 import {
   buildQuesturianMapsGlobalData,
@@ -260,6 +264,16 @@ const pageHeroBehavior: CuratedBlockBehavior = {
   getPublishBlockers: getPageHeroPublishBlockers,
 }
 
+const destinationHeaderBehavior: CuratedBlockBehavior = {
+  isArticleBlock: false,
+  clearsItems: true,
+  resolveSelection() {
+    return getNewsletterSignupPlaceholderSelection()
+  },
+  resolveFields: (block, ctx) => resolveDestinationHeaderFields(ctx.payload, block),
+  getPublishBlockers: getDestinationHeaderPublishBlockers,
+}
+
 const photoPileBehavior: CuratedBlockBehavior = {
   isArticleBlock: false,
   clearsItems: true,
@@ -379,6 +393,7 @@ export const CURATED_BLOCK_BEHAVIORS: Record<string, CuratedBlockBehavior> = {
   }),
   'newsletter-signup': newsletterSignupBehavior,
   'page-hero': pageHeroBehavior,
+  'destination-header': destinationHeaderBehavior,
   'photo-pile': photoPileBehavior,
   'ad-slot': adSlotBehavior,
   'article-list': {

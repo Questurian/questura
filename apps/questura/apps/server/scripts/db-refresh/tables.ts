@@ -83,6 +83,7 @@ export const CONTENT_TABLES = [
   'location_homepages_blocks_author_feature',
   'location_homepages_blocks_author_feature_author_cards',
   'location_homepages_blocks_author_feature_selected_expertise',
+  'location_homepages_blocks_destination_header',
   'location_homepages_blocks_editorial_feature',
   'location_homepages_blocks_featured_article',
   'location_homepages_blocks_featured_article_carousel',
