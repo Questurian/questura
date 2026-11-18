@@ -31,6 +31,19 @@ const SITE_SECTIONS = new Set([
   'subscription',
 ])
 
+// Cities outside Peru whose map guides are open before the rest of the city
+// is (owner, 2026-11-18: Medellín rooftops). Only /<country>/<city>/maps/<slug>
+// opens; the city page and its other sections stay offline.
+const OPEN_MAP_GUIDE_CITIES = new Set(['colombia/medellin'])
+
+function isOpenMapGuide(pathname: string): boolean {
+  const [, country, city, section, slug, rest] = pathname.split('/')
+  return OPEN_MAP_GUIDE_CITIES.has(`${country}/${city}`)
+    && section === 'maps'
+    && Boolean(slug)
+    && rest === undefined
+}
+
 // The editorial landing pages and Lima content share the site with routes
 // used by existing readers. Keep legacy article URLs for canonical redirects.
 export function isPublicPageEnabled(pathname: string): boolean {
@@ -39,6 +52,7 @@ export function isPublicPageEnabled(pathname: string): boolean {
   return SITE_SECTIONS.has(section)
     || pathname.startsWith(`${LIMA_HREF}/`)
     || (section === 'articles' && Boolean(slug) && !rest)
+    || isOpenMapGuide(pathname)
 }
 
 export function publicLocationHref(locationKey: string): string | null {

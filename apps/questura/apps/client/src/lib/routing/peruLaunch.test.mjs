@@ -29,6 +29,16 @@ test('the public site keeps the five landing pages, Lima articles and reader rou
   assert.equal(publicLocationHref('colombia|medellin'), null)
 })
 
+test('Medellín map guides are open while the rest of Medellín stays offline', async () => {
+  const { isPublicPageEnabled } = await loadPolicy('https://api.questurian.com')
+  assert.equal(isPublicPageEnabled('/colombia/medellin/maps/best-rooftop-bars-medellin'), true)
+  for (const path of ['/colombia/medellin', '/colombia/medellin/maps', '/colombia/medellin/maps/',
+    '/colombia/medellin/maps/a/b', '/colombia/medellin/food-and-drink/some-article',
+    '/colombia/bogota/maps/best-rooftop-bars-bogota', '/mexico/mexico-city/maps/some-guide']) {
+    assert.equal(isPublicPageEnabled(path), false, path)
+  }
+})
+
 test('an isolated test backend can still serve fixture destinations', async () => {
   const { isPublicPageEnabled, publicLocationHref } = await loadPolicy('http://api.readiness.localhost:4100')
   assert.equal(isPublicPageEnabled('/zz-launch/harbor/food-and-drink/launch-article-00'), true)
