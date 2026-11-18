@@ -6,6 +6,7 @@ import {
   normalizeDestinationDescription,
   parseDestinationHeaderFields,
 } from './fields'
+import { destinationFocus, destinationHeaderLayout } from './constants'
 
 const READY_IMAGE = { url: 'https://cdn.example/lima.jpg', status: 'ready' }
 
@@ -83,6 +84,35 @@ describe('parseDestinationHeaderFields', () => {
     expect(
       parseDestinationHeaderFields({ destinationDescription: 5 }).destinationDescription.ok,
     ).toBe(false)
+  })
+
+  it('accepts the two layouts and a photo position from 0 to 100', () => {
+    const fields = parseDestinationHeaderFields({
+      destinationLayout: 'split',
+      destinationFocusX: 12.34,
+      destinationFocusY: 100,
+    })
+    expect(fields.destinationLayout).toEqual({ ok: true, omit: false, value: 'split' })
+    expect(fields.destinationFocusX).toEqual({ ok: true, omit: false, value: 12.3 })
+    expect(fields.destinationFocusY).toEqual({ ok: true, omit: false, value: 100 })
+    expect(hasDestinationHeaderFieldUpdates(fields)).toBe(true)
+  })
+
+  it('rejects an unknown layout or a position outside 0 to 100', () => {
+    expect(parseDestinationHeaderFields({ destinationLayout: 'full' }).destinationLayout.ok).toBe(
+      false,
+    )
+    expect(parseDestinationHeaderFields({ destinationFocusX: 101 }).destinationFocusX.ok).toBe(false)
+    expect(parseDestinationHeaderFields({ destinationFocusY: '50' }).destinationFocusY.ok).toBe(
+      false,
+    )
+  })
+
+  it('reads a missing layout as band and a missing position as the centre', () => {
+    expect(destinationHeaderLayout(undefined)).toBe('band')
+    expect(destinationHeaderLayout('split')).toBe('split')
+    expect(destinationFocus(null)).toBe(50)
+    expect(destinationFocus(140)).toBe(100)
   })
 
   it('normalizes Windows line breaks', () => {
