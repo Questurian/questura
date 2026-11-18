@@ -21,8 +21,8 @@ export const BLOCK_IMAGE_SIZES = {
   /** The page hero: the whole content column, 1400px less the two 24px gutters. */
   pageHero: '(min-width: 1448px) 1352px, calc(100vw - 48px)',
 
-  /** Destination Header, text-beside-photo layout: the photo takes 1.15fr of a 1fr/1.15fr split, 48px gap. */
-  destinationSplit: '(min-width: 1448px) 700px, (min-width: 768px) 52vw, calc(100vw - 48px)',
+  /** Destination Header, text-beside-photo layout: 6fr of a 5fr/6fr split from 1024px (4fr/6fr from 1280px), full width below. */
+  destinationSplit: '(min-width: 1448px) 820px, (min-width: 1280px) 60vw, (min-width: 1024px) 54vw, calc(100vw - 48px)',
 
   /** Destination Header, editorial layout: a centred photo, at most 720px wide. */
   destinationEditorial: '(min-width: 768px) 720px, calc(100vw - 48px)',
