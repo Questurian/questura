@@ -33,7 +33,12 @@ function ready(image: EditorialFeatureImage | null | undefined) {
 
 /**
  * Opens a destination page. Three layouts, all inside the page margins:
- * `band` puts a short photo strip above a centred flag, name and description;
+ * `band` puts a photo strip above a centred flag, name and description. The
+ * strip keeps one 7:2 shape from tablets up (never under 200px tall, so phones
+ * get a taller crop), which is the shape the editor's drag frame shows. The
+ * space under the block is larger than any gap inside it, so the header reads
+ * as one unit apart from the next block; the text column holds ~70 characters
+ * a line, since centred lines any longer turn ragged;
  * `split` puts the text on the left and the photo on the right (photo first
  * on phones); `editorial` centres a magazine-proportion photo above the text.
  * The country flag stands in for a breadcrumb. The editor-chosen focus keeps
@@ -56,13 +61,12 @@ export function DestinationHeaderPreview({
   const body = paragraphs(block.destinationDescription);
   if (!block.sectionHeading && !image && body.length === 0) return null;
 
-  const centred = layout !== "split";
   const objectPosition = `${focus(block.destinationFocusX)}% ${focus(block.destinationFocusY)}%`;
 
   const photoFrame =
     layout === "editorial"
       ? "mx-auto aspect-[3/2] w-full max-w-[720px] overflow-hidden bg-paper"
-      : "h-[200px] overflow-hidden bg-paper 768:h-[340px]";
+      : "aspect-[7/2] min-h-[200px] w-full overflow-hidden bg-paper";
   const sizes =
     layout === "editorial"
       ? BLOCK_IMAGE_SIZES.destinationEditorial
@@ -82,29 +86,23 @@ export function DestinationHeaderPreview({
   ) : null;
 
   const text = (
-    <div className={centred ? "mx-auto max-w-[40rem] text-center" : undefined}>
+    <div className="mx-auto max-w-[32rem] text-center">
       {location?.countryCode ? (
         <CountryFlag
           code={location.countryCode}
           countryName={location.countryName ?? undefined}
-          className="h-[18px] w-[27px] 768:h-[20px] 768:w-[30px]"
+          className="block mx-auto h-[18px] w-[27px] 768:h-[20px] 768:w-[30px]"
         />
       ) : null}
       {block.sectionHeading ? (
-        <h2
-          className={`mt-3 font-display font-normal leading-[1.05] text-foreground ${
-            centred
-              ? "text-[2.375rem] 768:text-[2.875rem]"
-              : "text-[2.625rem] 768:text-[3.5rem]"
-          }`}
-        >
+        <h2 className="mt-2.5 font-display text-[2.375rem] font-normal leading-none text-foreground 768:text-[2.875rem]">
           {block.sectionHeading}
         </h2>
       ) : null}
       {body.map((paragraph, index) => (
         <p
           key={index}
-          className={`${index === 0 ? "mt-3" : "mt-2.5"} font-editorial text-[1.0625rem] font-medium leading-[1.5] text-foreground/80 768:text-[1.125rem]`}
+          className={`${index === 0 ? "mt-4" : "mt-3"} font-editorial text-[1.0625rem] font-medium leading-[1.55] text-foreground/80 [text-wrap:pretty] 768:text-[1.125rem]`}
         >
           {paragraph}
         </p>
@@ -171,10 +169,10 @@ export function DestinationHeaderPreview({
   return (
     <BlockSection
       aria-label={block.sectionHeading ?? undefined}
-      className="bg-background pb-4 pt-4 768:pb-6 768:pt-7"
+      className="bg-background pb-10 pt-4 768:pb-14 768:pt-7"
     >
       {photo}
-      <div className="pt-6 768:pt-7">{text}</div>
+      <div className="pt-6 768:pt-8">{text}</div>
     </BlockSection>
   );
 }
