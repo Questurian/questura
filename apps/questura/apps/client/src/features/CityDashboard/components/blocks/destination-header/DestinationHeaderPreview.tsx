@@ -60,17 +60,13 @@ export function DestinationHeaderPreview({
   const objectPosition = `${focus(block.destinationFocusX)}% ${focus(block.destinationFocusY)}%`;
 
   const photoFrame =
-    layout === "split"
-      ? "order-first h-[220px] overflow-hidden bg-paper 768:order-none 768:h-[440px]"
-      : layout === "editorial"
-        ? "mx-auto aspect-[3/2] w-full max-w-[720px] overflow-hidden bg-paper"
-        : "h-[200px] overflow-hidden bg-paper 768:h-[340px]";
+    layout === "editorial"
+      ? "mx-auto aspect-[3/2] w-full max-w-[720px] overflow-hidden bg-paper"
+      : "h-[200px] overflow-hidden bg-paper 768:h-[340px]";
   const sizes =
-    layout === "split"
-      ? BLOCK_IMAGE_SIZES.destinationSplit
-      : layout === "editorial"
-        ? BLOCK_IMAGE_SIZES.destinationEditorial
-        : BLOCK_IMAGE_SIZES.pageHero;
+    layout === "editorial"
+      ? BLOCK_IMAGE_SIZES.destinationEditorial
+      : BLOCK_IMAGE_SIZES.pageHero;
 
   const photo = image ? (
     <div className={photoFrame}>
@@ -117,14 +113,56 @@ export function DestinationHeaderPreview({
   );
 
   if (layout === "split") {
+    // Side by side only from 1024px: narrower, the paragraph turns into a
+    // tall ribbon beside a box of photo. Below that the photo leads, full
+    // width, and the text follows.
+    //
+    // Wide, the photo stretches to the text column's height (min 440px), so
+    // the photo's top meets the flag and its bottom meets the last line's
+    // baseline (the -mb pulls the line box's half-leading and descent below
+    // the edge). A text shorter than the 320px minimum is centred instead.
     return (
       <BlockSection
         aria-label={block.sectionHeading ?? undefined}
-        className="bg-background pb-4 pt-4 768:pb-6 768:pt-9"
+        className="bg-background pb-8 pt-5 768:pt-8 1024:pb-10 1024:pt-10"
       >
-        <div className="grid grid-cols-1 items-center gap-5 768:grid-cols-[1fr_1.15fr] 768:gap-12">
-          {text}
-          {photo}
+        <div className="flex flex-col gap-6 768:gap-8 1024:grid 1024:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] 1024:items-stretch 1024:gap-14 1280:grid-cols-[minmax(0,4fr)_minmax(0,6fr)] 1280:gap-16">
+          <div className="flex flex-col 1024:justify-center">
+            {location?.countryCode ? (
+              <CountryFlag
+                code={location.countryCode}
+                countryName={location.countryName ?? undefined}
+                className="block h-[16px] w-[24px] 1024:h-[18px] 1024:w-[27px]"
+              />
+            ) : null}
+            {block.sectionHeading ? (
+              <h2 className="mt-2 font-display text-[2.625rem] font-normal leading-none text-foreground 768:text-[3rem] 1024:mt-1.5 1280:text-[3.375rem]">
+                {block.sectionHeading}
+              </h2>
+            ) : null}
+            <div className="max-w-[36rem] 1024:-mb-[0.45em] 1024:max-w-none">
+              {body.map((paragraph, index) => (
+                <p
+                  key={index}
+                  className={`${index === 0 ? "mt-4" : "mt-3"} font-editorial text-[1.0625rem] font-medium leading-[1.55] text-foreground/80 [text-wrap:pretty] 768:text-[1.125rem]`}
+                >
+                  {paragraph}
+                </p>
+              ))}
+            </div>
+          </div>
+          {image ? (
+            <div className="relative order-first aspect-[4/3] w-full overflow-hidden bg-paper 640:aspect-[16/9] 1024:order-none 1024:aspect-auto 1024:min-h-[320px]">
+              <PublicImage
+                src={image.url}
+                alt={image.alt ?? ""}
+                className="absolute inset-0 h-full w-full object-cover"
+                style={{ objectPosition }}
+                {...heroImagePriority(blockIndex)}
+                sizes={BLOCK_IMAGE_SIZES.destinationSplit}
+              />
+            </div>
+          ) : null}
         </div>
       </BlockSection>
     );
