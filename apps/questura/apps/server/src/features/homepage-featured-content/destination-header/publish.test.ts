@@ -99,6 +99,9 @@ describe('parseDestinationHeaderFields', () => {
   })
 
   it('rejects an unknown layout or a position outside 0 to 100', () => {
+    expect(
+      parseDestinationHeaderFields({ destinationLayout: 'editorial' }).destinationLayout,
+    ).toEqual({ ok: true, omit: false, value: 'editorial' })
     expect(parseDestinationHeaderFields({ destinationLayout: 'full' }).destinationLayout.ok).toBe(
       false,
     )
@@ -111,6 +114,7 @@ describe('parseDestinationHeaderFields', () => {
   it('reads a missing layout as band and a missing position as the centre', () => {
     expect(destinationHeaderLayout(undefined)).toBe('band')
     expect(destinationHeaderLayout('split')).toBe('split')
+    expect(destinationHeaderLayout('editorial')).toBe('editorial')
     expect(destinationFocus(null)).toBe(50)
     expect(destinationFocus(140)).toBe(100)
   })

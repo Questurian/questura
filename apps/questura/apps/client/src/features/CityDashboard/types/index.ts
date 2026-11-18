@@ -29,6 +29,8 @@ export type CityHomepageLocation = {
    * slug has thrown away. Never rebuild it from `params`.
    */
   label: string;
+  /** ISO 3166-1 alpha-2, uppercase, for the country flag; null when unknown. */
+  countryCode?: string | null;
 };
 
 export type CityHomepageSelection<TItem = unknown> = {
@@ -306,7 +308,7 @@ export type PageHeroBlock = {
 };
 
 /**
- * Opens a destination page: a photo (hero 21:9 crop), a breadcrumb
+ * Opens a destination page: a photo (hero 21:9 crop), the country flag
  * drawn from the page's location, the destination name (section heading) and
  * a description. Paragraphs in the description are split by a blank line.
  */
@@ -316,8 +318,13 @@ export type DestinationHeaderBlock = {
   sectionHeading: string | null;
   destinationDescription: string | null;
   destinationImage: EditorialFeatureImage | null;
-  /** band: photo inside the margins, text centred below. split: text left, photo right. */
-  destinationLayout?: "band" | "split" | null;
+  /** The 4:3 editorial crop, used by the editorial layout when the set has it. */
+  destinationImageEditorial?: EditorialFeatureImage | null;
+  /**
+   * band: photo strip, text centred below. split: text left, photo right.
+   * editorial: a 3:2 photo centred, text below.
+   */
+  destinationLayout?: "band" | "split" | "editorial" | null;
   /** Which part of the photo stays in view: CSS object-position, 0 to 100. */
   destinationFocusX?: number | null;
   destinationFocusY?: number | null;

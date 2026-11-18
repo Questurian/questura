@@ -30,6 +30,7 @@ export async function resolveDestinationHeaderFields(
 ) {
   const mediaSetId = relationshipId(block.destinationMediaSet)
   let destinationImage = null
+  let destinationImageEditorial = null
   let destinationImageAltReady = false
 
   if (mediaSetId) {
@@ -41,6 +42,8 @@ export async function resolveDestinationHeaderFields(
         overrideAccess: true,
       })) as unknown as Record<string, unknown>
       destinationImage = resolveMediaSetForPlacement(mediaSet, 'hero')
+      // The editorial layout draws the 4:3 crop when the set has it.
+      destinationImageEditorial = resolveMediaSetForPlacement(mediaSet, 'editorial')
       destinationImageAltReady = mediaSetHasAuthoredAlt(mediaSet)
     } catch (error) {
       // A deleted media set reads as no image and blocks publish; a failed read is not that.
@@ -55,6 +58,7 @@ export async function resolveDestinationHeaderFields(
     destinationFocusY: destinationFocus(block.destinationFocusY),
     destinationMediaSetId: mediaSetId,
     destinationImage,
+    destinationImageEditorial,
     destinationImageAltReady,
   }
 }

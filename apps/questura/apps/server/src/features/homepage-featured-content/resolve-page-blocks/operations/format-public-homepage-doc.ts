@@ -1,3 +1,4 @@
+import { resolveCountryCode } from '@/features/location/public/countryCode'
 import { publicLocationLabel } from '@/shared/location/server/publicLocationLabel'
 import { formatPublicHomepageBlock } from '../lib/format-public-block'
 import { resolvePageBlocks } from './resolve-blocks'
@@ -23,6 +24,8 @@ function formatPublicLocation(doc: LocationDoc) {
     cityName: doc.cityName ?? null,
     neighborhoodName: doc.neighborhoodName ?? null,
     label: publicLocationLabel(doc),
+    // For the country flag at the top of the page (Destination Header).
+    countryCode: resolveCountryCode(doc.countryName, doc.country),
   }
 }
 

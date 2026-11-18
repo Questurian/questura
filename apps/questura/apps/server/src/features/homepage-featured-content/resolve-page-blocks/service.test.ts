@@ -489,6 +489,7 @@ describe('formatPublicLocationHomepageDoc', () => {
       cityName: 'Lima',
       neighborhoodName: null,
       label: 'Lima, Peru',
+      countryCode: 'PE',
     })
   })
 
