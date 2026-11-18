@@ -102,9 +102,14 @@ describe('parseDestinationHeaderFields', () => {
     expect(
       parseDestinationHeaderFields({ destinationLayout: 'editorial' }).destinationLayout,
     ).toEqual({ ok: true, omit: false, value: 'editorial' })
-    expect(parseDestinationHeaderFields({ destinationLayout: 'full' }).destinationLayout.ok).toBe(
-      false,
-    )
+    expect(parseDestinationHeaderFields({ destinationLayout: 'full' }).destinationLayout).toEqual({
+      ok: true,
+      omit: false,
+      value: 'full',
+    })
+    expect(
+      parseDestinationHeaderFields({ destinationLayout: 'poster' }).destinationLayout.ok,
+    ).toBe(false)
     expect(parseDestinationHeaderFields({ destinationFocusX: 101 }).destinationFocusX.ok).toBe(false)
     expect(parseDestinationHeaderFields({ destinationFocusY: '50' }).destinationFocusY.ok).toBe(
       false,
@@ -115,6 +120,7 @@ describe('parseDestinationHeaderFields', () => {
     expect(destinationHeaderLayout(undefined)).toBe('band')
     expect(destinationHeaderLayout('split')).toBe('split')
     expect(destinationHeaderLayout('editorial')).toBe('editorial')
+    expect(destinationHeaderLayout('full')).toBe('full')
     expect(destinationFocus(null)).toBe(50)
     expect(destinationFocus(140)).toBe(100)
   })

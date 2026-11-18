@@ -5,12 +5,13 @@ export const DESTINATION_HEADER_DESCRIPTION_MAX = 1500
  * band: a short photo strip inside the page margins, text centred below.
  * split: text beside the photo.
  * editorial: a magazine-proportion photo (the 4:3 editorial crop) centred, text below.
+ * full: the photo edge to edge across the whole screen, text centred below.
  */
-export const DESTINATION_HEADER_LAYOUTS = ['band', 'split', 'editorial'] as const
+export const DESTINATION_HEADER_LAYOUTS = ['band', 'split', 'editorial', 'full'] as const
 export type DestinationHeaderLayout = (typeof DESTINATION_HEADER_LAYOUTS)[number]
 
 export function destinationHeaderLayout(value: unknown): DestinationHeaderLayout {
-  return value === 'split' || value === 'editorial' ? value : 'band'
+  return value === 'split' || value === 'editorial' || value === 'full' ? value : 'band'
 }
 
 /**

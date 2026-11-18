@@ -61,12 +61,14 @@ export const DestinationHeaderBlock: Block = {
             ? 'Photo band, text below'
             : value === 'split'
               ? 'Text beside photo'
-              : 'Editorial photo, text below',
+              : value === 'full'
+                ? 'Full-width photo, text below'
+                : 'Editorial photo, text below',
         value,
       })),
       admin: {
         description:
-          'band: photo strip, text centred below. split: text left, photo right. editorial: 4:3 photo centred, text below.',
+          'band: photo strip, text centred below. split: text left, photo right. editorial: 4:3 photo centred, text below. full: photo edge to edge, text centred below.',
       },
     },
     {
