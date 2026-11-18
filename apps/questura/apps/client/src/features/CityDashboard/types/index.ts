@@ -324,7 +324,7 @@ export type DestinationHeaderBlock = {
    * band: photo strip, text centred below. split: text left, photo right.
    * editorial: a 3:2 photo centred, text below.
    */
-  destinationLayout?: "band" | "split" | "editorial" | null;
+  destinationLayout?: "band" | "split" | "editorial" | "full" | null;
   /** Which part of the photo stays in view: CSS object-position, 0 to 100. */
   destinationFocusX?: number | null;
   destinationFocusY?: number | null;

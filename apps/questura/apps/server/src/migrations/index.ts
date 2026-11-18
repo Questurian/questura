@@ -88,6 +88,7 @@ import * as migration_20261118_002939_airbnb_card_presentation from './20261118_
 import * as migration_20261118_163701_destination_header_block from './20261118_163701_destination_header_block';
 import * as migration_20261118_173415_destination_header_layout_and_focus from './20261118_173415_destination_header_layout_and_focus';
 import * as migration_20261118_182918_destination_header_editorial_layout from './20261118_182918_destination_header_editorial_layout';
+import * as migration_20261118_213739_destination_header_full_width_layout from './20261118_213739_destination_header_full_width_layout';
 
 export const migrations = [
   {
@@ -538,6 +539,11 @@ export const migrations = [
   {
     up: migration_20261118_182918_destination_header_editorial_layout.up,
     down: migration_20261118_182918_destination_header_editorial_layout.down,
-    name: '20261118_182918_destination_header_editorial_layout'
+    name: '20261118_182918_destination_header_editorial_layout',
+  },
+  {
+    up: migration_20261118_213739_destination_header_full_width_layout.up,
+    down: migration_20261118_213739_destination_header_full_width_layout.down,
+    name: '20261118_213739_destination_header_full_width_layout',
   },
 ];

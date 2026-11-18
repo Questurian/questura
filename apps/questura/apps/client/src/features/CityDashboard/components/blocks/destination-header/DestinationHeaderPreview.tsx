@@ -8,7 +8,7 @@ import type {
 import CountryFlag from "@/components/shared/ui/CountryFlag";
 import { PublicImage } from "@/components/media/PublicImage";
 import { BLOCK_IMAGE_SIZES } from "../blockImageSizes";
-import { BlockSection } from "../BlockSection";
+import { BLOCK_GUTTER_CLASS, BlockSection } from "../BlockSection";
 import { heroImagePriority } from "../heroImagePriority";
 
 /** Paragraphs are separated by a blank line in the stored text. */
@@ -40,7 +40,8 @@ function ready(image: EditorialFeatureImage | null | undefined) {
  * as one unit apart from the next block; the text column holds ~70 characters
  * a line, since centred lines any longer turn ragged;
  * `split` puts the text on the left and the photo on the right (photo first
- * on phones); `editorial` centres a magazine-proportion photo above the text.
+ * on phones); `editorial` centres a magazine-proportion photo above the text;
+ * `full` runs the photo edge to edge across the screen above the same text.
  * The country flag stands in for a breadcrumb. The editor-chosen focus keeps
  * the same part of the photo in view at every size. The title is an <h2>
  * because the page already carries its one (visually hidden) <h1>.
@@ -52,7 +53,8 @@ export function DestinationHeaderPreview({
 }: HomepageBlockLayoutProps<DestinationHeaderBlock>): JSX.Element | null {
   const layout =
     block.destinationLayout === "split" ||
-    block.destinationLayout === "editorial"
+    block.destinationLayout === "editorial" ||
+    block.destinationLayout === "full"
       ? block.destinationLayout
       : "band";
   const hero = block.destinationImage?.url ? block.destinationImage : null;
@@ -63,14 +65,21 @@ export function DestinationHeaderPreview({
 
   const objectPosition = `${focus(block.destinationFocusX)}% ${focus(block.destinationFocusY)}%`;
 
+  // `full` is the original edge-to-edge photo: 4:3 on phones, 21:9 (the
+  // hero crop's own shape) from tablets up, never taller than 78% of the
+  // screen so the name still shows on a short laptop.
   const photoFrame =
     layout === "editorial"
       ? "mx-auto aspect-[3/2] w-full max-w-[720px] overflow-hidden bg-paper"
-      : "aspect-[7/2] min-h-[200px] w-full overflow-hidden bg-paper";
+      : layout === "full"
+        ? "aspect-[4/3] max-h-[78vh] w-full overflow-hidden bg-paper 768:aspect-[21/9]"
+        : "aspect-[7/2] min-h-[200px] w-full overflow-hidden bg-paper";
   const sizes =
     layout === "editorial"
       ? BLOCK_IMAGE_SIZES.destinationEditorial
-      : BLOCK_IMAGE_SIZES.pageHero;
+      : layout === "full"
+        ? BLOCK_IMAGE_SIZES.fullBleed
+        : BLOCK_IMAGE_SIZES.pageHero;
 
   const photo = image ? (
     <div className={photoFrame}>
@@ -102,7 +111,7 @@ export function DestinationHeaderPreview({
       {body.map((paragraph, index) => (
         <p
           key={index}
-          className={`${index === 0 ? "mt-4" : "mt-3"} font-editorial text-[1.0625rem] font-medium leading-[1.55] text-foreground/80 [text-wrap:pretty] 768:text-[1.125rem]`}
+          className={`${index === 0 ? "mt-4" : "mt-3"} font-editorial text-[1rem] font-semibold leading-[1.55] text-foreground [text-wrap:pretty] 768:text-[1.0625rem]`}
         >
           {paragraph}
         </p>
@@ -142,7 +151,7 @@ export function DestinationHeaderPreview({
               {body.map((paragraph, index) => (
                 <p
                   key={index}
-                  className={`${index === 0 ? "mt-4" : "mt-3"} font-editorial text-[1.0625rem] font-medium leading-[1.55] text-foreground/80 [text-wrap:pretty] 768:text-[1.125rem]`}
+                  className={`${index === 0 ? "mt-4" : "mt-3"} font-editorial text-[1rem] font-semibold leading-[1.55] text-foreground [text-wrap:pretty] 768:text-[1.0625rem]`}
                 >
                   {paragraph}
                 </p>
@@ -163,6 +172,20 @@ export function DestinationHeaderPreview({
           ) : null}
         </div>
       </BlockSection>
+    );
+  }
+
+  if (layout === "full") {
+    // Outside BlockSection: the photo runs past the 1400px content width to
+    // both edges of the screen. The text keeps the page gutter.
+    return (
+      <section
+        aria-label={block.sectionHeading ?? undefined}
+        className="relative bg-background pb-10 768:pb-14"
+      >
+        {photo}
+        <div className={`pt-7 768:pt-9 ${BLOCK_GUTTER_CLASS}`}>{text}</div>
+      </section>
     );
   }
 
