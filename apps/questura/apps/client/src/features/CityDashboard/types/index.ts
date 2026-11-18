@@ -305,6 +305,23 @@ export type PageHeroBlock = {
   };
 };
 
+/**
+ * Opens a destination page: a full-width photo (hero 21:9 crop), a breadcrumb
+ * drawn from the page's location, the destination name (section heading) and
+ * a description. Paragraphs in the description are split by a blank line.
+ */
+export type DestinationHeaderBlock = {
+  id: string;
+  blockType: "destination-header";
+  sectionHeading: string | null;
+  destinationDescription: string | null;
+  destinationImage: EditorialFeatureImage | null;
+  selection?: {
+    items: unknown[];
+    totalSlots: number;
+  };
+};
+
 /** One photo in a Photo Pile, at its wide (16:9) crop. */
 export type PhotoPilePhoto = {
   mediaSetId: number;
@@ -364,6 +381,7 @@ export type CityHomepageBlock<TItem = unknown> =
   | NewsletterSignupBlock
   | AdSlotBlock
   | PageHeroBlock
+  | DestinationHeaderBlock
   | PhotoPileBlock
   | CityHomepageLegacyBlock<TItem>;
 

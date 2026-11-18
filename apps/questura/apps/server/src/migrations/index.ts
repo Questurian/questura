@@ -85,6 +85,7 @@ import * as migration_20261113_052424_itinerary_hide_website from './20261113_05
 import * as migration_20261115_213048_add_rooftop_listicle_moments from './20261115_213048_add_rooftop_listicle_moments';
 import * as migration_20261115_233849_add_listicle_item_section from './20261115_233849_add_listicle_item_section';
 import * as migration_20261118_002939_airbnb_card_presentation from './20261118_002939_airbnb_card_presentation';
+import * as migration_20261118_163701_destination_header_block from './20261118_163701_destination_header_block';
 
 export const migrations = [
   {
@@ -520,6 +521,11 @@ export const migrations = [
   {
     up: migration_20261118_002939_airbnb_card_presentation.up,
     down: migration_20261118_002939_airbnb_card_presentation.down,
-    name: '20261118_002939_airbnb_card_presentation'
+    name: '20261118_002939_airbnb_card_presentation',
+  },
+  {
+    up: migration_20261118_163701_destination_header_block.up,
+    down: migration_20261118_163701_destination_header_block.down,
+    name: '20261118_163701_destination_header_block'
   },
 ];

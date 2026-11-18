@@ -27,6 +27,7 @@ const EXPECTED_KEYS = [
   'newsletter-signup',
   'article-list',
   'page-hero',
+  'destination-header',
   'photo-pile',
   'ad-slot',
 ] as const
@@ -176,6 +177,7 @@ describe('curatedBlockRegistry', () => {
         'newsletter-signup': { min: 0, max: 0, default: 0 },
         'article-list': { min: 1, max: 25, default: 5 },
         'page-hero': { min: 0, max: 0, default: 0 },
+        'destination-header': { min: 0, max: 0, default: 0 },
         'photo-pile': { min: 0, max: 0, default: 0 },
         'ad-slot': { min: 0, max: 0, default: 0 },
       })

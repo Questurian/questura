@@ -14,6 +14,7 @@ import type {
   LocationGridBlock,
   NewsletterSignupBlock,
   PageHeroBlock,
+  DestinationHeaderBlock,
   PhotoPileBlock,
   ThingsToDoAttractionsBlock,
   HomepageBlockLayoutDefinition,
@@ -38,6 +39,7 @@ import { LocationGridPreview } from "../components/blocks/location-grid/Location
 import { QuestUrianMapsPreview } from "../components/blocks/questurian-maps/QuestUrianMapsPreview";
 import { QuesturianMapsDarkPreview } from "../components/blocks/questurian-maps-dark/QuesturianMapsDarkPreview";
 import { PageHeroPreview } from "../components/blocks/page-hero/PageHeroPreview";
+import { DestinationHeaderPreview } from "../components/blocks/destination-header/DestinationHeaderPreview";
 import { ArticleListPreview } from "../components/blocks/article-list/ArticleListPreview";
 import { NewsletterSignupPreview } from "../components/blocks/newsletter-signup/NewsletterSignupPreview";
 import { AdSlotPreview } from "../components/blocks/ad-slot/AdSlotPreview";
@@ -193,6 +195,10 @@ const homepageBlockFallbackLayouts: HomepageBlockLayoutFallbackDefinition[] = [
   defineHomepageBlockLayoutAnySlots<PageHeroBlock>({
     blockType: "page-hero",
     Component: PageHeroPreview,
+  }),
+  defineHomepageBlockLayoutAnySlots<DestinationHeaderBlock>({
+    blockType: "destination-header",
+    Component: DestinationHeaderPreview,
   }),
   // The section page lifts its Photo Pile out of the block list and draws it
   // as the masthead (SectionMasthead), so in the list it is nothing.

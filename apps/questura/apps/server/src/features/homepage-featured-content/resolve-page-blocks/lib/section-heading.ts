@@ -16,6 +16,7 @@ export const HOMEPAGE_BLOCK_TYPES_WITH_OPTIONAL_SECTION_HEADING = [
   'article-list',
   'questurian-maps-dark',
   'page-hero',
+  'destination-header',
 ] as const
 
 export type HomepageBlockTypeWithOptionalSectionHeading =
