@@ -1,4 +1,8 @@
-import { DESTINATION_HEADER_DESCRIPTION_MAX } from './constants'
+import {
+  DESTINATION_HEADER_DESCRIPTION_MAX,
+  DESTINATION_HEADER_LAYOUTS,
+  type DestinationHeaderLayout,
+} from './constants'
 
 type ParsedDestinationHeaderField<T> =
   | { ok: true; omit: true }
@@ -48,10 +52,37 @@ function parseDescriptionField(
   return { ok: true, omit: false, value: value || null }
 }
 
+function parseLayoutField(
+  body: Record<string, unknown>,
+  field: string,
+): ParsedDestinationHeaderField<DestinationHeaderLayout> {
+  if (!Object.prototype.hasOwnProperty.call(body, field)) return { ok: true, omit: true }
+  const raw = body[field]
+  if (!DESTINATION_HEADER_LAYOUTS.includes(raw as DestinationHeaderLayout)) {
+    return { ok: false, message: `${field} must be one of ${DESTINATION_HEADER_LAYOUTS.join(', ')}.` }
+  }
+  return { ok: true, omit: false, value: raw as DestinationHeaderLayout }
+}
+
+function parseFocusField(
+  body: Record<string, unknown>,
+  field: string,
+): ParsedDestinationHeaderField<number> {
+  if (!Object.prototype.hasOwnProperty.call(body, field)) return { ok: true, omit: true }
+  const raw = body[field]
+  if (typeof raw !== 'number' || !Number.isFinite(raw) || raw < 0 || raw > 100) {
+    return { ok: false, message: `${field} must be a number from 0 to 100.` }
+  }
+  return { ok: true, omit: false, value: Math.round(raw * 10) / 10 }
+}
+
 export function parseDestinationHeaderFields(body: Record<string, unknown>) {
   return {
     destinationMediaSet: parseMediaSetField(body, 'destinationMediaSet'),
     destinationDescription: parseDescriptionField(body, 'destinationDescription'),
+    destinationLayout: parseLayoutField(body, 'destinationLayout'),
+    destinationFocusX: parseFocusField(body, 'destinationFocusX'),
+    destinationFocusY: parseFocusField(body, 'destinationFocusY'),
   }
 }
 

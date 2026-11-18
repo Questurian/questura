@@ -1,6 +1,7 @@
 import type { PayloadInstance } from '@/types'
 import { resolveMediaSetForPlacement } from '@/features/media/lib/resolve-public-image'
 import { isNotFoundError } from '@/shared/lib/not-found-error'
+import { destinationFocus, destinationHeaderLayout } from './constants'
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null
@@ -49,6 +50,9 @@ export async function resolveDestinationHeaderFields(
 
   return {
     destinationDescription: text(block.destinationDescription),
+    destinationLayout: destinationHeaderLayout(block.destinationLayout),
+    destinationFocusX: destinationFocus(block.destinationFocusX),
+    destinationFocusY: destinationFocus(block.destinationFocusY),
     destinationMediaSetId: mediaSetId,
     destinationImage,
     destinationImageAltReady,

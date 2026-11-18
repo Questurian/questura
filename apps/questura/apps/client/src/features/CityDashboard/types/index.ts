@@ -306,7 +306,7 @@ export type PageHeroBlock = {
 };
 
 /**
- * Opens a destination page: a full-width photo (hero 21:9 crop), a breadcrumb
+ * Opens a destination page: a photo (hero 21:9 crop), a breadcrumb
  * drawn from the page's location, the destination name (section heading) and
  * a description. Paragraphs in the description are split by a blank line.
  */
@@ -316,6 +316,11 @@ export type DestinationHeaderBlock = {
   sectionHeading: string | null;
   destinationDescription: string | null;
   destinationImage: EditorialFeatureImage | null;
+  /** band: photo inside the margins, text centred below. split: text left, photo right. */
+  destinationLayout?: "band" | "split" | null;
+  /** Which part of the photo stays in view: CSS object-position, 0 to 100. */
+  destinationFocusX?: number | null;
+  destinationFocusY?: number | null;
   selection?: {
     items: unknown[];
     totalSlots: number;

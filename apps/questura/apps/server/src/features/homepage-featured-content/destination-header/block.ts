@@ -1,7 +1,7 @@
 import type { Block } from 'payload'
 
 import { HOMEPAGE_FEATURED_ARTICLES_SECTION_HEADING_MAX } from '../resolve-page-blocks/lib/section-heading'
-import { DESTINATION_HEADER_DESCRIPTION_MAX } from './constants'
+import { DESTINATION_HEADER_DESCRIPTION_MAX, DESTINATION_HEADER_LAYOUTS } from './constants'
 
 /**
  * The header that opens a destination page: one full-width photo, then a
@@ -47,6 +47,37 @@ export const DestinationHeaderBlock: Block = {
       type: 'relationship',
       relationTo: 'media-sets',
       admin: { description: 'Header photo. A ready hero (21:9) variant is required to publish.' },
+    },
+    {
+      name: 'destinationLayout',
+      type: 'select',
+      // The generated name passes Postgres's 63-character limit.
+      enumName: 'enum_lh_blocks_destination_header_layout',
+      required: false,
+      defaultValue: 'band',
+      options: DESTINATION_HEADER_LAYOUTS.map((value) => ({
+        label: value === 'band' ? 'Photo band, text below' : 'Text beside photo',
+        value,
+      })),
+      admin: { description: 'band: photo inside the margins, text centred below. split: text left, photo right.' },
+    },
+    {
+      name: 'destinationFocusX',
+      type: 'number',
+      required: false,
+      min: 0,
+      max: 100,
+      defaultValue: 50,
+      admin: { description: 'Photo position left to right, 0 to 100 (CSS object-position).' },
+    },
+    {
+      name: 'destinationFocusY',
+      type: 'number',
+      required: false,
+      min: 0,
+      max: 100,
+      defaultValue: 50,
+      admin: { description: 'Photo position top to bottom, 0 to 100 (CSS object-position).' },
     },
   ],
 }
