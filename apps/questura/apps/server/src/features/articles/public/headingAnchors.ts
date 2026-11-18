@@ -72,9 +72,12 @@ export function anchorArticleHeadings(
   }
 
   for (const block of blocks) {
-    if (block.blockType !== 'text' || typeof block.content !== 'string') continue
+    const field = block.blockType === 'airbnb-card' ? 'stayContent' : 'content'
+    if (block.blockType !== 'text' && block.blockType !== 'airbnb-card') continue
+    const html = block[field]
+    if (typeof html !== 'string') continue
 
-    block.content = block.content.replace(
+    block[field] = html.replace(
       HEADING_PATTERN,
       (match: string, tag: string, attributes: string, inner: string) => {
         if (/\sid\s*=/.test(attributes)) return match

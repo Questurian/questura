@@ -167,6 +167,21 @@ describe('sanitizeAirbnbCards', () => {
     ])
   })
 
+  it('uses the card photo order and fills from the listing gallery', async () => {
+    const [first, second, third] = [41, 42, 43]
+    const blocks: Array<Record<string, unknown>> = [{
+      blockType: 'airbnb-card',
+      airbnb: airbnbDoc({ gallery: [first, second, third].map((image) => ({ image })) }),
+      photoOrder: [third, 999, first, third],
+    }]
+    const { payload, find } = payloadWithMediaSets([])
+    await sanitizeAirbnbCards(blocks, payload)
+    expect(find).toHaveBeenCalledWith(expect.objectContaining({
+      where: { id: { in: [third, first, second] } },
+    }))
+    expect(blocks[0]).not.toHaveProperty('photoOrder')
+  })
+
   it('names the neighbourhood the Airbnb is tagged with', async () => {
     const blocks: Array<Record<string, unknown>> = [
       {

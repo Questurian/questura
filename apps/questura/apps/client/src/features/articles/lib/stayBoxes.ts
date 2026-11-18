@@ -2,12 +2,9 @@
  * Stay boxes: an Airbnb Card and the section written about it, read as one box.
  *
  * Owner decision, 2026-10-20: on a "best Airbnbs" article each stay is one
- * box (photos, name, write-up, facts and link together), the way a Condé Nast
- * Traveler gallery reads. The write-up already exists: the AI Blog Writer
- * splits the body at its headings, and a card picked there lands right after
- * the block it was added under. So nothing new is authored or stored. At render
- * time each card takes in the section written beside it, heading and prose,
- * and that section leaves the reading column.
+ * box (photos, name, write-up, facts and link together). A card can carry
+ * its write-up. Older cards take in the section written beside them at render
+ * time, and that section leaves the reading column.
  *
  * Which side is "beside": the section above, because that is where the writer
  * puts a card. A card moved above its section is still matched, because every
@@ -26,6 +23,7 @@ import { splitProse, type ProseSegment } from './adPlacement.ts'
 export type StayLead = {
   /** Inner HTML of the section heading; it becomes the box title. */
   headingHtml: string
+  headingId?: string
   /** The heading's level, so the box keeps the article's outline. */
   level: 2 | 3
   /** The prose under the heading. Empty when the section was a heading alone. */
@@ -45,6 +43,7 @@ export type StayPosition = { index: number; total: number }
 export type StayPairableBlock = {
   blockType: string
   content?: string
+  stayContent?: string | null
   airbnb?: { title: string } | null
 }
 
@@ -148,6 +147,20 @@ function innerHtml(html: string): string {
   return html.replace(/^\s*<h[23][^>]*>/i, '').replace(/<\/h[23]>\s*$/i, '')
 }
 
+function buildLead(segments: ProseSegment[], title: string): StayLead | null {
+  if (!segments.length) return null
+  const heading = segments[0]
+  const hasHeading = heading.tag === 'h2' || heading.tag === 'h3'
+  const headingId = hasHeading ? /^<h[23]\b[^>]*\sid="([^"]+)"/i.exec(heading.html)?.[1] : undefined
+  return {
+    headingHtml: hasHeading ? innerHtml(heading.html) : '',
+    ...(headingId ? { headingId } : {}),
+    level: heading.tag === 'h2' ? 2 : 3,
+    html: segments.slice(hasHeading ? 1 : 0).map((segment) => segment.html).join(''),
+    namesStay: hasHeading && headingMatch(heading.html, title) >= NAME_MATCH,
+  }
+}
+
 /**
  * Pairs every published Airbnb Card with the section written beside it.
  *
@@ -177,6 +190,7 @@ export function pairStayBoxes<T extends StayPairableBlock>(blocks: T[]): Array<T
   }
 
   const candidate = (cardIndex: number, side: -1 | 1): Candidate | null => {
+    if (typeof blocks[cardIndex].stayContent === 'string') return null
     const blockIndex = cardIndex + side
     if (blocks[blockIndex]?.blockType !== 'text') return null
     const segments = segmentsOf(blockIndex)
@@ -198,21 +212,19 @@ export function pairStayBoxes<T extends StayPairableBlock>(blocks: T[]): Array<T
   const taken = new Map<number, Section>()
   const leads = new Map<number, StayLead>()
   cards.forEach((cardIndex, k) => {
+    const { stayContent, airbnb } = blocks[cardIndex]
+    if (typeof stayContent === 'string') {
+      const lead = buildLead(splitProse(stayContent), airbnb?.title ?? '')
+      if (lead) leads.set(cardIndex, lead)
+      return
+    }
     const pick = chosen[k]
     if (!pick || taken.has(pick.blockIndex)) return
     if (!isList && pick.score < NAME_MATCH) return
     const segments = segmentsOf(pick.blockIndex)
-    const heading = segments[pick.section.heading]
     taken.set(pick.blockIndex, pick.section)
-    leads.set(cardIndex, {
-      headingHtml: innerHtml(heading.html),
-      level: heading.tag === 'h3' ? 3 : 2,
-      html: segments
-        .slice(pick.section.heading + 1, pick.section.end)
-        .map((segment) => segment.html)
-        .join(''),
-      namesStay: pick.score >= NAME_MATCH,
-    })
+    const lead = buildLead(segments.slice(pick.section.heading, pick.section.end), airbnb?.title ?? '')
+    if (lead) leads.set(cardIndex, lead)
   })
 
   let boxNumber = 0

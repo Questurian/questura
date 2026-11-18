@@ -4,6 +4,20 @@ import { headingMatch, pairStayBoxes, withoutListNumber } from './stayBoxes.ts'
 
 const text = (id, content) => ({ id, blockType: 'text', content })
 const card = (id, title) => ({ id, blockType: 'airbnb-card', airbnb: { title } })
+
+test('an Airbnb with its own write-up keeps it after the card moves', () => {
+  const outside = { id: 't', blockType: 'text', content: '<h2>Duplex</h2><p>Outside the card.</p>' }
+  const own = { ...card('c', 'Duplex'), stayContent: '<h2 id="stay-duplex">Duplex</h2><p>Inside the <strong>card</strong>.</p>' }
+  const [first, second] = pairStayBoxes([outside, own])
+  assert.deepEqual(first, outside)
+  assert.deepEqual(second.lead, {
+    headingHtml: 'Duplex',
+    headingId: 'stay-duplex',
+    level: 2,
+    html: '<p>Inside the <strong>card</strong>.</p>',
+    namesStay: true,
+  })
+})
 const section = (heading, body = `<p>About ${heading}.</p>`, tag = 'h2') => `<${tag}>${heading}</${tag}>${body}`
 
 const STAYS = ['The two bedroom on Malecón de la Marina', 'A loft by Kennedy Park', 'Clifftop duplex penthouse']

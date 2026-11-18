@@ -123,6 +123,7 @@ export type AirbnbCardBlock = {
   id: string
   blockType: 'airbnb-card'
   airbnb: AirbnbCard | null
+  stayContent?: string | null
   /** Set by `pairStayBoxes`: the section written about this stay, drawn inside its box. */
   lead?: StayLead | null
   /** Set by `pairStayBoxes`: the box's number among the article's Airbnbs. */

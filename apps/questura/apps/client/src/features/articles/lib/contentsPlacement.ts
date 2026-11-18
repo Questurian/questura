@@ -16,7 +16,7 @@ export type ContentsSlot = {
   offset: number
 }
 
-type SlotBlock = { blockType: string; content?: string }
+type SlotBlock = { blockType: string; content?: string; stayContent?: string | null; lead?: { level: number } | null }
 
 const FIRST_H2 = /<h2[\s>]/
 
@@ -27,6 +27,9 @@ export function findContentsSlot(
   if (blocks.length === 0) return null
 
   for (const [blockIndex, block] of blocks.entries()) {
+    if (block.blockType === 'airbnb-card' && block.stayContent && block.lead?.level === 2) {
+      return { blockIndex, runIndex: 0, offset: 0 }
+    }
     if (block.blockType !== 'text' || typeof block.content !== 'string') continue
     const runs = plan.proseRuns.get(blockIndex) ?? [block.content]
     for (const [runIndex, html] of runs.entries()) {
