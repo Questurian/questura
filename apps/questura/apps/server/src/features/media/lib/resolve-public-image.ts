@@ -9,6 +9,7 @@ export type MediaPlacement =
   | 'hero'
   | 'article-header'
   | 'open-graph'
+  | 'editorial'
 
 export type PublicImageStatus = 'ready' | 'missing' | 'legacy_fallback'
 
@@ -75,6 +76,8 @@ const PLACEMENT_CONFIG: Record<MediaPlacement, PlacementConfig> = {
   hero: { required: 'hero', migrationFallbacks: ['wide'] },
   'article-header': { required: 'wide', migrationFallbacks: ['hero'] },
   'open-graph': { required: 'open_graph', migrationFallbacks: [] },
+  // A 4:3 magazine crop; the wide crop stands in when a set has none.
+  editorial: { required: 'editorial', migrationFallbacks: ['wide'] },
 }
 
 const MISSING_IMAGE: PublicImage = {

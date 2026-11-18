@@ -24,6 +24,9 @@ export const BLOCK_IMAGE_SIZES = {
   /** Destination Header, text-beside-photo layout: the photo takes 1.15fr of a 1fr/1.15fr split, 48px gap. */
   destinationSplit: '(min-width: 1448px) 700px, (min-width: 768px) 52vw, calc(100vw - 48px)',
 
+  /** Destination Header, editorial layout: a centred photo, at most 720px wide. */
+  destinationEditorial: '(min-width: 768px) 720px, calc(100vw - 48px)',
+
   /** The lead card of a block: 1.5fr of a 1.5fr/1fr split. Measured at 762px. */
   hero: '(min-width: 1024px) 780px, 100vw',
 

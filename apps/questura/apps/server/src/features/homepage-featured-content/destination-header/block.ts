@@ -56,10 +56,18 @@ export const DestinationHeaderBlock: Block = {
       required: false,
       defaultValue: 'band',
       options: DESTINATION_HEADER_LAYOUTS.map((value) => ({
-        label: value === 'band' ? 'Photo band, text below' : 'Text beside photo',
+        label:
+          value === 'band'
+            ? 'Photo band, text below'
+            : value === 'split'
+              ? 'Text beside photo'
+              : 'Editorial photo, text below',
         value,
       })),
-      admin: { description: 'band: photo inside the margins, text centred below. split: text left, photo right.' },
+      admin: {
+        description:
+          'band: photo strip, text centred below. split: text left, photo right. editorial: 4:3 photo centred, text below.',
+      },
     },
     {
       name: 'destinationFocusX',

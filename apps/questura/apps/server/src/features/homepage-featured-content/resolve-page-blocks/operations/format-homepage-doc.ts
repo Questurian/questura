@@ -1,3 +1,4 @@
+import { resolveCountryCode } from '@/features/location/public/countryCode'
 import type { LocationHomepageDoc } from '../types'
 
 import { resolvePageBlocks } from './resolve-blocks'
@@ -21,6 +22,7 @@ export function formatHomepageDoc(
           countryName: location.countryName ?? null,
           cityName: location.cityName ?? null,
           neighborhoodName: location.neighborhoodName ?? null,
+          countryCode: resolveCountryCode(location.countryName, location.country),
         }
       : null,
     pageBlocks: resolvedBlocks,

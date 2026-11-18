@@ -86,6 +86,7 @@ describe('location homepage routes', () => {
         cityName: 'Lima',
         neighborhoodName: null,
         label: 'Lima, Peru',
+        countryCode: 'PE',
       },
       pageBlocks: [],
     })

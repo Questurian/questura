@@ -1,12 +1,16 @@
 /** Longest Destination Header description, in characters. Room for a full paragraph or two. */
 export const DESTINATION_HEADER_DESCRIPTION_MAX = 1500
 
-/** A: the photo inside the page margins, text centred below. C: text beside the photo. */
-export const DESTINATION_HEADER_LAYOUTS = ['band', 'split'] as const
+/**
+ * band: a short photo strip inside the page margins, text centred below.
+ * split: text beside the photo.
+ * editorial: a magazine-proportion photo (the 4:3 editorial crop) centred, text below.
+ */
+export const DESTINATION_HEADER_LAYOUTS = ['band', 'split', 'editorial'] as const
 export type DestinationHeaderLayout = (typeof DESTINATION_HEADER_LAYOUTS)[number]
 
 export function destinationHeaderLayout(value: unknown): DestinationHeaderLayout {
-  return value === 'split' ? 'split' : 'band'
+  return value === 'split' || value === 'editorial' ? value : 'band'
 }
 
 /**
