@@ -8,7 +8,11 @@ import type {
 import CountryFlag from "@/components/shared/ui/CountryFlag";
 import { PublicImage } from "@/components/media/PublicImage";
 import { BLOCK_IMAGE_SIZES } from "../blockImageSizes";
-import { BLOCK_GUTTER_CLASS, BlockSection } from "../BlockSection";
+import {
+  BLOCK_GUTTER_CLASS,
+  BLOCK_MAX_WIDTH_CLASS,
+  BlockSection,
+} from "../BlockSection";
 import { heroImagePriority } from "../heroImagePriority";
 
 /** Paragraphs are separated by a blank line in the stored text. */
@@ -33,7 +37,8 @@ function ready(image: EditorialFeatureImage | null | undefined) {
 
 /**
  * Opens a destination page. Three layouts, all inside the page margins:
- * `band` puts a photo strip above a centred flag, name and description. The
+ * `band` puts a photo strip above the flag and name (left) and the
+ * description (right; all stacked on the left edge on phones). The
  * strip keeps one 7:2 shape from tablets up (never under 200px tall, so phones
  * get a taller crop), which is the shape the editor's drag frame shows. The
  * space under the block is larger than any gap inside it, so the header reads
@@ -94,7 +99,7 @@ export function DestinationHeaderPreview({
     </div>
   ) : null;
 
-  const text = (
+  const centredText = (
     <div className="mx-auto max-w-[32rem] text-center">
       {location?.countryCode ? (
         <CountryFlag
@@ -118,6 +123,40 @@ export function DestinationHeaderPreview({
       ))}
     </div>
   );
+
+  // Band and full width: flag and name on the left, paragraph on the right,
+  // its first line level with the top of the name's capitals (36px = the
+  // 20px flag, the 10px gap and the name's half-leading above its caps).
+  // Phones stack all three on the left edge.
+  const sideText = (
+    <div className="768:grid 768:grid-cols-[minmax(0,4fr)_minmax(0,7fr)] 768:gap-x-8 1024:gap-x-12">
+      <div>
+        {location?.countryCode ? (
+          <CountryFlag
+            code={location.countryCode}
+            countryName={location.countryName ?? undefined}
+            className="block h-[18px] w-[27px] 768:h-[20px] 768:w-[30px]"
+          />
+        ) : null}
+        {block.sectionHeading ? (
+          <h2 className="mt-2.5 font-display text-[2.375rem] font-normal leading-none text-foreground 768:text-[2.875rem]">
+            {block.sectionHeading}
+          </h2>
+        ) : null}
+      </div>
+      <div className="mt-4 max-w-[40rem] 768:mt-0 768:pt-[36px]">
+        {body.map((paragraph, index) => (
+          <p
+            key={index}
+            className={`${index === 0 ? "" : "mt-3"} font-editorial text-[1rem] font-semibold leading-[1.55] text-foreground [text-wrap:pretty] 768:text-[1.0625rem]`}
+          >
+            {paragraph}
+          </p>
+        ))}
+      </div>
+    </div>
+  );
+  const text = layout === "editorial" ? centredText : sideText;
 
   if (layout === "split") {
     // Side by side only from 1024px: narrower, the paragraph turns into a
@@ -184,7 +223,11 @@ export function DestinationHeaderPreview({
         className="relative bg-background pb-10 768:pb-14"
       >
         {photo}
-        <div className={`pt-7 768:pt-9 ${BLOCK_GUTTER_CLASS}`}>{text}</div>
+        <div
+          className={`pt-7 768:pt-9 ${BLOCK_MAX_WIDTH_CLASS} ${BLOCK_GUTTER_CLASS}`}
+        >
+          {text}
+        </div>
       </section>
     );
   }

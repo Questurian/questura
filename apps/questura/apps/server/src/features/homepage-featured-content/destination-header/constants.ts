@@ -2,10 +2,10 @@
 export const DESTINATION_HEADER_DESCRIPTION_MAX = 1500
 
 /**
- * band: a short photo strip inside the page margins, text centred below.
+ * band: a short photo strip inside the page margins; below it the name on the left, the description on the right.
  * split: text beside the photo.
  * editorial: a magazine-proportion photo (the 4:3 editorial crop) centred, text below.
- * full: the photo edge to edge across the whole screen, text centred below.
+ * full: the photo edge to edge across the whole screen; name left, description right below.
  */
 export const DESTINATION_HEADER_LAYOUTS = ['band', 'split', 'editorial', 'full'] as const
 export type DestinationHeaderLayout = (typeof DESTINATION_HEADER_LAYOUTS)[number]
