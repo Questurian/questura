@@ -16,20 +16,26 @@ export function normalizeArticleTypeLabel(label: string): string {
   return label.trim().toLowerCase() === 'questurian maps' ? MAPS_LABEL : label
 }
 
+export function MapsPin(): JSX.Element {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 12 16"
+      className="kicker-pin"
+      fill="currentColor"
+    >
+      <path d="M6 0C2.69 0 0 2.6 0 5.82 0 10.18 6 16 6 16s6-5.82 6-10.18C12 2.6 9.31 0 6 0Zm0 8.2a2.3 2.3 0 1 1 0-4.6 2.3 2.3 0 0 1 0 4.6Z" />
+    </svg>
+  )
+}
+
 export function ArticleKickerLabel({ label }: { label: string }): JSX.Element {
   const text = normalizeArticleTypeLabel(label)
   if (text !== MAPS_LABEL) return <>{text}</>
 
   return (
     <span className="whitespace-nowrap">
-      <svg
-        aria-hidden="true"
-        viewBox="0 0 12 16"
-        className="kicker-pin"
-        fill="currentColor"
-      >
-        <path d="M6 0C2.69 0 0 2.6 0 5.82 0 10.18 6 16 6 16s6-5.82 6-10.18C12 2.6 9.31 0 6 0Zm0 8.2a2.3 2.3 0 1 1 0-4.6 2.3 2.3 0 0 1 0 4.6Z" />
-      </svg>
+      <MapsPin />
       {text}
     </span>
   )

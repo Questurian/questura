@@ -61,8 +61,8 @@ export const BLOCK_IMAGE_SIZES = {
   carouselCard:
     '(min-width: 1024px) 410px, (min-width: 768px) 340px, (min-width: 380px) 291px, calc(100vw - 5.25rem)',
 
-  /** A maps carousel card: `w-[68vw] 380:w-[220px] 480:w-[245px]`. */
-  mapCard: '(min-width: 480px) 245px, (min-width: 380px) 220px, 68vw',
+  /** Questura Maps: phone thumbnail, two tablet columns, three desktop columns. */
+  mapCard: '(min-width: 1400px) 435px, (min-width: 1080px) calc((100vw - 96px) / 3), (min-width: 768px) calc((100vw - 72px) / 2), 96px',
 
   /**
    * A Questurian Maps card: three across from 1024, two across from 768. On a
