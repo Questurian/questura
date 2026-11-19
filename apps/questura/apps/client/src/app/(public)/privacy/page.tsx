@@ -31,7 +31,7 @@ export default function PrivacyPage() {
         <h1 className="font-display text-[1.8rem] 480:text-[2.2rem] text-foreground leading-[1.15]">
           Privacy
         </h1>
-        <p className="text-[0.85rem] text-foreground/60 mt-2">Last updated 20 November 2026</p>
+        <p className="text-[0.85rem] text-foreground/60 mt-2">Last updated 19 November 2026</p>
 
         <p className={`${body} mt-6`}>
           You can read Questurian without an account, and we do not run advertising or tracking
