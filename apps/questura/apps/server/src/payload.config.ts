@@ -33,6 +33,7 @@ import { SingleTypeListicles } from './features/articles/single-type-listicles/c
 import { ListicleItineraries } from './features/articles/listicle-itineraries/collections'
 import { ArticleRedirects } from './features/articles/redirects/collections'
 import { CuratedPageGlobals, LocationHomepages } from './features/homepage-featured-content'
+import { DestinationHeaderStyleGlobal } from './features/homepage-featured-content/destination-header/global'
 import { VisitorProfiles } from './features/visitor-auth'
 import { Bookmarks } from './features/bookmarks'
 import { NewsletterIssues, NewsletterSubscribers } from './features/newsletter'
@@ -63,7 +64,7 @@ export default buildConfig({
   cors: APP_CONFIG.CORS_ORIGINS,
   csrf: APP_CONFIG.CORS_ORIGINS,
   collections: [Users, ServiceAccounts, Authors, EmailLogs, VisitorProfiles, Bookmarks, NewsletterSubscribers, NewsletterIssues, MediaAsset, MediaSet, Articles, SingleTypeListicles, ListicleItineraries, ArticleRedirects, Locations, Categories, Tags, Accommodations, Dining, Attractions, Tours, Airbnbs, Nightlife, KeyLocations, AffiliateProducts, InstagramPosts, PerfectForTags, Currencies, LocationHomepages, StripeWebhookEvents, RefreshJobs],
-  globals: CuratedPageGlobals,
+  globals: [...CuratedPageGlobals, DestinationHeaderStyleGlobal],
   // Payload answers its own errors, so a 500 from its REST or GraphQL
   // handlers would otherwise reach the logs and never Sentry.
   hooks: {

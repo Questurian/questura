@@ -56,6 +56,7 @@ export const CONTENT_TABLES = [
   'currencies',
   'currencies_regions',
   'currencies_used_in',
+  'destination_header_style',
   'dining',
   'dining_gallery',
   'dining_instagram_gallery',
