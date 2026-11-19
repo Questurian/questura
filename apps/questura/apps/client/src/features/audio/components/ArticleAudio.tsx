@@ -236,13 +236,13 @@ function SectionPlayer({ clip, state, returnTo }: { clip: ArticleAudioClip; stat
           {!member ? <LockIcon /> : loading ? <Spinner /> : playing ? <PauseIcon /> : <PlayIcon />}
         </button>
         <div className="aud-meta">
-          <p className="aud-label">
+          <div className="aud-label">
             <HeadphonesIcon />
             {label}
-          </p>
-          <p className="aud-sub">
+          </div>
+          <div className="aud-sub">
             {clip.title} · read by {clip.voiceName} · {formatClock(clip.durationSeconds)}
-          </p>
+          </div>
         </div>
         {member ? (
           <div className="aud-tools">
@@ -271,7 +271,7 @@ function SectionPlayer({ clip, state, returnTo }: { clip: ArticleAudioClip; stat
           </div>
         </>
       ) : null}
-      {isCurrent && state.phase === 'error' && state.error ? <p className="aud-error">{state.error}</p> : null}
+      {isCurrent && state.phase === 'error' && state.error ? <div className="aud-error">{state.error}</div> : null}
       {lockOpen ? <LockPanel access={state.access} returnTo={`${returnTo}#${slotElementId(clip.sectionKey)}`} /> : null}
     </div>
   )
@@ -282,10 +282,10 @@ function LockPanel({ access, returnTo }: { access: ReaderAccess; returnTo: strin
   const signedIn = access === 'not-member'
   return (
     <div className="aud-lock" role="region" aria-label="Members-only audio">
-      <p className="aud-lock-title">Listen with a Questurian membership</p>
-      <p className="aud-lock-text">
+      <div className="aud-lock-title">Listen with a Questurian membership</div>
+      <div className="aud-lock-text">
         Members can listen to every section of our guides, read aloud, with the text following along as you go.
-      </p>
+      </div>
       <div className="aud-lock-actions">
         <Link href={href} className="aud-lock-cta">
           {signedIn ? 'Join to listen' : 'Become a member to listen'}

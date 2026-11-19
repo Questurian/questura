@@ -69,6 +69,15 @@
 .aud-player p {
   margin: 0;
 }
+/* The prose's link look (blue words, underline, hover wash) is not for the player's buttons. */
+.article-prose .aud-lock a {
+  background-image: none;
+  text-decoration: none;
+}
+.article-prose .aud-lock-signin a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
 .aud-row {
   display: flex;
   align-items: center;
@@ -120,7 +129,7 @@
   height: 13px;
 }
 .aud-sub {
-  margin-top: 3px !important;
+  margin-top: 3px;
 }
 .aud-tools {
   display: flex;
@@ -226,7 +235,7 @@
   font-variant-numeric: tabular-nums;
 }
 .aud-error {
-  margin-top: 8px !important;
+  margin-top: 8px;
   font-size: 13px;
   color: #a3261b;
 }
@@ -270,7 +279,7 @@
   color: var(--foreground);
 }
 .aud-lock-text {
-  margin-top: 6px !important;
+  margin-top: 6px;
   font-size: 14px;
   line-height: 1.55;
   color: rgb(26 26 26 / 0.75);
