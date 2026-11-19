@@ -68,7 +68,7 @@ export const DestinationHeaderBlock: Block = {
       })),
       admin: {
         description:
-          'band: photo strip, text centred below. split: text left, photo right. editorial: 4:3 photo centred, text below. full: photo edge to edge, text centred below.',
+          'band: photo strip, name left and text right below. split: text left, photo right. editorial: 4:3 photo centred, text centred below. full: photo edge to edge, name left and text right below.',
       },
     },
     {
