@@ -154,5 +154,6 @@ export function formatPublicArticleItem(
     ...(imageWide ? { imageWide } : {}),
     ...(imageHero ? { imageHero } : {}),
     ...(articlePath ? { articlePath } : {}),
+    ...(item.hasAudio === true ? { hasAudio: true } : {}),
   }
 }

@@ -8,6 +8,7 @@ import type {
 } from '../../../types'
 import { BlockSection } from '../BlockSection'
 import { AuthorLink } from '@/features/authors/components/AuthorLink'
+import { AudioBadge } from '@/features/audio/components/AudioBadge'
 import { NavigableImageTarget } from '../NavigableImageTarget'
 import { PublicImage } from '@/components/media/PublicImage'
 import { BLOCK_IMAGE_SIZES } from '../blockImageSizes'
@@ -57,6 +58,7 @@ function ThreeArticleCard({
           href={articlePath}
           label={`Read ${article.title}`}
         />
+        {article?.hasAudio ? <AudioBadge /> : null}
       </div>
 
       {/* Copy starts on the photo's left edge, like every other card. */}
@@ -141,6 +143,7 @@ function GridArticleCard({
           href={articlePath}
           label={`Read ${article.title}`}
         />
+        {article?.hasAudio ? <AudioBadge /> : null}
       </div>
 
       <div className="city-article-content flex flex-1 flex-col pt-4">

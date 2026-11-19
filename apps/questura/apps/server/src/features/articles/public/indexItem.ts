@@ -35,6 +35,8 @@ export type IndexItem = {
   publishedAt: string | null
   href: string
   thumbnail: { url: string; alt: string | null } | null
+  /** At least one AudioClip: cards draw the Audio badge (ADR-0018). */
+  hasAudio?: boolean
 }
 
 function pickTitle(doc: Record<string, unknown>): string {

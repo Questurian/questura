@@ -9,6 +9,7 @@ import { sanitizeAirbnbCards } from './airbnbCards'
 import { sanitizeHotelCards } from './hotelCards'
 import { sanitizeStayLists } from './stayLists'
 import { anchorArticleHeadings } from './headingAnchors'
+import { publicAudioForArticle } from '@/features/audio-clips/lib/public-audio'
 
 async function toLexicalHTML(data: unknown): Promise<string> {
   return convertLexicalToHTMLAsync({
@@ -130,9 +131,15 @@ async function serializeBlurbArray(
   )
 }
 
+export type SerializeArticleOptions = {
+  /** The studio's section reader serializes only to find the text; it needs no players. */
+  skipAudio?: boolean
+}
+
 async function serializeStandardArticleBlocks(
   article: Record<string, unknown>,
   payload?: Payload,
+  options: SerializeArticleOptions = {},
 ) {
   const blocks = article.contentBlocks as Array<Record<string, unknown>> | undefined
   if (!Array.isArray(blocks)) return
@@ -157,6 +164,15 @@ async function serializeStandardArticleBlocks(
   const contents = anchorArticleHeadings(blocks)
   if (article.showTableOfContents === true && contents.length > 0) {
     article.tableOfContents = contents
+  }
+
+  // AudioClips (ADR-0018): which sections have a player, read against the
+  // whole body's headings before the paywall trims it, so a non-member sees
+  // every player (locked) and a member's swapped-in body finds its slots.
+  // Titles and lengths only: the words and the file are members-only.
+  if (!options.skipAudio && payload && typeof article.id === 'number') {
+    const audio = await publicAudioForArticle(payload, article.id, contents.map((entry) => entry.id))
+    if (audio) article.audio = audio
   }
 }
 
@@ -253,8 +269,9 @@ export async function serializeArticleByCollection(
   collection: ArticleCollectionSlug,
   article: Record<string, unknown>,
   payload?: Payload,
+  options: SerializeArticleOptions = {},
 ) {
-  if (collection === 'articles') await serializeStandardArticleBlocks(article, payload)
+  if (collection === 'articles') await serializeStandardArticleBlocks(article, payload, options)
   if (collection === 'single-type-listicles') await serializeMapsListicleBlocks(article, payload)
   if (collection === 'listicle-itineraries') await serializeItineraryBlocks(article, payload)
   serializeArticleAuthor(article)

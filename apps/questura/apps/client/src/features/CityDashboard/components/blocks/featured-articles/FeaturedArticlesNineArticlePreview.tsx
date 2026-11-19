@@ -10,6 +10,7 @@ import { BLOCK_GUTTER_CLASS, BLOCK_MAX_WIDTH_CLASS } from '../BlockSection'
 import { BlockSectionHeader } from '../BlockSectionHeader'
 import { BLOCK_TYPE, blockTitleLength } from '../blockType'
 import { AuthorLink } from '@/features/authors/components/AuthorLink'
+import { AudioBadge } from '@/features/audio/components/AudioBadge'
 import { NavigableImageTarget } from '../NavigableImageTarget'
 import { PublicImage, PublicSource } from '@/components/media/PublicImage'
 import { BLOCK_IMAGE_SIZES } from '../blockImageSizes'
@@ -66,6 +67,7 @@ function WideCard({ article }: SlotCardProps): JSX.Element {
           </picture>
         ) : null}
         <NavigableImageTarget href={article.articlePath} label={`Read ${article.title}`} />
+        {article?.hasAudio ? <AudioBadge /> : null}
       </div>
 
       <div className="city-article-content flex w-full flex-col justify-start py-0">
@@ -134,6 +136,7 @@ function CenterHeroCard({ article, imagePriority }: CenterHeroCardProps): JSX.El
           </picture>
         ) : null}
         <NavigableImageTarget href={article.articlePath} label={`Read ${article.title}`} />
+        {article?.hasAudio ? <AudioBadge /> : null}
       </div>
 
       <div className="city-article-content flex w-full flex-col justify-start py-0">
@@ -222,6 +225,7 @@ function HorizontalCard({ article }: SlotCardProps): JSX.Element {
           />
         ) : null}
         <NavigableImageTarget href={article.articlePath} label={`Read ${article.title}`} />
+        {article?.hasAudio ? <AudioBadge /> : null}
       </div>
     </section>
   )
@@ -273,6 +277,7 @@ function CompactListCard({ article }: SlotCardProps): JSX.Element {
           />
         ) : null}
         <NavigableImageTarget href={article.articlePath} label={`Read ${article.title}`} />
+        {article?.hasAudio ? <AudioBadge /> : null}
       </div>
     </section>
   )

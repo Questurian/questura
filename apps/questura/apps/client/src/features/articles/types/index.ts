@@ -1,3 +1,4 @@
+import type { ArticleAudio } from '@/features/audio/lib/slots'
 import type { GateState } from '@/features/articles/lib/gate'
 import type { StayLead, StayPosition } from '@/features/articles/lib/stayBoxes'
 
@@ -252,6 +253,8 @@ export type Article = {
    * server builds it from the whole body, so it names locked parts too.
    */
   tableOfContents?: TableOfContentsEntry[]
+  /** AudioClips' players: which sections have one, titles and lengths only (ADR-0018). */
+  audio?: ArticleAudio | null
 }
 
 export type ArticleDisplayLayout = 'classic' | 'dark-hero' | 'centered'

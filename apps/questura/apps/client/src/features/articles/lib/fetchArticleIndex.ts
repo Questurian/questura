@@ -11,6 +11,8 @@ export type ArticleIndexItem = {
   publishedAt: string | null
   href: string
   thumbnail: { url: string; alt: string | null } | null
+  /** At least one AudioClip: the card draws the Audio badge (ADR-0018). */
+  hasAudio?: boolean
 }
 
 export type ArticleIndexResponse = {

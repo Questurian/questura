@@ -8,6 +8,7 @@ import type {
 } from '../../../types'
 import { BLOCK_GUTTER_CLASS, BLOCK_MAX_WIDTH_CLASS } from '../BlockSection'
 import { AuthorLink } from '@/features/authors/components/AuthorLink'
+import { AudioBadge } from '@/features/audio/components/AudioBadge'
 import { NavigableImageTarget } from '../NavigableImageTarget'
 import { PublicImage } from '@/components/media/PublicImage'
 import { BLOCK_IMAGE_SIZES } from '../blockImageSizes'
@@ -121,6 +122,7 @@ export function FeaturedArticleOneArticlePreview({
         <div className="city-article-image-shell relative aspect-square overflow-hidden bg-[#1a1a1a]">
           <ArticleImage src={mobileImageUrl} priority={imagePriority} className="h-full w-full object-cover" />
           <NavigableImageTarget href={articlePath} label={`Read ${article.title}`} />
+          {article?.hasAudio ? <AudioBadge /> : null}
         </div>
       ) : null}
       <div className="relative bg-[#0a0a0a]">
@@ -192,6 +194,7 @@ export function FeaturedArticleOneArticlePreview({
             <ArticleImage src={desktopImageUrl} priority={imagePriority} className="h-full w-full object-cover" />
           ) : null}
           <NavigableImageTarget href={articlePath} label={`Read ${article.title}`} />
+          {article?.hasAudio ? <AudioBadge /> : null}
         </div>
       </div>
     </>

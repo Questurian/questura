@@ -4,6 +4,7 @@ import { planArticleAds } from '@/features/articles/lib/adPlacement'
 import { ADS_ENABLED } from '@/features/articles/lib/ads'
 import { pairStayBoxes } from '@/features/articles/lib/stayBoxes'
 import type { ContentBlock, TableOfContentsEntry } from '@/features/articles/types'
+import { withAudioSlots, type ArticleAudio } from '@/features/audio/lib/slots'
 
 /**
  * A member's whole body of a locked article, drawn in the browser once
@@ -13,9 +14,11 @@ import type { ContentBlock, TableOfContentsEntry } from '@/features/articles/typ
 export function MemberArticleBody({
   blocks,
   contents,
+  audio,
 }: {
   blocks: ContentBlock[]
   contents?: TableOfContentsEntry[]
+  audio?: ArticleAudio | null
 }) {
   // A section link (`…#staying-safe`) to a locked part had nothing to land on
   // when the page loaded; the section exists now, so go to it.
@@ -27,7 +30,7 @@ export function MemberArticleBody({
 
   // A member reads no seam, so the plan is the whole body's, as on a free
   // article, and the Airbnbs are boxed with their sections first, as there.
-  const paired = pairStayBoxes(blocks)
+  const paired = withAudioSlots(pairStayBoxes(blocks), audio)
   const adPlan = planArticleAds(paired, { enabled: ADS_ENABLED })
   return <ArticleBlockStream blocks={paired} plan={adPlan} contents={contents} />
 }

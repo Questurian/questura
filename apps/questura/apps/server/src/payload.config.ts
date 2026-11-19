@@ -36,6 +36,7 @@ import { CuratedPageGlobals, LocationHomepages } from './features/homepage-featu
 import { DestinationHeaderStyleGlobal } from './features/homepage-featured-content/destination-header/global'
 import { VisitorProfiles } from './features/visitor-auth'
 import { Bookmarks } from './features/bookmarks'
+import { AudioClips, AudioListens } from './features/audio-clips'
 import { NewsletterIssues, NewsletterSubscribers } from './features/newsletter'
 import { StripeWebhookEvents } from './features/payments/collections/StripeWebhookEvents'
 import { APP_CONFIG, APP_URLS } from './shared/config'
@@ -63,7 +64,7 @@ export default buildConfig({
   serverURL: APP_URLS.backendLocal,
   cors: APP_CONFIG.CORS_ORIGINS,
   csrf: APP_CONFIG.CORS_ORIGINS,
-  collections: [Users, ServiceAccounts, Authors, EmailLogs, VisitorProfiles, Bookmarks, NewsletterSubscribers, NewsletterIssues, MediaAsset, MediaSet, Articles, SingleTypeListicles, ListicleItineraries, ArticleRedirects, Locations, Categories, Tags, Accommodations, Dining, Attractions, Tours, Airbnbs, Nightlife, KeyLocations, AffiliateProducts, InstagramPosts, PerfectForTags, Currencies, LocationHomepages, StripeWebhookEvents, RefreshJobs],
+  collections: [Users, ServiceAccounts, Authors, EmailLogs, VisitorProfiles, Bookmarks, NewsletterSubscribers, NewsletterIssues, MediaAsset, MediaSet, Articles, SingleTypeListicles, ListicleItineraries, ArticleRedirects, AudioClips, AudioListens, Locations, Categories, Tags, Accommodations, Dining, Attractions, Tours, Airbnbs, Nightlife, KeyLocations, AffiliateProducts, InstagramPosts, PerfectForTags, Currencies, LocationHomepages, StripeWebhookEvents, RefreshJobs],
   globals: [...CuratedPageGlobals, DestinationHeaderStyleGlobal],
   // Payload answers its own errors, so a 500 from its REST or GraphQL
   // handlers would otherwise reach the logs and never Sentry.

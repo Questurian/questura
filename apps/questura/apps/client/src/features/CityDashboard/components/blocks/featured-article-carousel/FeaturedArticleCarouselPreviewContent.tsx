@@ -11,6 +11,7 @@ import type {
 import { BLOCK_GUTTER_CLASS, BlockSection, CAROUSEL_CARD_WIDTH_CLASS } from '../BlockSection'
 import { useSnapCarousel } from '../useSnapCarousel'
 import { AuthorLink } from '@/features/authors/components/AuthorLink'
+import { AudioBadge } from '@/features/audio/components/AudioBadge'
 import { NavigableImageTarget } from '../NavigableImageTarget'
 import { BLOCK_IMAGE_SIZES } from '../blockImageSizes'
 import { EAGER_IMAGE, LAZY_IMAGE, isPriorityImage, type ImagePriority } from '../heroImagePriority'
@@ -61,6 +62,7 @@ function CarouselArticleCard({ article, isPriority, isLast }: CarouselArticleCar
           />
         ) : null}
         <NavigableImageTarget href={articlePath} label={`Read ${article.title}`} />
+        {article?.hasAudio ? <AudioBadge /> : null}
       </div>
 
       <div className="pt-4 flex flex-col flex-1">

@@ -10,6 +10,7 @@ import { BLOCK_GUTTER_CLASS, BLOCK_MAX_WIDTH_CLASS } from '../BlockSection'
 import { BlockSectionHeader } from '../BlockSectionHeader'
 import { BLOCK_TYPE, blockTitleLength } from '../blockType'
 import { AuthorLink } from '@/features/authors/components/AuthorLink'
+import { AudioBadge } from '@/features/audio/components/AudioBadge'
 import { NavigableImageTarget } from '../NavigableImageTarget'
 import { PublicImage } from '@/components/media/PublicImage'
 import { BLOCK_IMAGE_SIZES } from '../blockImageSizes'
@@ -58,6 +59,7 @@ function MagazineHeroCard({ article, imagePriority }: MagazineHeroCardProps): JS
           />
         ) : null}
         <NavigableImageTarget href={articlePath} label={`Read ${article.title}`} />
+        {article?.hasAudio ? <AudioBadge /> : null}
       </div>
 
       {/* No inline padding: the copy starts on the photo's left edge. The
@@ -125,6 +127,7 @@ function SidebarMediaCard({ article }: SidebarMediaCardProps): JSX.Element {
           />
         ) : null}
         <NavigableImageTarget href={articlePath} label={`Read ${article.title}`} />
+        {article?.hasAudio ? <AudioBadge /> : null}
       </div>
 
       <div className="city-five-side-copy">

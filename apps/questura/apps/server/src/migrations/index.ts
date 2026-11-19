@@ -90,6 +90,7 @@ import * as migration_20261118_173415_destination_header_layout_and_focus from '
 import * as migration_20261118_182918_destination_header_editorial_layout from './20261118_182918_destination_header_editorial_layout';
 import * as migration_20261118_213739_destination_header_full_width_layout from './20261118_213739_destination_header_full_width_layout';
 import * as migration_20261119_163105_destination_header_style from './20261119_163105_destination_header_style';
+import * as migration_20261120_010000_add_audio_clips_and_listens from './20261120_010000_add_audio_clips_and_listens';
 
 export const migrations = [
   {
@@ -551,5 +552,10 @@ export const migrations = [
     up: migration_20261119_163105_destination_header_style.up,
     down: migration_20261119_163105_destination_header_style.down,
     name: '20261119_163105_destination_header_style',
+  },
+  {
+    up: migration_20261120_010000_add_audio_clips_and_listens.up,
+    down: migration_20261120_010000_add_audio_clips_and_listens.down,
+    name: '20261120_010000_add_audio_clips_and_listens',
   },
 ];
