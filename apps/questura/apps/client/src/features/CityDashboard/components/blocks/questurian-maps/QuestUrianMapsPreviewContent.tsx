@@ -1,117 +1,50 @@
 'use client'
 
+import { useState, type JSX } from 'react'
+
 import Link from '@/components/navigation/PublicLink'
-import { useRef, useState, type JSX } from 'react'
-
-import type {
-  CityHomepageArticleBlock,
-  FeaturedArticleTeaser,
-  HomepageBlockLayoutProps,
-} from '../../../types'
-import { BlockSection, BLOCK_GUTTER_CLASS } from '../BlockSection'
-import { NavigableImageTarget } from '../NavigableImageTarget'
-import { PublicImage } from '@/components/media/PublicImage'
+import { AuthorLink } from '@/features/authors/components/AuthorLink'
+import type { CityHomepageArticleBlock, FeaturedArticleTeaser, HomepageBlockLayoutProps } from '../../../types'
+import { BLOCK_TYPE } from '../blockType'
+import { ArticleKickerLabel, MapsPin } from '../ArticleKickerLabel'
+import { BlockSection } from '../BlockSection'
 import { BLOCK_IMAGE_SIZES } from '../blockImageSizes'
-import { isPriorityImage } from '../heroImagePriority'
-import { ArticleKickerLabel } from '../ArticleKickerLabel'
+import { EAGER_IMAGE, LAZY_IMAGE, isPriorityImage } from '../heroImagePriority'
+import { NavigableImageTarget } from '../NavigableImageTarget'
+import { PhoneSquareImage } from '../PhoneSquareImage'
+import styles from './QuesturaMaps.module.css'
 
-function MapPinIcon(): JSX.Element {
-  return (
-    <svg
-      width="20"
-      height="26"
-      viewBox="0 0 20 26"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      aria-hidden="true"
-      className="shrink-0"
-    >
-      <path
-        d="M10 0C4.477 0 0 4.477 0 10c0 7.5 10 16 10 16s10-8.5 10-16C20 4.477 15.523 0 10 0zm0 13.5a3.5 3.5 0 110-7 3.5 3.5 0 010 7z"
-        fill="#1e3599"
-      />
-    </svg>
-  )
-}
-
-function MapCarouselCard({
-  item,
-  isPriority,
-  isLast,
-}: {
-  item: FeaturedArticleTeaser
-  isPriority: boolean
-  isLast: boolean
-}): JSX.Element {
-  // Success needs no state: the image paints from the server HTML the moment
-  // it decodes. Only a broken URL needs JavaScript, and only to fall back to
-  // the grey tile behind it.
-  const [hasFailed, setHasFailed] = useState(false)
+function MapCard({ item, isPriority }: { item: FeaturedArticleTeaser; isPriority: boolean }): JSX.Element {
+  const [failed, setFailed] = useState(false)
+  const widePhoto = item.imageWide?.url || item.imageUrl
+  const author = item.author
+  const name = author?.name?.trim()
 
   return (
-    <article
-      className={`flex-none snap-start flex flex-col w-[68vw] 380:w-[220px] 480:w-[245px]${!isLast ? ' mr-5 border-r border-[rgba(95,89,82,0.15)]' : ''}`}
-    >
-      <p className="font-[family-name:var(--font-dm-sans)] text-[0.62rem] font-semibold uppercase tracking-[0.1em] text-[#1e3599] mb-2 leading-none">
-        <ArticleKickerLabel label="Maps" />
-      </p>
-
-      <div className="relative aspect-square overflow-hidden bg-[#d7dcde]">
-        {item.imageUrl ? (
-          <PublicImage
-            src={item.imageUrl}
-            alt={item.title}
-            className={`h-full w-full object-cover${hasFailed ? ' opacity-0' : ''}`}
-            fetchPriority={isPriority ? 'high' : 'auto'}
-            loading={isPriority ? 'eager' : 'lazy'}
-            onError={() => setHasFailed(true)}
+    <article className={styles.card}>
+      <div className={styles.photo}>
+        {!failed && (
+          <PhoneSquareImage
+            article={{ ...item, imageUrl: widePhoto }}
             sizes={BLOCK_IMAGE_SIZES.mapCard}
+            priority={isPriority ? EAGER_IMAGE : LAZY_IMAGE}
+            onError={() => setFailed(true)}
           />
-        ) : null}
+        )}
         <NavigableImageTarget href={item.articlePath} label={`Open ${item.title}`} />
       </div>
-
-      <h3 className="mt-3 font-editorial font-semibold text-[1.05rem] leading-[1.2] text-[#1a1a1a]">
-        {item.articlePath ? <Link href={item.articlePath}>{item.title}</Link> : item.title}
-      </h3>
-    </article>
-  )
-}
-
-function MapGridCard({
-  item,
-  isPriority,
-}: {
-  item: FeaturedArticleTeaser
-  isPriority: boolean
-}): JSX.Element {
-  const imgSrc = item.imageUrlSquare ?? item.imageUrl
-  // See MapCarouselCard: the success path is native, the failure path is not.
-  const [hasFailed, setHasFailed] = useState(false)
-
-  return (
-    <div className="city-four-side-card" style={{ background: '#fafaf8' }}>
-      <div className="city-four-side-image relative">
-        {imgSrc ? (
-          <PublicImage
-            src={imgSrc}
-            alt={item.title}
-            className={`relative z-10 h-full w-full object-cover${hasFailed ? ' opacity-0' : ''}`}
-            fetchPriority={isPriority ? 'high' : 'auto'}
-            loading={isPriority ? 'eager' : 'lazy'}
-            onError={() => setHasFailed(true)}
-            sizes={BLOCK_IMAGE_SIZES.quarterColumn}
-          />
-        ) : null}
-        <NavigableImageTarget href={item.articlePath} label={`Open ${item.title}`} />
-      </div>
-      <div className="city-four-side-copy">
-        <p className="city-four-side-type"><ArticleKickerLabel label="Maps" /></p>
-        <h3 className="city-four-side-title">
+      <div className={styles.copy}>
+        <p className={BLOCK_TYPE.kicker}><ArticleKickerLabel label="Maps" /></p>
+        <h3 className={styles.title}>
           {item.articlePath ? <Link href={item.articlePath}>{item.title}</Link> : item.title}
         </h3>
+        {name && (
+          <p className={styles.byline}>
+            By <AuthorLink authorSlug={author?.slug} authorId={author?.id} className="hover:underline">{name}</AuthorLink>
+          </p>
+        )}
       </div>
-    </div>
+    </article>
   )
 }
 
@@ -119,85 +52,19 @@ export function QuestUrianMapsPreview({
   block,
   blockIndex,
 }: HomepageBlockLayoutProps<CityHomepageArticleBlock>): JSX.Element | null {
-  const items = block.items ?? []
-
-  const scrollRef = useRef<HTMLDivElement>(null)
-
-  if (items.length === 0) return null
-
-  const row1 = items.slice(0, 3)
-  const row2 = items.slice(3, 6)
+  if (!block.items?.length) return null
 
   return (
-    // Flush BlockSection: the mobile carousel bleeds to the wrapper edge, so
-    // the gutter is applied per inner element via BLOCK_GUTTER_CLASS instead.
-    <BlockSection className="py-10 bg-[#fafaf8]" flush band>
-      {/* Editorial rule-on-sides header */}
-      <div className={`flex items-center gap-4 ${BLOCK_GUTTER_CLASS} mb-8`}>
-        <div className="flex-1 h-px bg-[#d6d0ca]" aria-hidden="true" />
-        <div className="flex flex-col items-center gap-1.5 shrink-0">
-          <MapPinIcon />
-          <h2 className="font-display font-bold uppercase tracking-[0.2em] text-[#1e3599] text-[0.95rem] 768:text-[1.1rem] 1024:text-[1.2rem]">
-            Questurian Maps
-          </h2>
-        </div>
-        <div className="flex-1 h-px bg-[#d6d0ca]" aria-hidden="true" />
-      </div>
-
-      {/* Mobile: horizontal snap-scroll carousel */}
-      <div className="768:hidden">
-        <div
-          ref={scrollRef}
-          className="flex overflow-x-auto pl-[var(--block-gutter)]"
-          style={
-            {
-              scrollSnapType: 'x mandatory',
-              scrollPaddingLeft: 'var(--block-gutter)',
-              scrollbarWidth: 'none',
-              WebkitOverflowScrolling: 'touch',
-            } as React.CSSProperties
-          }
-        >
-          {items.map((item, index) => (
-            <MapCarouselCard
-              key={`${item.title}-${index}`}
-              item={item}
-              isPriority={isPriorityImage(blockIndex, index)}
-              isLast={index === items.length - 1}
-            />
-          ))}
-          <div className="w-[var(--block-gutter)] shrink-0" aria-hidden="true" />
-        </div>
-      </div>
-
-      {/* Desktop: 2×3 compact grid using city-four-side-* classes */}
-      <div className={`hidden 768:block ${BLOCK_GUTTER_CLASS}`}>
-        <div className="grid grid-cols-3 border-b border-[rgba(95,89,82,0.18)]">
-          {row1.map((item, index) => (
-            <div
-              key={`r1-${item.title}-${index}`}
-              className={index > 0 ? 'border-l border-[rgba(95,89,82,0.18)]' : ''}
-            >
-              <MapGridCard item={item} isPriority={isPriorityImage(blockIndex, index)} />
-            </div>
-          ))}
-        </div>
-
-        {row2.length > 0 ? (
-          <div className="grid grid-cols-3">
-            {row2.map((item, index) => (
-              <div
-                key={`r2-${item.title}-${index}`}
-                className={index > 0 ? 'border-l border-[rgba(95,89,82,0.18)]' : ''}
-              >
-                {/* Second row, so the item's position is its index plus the
-                    first row. Passing the row-relative index gave row two's
-                    opening cards the same standing as row one's. */}
-                <MapGridCard item={item} isPriority={isPriorityImage(blockIndex, row1.length + index)} />
-              </div>
-            ))}
-          </div>
-        ) : null}
+    <BlockSection className={styles.section} aria-label="Questura Maps">
+      <h2 className={styles.heading}><MapsPin />Questura Maps</h2>
+      <div className={styles.grid}>
+        {block.items.map((item, index) => (
+          <MapCard
+            key={`${item.articlePath ?? item.title}-${item.imageWide?.url ?? item.imageUrl ?? item.imageUrlSquare ?? ''}-${index}`}
+            item={item}
+            isPriority={isPriorityImage(blockIndex, index)}
+          />
+        ))}
       </div>
     </BlockSection>
   )

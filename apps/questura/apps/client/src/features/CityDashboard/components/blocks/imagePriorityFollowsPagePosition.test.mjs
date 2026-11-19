@@ -136,19 +136,13 @@ test('no block after the first has a priority image', () => {
   assert.deepEqual(heroImagePriority(0), { loading: 'eager', fetchPriority: 'high' })
 })
 
-// The rule reads an item's position in its block, so a layout that renders
-// its items in several passes has to offset each pass. The maps grid handed
-// its second row a row-relative index, which gave row two's opening cards the
-// same standing as row one's.
-test('a layout that splits its items into rows offsets the later rows', () => {
+// The six maps share one responsive grid. Later cards keep their original
+// index when CSS moves them to another row.
+test('maps derive image priority from the index in the full list', () => {
   const source = readFileSync(
     join(blocksDir, 'questurian-maps/QuestUrianMapsPreviewContent.tsx'),
     'utf8',
   )
-  const rowTwo = source.slice(source.indexOf('row2.map('))
-  assert.match(
-    rowTwo,
-    /isPriorityImage\(blockIndex, row1\.length \+ index\)/,
-    'row two passes a row-relative index, which reads as the top of the block',
-  )
+  assert.match(source, /block\.items\.map\(\(item, index\)/)
+  assert.match(source, /isPriority=\{isPriorityImage\(blockIndex, index\)\}/)
 })
