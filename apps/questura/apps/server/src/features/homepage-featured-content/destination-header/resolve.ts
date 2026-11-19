@@ -2,6 +2,7 @@ import type { PayloadInstance } from '@/types'
 import { resolveMediaSetForPlacement } from '@/features/media/lib/resolve-public-image'
 import { isNotFoundError } from '@/shared/lib/not-found-error'
 import { destinationFocus, destinationHeaderLayout } from './constants'
+import { DESTINATION_HEADER_STYLE_SLUG, destinationHeaderStyle } from './style'
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null
@@ -51,7 +52,18 @@ export async function resolveDestinationHeaderFields(
     }
   }
 
+  // The look every header shares; an unreadable or empty global reads as the defaults.
+  let destinationStyle = destinationHeaderStyle(null)
+  try {
+    destinationStyle = destinationHeaderStyle(
+      await payload.findGlobal({ slug: DESTINATION_HEADER_STYLE_SLUG, depth: 0, overrideAccess: true }),
+    )
+  } catch (error) {
+    if (!isNotFoundError(error)) throw error
+  }
+
   return {
+    destinationStyle,
     destinationDescription: text(block.destinationDescription),
     destinationLayout: destinationHeaderLayout(block.destinationLayout),
     destinationFocusX: destinationFocus(block.destinationFocusX),

@@ -168,3 +168,21 @@ export const revalidateArticleRedirectAfterDelete: CollectionAfterDeleteHook = a
     'article-redirects:delete',
   )
 }
+
+// The shared Destination Header style restyles every city page that has a
+// header, so a save refreshes every location homepage.
+export const revalidateEveryLocationHomepageAfterChange: GlobalAfterChangeHook = async ({ req }) => {
+  const { docs } = await req.payload.find({
+    collection: 'location-homepages',
+    depth: 0,
+    limit: 1000,
+    pagination: false,
+    overrideAccess: true,
+    select: { location: true },
+    req,
+  })
+  const targets = await Promise.all(
+    docs.map((doc) => locationHomepageTarget(req, doc as unknown as AnyDoc)),
+  )
+  await requestRevalidation(req, mergeTargets(...targets), 'destination-header-style:update')
+}

@@ -1,7 +1,9 @@
-import type { JSX } from "react";
+import type { CSSProperties, JSX } from "react";
 
 import type {
+  CityHomepageLocation,
   DestinationHeaderBlock,
+  DestinationHeaderStyle,
   EditorialFeatureImage,
   HomepageBlockLayoutProps,
 } from "../../../types";
@@ -14,6 +16,16 @@ import {
   BlockSection,
 } from "../BlockSection";
 import { heroImagePriority } from "../heroImagePriority";
+import { DESTINATION_HEADER_FONT_CLASS } from "./destinationHeaderFonts";
+import { LevelWithName } from "./LevelWithName";
+import {
+  DEFAULT_DESTINATION_HEADER_STYLE,
+  TEXT_METRICS,
+  crumbCapHeight,
+  crumbFlagWidth,
+  levelPaddingTop,
+  textWeight,
+} from "./destinationHeaderMetrics";
 
 /** Paragraphs are separated by a blank line in the stored text. */
 function paragraphs(text: string | null | undefined): string[] {
@@ -36,6 +48,80 @@ function ready(image: EditorialFeatureImage | null | undefined) {
 }
 
 /**
+ * "[flag] PERU › LIMA" above the name, in the description's font: small
+ * tracked capitals, the city in full ink. The flag is exactly as tall as the
+ * capitals and stands on their baseline, with a hairline edge so a white
+ * stripe still reads against the paper; the chevron is the same height.
+ */
+function Crumb({
+  location,
+  name,
+  style,
+  className = "",
+}: {
+  location: CityHomepageLocation | null | undefined;
+  name: string | null;
+  style: DestinationHeaderStyle;
+  className?: string;
+}): JSX.Element | null {
+  const country = location?.countryName?.trim();
+  const city = (location?.cityName ?? name)?.trim();
+  if (!country || !city) return null;
+  const cap = crumbCapHeight(style);
+
+  return (
+    <nav
+      aria-label="Breadcrumb"
+      className={`flex items-baseline gap-[0.75em] text-[12px] font-medium uppercase leading-none tracking-[0.14em] text-foreground/70 ${DESTINATION_HEADER_FONT_CLASS[style.textFont]} ${className}`}
+    >
+      <span className="inline-flex items-baseline">
+        {location?.countryCode ? (
+          <span
+            className="relative mr-[0.55em] flex shrink-0 after:absolute after:inset-0 after:shadow-[inset_0_0_0_0.5px_rgb(26_26_26/0.16)]"
+            style={{ height: cap, width: crumbFlagWidth(style) }}
+          >
+            <CountryFlag code={location.countryCode} className="block h-full w-full" />
+          </span>
+        ) : null}
+        <span>{country}</span>
+      </span>
+      <svg
+        viewBox="0 0 6 10"
+        aria-hidden="true"
+        className="block shrink-0 overflow-visible"
+        style={{ height: cap, width: cap * 0.6 }}
+      >
+        <path
+          d="M1 1l4 4-4 4"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={1.1}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          vectorEffect="non-scaling-stroke"
+        />
+      </svg>
+      <span className="text-foreground">{city}</span>
+    </nav>
+  );
+}
+
+/** The description's font, weight, size and colour from the shared style. */
+function textProps(style: DestinationHeaderStyle): {
+  className: string;
+  style: CSSProperties;
+} {
+  return {
+    className: `${DESTINATION_HEADER_FONT_CLASS[style.textFont]} [text-wrap:pretty] ${style.textTone === "ink" ? "text-foreground" : "text-foreground/70"}`,
+    style: {
+      fontSize: `${style.textSize}px`,
+      fontWeight: textWeight(style),
+      lineHeight: TEXT_METRICS[style.textFont].lineHeight,
+    },
+  };
+}
+
+/**
  * Opens a destination page. Three layouts, all inside the page margins:
  * `band` puts a photo strip above the flag and name (left) and the
  * description (right; all stacked on the left edge on phones). The
@@ -47,7 +133,9 @@ function ready(image: EditorialFeatureImage | null | undefined) {
  * `split` puts the text on the left and the photo on the right (photo first
  * on phones); `editorial` centres a magazine-proportion photo above the text;
  * `full` runs the photo edge to edge across the screen above the same text.
- * The country flag stands in for a breadcrumb. The editor-chosen focus keeps
+ * A small "[flag] PERU › LIMA" crumb sits above the name. The description's
+ * font, weight, size, colour and (band, full) position come from the one
+ * shared Destination Header style. The editor-chosen focus keeps
  * the same part of the photo in view at every size. The title is an <h2>
  * because the page already carries its one (visually hidden) <h1>.
  */
@@ -69,6 +157,16 @@ export function DestinationHeaderPreview({
   if (!block.sectionHeading && !image && body.length === 0) return null;
 
   const objectPosition = `${focus(block.destinationFocusX)}% ${focus(block.destinationFocusY)}%`;
+  const style = block.destinationStyle ?? DEFAULT_DESTINATION_HEADER_STYLE;
+  const text = textProps(style);
+  const crumb = (className?: string) => (
+    <Crumb
+      location={location}
+      name={block.sectionHeading}
+      style={style}
+      className={className}
+    />
+  );
 
   // `full` is the original edge-to-edge photo: 4:3 on phones, 21:9 (the
   // hero crop's own shape) from tablets up, never taller than 78% of the
@@ -101,22 +199,17 @@ export function DestinationHeaderPreview({
 
   const centredText = (
     <div className="mx-auto max-w-[32rem] text-center">
-      {location?.countryCode ? (
-        <CountryFlag
-          code={location.countryCode}
-          countryName={location.countryName ?? undefined}
-          className="block mx-auto h-[18px] w-[27px] 768:h-[20px] 768:w-[30px]"
-        />
-      ) : null}
+      {crumb("mb-3.5 justify-center")}
       {block.sectionHeading ? (
-        <h2 className="mt-2.5 font-display text-[2.375rem] font-normal leading-none text-foreground 768:text-[2.875rem]">
+        <h2 className="font-display text-[2.375rem] font-normal leading-none text-foreground 768:text-[2.875rem]">
           {block.sectionHeading}
         </h2>
       ) : null}
       {body.map((paragraph, index) => (
         <p
           key={index}
-          className={`${index === 0 ? "mt-4" : "mt-3"} font-editorial text-[1rem] font-semibold leading-[1.55] text-foreground [text-wrap:pretty] 768:text-[1.0625rem]`}
+          className={`${index === 0 ? "mt-4" : "mt-3"} ${text.className}`}
+          style={text.style}
         >
           {paragraph}
         </p>
@@ -124,39 +217,51 @@ export function DestinationHeaderPreview({
     </div>
   );
 
-  // Band and full width: flag and name on the left, paragraph on the right,
-  // its first line level with the top of the name's capitals (36px = the
-  // 20px flag, the 10px gap and the name's half-leading above its caps).
-  // Phones stack all three on the left edge.
+  // Band and full width: crumb and name on the left, paragraph on the
+  // right. "top" starts its first capitals on the name's cap line (the
+  // padding is worked out from the fonts' measured metrics); "centre" centres
+  // it on crumb and name together. Phones stack all three on the left edge.
+  const level = style.textAlign !== "centre";
   const sideText = (
-    <div className="768:grid 768:grid-cols-[minmax(0,4fr)_minmax(0,7fr)] 768:gap-x-8 1024:gap-x-12">
-      <div>
-        {location?.countryCode ? (
-          <CountryFlag
-            code={location.countryCode}
-            countryName={location.countryName ?? undefined}
-            className="block h-[18px] w-[27px] 768:h-[20px] 768:w-[30px]"
-          />
-        ) : null}
-        {block.sectionHeading ? (
-          <h2 className="mt-2.5 font-display text-[2.375rem] font-normal leading-none text-foreground 768:text-[2.875rem]">
-            {block.sectionHeading}
-          </h2>
-        ) : null}
-      </div>
-      <div className="mt-4 max-w-[40rem] 768:mt-0 768:pt-[36px]">
-        {body.map((paragraph, index) => (
+    <div className="768:grid 768:grid-cols-[minmax(0,4fr)_minmax(0,7fr)] 768:grid-rows-[auto_auto] 768:gap-x-8 1024:gap-x-12">
+      {crumb("768:col-start-1 768:row-start-1")}
+      {block.sectionHeading ? (
+        <h2 className="mt-3.5 font-display text-[2.375rem] font-normal leading-none text-foreground 768:col-start-1 768:row-start-2 768:text-[2.875rem]">
+          {block.sectionHeading}
+        </h2>
+      ) : null}
+      {level ? (
+        <LevelWithName
+          className="mt-4 max-w-[34rem] 768:col-start-2 768:row-start-2 768:mt-0 768:pt-[var(--dh-level)]"
+          style={{ "--dh-level": `${levelPaddingTop(style)}px` } as CSSProperties}
+          padding={levelPaddingTop(style)}
+        >
+          {body.map((paragraph, index) => (
           <p
             key={index}
-            className={`${index === 0 ? "" : "mt-3"} font-editorial text-[1rem] font-semibold leading-[1.55] text-foreground [text-wrap:pretty] 768:text-[1.0625rem]`}
+            className={`${index === 0 ? "" : "mt-3"} ${text.className}`}
+            style={text.style}
           >
             {paragraph}
           </p>
         ))}
-      </div>
+        </LevelWithName>
+      ) : (
+        <div className="mt-4 max-w-[34rem] 768:col-start-2 768:row-span-2 768:row-start-1 768:mt-0 768:self-center">
+          {body.map((paragraph, index) => (
+          <p
+            key={index}
+            className={`${index === 0 ? "" : "mt-3"} ${text.className}`}
+            style={text.style}
+          >
+            {paragraph}
+          </p>
+        ))}
+        </div>
+      )}
     </div>
   );
-  const text = layout === "editorial" ? centredText : sideText;
+  const textBlock = layout === "editorial" ? centredText : sideText;
 
   if (layout === "split") {
     // Side by side only from 1024px: narrower, the paragraph turns into a
@@ -174,15 +279,9 @@ export function DestinationHeaderPreview({
       >
         <div className="flex flex-col gap-6 768:gap-8 1024:grid 1024:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] 1024:items-stretch 1024:gap-14 1280:grid-cols-[minmax(0,4fr)_minmax(0,6fr)] 1280:gap-16">
           <div className="flex flex-col 1024:justify-center">
-            {location?.countryCode ? (
-              <CountryFlag
-                code={location.countryCode}
-                countryName={location.countryName ?? undefined}
-                className="block h-[16px] w-[24px] 1024:h-[18px] 1024:w-[27px]"
-              />
-            ) : null}
+            {crumb()}
             {block.sectionHeading ? (
-              <h2 className="mt-2 font-display text-[2.625rem] font-normal leading-none text-foreground 768:text-[3rem] 1024:mt-1.5 1280:text-[3.375rem]">
+              <h2 className="mt-3.5 font-display text-[2.625rem] font-normal leading-none text-foreground 768:text-[3rem] 1280:text-[3.375rem]">
                 {block.sectionHeading}
               </h2>
             ) : null}
@@ -190,7 +289,8 @@ export function DestinationHeaderPreview({
               {body.map((paragraph, index) => (
                 <p
                   key={index}
-                  className={`${index === 0 ? "mt-4" : "mt-3"} font-editorial text-[1rem] font-semibold leading-[1.55] text-foreground [text-wrap:pretty] 768:text-[1.0625rem]`}
+                  className={`${index === 0 ? "mt-4" : "mt-3"} ${text.className}`}
+                  style={text.style}
                 >
                   {paragraph}
                 </p>
@@ -226,7 +326,7 @@ export function DestinationHeaderPreview({
         <div
           className={`pt-7 768:pt-9 ${BLOCK_MAX_WIDTH_CLASS} ${BLOCK_GUTTER_CLASS}`}
         >
-          {text}
+          {textBlock}
         </div>
       </section>
     );
@@ -238,7 +338,7 @@ export function DestinationHeaderPreview({
       className="bg-background pb-10 pt-4 768:pb-14 768:pt-7"
     >
       {photo}
-      <div className="pt-6 768:pt-8">{text}</div>
+      <div className="pt-6 768:pt-8">{textBlock}</div>
     </BlockSection>
   );
 }

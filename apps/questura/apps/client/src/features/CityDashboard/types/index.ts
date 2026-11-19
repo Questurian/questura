@@ -312,9 +312,30 @@ export type PageHeroBlock = {
  * drawn from the page's location, the destination name (section heading) and
  * a description. Paragraphs in the description are split by a blank line.
  */
+export type DestinationHeaderTextFont =
+  | "jost"
+  | "lato"
+  | "raleway"
+  | "manrope"
+  | "dmsans"
+  | "worksans"
+  | "serif";
+
+/** The one look every Destination Header shares (edited in ABW). */
+export type DestinationHeaderStyle = {
+  textFont: DestinationHeaderTextFont;
+  textWeight: "300" | "400";
+  textSize: "13" | "14" | "15" | "16";
+  textTone: "grey" | "ink";
+  /** top: first line level with the name's capitals; centre: centred on crumb and name. */
+  textAlign: "top" | "centre";
+};
+
 export type DestinationHeaderBlock = {
   id: string;
   blockType: "destination-header";
+  /** Shared style; older API responses without it read as the defaults. */
+  destinationStyle?: DestinationHeaderStyle | null;
   sectionHeading: string | null;
   destinationDescription: string | null;
   destinationImage: EditorialFeatureImage | null;
