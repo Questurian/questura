@@ -105,7 +105,10 @@ describe('GET /api/public/articles/by-location', () => {
     expect(body.hasNext).toBe(true)
 
     // One location lookup + one find per collection that actually has ids.
-    const contentFinds = find.mock.calls.filter(([args]) => args.collection !== 'locations')
+    // The Audio badge lookup (one query, ids only) is not a card hydration.
+    const audioFinds = find.mock.calls.filter(([args]) => args.collection === 'audio-clips')
+    expect(audioFinds.length).toBeLessThanOrEqual(1)
+    const contentFinds = find.mock.calls.filter(([args]) => args.collection !== 'locations' && args.collection !== 'audio-clips')
     expect(contentFinds).toHaveLength(2)
     for (const [args] of contentFinds) {
       expect(args.limit).toBe(args.where.id.in.length)
