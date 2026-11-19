@@ -409,6 +409,11 @@ export class AudioController {
     const info = clipId === null ? null : this.info.get(clipId)
     const audio = this.audio
     if (clipId === null || !info || !audio) return
+    // Finished, or not started: nothing is being read, so nothing is marked.
+    if (audio.ended || (audio.paused && audio.currentTime < 0.05)) {
+      this.clearHighlight()
+      return
+    }
     const ranges = this.rangesFor(clipId)
     if (!ranges) return
     if (!this.unmarkBlocks) this.unmarkBlocks = markNarratedBlocks(ranges)
