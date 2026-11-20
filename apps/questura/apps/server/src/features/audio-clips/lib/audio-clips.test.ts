@@ -118,6 +118,14 @@ describe('reading rules', () => {
     expect(isMostlyLinks('<a href="/a">Anticuchos</a> · <a href="/b">Lomo saltado</a>')).toBe(true)
   })
 
+  it('does not read hotel or Airbnb stay boxes', () => {
+    const blocks = [
+      { blockType: 'text', content: '<p>Miraflores is easiest.</p>' },
+      { blockType: 'airbnb-card', stayContent: '<p>A loft above the park with a balcony.</p>' },
+    ] as Array<Record<string, unknown>>
+    expect(articleReading({ title: 'Lima', authors: [], blocks }).sentences).toEqual(['Lima.', 'Miraflores is easiest.'])
+  })
+
   it('does not end a sentence at "vs." or "Av."', () => {
     expect(splitSentences('Barranco vs. Miraflores is the choice. The hotel is on Av. Larco. Book early.')).toEqual([
       'Barranco vs. Miraflores is the choice.',

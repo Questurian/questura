@@ -80,10 +80,10 @@ What a standard article's recording reads, in order:
 1. The title.
 2. "By" and the author, or every author when there are several.
 3. The body in page order: paragraphs, headings (each as a short sentence),
-   list items, and the text of Airbnb stay boxes.
+   list items.
 
 Never read: the line under the title (the dek, which is also the meta
-description); photos, captions and credits; pull quotes, boxes, carousels,
+description); hotel and Airbnb stay boxes; photos, captions and credits; pull quotes, boxes, carousels,
 maps; Read more / Read next blocks; ads; the Contents box; and any paragraph or
 list item that is mostly links (60% or more of its text is link text, such as
 the "More Lima guides" lists). A heading whose part is left with nothing to

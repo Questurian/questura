@@ -6,8 +6,9 @@ import { headingText } from '@/features/articles/public/headingAnchors'
  *
  * - Read: the title, "By" and every author, then the body in page order:
  *   paragraphs, headings (each as its own short sentence) and list items of the
- *   text blocks, and the text of Airbnb stay boxes.
- * - Never read: the line under the title (the dek / meta description), photos,
+ *   text blocks.
+ * - Never read: the line under the title (the dek / meta description), hotel and
+ *   Airbnb stay boxes (owner, 2026-11-20), photos,
  *   captions and credits, pull quotes, boxes, carousels, maps, Read more /
  *   Read next blocks, ads, the Contents box, and any paragraph or list item
  *   that is mostly links (a "More Lima guides" list, a "see also" line). A
@@ -81,12 +82,8 @@ type ReadItem =
 function readItems(blocks: Array<Record<string, unknown>>): ReadItem[] {
   const items: ReadItem[] = []
   for (const block of blocks) {
-    const html =
-      block.blockType === 'text'
-        ? block.content
-        : block.blockType === 'airbnb-card'
-          ? block.stayContent
-          : null
+    // Only text blocks: a hotel or Airbnb stay box (`airbnb-card`) is not read.
+    const html = block.blockType === 'text' ? block.content : null
     if (typeof html !== 'string') continue
 
     for (const match of html.matchAll(READ_ELEMENT)) {
