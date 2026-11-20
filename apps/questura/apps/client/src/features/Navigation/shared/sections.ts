@@ -12,9 +12,9 @@ export interface NavSection {
   /** Thin bar only: hidden below 1280px, where it doesn't fit beside the wordmark. */
   wideOnly?: boolean;
   /**
-   * Row under the big masthead only (home, country and city pages). The thin
-   * bar and the phone/tablet menu leave it out; the menu lists Lima under
-   * Destinations already.
+   * Left out of the thin bar: shows in the row under the big masthead (home,
+   * country and city pages) and in the menu, never in the bar you get after
+   * scrolling.
    */
   rowOnly?: boolean;
 }
