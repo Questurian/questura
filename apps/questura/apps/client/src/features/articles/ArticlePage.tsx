@@ -3,7 +3,7 @@ import { PublicImage } from '@/components/media/PublicImage'
 import { GatedArticleBody } from '@/features/articles/components/GatedArticleBody'
 import { ArticleShareButton } from '@/features/articles/components/ArticleShareButton'
 import { ArticleAudioLoader } from '@/features/audio/components/ArticleAudioLoader'
-import { ListenLine } from '@/features/audio/components/ListenLine'
+import { HeaderListen, ListenLine } from '@/features/audio/components/ListenLine'
 import { BookmarkButton } from '@/features/bookmarks/components/BookmarkButton'
 import { AuthorLink } from '@/features/authors/components/AuthorLink'
 import {
@@ -26,7 +26,7 @@ import { getPublicBaseUrl } from '@/lib/seo/publicBaseUrl'
 import { Article, type ArticleDisplayLayout } from './types'
 import { formatArticleDate } from '@/lib/dates'
 
-/** Share and bookmark: the same row in every layout. */
+/** Share and bookmark: the same row in every layout. A dark header adds its quiet Listen box under them. */
 function ArticleShareRow({
   article,
   shareUrl,
@@ -57,6 +57,7 @@ function ArticleShareRow({
         />
         <BookmarkButton targetType="articles" targetId={article.id} />
       </div>
+      {tone === 'dark' && article.audio?.clips.length ? <HeaderListen audio={article.audio} /> : null}
     </div>
   )
 }
