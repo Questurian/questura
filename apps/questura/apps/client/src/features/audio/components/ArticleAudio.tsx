@@ -339,7 +339,7 @@ function LockPanel({ access, returnTo }: { access: ReaderAccess; returnTo: strin
     <div className="aud-lock" role="region" aria-label="Members-only audio">
       <div className="aud-lock-title">Listen with a Questurian membership</div>
       <div className="aud-lock-text">
-        Members can listen to our guides read aloud, with the text following along as you go.
+        Members can listen to our guides, read aloud.
       </div>
       <div className="aud-lock-actions">
         <Link href={href} className="aud-lock-cta">
