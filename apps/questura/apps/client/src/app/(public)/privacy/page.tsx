@@ -66,7 +66,7 @@ export default function PrivacyPage() {
 
         <h2 className={heading}>Listening</h2>
         <p className={body}>
-          When you play a guide's audio, we record which section you played, when, how long you
+          When you play a guide&rsquo;s audio, we record which section you played, when, how long you
           listened, which parts you heard and at what speed. We use it to learn which guides people
           listen to and where they stop, so we can make them better.
         </p>
