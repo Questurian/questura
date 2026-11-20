@@ -241,7 +241,7 @@ export default function MenuModal({
                 Explore
               </p>
               <ul className="border-t border-white/10">
-                {NAV_SECTIONS.filter((section) => section.href).map((section) => (
+                {NAV_SECTIONS.filter((section) => section.href && !section.rowOnly).map((section) => (
                   <li key={section.label} className="border-b border-white/10">
                     <Link
                       href={section.href!}

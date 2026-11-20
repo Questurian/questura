@@ -78,7 +78,7 @@ export default function DesktopNavbar({ locked }: DesktopNavbarProps) {
                 transform: `translateY(calc(clamp(0, (1 - var(--navbar-collapse, 0)) / ${1 - LINKS_IN_FROM}, 1) * -8px))`,
               }}
             >
-              {NAV_SECTIONS.map((s) => (
+              {NAV_SECTIONS.filter((s) => !s.rowOnly).map((s) => (
                 <li key={s.label} className={s.wideOnly ? "hidden 1280:list-item" : ""}>
                   <Section section={s} className="whitespace-nowrap" />
                 </li>
