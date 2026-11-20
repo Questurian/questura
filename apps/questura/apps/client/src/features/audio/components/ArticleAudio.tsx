@@ -20,7 +20,6 @@ import { audioController, TEXT_FOLLOW_ENABLED, type AudioState, type ReaderAcces
 import {
   formatClock,
   formatPlayerClock,
-  headerSlotElementId,
   listenMinutesLabel,
   slotElementId,
   type ArticleAudio as ArticleAudioData,
@@ -84,28 +83,6 @@ function useSlots(clips: ArticleAudioClip[]) {
   return slots
 }
 
-/** The dark header's quiet Listen box, if the page has one. The header is drawn once, so one look is enough. */
-function useHeaderSlots(clips: ArticleAudioClip[]) {
-  const [slots, setSlots] = useState<Map<string, HTMLElement>>(new Map())
-  const keys = clips.map((clip) => clip.sectionKey).join('|')
-  useEffect(() => {
-    const scan = () => {
-      const found = new Map<string, HTMLElement>()
-      for (const clip of clips) {
-        const element = document.getElementById(headerSlotElementId(clip.sectionKey))
-        if (element) {
-          element.setAttribute('data-ready', '')
-          found.set(clip.sectionKey, element)
-        }
-      }
-      setSlots(found)
-    }
-    scan()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [keys])
-  return slots
-}
-
 export function ArticleAudio({
   audio,
   articleTitle,
@@ -150,7 +127,6 @@ export function ArticleAudio({
   }, [currentKey, slots])
 
   const current = audio.clips.find((clip) => clip.id === state.clipId) ?? null
-  const headerSlots = useHeaderSlots(audio.clips)
 
   return (
     <>
@@ -159,10 +135,6 @@ export function ArticleAudio({
         return slot
           ? createPortal(<ListenPlayer key={clip.id} clip={clip} state={state} returnTo={returnTo} />, slot)
           : null
-      })}
-      {audio.clips.map((clip) => {
-        const slot = headerSlots.get(clip.sectionKey)
-        return slot ? createPortal(<HeaderListenButton key={clip.id} clip={clip} state={state} />, slot) : null
       })}
       {createPortal(<MiniPlayer clip={current} state={state} articleTitle={articleTitle} />, document.body)}
       {state.toast ? createPortal(<div className="aud-toast" role="status">{state.toast}</div>, document.body) : null}
@@ -357,32 +329,6 @@ function ListenPlayer({ clip, state, returnTo }: { clip: ArticleAudioClip; state
       {isCurrent && state.phase === 'error' && state.error ? <div className="aud-error">{state.error}</div> : null}
       {lockOpen ? <LockPanel access={state.access} returnTo={`${returnTo}#${slotElementId(clip.sectionKey)}`} /> : null}
     </div>
-  )
-}
-
-/**
- * The quiet Listen box in a dark header: the same recording as the line above
- * the text. A member's press plays or pauses it (that line opens into the
- * player); a non-member's press opens the membership panel there and goes to it.
- */
-function HeaderListenButton({ clip, state }: { clip: ArticleAudioClip; state: AudioState }) {
-  const toggle = useToggle(clip.id)
-  const playing = state.clipId === clip.id && state.phase === 'playing'
-  const press = async () => {
-    await toggle()
-    const after = audioController.getSnapshot()
-    if (after.access !== 'member' && after.lockedClipId === clip.id) audioController.scrollToClip(clip.id)
-  }
-  return (
-    <button
-      type="button"
-      className="aud-header-box"
-      onClick={() => void press()}
-      aria-label={playing ? 'Pause' : `Listen to this article, ${listenMinutesLabel(clip.durationSeconds)}`}
-    >
-      {playing ? <PauseIcon /> : <PlayIcon />}
-      {playing ? 'Pause' : 'Listen'}
-    </button>
   )
 }
 

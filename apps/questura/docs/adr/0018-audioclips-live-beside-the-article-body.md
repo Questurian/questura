@@ -68,8 +68,7 @@ Intro slot are gone from standard articles. Section keys stay in the collection
 for listicles and itinerary stops later. Older per-section clips stay in the
 studio as "Not attached" and are not drawn.
 
-Follow-up, 2026-11-20: on the dark-hero layout only, a second, quiet Listen
-box (thin white outline) sits under Share and Bookmark and plays the same
-recording; the blue line above the text stays the prominent one. The card
-badge became a larger black box with glowing blue headphones and "Audio",
-the same on every kind of card.
+Follow-up, 2026-11-20: the card badge became a larger black box with glowing
+blue headphones and "Audio", the same on every kind of card. A second, quiet
+Listen box in the dark-hero header was tried the same day and removed: two
+Listen buttons looked odd. The line above the text is the only one.

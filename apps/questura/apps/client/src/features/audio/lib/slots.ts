@@ -46,11 +46,6 @@ export function slotElementId(sectionKey: string): string {
   return `listen-${sectionKey}`
 }
 
-/** The second, quiet Listen button in a dark header (same recording, same player). */
-export function headerSlotElementId(sectionKey: string): string {
-  return `listen-${sectionKey}-header`
-}
-
 /** The one recording a standard article plays. */
 export function articleClip(audio: ArticleAudio | null | undefined): ArticleAudioClip | null {
   return audio?.clips.find((clip) => clip.sectionKey === ARTICLE_SECTION_KEY) ?? null
