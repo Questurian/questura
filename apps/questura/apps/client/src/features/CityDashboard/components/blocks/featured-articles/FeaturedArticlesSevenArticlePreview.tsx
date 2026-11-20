@@ -7,6 +7,7 @@ import type {
   HomepageBlockLayoutProps,
 } from '../../../types'
 import { AuthorLink } from '@/features/authors/components/AuthorLink'
+import { AudioBadge } from '@/features/audio/components/AudioBadge'
 import { NavigableImageTarget } from '../NavigableImageTarget'
 import { PublicImage, PublicSource } from '@/components/media/PublicImage'
 import { BLOCK_IMAGE_SIZES } from '../blockImageSizes'
@@ -80,6 +81,7 @@ function FeaturedArticlePreviewCard({
           </picture>
         ) : null}
         <NavigableImageTarget href={article.articlePath} label={`Read ${article.title}`} />
+        {article?.hasAudio ? <AudioBadge /> : null}
       </div>
 
       <div className="city-article-content flex w-full flex-col justify-start py-0">
@@ -181,6 +183,7 @@ function CompactArticlePreviewCard({
           />
         ) : null}
         <NavigableImageTarget href={article.articlePath} label={`Read ${article.title}`} />
+        {article?.hasAudio ? <AudioBadge /> : null}
       </div>
     </section>
   )

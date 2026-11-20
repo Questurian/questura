@@ -9,6 +9,7 @@ import type {
 } from '../../../types'
 import { BlockSection } from '../BlockSection'
 import { AuthorLink } from '@/features/authors/components/AuthorLink'
+import { AudioBadge } from '@/features/audio/components/AudioBadge'
 import { NavigableImageTarget } from '../NavigableImageTarget'
 import { PublicImage } from '@/components/media/PublicImage'
 import { BLOCK_IMAGE_SIZES } from '../blockImageSizes'
@@ -91,6 +92,7 @@ function ArticleThumb({
         />
       ) : null}
       <NavigableImageTarget href={article.articlePath ?? null} label={`Read ${article.title}`} />
+      {article?.hasAudio ? <AudioBadge /> : null}
     </div>
   )
 }

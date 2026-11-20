@@ -42,7 +42,7 @@ runs with: `DATABASE_URI`, `REDIS_URL`, `BETTER_AUTH_SECRET`), dry run first:
 
 ```bash
 pnpm --dir apps/questura/apps/server exec tsx scripts/erase-visitor-account.ts --email reader@example.com
-# ERASE dry-run sessions=2 sign_in_methods=1 bookmarks=4 profile=deleted. Nothing changed; add --apply to erase.
+# ERASE dry-run sessions=2 sign_in_methods=1 bookmarks=4 listens=0 profile=deleted. Nothing changed; add --apply to erase.
 ```
 
 If it says `ERASE refused: the membership has not ended`, step 2 has not
@@ -51,7 +51,7 @@ Then:
 
 ```bash
 pnpm --dir apps/questura/apps/server exec tsx scripts/erase-visitor-account.ts --email reader@example.com --apply
-# ERASE done sessions=2 sign_in_methods=1 bookmarks=4 profile=deleted
+# ERASE done sessions=2 sign_in_methods=1 bookmarks=4 listens=0 profile=deleted
 ```
 
 What `--apply` does, in order:
@@ -59,7 +59,7 @@ What `--apply` does, in order:
 1. **Revokes every session**, in Redis and Postgres. Every device is signed
    out within about a second (the cookie cache is overridden by the
    revocation list, `session-revocations.ts`).
-2. **Deletes** the bookmarks, the newsletter subscription row, any outstanding reset link, and the visitor
+2. **Deletes** the bookmarks, the audio Listens (which clips they played and for how long), the newsletter subscription row, any outstanding reset link, and the visitor
    profile. If the profile still names a Stripe customer (you kept it in
    step 2), it is **emptied** instead: name, address and billing address
    cleared, the Stripe linkage and membership dates kept.

@@ -10,6 +10,7 @@ import { BLOCK_GUTTER_CLASS, BLOCK_MAX_WIDTH_CLASS } from '../BlockSection'
 import { BlockSectionHeader } from '../BlockSectionHeader'
 import { BLOCK_TYPE, blockTitleLength } from '../blockType'
 import { AuthorLink } from '@/features/authors/components/AuthorLink'
+import { AudioBadge } from '@/features/audio/components/AudioBadge'
 import { NavigableImageTarget } from '../NavigableImageTarget'
 import { PublicImage, PublicSource } from '@/components/media/PublicImage'
 import { BLOCK_IMAGE_SIZES } from '../blockImageSizes'
@@ -68,6 +69,7 @@ function HeroArticleCard({ article, imagePriority }: HeroArticleCardProps): JSX.
           </picture>
         ) : null}
         <NavigableImageTarget href={articlePath} label={`Read ${article.title}`} />
+        {article?.hasAudio ? <AudioBadge /> : null}
       </div>
 
       {/* No inline padding: the copy starts on the photo's left edge. The
@@ -135,6 +137,7 @@ function SideListArticleCard({ article }: SideListArticleCardProps): JSX.Element
           />
         ) : null}
         <NavigableImageTarget href={articlePath} label={`Read ${article.title}`} />
+        {article?.hasAudio ? <AudioBadge /> : null}
       </div>
 
       <div className="city-four-side-copy">

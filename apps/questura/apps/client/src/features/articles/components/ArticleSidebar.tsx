@@ -1,4 +1,5 @@
 import { Suspense } from 'react'
+import { AudioBadge } from '@/features/audio/components/AudioBadge'
 import Link from '@/components/navigation/PublicLink'
 import { PublicImage } from '@/components/media/PublicImage'
 import { AdLabel } from '@/features/ads/components/AdLabel'
@@ -134,6 +135,7 @@ export function ArticlePartners({ partners }: { partners: ArticleIndexItem[] }) 
                     className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                   />
                 ) : null}
+                {item.hasAudio ? <AudioBadge /> : null}
               </div>
               <p className="mt-2.5 font-display text-[15px] leading-snug text-foreground group-hover:underline">
                 {item.title}

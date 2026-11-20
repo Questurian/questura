@@ -34,6 +34,7 @@ const ENTRYPOINTS = [
       './global/featured-articles-five.css',
       './global/featured-articles-nine.css',
       './global/featured-articles-three.css',
+      './global/article-audio.css',
       './global/responsive-accessibility.css',
     ],
   },

@@ -1,4 +1,5 @@
 import { ExternalLink } from 'lucide-react'
+import { AudioBadge } from '@/features/audio/components/AudioBadge'
 
 import Link from '@/components/navigation/PublicLink'
 
@@ -114,8 +115,9 @@ function RelatedArticle({ article, count, index, tone }: {
   return (
     <article className={`grid min-w-0 gap-3 border-b ${tone.itemRule} pb-4 last:border-b-0 ${showImage ? imageColumn : 'grid-cols-[2rem_1fr]'}`}>
       {showImage ? (
-        <div className={`aspect-square overflow-hidden ${tone.imageGround} ${square ? '' : '768:aspect-[16/10]'}`}>
+        <div className={`relative aspect-square overflow-hidden ${tone.imageGround} ${square ? '' : '768:aspect-[16/10]'}`}>
           <ArticleImage article={article} square={square} tone={tone} />
+          {article.hasAudio ? <AudioBadge /> : null}
         </div>
       ) : (
         <span aria-hidden="true" className={`pt-0.5 tabular-nums ${tone.kicker} ${BLOCK_TYPE.kicker}`}>

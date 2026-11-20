@@ -1,3 +1,4 @@
+import { articleIdsWithAudio } from '@/features/audio-clips/lib/public-audio'
 import { NextRequest, NextResponse } from 'next/server'
 import { getPayload } from 'payload'
 import type { Where } from 'payload'
@@ -102,6 +103,10 @@ export async function GET(req: NextRequest) {
       if (page > result.totalPages) return notFound()
 
       const items = result.docs.map((doc) => serializeIndexItem(doc, type))
+      if (type === 'articles') {
+        const withAudio = await articleIdsWithAudio(payload, items.map((item) => Number(item.id)))
+        for (const item of items) item.hasAudio = withAudio.has(Number(item.id))
+      }
 
       return NextResponse.json({
         page,

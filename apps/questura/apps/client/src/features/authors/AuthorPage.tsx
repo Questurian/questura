@@ -1,4 +1,5 @@
 import Link from "@/components/navigation/PublicLink";
+import { AudioBadge } from "@/features/audio/components/AudioBadge";
 import type { JSX } from "react";
 import type {
   AuthorArticleItem,
@@ -61,8 +62,9 @@ function ArticleCard({
         href={article.href}
         className="group block outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-4 focus-visible:ring-offset-background"
       >
-        <div className="overflow-hidden bg-paper">
+        <div className="relative overflow-hidden bg-paper">
           <ArticleThumbnail thumbnail={article.thumbnail} />
+          {article.hasAudio ? <AudioBadge /> : null}
         </div>
         <p className="mt-3.5 text-[11px] font-semibold uppercase tracking-[0.13em] text-accent">
           {articleLabel(article)}

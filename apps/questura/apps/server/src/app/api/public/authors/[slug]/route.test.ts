@@ -67,7 +67,10 @@ describe('GET /api/public/authors/[slug]', () => {
     expect(body.totalDocs).toBe(2)
     expect(body.articles.map((a: { id: number }) => a.id)).toEqual([2, 5])
 
-    const contentFinds = find.mock.calls.filter(([args]) => args.collection !== 'authors')
+    // The Audio badge lookup (one query, ids only) is not a card hydration.
+    const audioFinds = find.mock.calls.filter(([args]) => args.collection === 'audio-clips')
+    expect(audioFinds.length).toBeLessThanOrEqual(1)
+    const contentFinds = find.mock.calls.filter(([args]) => args.collection !== 'authors' && args.collection !== 'audio-clips')
     expect(contentFinds).toHaveLength(2)
     for (const [args] of contentFinds) {
       // The whole point: card fields only, and no more documents than ids.

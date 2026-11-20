@@ -71,4 +71,6 @@ export type PublicArticleItem = {
   imageWide?: PublicImage | null
   imageHero?: PublicImage | null
   articlePath?: string | null
+  /** At least one AudioClip: the card draws the Audio badge (ADR-0018). */
+  hasAudio?: boolean
 }

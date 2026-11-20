@@ -1,7 +1,6 @@
 import type { JSX } from 'react'
 import { ShimmerImage } from '@/components/media/ShimmerImage'
 import type { ArticleAuthor } from '@/features/articles/types'
-import { AddOnGoogleButton } from '@/features/articles/components/AddOnGoogleButton'
 import { ArticleShareButton } from '@/features/articles/components/ArticleShareButton'
 import { BookmarkButton } from '@/features/bookmarks/components/BookmarkButton'
 import type { BookmarkTargetType } from '@/features/bookmarks/types'
@@ -139,7 +138,6 @@ export function ArticlePageHeader({
               ) : null}
 
             </div>
-            <AddOnGoogleButton />
           </div>
         </div>
       ) : null}

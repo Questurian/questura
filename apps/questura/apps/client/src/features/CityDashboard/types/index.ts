@@ -92,6 +92,8 @@ export type FeaturedArticleTeaser = {
   imageSquare?: EditorialFeatureImage | null;
   imageWide?: EditorialFeatureImage | null;
   articlePath: string | null;
+  /** At least one AudioClip: the card draws the Audio badge (ADR-0018). */
+  hasAudio?: boolean;
 };
 
 export type CityHomepageArticleBlock = {

@@ -31,7 +31,7 @@ export default function PrivacyPage() {
         <h1 className="font-display text-[1.8rem] 480:text-[2.2rem] text-foreground leading-[1.15]">
           Privacy
         </h1>
-        <p className="text-[0.85rem] text-foreground/60 mt-2">Last updated 17 October 2026</p>
+        <p className="text-[0.85rem] text-foreground/60 mt-2">Last updated 19 November 2026</p>
 
         <p className={`${body} mt-6`}>
           You can read Questurian without an account, and we do not run advertising or tracking
@@ -63,6 +63,13 @@ export default function PrivacyPage() {
 
         <h2 className={heading}>Bookmarks</h2>
         <p className={body}>The articles you bookmark, so you can find them again.</p>
+
+        <h2 className={heading}>Listening</h2>
+        <p className={body}>
+          When you play a guide&rsquo;s audio, we record which section you played, when, how long you
+          listened, which parts you heard and at what speed. We use it to learn which guides people
+          listen to and where they stop, so we can make them better.
+        </p>
 
         <h2 className={heading}>The newsletter</h2>
         <p className={body}>
@@ -97,7 +104,7 @@ export default function PrivacyPage() {
           </a>{' '}
           from the address you sign in with, and we delete your account within{' '}
           {ACCOUNT_DELETION_DAYS} days. We cancel any membership first, sign you out everywhere,
-          and delete your account, bookmarks, newsletter subscription and sign-in details. Stripe keeps its own record of
+          and delete your account, bookmarks, listening history, newsletter subscription and sign-in details. Stripe keeps its own record of
           past payments, as the law requires of it.
         </p>
       </article>

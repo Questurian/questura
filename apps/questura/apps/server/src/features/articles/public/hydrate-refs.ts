@@ -1,3 +1,4 @@
+import { articleIdsWithAudio } from '@/features/audio-clips/lib/public-audio'
 import type { getPayload } from 'payload'
 
 import { TYPE_TO_COLLECTION, type ArticleTypeKey } from './scope'
@@ -68,10 +69,15 @@ export async function hydrateArticleRefs<TRef extends ArticleRef>(
         overrideAccess: true,
       })
 
+      const withAudio =
+        type === 'articles'
+          ? await articleIdsWithAudio(payload, result.docs.map((doc) => Number((doc as unknown as Record<string, unknown>).id)))
+          : null
       for (const doc of result.docs) {
         const id = (doc as unknown as Record<string, unknown>).id
         itemsByKey.set(`${type}:${String(id)}`, {
           ...serializeIndexItem(doc, type),
+          ...(withAudio ? { hasAudio: withAudio.has(Number(id)) } : {}),
           type,
         })
       }

@@ -1,4 +1,5 @@
 import Link from '@/components/navigation/PublicLink'
+import { AudioBadge } from '@/features/audio/components/AudioBadge'
 import { notFound } from 'next/navigation'
 
 import { PublicImage } from '@/components/media/PublicImage'
@@ -85,6 +86,7 @@ export async function ArticleIndexPage({ scope, type, page, lang }: Props) {
                       sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
                       className="h-full w-full object-cover"
                     />
+                    {item.hasAudio ? <AudioBadge /> : null}
                   </div>
                 )}
                 <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-foreground/55">

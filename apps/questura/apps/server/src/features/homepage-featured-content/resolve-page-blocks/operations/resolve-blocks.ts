@@ -11,6 +11,32 @@ import {
 import { resolveStoredSlotCountForBlockType } from '../../slot-count/service'
 import { curatedBlockApiPayload } from '../lib/curated-block-api-payload'
 import { resolveLocationGridScope } from './resolve-scope'
+import { articleIdsWithAudio } from '@/features/audio-clips/lib/public-audio'
+
+/**
+ * Cards draw an Audio badge on articles that have AudioClips (ADR-0018). One
+ * query for the whole page, after the blocks resolve and outside their read
+ * budget, which bounds the reference reads the blocks themselves make.
+ */
+async function markArticlesWithAudio(payload: PayloadInstance, blocks: unknown[]) {
+  const items: Array<Record<string, unknown>> = []
+  for (const block of blocks) {
+    const selection = block && typeof block === 'object' ? (block as Record<string, unknown>).selection : null
+    const list = selection && typeof selection === 'object' ? (selection as Record<string, unknown>).items : null
+    if (!Array.isArray(list)) continue
+    for (const item of list) {
+      if (item && typeof item === 'object' && (item as Record<string, unknown>).relationTo === 'articles') {
+        items.push(item as Record<string, unknown>)
+      }
+    }
+  }
+  if (items.length === 0) return
+  const withAudio = await articleIdsWithAudio(
+    payload as unknown as Parameters<typeof articleIdsWithAudio>[0],
+    items.map((item) => Number(item.id)),
+  ).catch(() => new Set<number>())
+  for (const item of items) item.hasAudio = withAudio.has(Number(item.id))
+}
 
 async function resolveAll(
   payload: PayloadInstance,
@@ -67,6 +93,7 @@ export async function resolvePageBlocksWithReadStats(
     budget,
   )
 
+  await markArticlesWithAudio(payload, result)
   return { blocks: result, stats }
 }
 

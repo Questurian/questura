@@ -1,4 +1,5 @@
 import Link from "@/components/navigation/PublicLink";
+import { AudioBadge } from "@/features/audio/components/AudioBadge";
 
 import type {
   AuthorFeatureBlock,
@@ -165,8 +166,9 @@ function RelatedArticle({
   if (solo) {
     return (
       <article className="flex min-h-0 flex-col border-b border-foreground/25 pb-4">
-        <div className="aspect-square min-h-0 overflow-hidden bg-paper 768:aspect-[16/10] 1024:flex-1 1024:aspect-auto">
+        <div className="relative aspect-square min-h-0 overflow-hidden bg-paper 768:aspect-[16/10] 1024:flex-1 1024:aspect-auto">
           <ArticleImage article={article} square={false} />
+          {article.hasAudio ? <AudioBadge /> : null}
         </div>
         <div className="pt-5">
           <p className={`mb-2 ${BLOCK_TYPE.kicker}`}>
@@ -203,9 +205,10 @@ function RelatedArticle({
         </span>
       ) : (
         <div
-          className={`${square ? "aspect-square" : "aspect-square 768:aspect-[16/10]"} overflow-hidden bg-paper`}
+          className={`relative ${square ? "aspect-square" : "aspect-square 768:aspect-[16/10]"} overflow-hidden bg-paper`}
         >
           <ArticleImage article={article} square={square} />
+          {article.hasAudio ? <AudioBadge /> : null}
         </div>
       )}
       <div className="min-w-0 self-start">

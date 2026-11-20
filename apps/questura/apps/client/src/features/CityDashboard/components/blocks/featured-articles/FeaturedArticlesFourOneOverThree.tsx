@@ -4,6 +4,7 @@ import { ArticleKickerLabel } from '../ArticleKickerLabel'
 
 import type { FeaturedArticleTeaser } from '../../../types'
 import { AuthorLink } from '@/features/authors/components/AuthorLink'
+import { AudioBadge } from '@/features/audio/components/AudioBadge'
 import { NavigableImageTarget } from '../NavigableImageTarget'
 import { PublicImage, PublicSource } from '@/components/media/PublicImage'
 import { BLOCK_IMAGE_SIZES } from '../blockImageSizes'
@@ -52,6 +53,7 @@ function OneOverThreeCard({ article, lead, imagePriority }: CardProps): JSX.Elem
           </picture>
         ) : null}
         <NavigableImageTarget href={articlePath} label={`Read ${article.title}`} />
+        {article?.hasAudio ? <AudioBadge /> : null}
       </div>
 
       <div className="city-four-o3-copy">

@@ -94,6 +94,26 @@ Editorial content collections.
 An optional reader-facing cue on a non-lodging Listicle Itinerary stop. Its stable **Moment key** selects the cue; its optional **Moment label** customizes the displayed wording.
 _Avoid_: stop type, daypart, itinerary tag
 
+### AudioClip
+
+One narrated recording of one Article section, played from the start of that section. Only a reader with Membership entitlement can play it; every reader sees it. An article's AudioClips, in section order, can play as one continuous listen.
+_Avoid_: audio, podcast, voiceover, track, narration file
+
+### Article section
+
+The part of an Article from one main heading to the next. The text before the first main heading is the Intro section. An AudioClip belongs to exactly one Article section and reads its heading and prose from the start, usually to the end.
+_Avoid_: chapter, part, block
+
+### Narrator
+
+A voice that reads AudioClips. Each Article has its own Narrator; different Articles may use different Narrators.
+_Avoid_: voice profile, speaker, TTS voice
+
+### Listen
+
+One member playing one AudioClip during one visit to the page. It records who listened, when, how long they heard, and which stretches of the clip they heard. Pausing and resuming in the same visit is the same Listen.
+_Avoid_: play, view, stream, session
+
 ### AffiliateProducts / InstagramPosts
 
 Curated external content.
