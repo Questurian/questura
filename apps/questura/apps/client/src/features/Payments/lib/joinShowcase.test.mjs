@@ -30,11 +30,11 @@ test('no map image is asked for without a Maps key: CI and the sandbox build wit
 });
 
 test('the static map is centred on the place, with a pin there', () => {
-  const [xoma] = LISTICLE_PLACES;
-  const url = new URL(staticMapUrl(xoma, 'test-key'));
+  const [candelo] = LISTICLE_PLACES;
+  const url = new URL(staticMapUrl(candelo, 'test-key'));
   assert.equal(url.origin + url.pathname, 'https://maps.googleapis.com/maps/api/staticmap');
-  assert.equal(url.searchParams.get('center'), `${xoma.latitude},${xoma.longitude}`);
-  assert.equal(url.searchParams.get('markers'), `color:0x3B5BDB|${xoma.latitude},${xoma.longitude}`);
+  assert.equal(url.searchParams.get('center'), `${candelo.latitude},${candelo.longitude}`);
+  assert.equal(url.searchParams.get('markers'), `color:0x3B5BDB|${candelo.latitude},${candelo.longitude}`);
   assert.equal(url.searchParams.get('key'), 'test-key');
   assert.ok(url.searchParams.getAll('style').length > 0, 'styled to match the listicle map');
 });
