@@ -1,6 +1,6 @@
 import type { Payload } from 'payload'
 
-import { INTRO_SECTION_KEY } from './sections'
+import { ARTICLE_SECTION_KEY } from './sections'
 
 export type ClipSentence = { text: string; start: number; end: number }
 
@@ -66,21 +66,13 @@ export async function findClipsForArticle(payload: Payload, articleId: number): 
 }
 
 /**
- * The article's playable clips, in no particular order (the page orders them
- * by where their sections fall). A clip whose heading is gone is left out:
- * the studio shows it as "Not attached", the site does not draw it.
+ * The article's playable recording: the one whole-article clip. Older
+ * per-section clips (the first test's Intro) are left out; the studio shows
+ * them as "Not attached" so they can be deleted.
  */
-export async function publicAudioForArticle(
-  payload: Payload,
-  articleId: number,
-  headingIdsInOrder: string[],
-): Promise<PublicArticleAudio | null> {
-  // Page order: the Intro first, then each section where its heading falls.
-  const order = new Map<string, number>([[INTRO_SECTION_KEY, -1]])
-  headingIdsInOrder.forEach((id, index) => order.set(id, index))
+export async function publicAudioForArticle(payload: Payload, articleId: number): Promise<PublicArticleAudio | null> {
   const clips = (await findClipsForArticle(payload, articleId))
-    .filter((clip) => order.has(clip.sectionKey))
-    .sort((a, b) => (order.get(a.sectionKey) ?? 0) - (order.get(b.sectionKey) ?? 0))
+    .filter((clip) => clip.sectionKey === ARTICLE_SECTION_KEY)
     .map((clip) => ({
       id: clip.id,
       sectionKey: clip.sectionKey,

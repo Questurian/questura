@@ -5,9 +5,9 @@ import { serializeArticleByCollection } from '@/features/articles/public/seriali
 import { findClipsForArticle, parseSentences, type ClipRow } from './public-audio'
 
 export type { ClipSentence } from './public-audio'
-import { clipMatchesSection, sectionsFromBlocks, scriptFromSentences, type ArticleSection } from './sections'
+import { articleReading, clipMatchesSection, scriptFromSentences, type ArticleSection } from './sections'
 
-/** The article's sections, read from its whole body exactly as the page anchors it. */
+/** What a standard article's Narrator reads: one "article" section, from its whole body as the page anchors it. */
 export async function loadArticleSections(payload: Payload, articleId: number): Promise<{
   article: { id: number; title: string; status: string }
   sections: ArticleSection[]
@@ -19,10 +19,27 @@ export async function loadArticleSections(payload: Payload, articleId: number): 
   // Strip anything that would make serialization resolve the audio again.
   await serializeArticleByCollection('articles', article, payload, { skipAudio: true })
   const blocks = Array.isArray(article.contentBlocks) ? (article.contentBlocks as Array<Record<string, unknown>>) : []
+  const title = String(article.title ?? '')
+  const seo = (article.seoSection ?? null) as { metaDescription?: unknown } | null
   return {
-    article: { id: articleId, title: String(article.title ?? ''), status: String(article.status ?? '') },
-    sections: sectionsFromBlocks(blocks),
+    article: { id: articleId, title, status: String(article.status ?? '') },
+    sections: [
+      articleReading({
+        title,
+        authors: authorNames(article.author),
+        dek: typeof seo?.metaDescription === 'string' ? seo.metaDescription : null,
+        blocks,
+      }),
+    ],
   }
+}
+
+/** The byline's names: one author today, every one of them if the field ever holds several. */
+function authorNames(value: unknown): string[] {
+  const list = Array.isArray(value) ? value : [value]
+  return list
+    .map((entry) => (entry && typeof entry === 'object' ? (entry as { displayName?: unknown }).displayName : null))
+    .filter((name): name is string => typeof name === 'string' && name.trim().length > 0)
 }
 
 export type StudioSectionView = {

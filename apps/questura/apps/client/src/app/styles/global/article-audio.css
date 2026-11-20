@@ -1,102 +1,70 @@
 /*
- * AudioClips (ADR-0018): the section player, its server-drawn shell, the
- * floating player, the sentence highlight, the narrated-section rule, the
- * card badge and the header's "N-min listen" line. Approved mockup:
+ * AudioClips (ADR-0018, amended 2026-11-19): the header's Listen button and
+ * the one bar it opens into, the floating player, the sentence highlight, the
+ * narrated-paragraph rule and the card badge. Approved mockup:
  * questurian-studio apps/ai-blog-writer/apps/frontend/public/audio-clips-mockup.html
  */
 
-/* ---- slot + shell (server HTML, before the player loads) ---------------- */
+/* ---- the header's Listen button and its bar ---------------------------- */
 
-.article-prose .audio-slot,
 .audio-slot {
-  margin: 4px 0 24px;
+  align-self: stretch;
   font-family: var(--font-dm-sans), system-ui, sans-serif;
-}
-.article-prose h2 + .audio-slot {
-  margin-top: 10px;
-}
-.audio-shell {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  min-height: 68px;
-  padding: 12px 0 12px;
-  border-top: 1px solid rgb(26 26 26 / 0.14);
-  border-bottom: 1px solid rgb(26 26 26 / 0.14);
 }
 .audio-slot[data-ready] > .audio-shell {
   display: none;
 }
-.audio-shell-button {
-  flex: none;
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
+.aud-listen {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 16px 0 12px;
+  border-radius: 2px;
   background: var(--accent);
-  opacity: 0.85;
-}
-.audio-shell-text {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  min-width: 0;
-}
-.audio-shell-label,
-.aud-label {
-  font-size: 11px;
+  color: #fff;
+  font-size: 12px;
   font-weight: 600;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--accent);
+  line-height: 1;
+  transition: opacity 0.15s ease;
 }
-.audio-shell-sub,
-.aud-sub {
-  font-size: 13px;
-  line-height: 1.35;
-  color: rgb(26 26 26 / 0.6);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.aud-listen:hover {
+  opacity: 0.9;
 }
-
-/* ---- the section player ------------------------------------------------- */
-
-.aud-player {
-  border-top: 1px solid rgb(26 26 26 / 0.14);
-  border-bottom: 1px solid rgb(26 26 26 / 0.14);
-  padding: 12px 0 10px;
+.aud-listen svg {
+  width: 16px;
+  height: 16px;
+}
+/* The open bar keeps one width in every layout (the centred header shrinks to its content). */
+.aud-player[data-expanded] {
+  width: min(36rem, calc(100vw - 32px));
 }
 .aud-player p {
   margin: 0;
 }
-/* The prose's link look (blue words, underline, hover wash) is not for the player's buttons. */
-.article-prose .aud-lock a {
-  background-image: none;
-  text-decoration: none;
-}
-.article-prose .aud-lock-signin a {
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
 .aud-row {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
+  animation: aud-drop 0.2s ease-out;
 }
 .aud-play {
   flex: none;
-  width: 42px;
-  height: 42px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   background: var(--accent);
   color: #fff;
   display: grid;
   place-items: center;
-  transition: transform 0.1s ease, background-color 0.2s ease;
+  transition: transform 0.1s ease;
 }
 .aud-play:active {
   transform: scale(0.95);
 }
+.aud-listen:focus-visible,
 .aud-play:focus-visible,
 .aud-speed:focus-visible,
 .aud-follow:focus-visible,
@@ -108,28 +76,6 @@
 .aud-play svg {
   width: 18px;
   height: 18px;
-}
-.aud-player[data-locked] .aud-play {
-  background: var(--foreground);
-}
-.aud-player[data-locked] .aud-label {
-  color: rgb(26 26 26 / 0.6);
-}
-.aud-meta {
-  flex: 1;
-  min-width: 0;
-}
-.aud-label {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.aud-label svg {
-  width: 13px;
-  height: 13px;
-}
-.aud-sub {
-  margin-top: 3px;
 }
 .aud-tools {
   display: flex;
@@ -143,7 +89,7 @@
   font-size: 12px;
   font-weight: 600;
   border: 1px solid rgb(26 26 26 / 0.18);
-  background: var(--paper);
+  background: transparent;
   color: var(--foreground);
   font-variant-numeric: tabular-nums;
 }
@@ -192,47 +138,62 @@
   cursor: pointer;
   touch-action: none;
 }
+/* The bar is the progress: it fills blue as the recording plays, the time sits inside it. */
 .aud-bar {
-  height: 18px;
-  margin-top: 8px;
+  flex: 1;
+  min-width: 0;
+  height: 40px;
+  border: 1px solid rgb(26 26 26 / 0.22);
+  overflow: hidden;
 }
-.aud-track,
-.aud-fill {
+.aud-bar .aud-track,
+.aud-bar .aud-knob {
+  display: none;
+}
+.aud-bar .aud-fill {
   position: absolute;
   left: 0;
-  top: 8px;
+  top: 0;
+  bottom: 0;
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+  box-shadow: inset -2px 0 0 var(--accent);
+}
+.aud-time {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--foreground);
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+}
+.aud-mini-bar .aud-track,
+.aud-mini-bar .aud-fill {
+  position: absolute;
+  left: 0;
   height: 3px;
 }
-.aud-track {
+.aud-mini-bar .aud-track {
   right: 0;
-  background: #ddd6ca;
 }
-.aud-fill {
-  background: var(--accent);
+
+/* On a dark hero the bar is drawn in white. */
+.audio-slot[data-tone='dark'] .aud-bar {
+  border-color: rgb(255 255 255 / 0.4);
 }
-.aud-knob {
-  position: absolute;
-  top: 3px;
-  width: 13px;
-  height: 13px;
-  margin-left: -6px;
-  border-radius: 50%;
-  background: var(--accent);
-  opacity: 0;
-  transition: opacity 0.15s ease;
+.audio-slot[data-tone='dark'] .aud-bar .aud-fill {
+  background: rgb(255 255 255 / 0.18);
+  box-shadow: inset -2px 0 0 #fff;
 }
-.aud-bar:hover .aud-knob,
-.aud-bar:focus-visible .aud-knob,
-.aud-player[data-started] .aud-knob {
-  opacity: 1;
+.audio-slot[data-tone='dark'] .aud-time,
+.audio-slot[data-tone='dark'] .aud-speed,
+.audio-slot[data-tone='dark'] .aud-follow {
+  color: #fff;
 }
-.aud-times {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 2px;
-  font-size: 11px;
-  color: rgb(26 26 26 / 0.6);
-  font-variant-numeric: tabular-nums;
+.audio-slot[data-tone='dark'] .aud-speed {
+  border-color: rgb(255 255 255 / 0.4);
 }
 .aud-error {
   margin-top: 8px;
@@ -458,31 +419,8 @@
   font-size: 13px;
 }
 
-/* ---- header line and card badge ----------------------------------------- */
+/* ---- card badge --------------------------------------------------------- */
 
-.article-listen-line {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 7px 12px;
-  border: 1px solid currentColor;
-  font-family: var(--font-dm-sans), system-ui, sans-serif;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  text-decoration: none;
-  color: inherit;
-  opacity: 0.9;
-}
-.article-listen-line:hover {
-  opacity: 1;
-  border-color: var(--accent-soft);
-}
-.article-listen-line svg {
-  width: 16px;
-  height: 16px;
-}
 .audio-badge {
   position: absolute;
   left: 10px;

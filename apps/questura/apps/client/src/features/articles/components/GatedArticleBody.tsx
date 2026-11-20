@@ -5,7 +5,6 @@ import { PaywallNotice } from '@/features/articles/components/PaywallNotice'
 import type { GateState } from '@/features/articles/lib/gate'
 import { useGatedFullArticle } from '@/features/articles/lib/useGatedFullArticle'
 import type { ContentBlock, TableOfContentsEntry } from '@/features/articles/types'
-import type { ArticleAudio } from '@/features/audio/lib/slots'
 import { lazy, Suspense, useEffect, type ReactNode } from 'react'
 
 /**
@@ -30,8 +29,6 @@ type GatedArticleBodyProps = {
   sample: ReactNode
   /** The Contents box's lines, drawn again in a member's full body. */
   contents?: TableOfContentsEntry[]
-  /** AudioClips: their players go back under their headings in the full body. */
-  audio?: ArticleAudio | null
 }
 
 type FullArticleResponse = {
@@ -50,7 +47,7 @@ type FullArticleResponse = {
  * its paragraphs (an image, a key takeaway), so cutting the first `shown`
  * blocks off the body repeated a paragraph and lost those blocks.
  */
-export function GatedArticleBody({ articleId, gate, path, lang, sample, contents, audio }: GatedArticleBodyProps) {
+export function GatedArticleBody({ articleId, gate, path, lang, sample, contents }: GatedArticleBodyProps) {
   const { phase, data, retry } = useGatedFullArticle<FullArticleResponse>({
     articleId,
     type: 'articles',
@@ -115,7 +112,7 @@ export function GatedArticleBody({ articleId, gate, path, lang, sample, contents
         </>
       }
     >
-      <MemberArticleBody blocks={data.contentBlocks} contents={contents} audio={audio} />
+      <MemberArticleBody blocks={data.contentBlocks} contents={contents} />
     </Suspense>
   )
 }

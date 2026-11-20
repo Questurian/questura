@@ -1,6 +1,15 @@
 'use client'
 
-import { useCallback, useEffect, useRef, useState, useSyncExternalStore, type KeyboardEvent, type PointerEvent } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  type KeyboardEvent,
+  type PointerEvent,
+  type ReactNode,
+} from 'react'
 import { createPortal } from 'react-dom'
 
 import Link from '@/components/navigation/PublicLink'
@@ -11,9 +20,9 @@ import { audioController, type AudioState, type ReaderAccess } from '../lib/cont
 import { formatClock, slotElementId, type ArticleAudio as ArticleAudioData, type ArticleAudioClip } from '../lib/slots'
 
 /**
- * The article's audio, once loaded (ADR-0018): a player in each narrated
- * section's slot, the floating player, and the "listen with a membership"
- * panel. Every player draws the one controller's state.
+ * The article's audio, once loaded (ADR-0018, amended 2026-11-19): the header's
+ * "Listen" button that opens into one bar, the floating player, and the
+ * "listen with a membership" panel. Every player draws the one controller's state.
  */
 
 const useAudio = () => useSyncExternalStore(audioController.subscribe, audioController.getSnapshot, audioController.getSnapshot)
@@ -117,7 +126,7 @@ export function ArticleAudio({
       {audio.clips.map((clip) => {
         const slot = slots.get(clip.sectionKey)
         return slot
-          ? createPortal(<SectionPlayer key={clip.id} clip={clip} state={state} returnTo={returnTo} />, slot)
+          ? createPortal(<ListenPlayer key={clip.id} clip={clip} state={state} returnTo={returnTo} />, slot)
           : null
       })}
       {createPortal(<MiniPlayer clip={current} state={state} articleTitle={articleTitle} />, document.body)}
@@ -133,18 +142,6 @@ const PlayIcon = () => (
 )
 const PauseIcon = () => (
   <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 5h4v14H7zM13 5h4v14h-4z" /></svg>
-)
-const LockIcon = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" aria-hidden="true">
-    <rect x="5" y="11" width="14" height="9" />
-    <path d="M8 11V8a4 4 0 0 1 8 0v3" />
-  </svg>
-)
-const HeadphonesIcon = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-    <path d="M3 14v-2a9 9 0 0 1 18 0v2" />
-    <path d="M21 15a2 2 0 0 1-2 2h-1v-6h1a2 2 0 0 1 2 2zM3 15a2 2 0 0 0 2 2h1v-6H5a2 2 0 0 0-2 2z" />
-  </svg>
 )
 const FollowIcon = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="M12 5v14M5 12l7 7 7-7" /></svg>
@@ -163,7 +160,19 @@ function useToggle(clipId: number) {
   }, [clipId])
 }
 
-function SeekBar({ clipId, time, duration, className }: { clipId: number; time: number; duration: number; className: string }) {
+function SeekBar({
+  clipId,
+  time,
+  duration,
+  className,
+  children,
+}: {
+  clipId: number
+  time: number
+  duration: number
+  className: string
+  children?: ReactNode
+}) {
   const bar = useRef<HTMLDivElement>(null)
   const share = duration > 0 ? Math.min(1, time / duration) : 0
   const seekTo = (event: PointerEvent<HTMLDivElement>) => {
@@ -200,51 +209,50 @@ function SeekBar({ clipId, time, duration, className }: { clipId: number; time: 
       <span className="aud-track" />
       <span className="aud-fill" style={{ width: `${share * 100}%` }} />
       <span className="aud-knob" style={{ left: `${share * 100}%` }} />
+      {children}
     </div>
   )
 }
 
-function SectionPlayer({ clip, state, returnTo }: { clip: ArticleAudioClip; state: AudioState; returnTo: string }) {
+/**
+ * The header's player: a blue "Listen" button until it is pressed, then one
+ * bar: play/pause, the progress bar with the time inside it, and speed and
+ * Follow along at the side. A non-member's press opens the membership panel.
+ */
+function ListenPlayer({ clip, state, returnTo }: { clip: ArticleAudioClip; state: AudioState; returnTo: string }) {
   const toggle = useToggle(clip.id)
+  const [opened, setOpened] = useState(false)
   const member = state.access === 'member'
   const isCurrent = state.clipId === clip.id
   const playing = isCurrent && state.phase === 'playing'
   const loading = isCurrent && state.phase === 'loading'
   const time = isCurrent ? state.currentTime : state.positions[clip.id] ?? 0
   const duration = isCurrent && state.duration ? state.duration : clip.durationSeconds
-  const started = isCurrent || time > 0
+  const expanded = member && (opened || isCurrent || time > 0)
   const lockOpen = !member && state.lockedClipId === clip.id
 
-  const label = !member
-    ? 'Members listen'
-    : loading
-      ? 'Loading…'
-      : playing
-        ? 'Listening'
-        : 'Listen to this section'
+  const press = () => {
+    setOpened(true)
+    void toggle()
+  }
 
   return (
-    <div className="aud-player" data-locked={member ? undefined : ''} data-started={started ? '' : undefined}>
-      <div className="aud-row">
-        <button
-          type="button"
-          className="aud-play"
-          onClick={() => void toggle()}
-          aria-label={!member ? `Listen to ${clip.title}: members only` : playing ? `Pause ${clip.title}` : `Play ${clip.title}`}
-          aria-expanded={!member ? lockOpen : undefined}
-        >
-          {!member ? <LockIcon /> : loading ? <Spinner /> : playing ? <PauseIcon /> : <PlayIcon />}
-        </button>
-        <div className="aud-meta">
-          <div className="aud-label">
-            <HeadphonesIcon />
-            {label}
-          </div>
-          <div className="aud-sub">
-            {clip.title} · read by {clip.voiceName} · {formatClock(clip.durationSeconds)}
-          </div>
-        </div>
-        {member ? (
+    <div className="aud-player" data-expanded={expanded ? '' : undefined}>
+      {expanded ? (
+        <div className="aud-row">
+          <button
+            type="button"
+            className="aud-play"
+            onClick={press}
+            aria-label={playing ? 'Pause' : 'Play'}
+          >
+            {loading ? <Spinner /> : playing ? <PauseIcon /> : <PlayIcon />}
+          </button>
+          <SeekBar clipId={clip.id} time={time} duration={duration} className="aud-bar">
+            <span className="aud-time" aria-hidden="true">
+              {formatClock(time)} / {formatClock(duration)}
+            </span>
+          </SeekBar>
           <div className="aud-tools">
             <button type="button" className="aud-speed" onClick={() => audioController.cycleSpeed()} aria-label={`Speed ${state.speed} times`}>
               {state.speed}×
@@ -260,17 +268,19 @@ function SectionPlayer({ clip, state, returnTo }: { clip: ArticleAudioClip; stat
               <span className="aud-follow-label">Follow along</span>
             </button>
           </div>
-        ) : null}
-      </div>
-      {member ? (
-        <>
-          <SeekBar clipId={clip.id} time={time} duration={duration} className="aud-bar" />
-          <div className="aud-times">
-            <span>{started ? formatClock(time) : ''}</span>
-            <span>-{formatClock(Math.max(0, duration - time))}</span>
-          </div>
-        </>
-      ) : null}
+        </div>
+      ) : (
+        <button
+          type="button"
+          className="aud-listen"
+          onClick={press}
+          aria-label={member ? 'Listen to this article' : 'Listen to this article: members only'}
+          aria-expanded={!member ? lockOpen : undefined}
+        >
+          <PlayIcon />
+          Listen
+        </button>
+      )}
       {isCurrent && state.phase === 'error' && state.error ? <div className="aud-error">{state.error}</div> : null}
       {lockOpen ? <LockPanel access={state.access} returnTo={`${returnTo}#${slotElementId(clip.sectionKey)}`} /> : null}
     </div>
@@ -284,7 +294,7 @@ function LockPanel({ access, returnTo }: { access: ReaderAccess; returnTo: strin
     <div className="aud-lock" role="region" aria-label="Members-only audio">
       <div className="aud-lock-title">Listen with a Questurian membership</div>
       <div className="aud-lock-text">
-        Members can listen to every section of our guides, read aloud, with the text following along as you go.
+        Members can listen to our guides read aloud, with the text following along as you go.
       </div>
       <div className="aud-lock-actions">
         <Link href={href} className="aud-lock-cta">
@@ -328,11 +338,9 @@ function MiniPlayer({ clip, state, articleTitle }: { clip: ArticleAudioClip | nu
               tabIndex={show ? undefined : -1}
             >
               <span className="aud-mini-kicker">
-                Now playing<span className="aud-mini-hint"> · back to the section</span>
+                Now playing<span className="aud-mini-hint"> · back to the top</span>
               </span>
-              <span className="aud-mini-name">
-                {clip.title} · {articleTitle}
-              </span>
+              <span className="aud-mini-name">{articleTitle}</span>
             </button>
             <span className="aud-mini-time">
               {formatClock(state.currentTime)} / {formatClock(duration)}

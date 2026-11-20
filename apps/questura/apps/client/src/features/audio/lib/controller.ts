@@ -2,7 +2,7 @@
 
 import { get, getBackendUrl, RequestError } from '@/lib/api'
 
-import { INTRO_SECTION_KEY, slotElementId, type ArticleAudioClip } from './slots'
+import { slotElementId, type ArticleAudioClip } from './slots'
 import { buildSentenceRanges, markNarratedBlocks, type SentenceRanges } from './sentenceRanges'
 
 /**
@@ -243,8 +243,7 @@ export class AudioController {
   scrollToClip(clipId: number | null) {
     const clip = clipId === null ? null : this.clips.get(clipId)
     if (!clip) return
-    const slot = document.getElementById(slotElementId(clip.sectionKey))
-    const target = clip.sectionKey === INTRO_SECTION_KEY ? slot : document.getElementById(clip.sectionKey) ?? slot
+    const target = document.getElementById(slotElementId(clip.sectionKey))
     if (!target) return
     this.autoScrollAt = Date.now()
     window.scrollTo({ top: window.scrollY + target.getBoundingClientRect().top - 96, behavior: 'smooth' })

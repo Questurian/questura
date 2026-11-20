@@ -166,12 +166,11 @@ async function serializeStandardArticleBlocks(
     article.tableOfContents = contents
   }
 
-  // AudioClips (ADR-0018): which sections have a player, read against the
-  // whole body's headings before the paywall trims it, so a non-member sees
-  // every player (locked) and a member's swapped-in body finds its slots.
-  // Titles and lengths only: the words and the file are members-only.
+  // AudioClips (ADR-0018): the article's one recording, so every reader sees
+  // the Listen button (locked for non-members). Title and length only: the
+  // words and the file are members-only.
   if (!options.skipAudio && payload && typeof article.id === 'number') {
-    const audio = await publicAudioForArticle(payload, article.id, contents.map((entry) => entry.id))
+    const audio = await publicAudioForArticle(payload, article.id)
     if (audio) article.audio = audio
   }
 }
