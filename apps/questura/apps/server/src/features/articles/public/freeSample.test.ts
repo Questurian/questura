@@ -346,6 +346,31 @@ describe('applySampleRule — single-type listicles', () => {
     expect(JSON.stringify(doc)).not.toContain('Place')
   })
 
+  it('cuts a long intro to about 80 words, the same on every locked guide', () => {
+    const sentence = (i: number) => `Sentence ${i} names Place ${i} for you.`
+    const intro = `<p>${Array.from({ length: 30 }, (_, i) => sentence(i)).join(' ')}</p>`
+    const doc: Record<string, unknown> = { header: { intro }, items: [place(0)] }
+
+    const outcome = applySampleRule('single-type-listicles', doc)
+
+    const kept = (doc.header as { intro: string }).intro
+    expect(DEFAULT_SAMPLE_LIMITS.listicleIntroWords).toBe(80)
+    expect(kept.split(/\s+/).length).toBeLessThanOrEqual(80)
+    expect(kept).toContain('Sentence 0')
+    expect(kept).not.toContain('Sentence 29')
+    expect(outcome.applied).toBe(true)
+  })
+
+  it('leaves a short intro whole', () => {
+    const intro = '<p>Short and sweet.</p>'
+    const doc: Record<string, unknown> = { header: { intro }, items: [] }
+
+    const outcome = applySampleRule('single-type-listicles', doc)
+
+    expect((doc.header as { intro: string }).intro).toBe(intro)
+    expect(outcome.applied).toBe(false)
+  })
+
   it('keeps the leading places when the limit allows some', () => {
     const doc: Record<string, unknown> = { items: Array.from({ length: 7 }, (_, i) => place(i)) }
 

@@ -1,4 +1,5 @@
 import { logger } from '@/shared/utils/logger'
+import { trimIntro } from './introSample'
 import type { ArticleCollectionSlug } from './serializeArticleBlocks'
 
 /**
@@ -33,6 +34,9 @@ import type { ArticleCollectionSlug } from './serializeArticleBlocks'
  *   the section each place sits under, so a member's full list can be headed
  *   by the server-rendered section headings. Its stored JSON-LD is dropped
  *   whole: it is an ItemList naming every place.
+ *   The intro itself is cut to about 80 words (owner decision, 2026-11-20,
+ *   see `introSample.ts`): a long intro named most of the places, and the
+ *   paywall fade sat wherever the intro happened to end.
  *
  * This module only derives; it does not decide who gets the sample. Callers
  * pair it with the Access tier and the reader's Membership entitlement.
@@ -45,6 +49,8 @@ export type SampleLimits = {
   articleTextBlocks: number
   /** Leading places kept on a single-type listicle. */
   listicleItems: number
+  /** Words of a single-type listicle's intro kept, cut back to a sentence end. */
+  listicleIntroWords: number
 }
 
 /**
@@ -54,6 +60,7 @@ export type SampleLimits = {
 export const DEFAULT_SAMPLE_LIMITS: SampleLimits = {
   articleTextBlocks: 2,
   listicleItems: 0,
+  listicleIntroWords: 80,
 }
 
 /**
@@ -276,8 +283,19 @@ function sampleListicle(doc: Record<string, unknown>, limits: SampleLimits): Sam
 
   doc.items = kept
 
+  const header = doc.header
+  let introCut = false
+  if (header && typeof header === 'object') {
+    const intro = (header as Record<string, unknown>).intro
+    const trimmed = trimIntro(intro, limits.listicleIntroWords)
+    if (trimmed !== intro) {
+      ;(header as Record<string, unknown>).intro = trimmed
+      introCut = true
+    }
+  }
+
   return {
-    applied: withheld.length > 0,
+    applied: withheld.length > 0 || introCut,
     unit: 'items',
     shown: kept.length,
     total: items.length,
