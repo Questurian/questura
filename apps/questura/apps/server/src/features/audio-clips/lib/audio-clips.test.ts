@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it } from 'vitest'
 import { anchorArticleHeadings } from '@/features/articles/public/headingAnchors'
 
 import { coveredSeconds, mergeRanges, normalizeRanges } from './listens'
-import { articleReading, bylineSentence, clipMatchesSection, sectionsFromBlocks, splitSentences } from './sections'
+import { articleReading, bylineSentence, clipMatchesSection, isMostlyLinks, sectionsFromBlocks, splitSentences } from './sections'
 import { audioStorageKey, signAudioUrl } from './storage'
 
 const lima = [
@@ -68,31 +68,62 @@ describe('sectionsFromBlocks', () => {
 })
 
 describe('articleReading', () => {
-  it('reads the title, the byline, the dek, then the whole body as one "article" section', () => {
+  it('reads the title, the byline, then the whole body as one "article" section, never the dek', () => {
     const reading = articleReading({
       title: 'The Questurian Guide to Lima',
       authors: ['Alan Malpartida'],
-      dek: 'Where to eat, stay and walk. Updated for 2026.',
       blocks: anchored(),
     })
     expect(reading.key).toBe('article')
-    expect(reading.sentences.slice(0, 5)).toEqual([
+    expect(reading.sentences.slice(0, 3)).toEqual([
       'The Questurian Guide to Lima.',
       'By Alan Malpartida.',
-      'Where to eat, stay and walk.',
-      'Updated for 2026.',
       'Lima is a city to plan around its meals.',
     ])
     expect(reading.sentences).toContain('Plan the trip.')
     expect(reading.sentences.at(-1)).toBe('Miraflores is easiest.')
   })
 
-  it('names every author, and skips a missing byline or dek', () => {
+  it('names every author, and skips a missing byline', () => {
     expect(bylineSentence(['Ana', 'Ben', 'Cy'])).toBe('By Ana, Ben and Cy.')
     expect(bylineSentence(['Ana', 'Ben'])).toBe('By Ana and Ben.')
     expect(bylineSentence([' '])).toBeNull()
-    const reading = articleReading({ title: 'Lima?', authors: [], dek: null, blocks: [] })
+    const reading = articleReading({ title: 'Lima?', authors: [], blocks: [] })
     expect(reading.sentences).toEqual(['Lima?'])
+  })
+})
+
+describe('reading rules', () => {
+  it('skips lines that are mostly links, and a heading left with nothing to read', () => {
+    const blocks = [
+      {
+        blockType: 'text',
+        content:
+          '<p>Lima is a city to plan around its meals.</p>' +
+          '<h2>More Lima guides</h2><h3>Choosing a base</h3>' +
+          '<p><a href="/a">Barranco vs. Miraflores</a> · <a href="/b">The best Airbnbs in Miraflores</a></p>' +
+          '<h3>Planning meals</h3><ul><li><a href="/c">Booking Central</a></li></ul>',
+      },
+    ] as Array<Record<string, unknown>>
+    anchorArticleHeadings(blocks)
+    expect(articleReading({ title: 'Lima', authors: ['Alan'], blocks }).sentences).toEqual([
+      'Lima.',
+      'By Alan.',
+      'Lima is a city to plan around its meals.',
+    ])
+  })
+
+  it('keeps a sentence with a link in it', () => {
+    expect(isMostlyLinks('Rentals can give more space: see <a href="/r">the Lima rentals</a> under US$150 a night.')).toBe(false)
+    expect(isMostlyLinks('<a href="/a">Anticuchos</a> · <a href="/b">Lomo saltado</a>')).toBe(true)
+  })
+
+  it('does not end a sentence at "vs." or "Av."', () => {
+    expect(splitSentences('Barranco vs. Miraflores is the choice. The hotel is on Av. Larco. Book early.')).toEqual([
+      'Barranco vs. Miraflores is the choice.',
+      'The hotel is on Av. Larco.',
+      'Book early.',
+    ])
   })
 })
 

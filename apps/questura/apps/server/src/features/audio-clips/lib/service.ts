@@ -20,14 +20,12 @@ export async function loadArticleSections(payload: Payload, articleId: number): 
   await serializeArticleByCollection('articles', article, payload, { skipAudio: true })
   const blocks = Array.isArray(article.contentBlocks) ? (article.contentBlocks as Array<Record<string, unknown>>) : []
   const title = String(article.title ?? '')
-  const seo = (article.seoSection ?? null) as { metaDescription?: unknown } | null
   return {
     article: { id: articleId, title, status: String(article.status ?? '') },
     sections: [
       articleReading({
         title,
         authors: authorNames(article.author),
-        dek: typeof seo?.metaDescription === 'string' ? seo.metaDescription : null,
         blocks,
       }),
     ],

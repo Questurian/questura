@@ -72,3 +72,20 @@ Follow-up, 2026-11-20: the card badge became a larger black box with glowing
 blue headphones and "Audio", the same on every kind of card. A second, quiet
 Listen box in the dark-hero header was tried the same day and removed: two
 Listen buttons looked odd. The line above the text is the only one.
+
+## Reading rules, 2026-11-20 (owner)
+
+What a standard article's recording reads, in order:
+
+1. The title.
+2. "By" and the author, or every author when there are several.
+3. The body in page order: paragraphs, headings (each as a short sentence),
+   list items, and the text of Airbnb stay boxes.
+
+Never read: the line under the title (the dek, which is also the meta
+description); photos, captions and credits; pull quotes, boxes, carousels,
+maps; Read more / Read next blocks; ads; the Contents box; and any paragraph or
+list item that is mostly links (60% or more of its text is link text, such as
+the "More Lima guides" lists). A heading whose part is left with nothing to
+read is dropped too. Abbreviations like "vs." and "Av." do not end a sentence.
+The rules live in `apps/server/src/features/audio-clips/lib/sections.ts`.
