@@ -16,13 +16,20 @@ import Link from '@/components/navigation/PublicLink'
 import { identityStore, SHARED_IDENTITY_MAX_AGE_MS } from '@/lib/user/currentIdentity'
 import { identityFromResponse } from '@/lib/user/identity'
 
-import { audioController, type AudioState, type ReaderAccess } from '../lib/controller'
-import { formatClock, slotElementId, type ArticleAudio as ArticleAudioData, type ArticleAudioClip } from '../lib/slots'
+import { audioController, TEXT_FOLLOW_ENABLED, type AudioState, type ReaderAccess } from '../lib/controller'
+import {
+  formatClock,
+  formatPlayerClock,
+  listenMinutesLabel,
+  slotElementId,
+  type ArticleAudio as ArticleAudioData,
+  type ArticleAudioClip,
+} from '../lib/slots'
 
 /**
- * The article's audio, once loaded (ADR-0018, amended 2026-11-19): the header's
- * "Listen" button that opens into one bar, the floating player, and the
- * "listen with a membership" panel. Every player draws the one controller's state.
+ * The article's audio, once loaded (ADR-0018, amended 2026-11-19): the
+ * "Listen" line above the article's text that opens into the player row, the
+ * floating player, and the "listen with a membership" panel. Every player draws the one controller's state.
  */
 
 const useAudio = () => useSyncExternalStore(audioController.subscribe, audioController.getSnapshot, audioController.getSnapshot)
@@ -149,6 +156,18 @@ const FollowIcon = () => (
 const CloseIcon = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
 )
+/** A circular arrow with "15" in it: back (`flip`) or forward fifteen seconds. */
+const SkipIcon = ({ back }: { back?: boolean }) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
+    <g transform={back ? undefined : 'translate(24 0) scale(-1 1)'}>
+      <path d="M5.2 8.2A8 8 0 1 1 4 12.5" strokeLinecap="round" />
+      <path d="M5 3.8v4.6h4.6" strokeLinecap="round" strokeLinejoin="round" />
+    </g>
+    <text x="12" y="15.2" textAnchor="middle" fontSize="8.2" fontWeight="700" fill="currentColor" stroke="none">
+      15
+    </text>
+  </svg>
+)
 const Spinner = () => <span className="aud-spinner" aria-hidden="true" />
 
 // ---- pieces ----------------------------------------------------------------
@@ -215,9 +234,10 @@ function SeekBar({
 }
 
 /**
- * The header's player: a blue "Listen" button until it is pressed, then one
- * bar: play/pause, the progress bar with the time inside it, and speed and
- * Follow along at the side. A non-member's press opens the membership panel.
+ * The player above the article's text: a "Listen · N minutes" line until it is
+ * pressed, then one row: play/pause, the time heard, the progress line, the
+ * length, back and forward fifteen seconds, and the speed. A non-member's
+ * press opens the membership panel.
  */
 function ListenPlayer({ clip, state, returnTo }: { clip: ArticleAudioClip; state: AudioState; returnTo: string }) {
   const toggle = useToggle(clip.id)
@@ -240,33 +260,55 @@ function ListenPlayer({ clip, state, returnTo }: { clip: ArticleAudioClip; state
     <div className="aud-player" data-expanded={expanded ? '' : undefined}>
       {expanded ? (
         <div className="aud-row">
-          <button
-            type="button"
-            className="aud-play"
-            onClick={press}
-            aria-label={playing ? 'Pause' : 'Play'}
-          >
+          <button type="button" className="aud-play" onClick={press} aria-label={playing ? 'Pause' : 'Play'}>
             {loading ? <Spinner /> : playing ? <PauseIcon /> : <PlayIcon />}
           </button>
-          <SeekBar clipId={clip.id} time={time} duration={duration} className="aud-bar">
-            <span className="aud-time" aria-hidden="true">
-              {formatClock(time)} / {formatClock(duration)}
-            </span>
-          </SeekBar>
+          <span className="aud-clock" aria-hidden="true">
+            {formatPlayerClock(time, duration)}
+          </span>
+          <SeekBar clipId={clip.id} time={time} duration={duration} className="aud-line" />
+          <span className="aud-clock" aria-hidden="true">
+            {formatPlayerClock(duration)}
+          </span>
           <div className="aud-tools">
-            <button type="button" className="aud-speed" onClick={() => audioController.cycleSpeed()} aria-label={`Speed ${state.speed} times`}>
-              {state.speed}×
+            <button
+              type="button"
+              className="aud-skip"
+              aria-label="Back 15 seconds"
+              title="Back 15 seconds"
+              onClick={() => audioController.seek(clip.id, time - 15)}
+            >
+              <SkipIcon back />
             </button>
             <button
               type="button"
-              className="aud-follow"
-              role="switch"
-              aria-checked={state.follow}
-              onClick={() => audioController.setFollow(!state.follow)}
+              className="aud-skip"
+              aria-label="Forward 15 seconds"
+              title="Forward 15 seconds"
+              onClick={() => audioController.seek(clip.id, time + 15)}
             >
-              <span className="aud-switch" aria-hidden="true" />
-              <span className="aud-follow-label">Follow along</span>
+              <SkipIcon />
             </button>
+            <button
+              type="button"
+              className="aud-speed"
+              onClick={() => audioController.cycleSpeed()}
+              aria-label={`Speed ${state.speed} times`}
+            >
+              {state.speed}x
+            </button>
+            {TEXT_FOLLOW_ENABLED ? (
+              <button
+                type="button"
+                className="aud-follow"
+                role="switch"
+                aria-checked={state.follow}
+                onClick={() => audioController.setFollow(!state.follow)}
+              >
+                <span className="aud-switch" aria-hidden="true" />
+                <span className="aud-follow-label">Follow along</span>
+              </button>
+            ) : null}
           </div>
         </div>
       ) : (
@@ -274,11 +316,14 @@ function ListenPlayer({ clip, state, returnTo }: { clip: ArticleAudioClip; state
           type="button"
           className="aud-listen"
           onClick={press}
-          aria-label={member ? 'Listen to this article' : 'Listen to this article: members only'}
+          aria-label={`Listen to this article, ${listenMinutesLabel(clip.durationSeconds)}${member ? '' : ': members only'}`}
           aria-expanded={!member ? lockOpen : undefined}
         >
-          <PlayIcon />
-          Listen
+          <span className="aud-listen-icon">
+            <PlayIcon />
+          </span>
+          <span className="aud-listen-word">Listen</span>
+          <span className="aud-listen-length">{listenMinutesLabel(clip.durationSeconds)}</span>
         </button>
       )}
       {isCurrent && state.phase === 'error' && state.error ? <div className="aud-error">{state.error}</div> : null}
@@ -346,8 +391,9 @@ function MiniPlayer({ clip, state, articleTitle }: { clip: ArticleAudioClip | nu
               {formatClock(state.currentTime)} / {formatClock(duration)}
             </span>
             <button type="button" className="aud-speed aud-mini-speed" onClick={() => audioController.cycleSpeed()} tabIndex={show ? undefined : -1}>
-              {state.speed}×
+              {state.speed}x
             </button>
+            {TEXT_FOLLOW_ENABLED ? (
             <button
               type="button"
               className="aud-mini-follow"
@@ -360,6 +406,7 @@ function MiniPlayer({ clip, state, articleTitle }: { clip: ArticleAudioClip | nu
             >
               <FollowIcon />
             </button>
+            ) : null}
             <button
               type="button"
               className="aud-mini-close"

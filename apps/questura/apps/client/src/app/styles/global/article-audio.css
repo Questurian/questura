@@ -1,14 +1,14 @@
 /*
- * AudioClips (ADR-0018, amended 2026-11-19): the header's Listen button and
- * the one bar it opens into, the floating player, the sentence highlight, the
- * narrated-paragraph rule and the card badge. Approved mockup:
+ * AudioClips (ADR-0018, amended 2026-11-19): the Listen line above the
+ * article's text and the player row it opens into, the floating player, the
+ * sentence highlight and narrated-paragraph rule (switched off for now) and
+ * the card badge. Approved mockup:
  * questurian-studio apps/ai-blog-writer/apps/frontend/public/audio-clips-mockup.html
  */
 
-/* ---- the header's Listen button and its bar ---------------------------- */
+/* ---- the Listen line above the text, and the player row it opens into --- */
 
 .audio-slot {
-  align-self: stretch;
   font-family: var(--font-dm-sans), system-ui, sans-serif;
 }
 .audio-slot[data-ready] > .audio-shell {
@@ -17,29 +17,45 @@
 .aud-listen {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  height: 36px;
-  padding: 0 16px 0 12px;
-  border-radius: 2px;
+  gap: 10px;
+  min-height: 40px;
+  color: var(--accent);
+  font-size: 14px;
+  line-height: 1;
+}
+.aud-listen-icon {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1.5px solid currentColor;
+  border-radius: 50%;
+  transition: background-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
+}
+.aud-listen-icon svg {
+  width: 15px;
+  height: 15px;
+  margin-left: 2px;
+}
+.aud-listen-word {
+  font-weight: 600;
+}
+.aud-listen-length {
+  color: rgb(26 26 26 / 0.55);
+}
+.aud-listen-length::before {
+  content: '•';
+  margin-right: 10px;
+  color: rgb(26 26 26 / 0.35);
+}
+.aud-listen:hover .aud-listen-icon {
   background: var(--accent);
   color: #fff;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  line-height: 1;
-  transition: opacity 0.15s ease;
+  transform: scale(1.06);
 }
-.aud-listen:hover {
-  opacity: 0.9;
-}
-.aud-listen svg {
-  width: 16px;
-  height: 16px;
-}
-/* The open bar keeps one width in every layout (the centred header shrinks to its content). */
-.aud-player[data-expanded] {
-  width: min(36rem, calc(100vw - 32px));
+.aud-listen:hover .aud-listen-word {
+  text-decoration: underline;
+  text-underline-offset: 4px;
 }
 .aud-player p {
   margin: 0;
@@ -47,54 +63,89 @@
 .aud-row {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
+  min-height: 44px;
   animation: aud-drop 0.2s ease-out;
 }
 .aud-play {
   flex: none;
   width: 40px;
   height: 40px;
+  border: 1.5px solid var(--accent);
   border-radius: 50%;
-  background: var(--accent);
-  color: #fff;
+  background: transparent;
+  color: var(--accent);
   display: grid;
   place-items: center;
-  transition: transform 0.1s ease;
+  transition: background-color 0.15s ease, color 0.15s ease, transform 0.1s ease;
+}
+.aud-play:hover {
+  background: var(--accent);
+  color: #fff;
 }
 .aud-play:active {
   transform: scale(0.95);
 }
+.aud-play svg {
+  width: 16px;
+  height: 16px;
+}
+.aud-play .aud-spinner {
+  border-color: color-mix(in srgb, var(--accent) 30%, transparent);
+  border-top-color: var(--accent);
+}
 .aud-listen:focus-visible,
 .aud-play:focus-visible,
+.aud-skip:focus-visible,
 .aud-speed:focus-visible,
 .aud-follow:focus-visible,
-.aud-bar:focus-visible,
+.aud-line:focus-visible,
 .aud-mini button:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 3px;
 }
-.aud-play svg {
-  width: 18px;
-  height: 18px;
+.aud-clock {
+  flex: none;
+  font-size: 12px;
+  color: rgb(26 26 26 / 0.55);
+  font-variant-numeric: tabular-nums;
 }
 .aud-tools {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 6px;
   flex: none;
 }
+.aud-skip {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  color: rgb(26 26 26 / 0.6);
+  transition: color 0.15s ease;
+}
+.aud-skip:hover {
+  color: var(--accent);
+}
+.aud-skip svg {
+  width: 26px;
+  height: 26px;
+}
 .aud-speed {
-  min-width: 46px;
-  height: 28px;
+  min-width: 36px;
+  height: 26px;
+  margin-left: 4px;
   font-size: 12px;
   font-weight: 600;
-  border: 1px solid rgb(26 26 26 / 0.18);
+  border: 1px solid rgb(26 26 26 / 0.2);
   background: transparent;
   color: var(--foreground);
   font-variant-numeric: tabular-nums;
+  transition: border-color 0.15s ease, color 0.15s ease;
 }
 .aud-speed:hover {
   border-color: var(--accent);
+  color: var(--accent);
 }
 .aud-follow {
   display: flex;
@@ -132,42 +183,45 @@
 .aud-follow[aria-checked='true'] .aud-switch::after {
   left: 15px;
 }
-.aud-bar,
+.aud-line,
 .aud-mini-bar {
   position: relative;
   cursor: pointer;
   touch-action: none;
 }
-/* The bar is the progress: it fills blue as the recording plays, the time sits inside it. */
-.aud-bar {
+/* The progress line: thin grey, blue up to a blue dot. */
+.aud-line {
   flex: 1;
   min-width: 0;
-  height: 40px;
-  border: 1px solid rgb(26 26 26 / 0.22);
-  overflow: hidden;
+  height: 24px;
 }
-.aud-bar .aud-track,
-.aud-bar .aud-knob {
-  display: none;
-}
-.aud-bar .aud-fill {
+.aud-line .aud-track,
+.aud-line .aud-fill {
   position: absolute;
   left: 0;
-  top: 0;
-  bottom: 0;
-  background: color-mix(in srgb, var(--accent) 16%, transparent);
-  box-shadow: inset -2px 0 0 var(--accent);
+  top: 11px;
+  height: 2px;
 }
-.aud-time {
+.aud-line .aud-track {
+  right: 0;
+  background: rgb(26 26 26 / 0.16);
+}
+.aud-line .aud-fill {
+  background: var(--accent);
+}
+.aud-line .aud-knob {
   position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--foreground);
-  font-variant-numeric: tabular-nums;
-  pointer-events: none;
+  top: 7px;
+  width: 10px;
+  height: 10px;
+  margin-left: -5px;
+  border-radius: 50%;
+  background: var(--accent);
+  transition: transform 0.15s ease;
+}
+.aud-line:hover .aud-knob,
+.aud-line:focus-visible .aud-knob {
+  transform: scale(1.35);
 }
 .aud-mini-bar .aud-track,
 .aud-mini-bar .aud-fill {
@@ -178,22 +232,16 @@
 .aud-mini-bar .aud-track {
   right: 0;
 }
-
-/* On a dark hero the bar is drawn in white. */
-.audio-slot[data-tone='dark'] .aud-bar {
-  border-color: rgb(255 255 255 / 0.4);
-}
-.audio-slot[data-tone='dark'] .aud-bar .aud-fill {
-  background: rgb(255 255 255 / 0.18);
-  box-shadow: inset -2px 0 0 #fff;
-}
-.audio-slot[data-tone='dark'] .aud-time,
-.audio-slot[data-tone='dark'] .aud-speed,
-.audio-slot[data-tone='dark'] .aud-follow {
-  color: #fff;
-}
-.audio-slot[data-tone='dark'] .aud-speed {
-  border-color: rgb(255 255 255 / 0.4);
+@media (max-width: 480px) {
+  .aud-row {
+    gap: 10px;
+  }
+  .aud-row > .aud-clock:last-of-type {
+    display: none;
+  }
+  .aud-tools {
+    gap: 2px;
+  }
 }
 .aud-error {
   margin-top: 8px;

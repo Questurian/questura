@@ -23,6 +23,20 @@ export type ArticleAudio = {
   totalSeconds: number
 }
 
+/** "00:46" under an hour, "01:09:17" from an hour up; `longest` keeps both ends of the bar alike. */
+export function formatPlayerClock(seconds: number, longest = seconds): string {
+  const whole = Math.max(0, Math.floor(seconds || 0))
+  const pad = (value: number) => String(value).padStart(2, '0')
+  const minutesAndSeconds = `${pad(Math.floor(whole / 60) % 60)}:${pad(whole % 60)}`
+  return longest >= 3600 ? `${pad(Math.floor(whole / 3600))}:${minutesAndSeconds}` : `${pad(Math.floor(whole / 60))}:${pad(whole % 60)}`
+}
+
+/** "69 minutes" beside the Listen button; anything under ninety seconds is "1 minute". */
+export function listenMinutesLabel(totalSeconds: number): string {
+  const minutes = Math.max(1, Math.round(totalSeconds / 60))
+  return minutes === 1 ? '1 minute' : `${minutes} minutes`
+}
+
 export function formatClock(seconds: number): string {
   const whole = Math.max(0, Math.floor(seconds || 0))
   return `${Math.floor(whole / 60)}:${String(whole % 60).padStart(2, '0')}`

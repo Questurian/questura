@@ -1,28 +1,26 @@
-import { articleClip, slotElementId, type ArticleAudio } from '../lib/slots'
+import { articleClip, listenMinutesLabel, slotElementId, type ArticleAudio } from '../lib/slots'
 
 /**
- * The article's "Listen" button (ADR-0018, amended 2026-11-19), in the header
- * where "Add Us On Google" used to be. Drawn here as a still shell so it is in
+ * The article's "Listen" line (ADR-0018, amended 2026-11-19), directly above
+ * the article's text in every layout. Drawn here as a still shell so it is in
  * place before any JavaScript; the player mounts into the same element and,
- * on a press, opens it into one bar. Shown to every reader: non-members get
- * the membership panel when they press it.
+ * on a press, opens it into the player row. Shown to every reader: non-members
+ * get the membership panel when they press it.
  */
-export function ListenLine({ audio, tone = 'light' }: { audio: ArticleAudio; tone?: 'light' | 'dark' }) {
+export function ListenLine({ audio }: { audio: ArticleAudio }) {
   const clip = articleClip(audio)
   if (!clip) return null
   return (
-    <div
-      className="audio-slot"
-      data-audio-slot={clip.sectionKey}
-      data-tone={tone}
-      id={slotElementId(clip.sectionKey)}
-    >
+    <div className="audio-slot" data-audio-slot={clip.sectionKey} id={slotElementId(clip.sectionKey)}>
       <div className="audio-shell" aria-hidden="true">
         <span className="aud-listen">
-          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-            <path d="M8 5.5v13l11-6.5z" />
-          </svg>
-          Listen
+          <span className="aud-listen-icon">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M9 6.5v11l9-5.5z" />
+            </svg>
+          </span>
+          <span className="aud-listen-word">Listen</span>
+          <span className="aud-listen-length">{listenMinutesLabel(clip.durationSeconds)}</span>
         </span>
       </div>
     </div>

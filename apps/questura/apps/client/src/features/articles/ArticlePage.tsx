@@ -26,7 +26,7 @@ import { getPublicBaseUrl } from '@/lib/seo/publicBaseUrl'
 import { Article, type ArticleDisplayLayout } from './types'
 import { formatArticleDate } from '@/lib/dates'
 
-/** Share, bookmark and, on an article with audio, its "Listen" button: the same row in every layout. */
+/** Share and bookmark: the same row in every layout. */
 function ArticleShareRow({
   article,
   shareUrl,
@@ -57,7 +57,6 @@ function ArticleShareRow({
         />
         <BookmarkButton targetType="articles" targetId={article.id} />
       </div>
-      {article.audio?.clips.length ? <ListenLine audio={article.audio} tone={tone} /> : null}
     </div>
   )
 }
@@ -102,6 +101,7 @@ function ArticleBody({ article, path, adPlan }: { article: Article; path?: strin
   const gate = readGate(article)
   return (
     <div className="space-y-8 sm:space-y-10" data-article-body>
+      {article.audio?.clips.length ? <ListenLine audio={article.audio} /> : null}
       {article.audio?.clips.length ? (
         <ArticleAudioLoader audio={article.audio} articleTitle={article.title} returnTo={path ?? '/'} />
       ) : null}
