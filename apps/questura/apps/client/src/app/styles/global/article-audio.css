@@ -496,42 +496,6 @@
   filter: drop-shadow(0 0 3px rgb(120 145 255 / 0.75)) drop-shadow(0 0 8px rgb(59 91 219 / 0.55));
 }
 
-/* ---- the dark header's quiet Listen box ---------------------------------- */
-
-.audio-header-slot {
-  font-family: var(--font-dm-sans), system-ui, sans-serif;
-}
-.audio-header-slot[data-ready] > .audio-shell {
-  display: none;
-}
-.aud-header-box {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 7px 12px;
-  border: 1px solid rgb(255 255 255 / 0.85);
-  color: #fff;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  line-height: 1;
-  opacity: 0.9;
-  transition: opacity 0.15s ease, background-color 0.15s ease;
-}
-.aud-header-box:hover {
-  opacity: 1;
-  background: rgb(255 255 255 / 0.08);
-}
-.aud-header-box:focus-visible {
-  outline: 2px solid #fff;
-  outline-offset: 3px;
-}
-.aud-header-box svg {
-  width: 14px;
-  height: 14px;
-}
-
 @media (max-width: 640px) {
   .aud-follow-label,
   .aud-mini-time,
