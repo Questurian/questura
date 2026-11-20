@@ -142,20 +142,24 @@ export type ListiclePlace = {
   longitude: number
 }
 
-/** From the live dining rows (XOMA is dining 262, Contraste 449). */
+/**
+ * From the live dining rows (Candelo is dining 536, Contraste 449). Candelo's
+ * pin uses Google's spot for Av. República de Panamá 5629: its dining row's
+ * coordinates point at a general Miraflores spot, not the restaurant.
+ */
 export const LISTICLE_PLACES: ListiclePlace[] = [
   {
-    choice: 'XOMA',
-    name: 'XOMA Gastronómico',
-    caption: 'XOMA Gastronómico',
-    price: '$$$$',
-    description: 'Andean ingredients and French training, with a seven-course tasting menu at dinner.',
-    idealFor: 'Business dining',
-    address: 'Elías Aguirre 179, Miraflores',
-    photoPosition: '2 / 5',
-    photo: `${CDN}/xoma-gastronmico_1779500469925_wide-5.webp`,
-    latitude: -12.1183162,
-    longitude: -77.0349372,
+    choice: 'Candelo',
+    name: 'Candelo Comida Popular',
+    caption: 'Candelo Comida Popular - Anticuchería',
+    price: '$$',
+    description: 'Beef heart off the grill with golden potato and corn, plus the cuts a street cart would sell.',
+    idealFor: 'Classic & traditional',
+    address: 'Av. República de Panamá 5629, Miraflores',
+    photoPosition: '1 / 3',
+    photo: `${CDN}/1792802780046-source-2217_wide.webp`,
+    latitude: -12.1200542,
+    longitude: -77.01805,
   },
   {
     choice: 'Contraste',
