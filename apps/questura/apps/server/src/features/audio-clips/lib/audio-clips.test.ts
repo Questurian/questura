@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it } from 'vitest'
 import { anchorArticleHeadings } from '@/features/articles/public/headingAnchors'
 
 import { coveredSeconds, mergeRanges, normalizeRanges } from './listens'
-import { clipMatchesSection, sectionsFromBlocks, splitSentences } from './sections'
+import { articleReading, bylineSentence, clipMatchesSection, sectionsFromBlocks, splitSentences } from './sections'
 import { audioStorageKey, signAudioUrl } from './storage'
 
 const lima = [
@@ -64,6 +64,35 @@ describe('sectionsFromBlocks', () => {
     const blocks = [{ blockType: 'text', content: '<h2>Plan</h2><p>Go in May.</p>' }] as Array<Record<string, unknown>>
     anchorArticleHeadings(blocks)
     expect(sectionsFromBlocks(blocks).map((section) => section.key)).toEqual(['plan'])
+  })
+})
+
+describe('articleReading', () => {
+  it('reads the title, the byline, the dek, then the whole body as one "article" section', () => {
+    const reading = articleReading({
+      title: 'The Questurian Guide to Lima',
+      authors: ['Alan Malpartida'],
+      dek: 'Where to eat, stay and walk. Updated for 2026.',
+      blocks: anchored(),
+    })
+    expect(reading.key).toBe('article')
+    expect(reading.sentences.slice(0, 5)).toEqual([
+      'The Questurian Guide to Lima.',
+      'By Alan Malpartida.',
+      'Where to eat, stay and walk.',
+      'Updated for 2026.',
+      'Lima is a city to plan around its meals.',
+    ])
+    expect(reading.sentences).toContain('Plan the trip.')
+    expect(reading.sentences.at(-1)).toBe('Miraflores is easiest.')
+  })
+
+  it('names every author, and skips a missing byline or dek', () => {
+    expect(bylineSentence(['Ana', 'Ben', 'Cy'])).toBe('By Ana, Ben and Cy.')
+    expect(bylineSentence(['Ana', 'Ben'])).toBe('By Ana and Ben.')
+    expect(bylineSentence([' '])).toBeNull()
+    const reading = articleReading({ title: 'Lima?', authors: [], dek: null, blocks: [] })
+    expect(reading.sentences).toEqual(['Lima?'])
   })
 })
 

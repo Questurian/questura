@@ -1,11 +1,12 @@
-import { INTRO_SECTION_KEY, slotElementId } from './slots'
+import { ARTICLE_SECTION_KEY } from './slots'
 
 /**
  * Finds each narrated sentence on the page, as a DOM Range (ADR-0018).
  *
- * The section's text is read straight from the rendered article, between
- * where the section starts (its slot for the Intro, its H2 otherwise) and the
- * next H2, skipping the players themselves, ads, figures and boxes. Each
+ * The text is read straight from the rendered page. The whole-article
+ * recording starts at the title (the byline and dek follow it) and runs to
+ * the end; a section's runs from its H2 to the next. The players, ads,
+ * figures, boxes and navigation are skipped. Each
  * sentence is then searched for in order, with spacing and curly quotes
  * evened out. A sentence that is not found (the text was edited after the
  * recording) gets no range and simply is not highlighted.
@@ -18,7 +19,7 @@ export type SentenceRanges = {
   ranges: Array<Range | null>
 }
 
-const SKIP = '[data-audio-slot], [data-in-article-ad], figure, aside, script, style, button'
+const SKIP = '[data-audio-slot], [data-in-article-ad], figure, aside, nav, script, style, button'
 
 type Point = { node: Text; offset: number }
 
@@ -41,8 +42,11 @@ function normalizeText(text: string): string {
 }
 
 function sectionBounds(sectionKey: string): { start: Node; end: Node | null; root: Element } | null {
-  const slot = document.getElementById(slotElementId(sectionKey))
-  const start = sectionKey === INTRO_SECTION_KEY ? slot : document.getElementById(sectionKey)
+  if (sectionKey === ARTICLE_SECTION_KEY) {
+    const start = document.querySelector('main h1') ?? document.querySelector('h1')
+    return start ? { start, end: null, root: start.closest('main') ?? document.body } : null
+  }
+  const start = document.getElementById(sectionKey)
   if (!start) return null
   const root = start.closest('[data-article-body]') ?? document.body
   const headings = Array.from(root.querySelectorAll('h2[id]'))

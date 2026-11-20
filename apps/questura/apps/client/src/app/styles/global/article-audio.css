@@ -1,154 +1,151 @@
 /*
- * AudioClips (ADR-0018): the section player, its server-drawn shell, the
- * floating player, the sentence highlight, the narrated-section rule, the
- * card badge and the header's "N-min listen" line. Approved mockup:
+ * AudioClips (ADR-0018, amended 2026-11-19): the Listen line above the
+ * article's text and the player row it opens into, the floating player, the
+ * sentence highlight and narrated-paragraph rule (switched off for now) and
+ * the card badge. Approved mockup:
  * questurian-studio apps/ai-blog-writer/apps/frontend/public/audio-clips-mockup.html
  */
 
-/* ---- slot + shell (server HTML, before the player loads) ---------------- */
+/* ---- the Listen line above the text, and the player row it opens into --- */
 
-.article-prose .audio-slot,
 .audio-slot {
-  margin: 4px 0 24px;
   font-family: var(--font-dm-sans), system-ui, sans-serif;
-}
-.article-prose h2 + .audio-slot {
-  margin-top: 10px;
-}
-.audio-shell {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  min-height: 68px;
-  padding: 12px 0 12px;
-  border-top: 1px solid rgb(26 26 26 / 0.14);
-  border-bottom: 1px solid rgb(26 26 26 / 0.14);
 }
 .audio-slot[data-ready] > .audio-shell {
   display: none;
 }
-.audio-shell-button {
-  flex: none;
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  background: var(--accent);
-  opacity: 0.85;
-}
-.audio-shell-text {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  min-width: 0;
-}
-.audio-shell-label,
-.aud-label {
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+.aud-listen {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 40px;
   color: var(--accent);
+  font-size: 14px;
+  line-height: 1;
 }
-.audio-shell-sub,
-.aud-sub {
-  font-size: 13px;
-  line-height: 1.35;
-  color: rgb(26 26 26 / 0.6);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.aud-listen-icon {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1.5px solid currentColor;
+  border-radius: 50%;
+  transition: background-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
 }
-
-/* ---- the section player ------------------------------------------------- */
-
-.aud-player {
-  border-top: 1px solid rgb(26 26 26 / 0.14);
-  border-bottom: 1px solid rgb(26 26 26 / 0.14);
-  padding: 12px 0 10px;
+.aud-listen-icon svg {
+  width: 15px;
+  height: 15px;
+  margin-left: 2px;
+}
+.aud-listen-word {
+  font-weight: 600;
+}
+.aud-listen-length {
+  color: rgb(26 26 26 / 0.55);
+}
+.aud-listen-length::before {
+  content: '•';
+  margin-right: 10px;
+  color: rgb(26 26 26 / 0.35);
+}
+.aud-listen:hover .aud-listen-icon {
+  background: var(--accent);
+  color: #fff;
+  transform: scale(1.06);
+}
+.aud-listen:hover .aud-listen-word {
+  text-decoration: underline;
+  text-underline-offset: 4px;
 }
 .aud-player p {
   margin: 0;
-}
-/* The prose's link look (blue words, underline, hover wash) is not for the player's buttons. */
-.article-prose .aud-lock a {
-  background-image: none;
-  text-decoration: none;
-}
-.article-prose .aud-lock-signin a {
-  text-decoration: underline;
-  text-underline-offset: 3px;
 }
 .aud-row {
   display: flex;
   align-items: center;
   gap: 14px;
+  min-height: 44px;
+  animation: aud-drop 0.2s ease-out;
 }
 .aud-play {
   flex: none;
-  width: 42px;
-  height: 42px;
+  width: 40px;
+  height: 40px;
+  border: 1.5px solid var(--accent);
   border-radius: 50%;
-  background: var(--accent);
-  color: #fff;
+  background: transparent;
+  color: var(--accent);
   display: grid;
   place-items: center;
-  transition: transform 0.1s ease, background-color 0.2s ease;
+  transition: background-color 0.15s ease, color 0.15s ease, transform 0.1s ease;
+}
+.aud-play:hover {
+  background: var(--accent);
+  color: #fff;
 }
 .aud-play:active {
   transform: scale(0.95);
 }
+.aud-play svg {
+  width: 16px;
+  height: 16px;
+}
+.aud-play .aud-spinner {
+  border-color: color-mix(in srgb, var(--accent) 30%, transparent);
+  border-top-color: var(--accent);
+}
+.aud-listen:focus-visible,
 .aud-play:focus-visible,
+.aud-skip:focus-visible,
 .aud-speed:focus-visible,
 .aud-follow:focus-visible,
-.aud-bar:focus-visible,
+.aud-line:focus-visible,
 .aud-mini button:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 3px;
 }
-.aud-play svg {
-  width: 18px;
-  height: 18px;
-}
-.aud-player[data-locked] .aud-play {
-  background: var(--foreground);
-}
-.aud-player[data-locked] .aud-label {
-  color: rgb(26 26 26 / 0.6);
-}
-.aud-meta {
-  flex: 1;
-  min-width: 0;
-}
-.aud-label {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.aud-label svg {
-  width: 13px;
-  height: 13px;
-}
-.aud-sub {
-  margin-top: 3px;
+.aud-clock {
+  flex: none;
+  font-size: 12px;
+  color: rgb(26 26 26 / 0.55);
+  font-variant-numeric: tabular-nums;
 }
 .aud-tools {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 6px;
   flex: none;
 }
+.aud-skip {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  color: rgb(26 26 26 / 0.6);
+  transition: color 0.15s ease;
+}
+.aud-skip:hover {
+  color: var(--accent);
+}
+.aud-skip svg {
+  width: 26px;
+  height: 26px;
+}
 .aud-speed {
-  min-width: 46px;
-  height: 28px;
+  min-width: 36px;
+  height: 26px;
+  margin-left: 4px;
   font-size: 12px;
   font-weight: 600;
-  border: 1px solid rgb(26 26 26 / 0.18);
-  background: var(--paper);
+  border: 1px solid rgb(26 26 26 / 0.2);
+  background: transparent;
   color: var(--foreground);
   font-variant-numeric: tabular-nums;
+  transition: border-color 0.15s ease, color 0.15s ease;
 }
 .aud-speed:hover {
   border-color: var(--accent);
+  color: var(--accent);
 }
 .aud-follow {
   display: flex;
@@ -186,53 +183,65 @@
 .aud-follow[aria-checked='true'] .aud-switch::after {
   left: 15px;
 }
-.aud-bar,
+.aud-line,
 .aud-mini-bar {
   position: relative;
   cursor: pointer;
   touch-action: none;
 }
-.aud-bar {
-  height: 18px;
-  margin-top: 8px;
+/* The progress line: thin grey, blue up to a blue dot. */
+.aud-line {
+  flex: 1;
+  min-width: 0;
+  height: 24px;
 }
-.aud-track,
-.aud-fill {
+.aud-line .aud-track,
+.aud-line .aud-fill {
   position: absolute;
   left: 0;
-  top: 8px;
-  height: 3px;
+  top: 11px;
+  height: 2px;
 }
-.aud-track {
+.aud-line .aud-track {
   right: 0;
-  background: #ddd6ca;
+  background: rgb(26 26 26 / 0.16);
 }
-.aud-fill {
+.aud-line .aud-fill {
   background: var(--accent);
 }
-.aud-knob {
+.aud-line .aud-knob {
   position: absolute;
-  top: 3px;
-  width: 13px;
-  height: 13px;
-  margin-left: -6px;
+  top: 7px;
+  width: 10px;
+  height: 10px;
+  margin-left: -5px;
   border-radius: 50%;
   background: var(--accent);
-  opacity: 0;
-  transition: opacity 0.15s ease;
+  transition: transform 0.15s ease;
 }
-.aud-bar:hover .aud-knob,
-.aud-bar:focus-visible .aud-knob,
-.aud-player[data-started] .aud-knob {
-  opacity: 1;
+.aud-line:hover .aud-knob,
+.aud-line:focus-visible .aud-knob {
+  transform: scale(1.35);
 }
-.aud-times {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 2px;
-  font-size: 11px;
-  color: rgb(26 26 26 / 0.6);
-  font-variant-numeric: tabular-nums;
+.aud-mini-bar .aud-track,
+.aud-mini-bar .aud-fill {
+  position: absolute;
+  left: 0;
+  height: 3px;
+}
+.aud-mini-bar .aud-track {
+  right: 0;
+}
+@media (max-width: 480px) {
+  .aud-row {
+    gap: 10px;
+  }
+  .aud-row > .aud-clock:last-of-type {
+    display: none;
+  }
+  .aud-tools {
+    gap: 2px;
+  }
 }
 .aud-error {
   margin-top: 8px;
@@ -458,31 +467,8 @@
   font-size: 13px;
 }
 
-/* ---- header line and card badge ----------------------------------------- */
+/* ---- card badge --------------------------------------------------------- */
 
-.article-listen-line {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 7px 12px;
-  border: 1px solid currentColor;
-  font-family: var(--font-dm-sans), system-ui, sans-serif;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  text-decoration: none;
-  color: inherit;
-  opacity: 0.9;
-}
-.article-listen-line:hover {
-  opacity: 1;
-  border-color: var(--accent-soft);
-}
-.article-listen-line svg {
-  width: 16px;
-  height: 16px;
-}
 .audio-badge {
   position: absolute;
   left: 10px;

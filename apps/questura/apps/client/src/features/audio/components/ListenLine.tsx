@@ -1,21 +1,28 @@
-import { listenMinutesLabel, slotElementId, type ArticleAudio } from '../lib/slots'
+import { articleClip, listenMinutesLabel, slotElementId, type ArticleAudio } from '../lib/slots'
 
 /**
- * "N-min listen" under the article's title (ADR-0018), in the place the
- * "Add Us On Google" button used to be. Jumps to the first narrated section;
- * it never starts playing on its own. Shown to every reader: the length of
- * what members can listen to is part of what the page sells.
+ * The article's "Listen" line (ADR-0018, amended 2026-11-19), directly above
+ * the article's text in every layout. Drawn here as a still shell so it is in
+ * place before any JavaScript; the player mounts into the same element and,
+ * on a press, opens it into the player row. Shown to every reader: non-members
+ * get the membership panel when they press it.
  */
 export function ListenLine({ audio }: { audio: ArticleAudio }) {
-  const first = audio.clips[0]
-  if (!first) return null
+  const clip = articleClip(audio)
+  if (!clip) return null
   return (
-    <a href={`#${slotElementId(first.sectionKey)}`} className="article-listen-line">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-        <path d="M3 14v-2a9 9 0 0 1 18 0v2" />
-        <path d="M21 15a2 2 0 0 1-2 2h-1v-6h1a2 2 0 0 1 2 2zM3 15a2 2 0 0 0 2 2h1v-6H5a2 2 0 0 0-2 2z" />
-      </svg>
-      <span>{listenMinutesLabel(audio.totalSeconds)}</span>
-    </a>
+    <div className="audio-slot" data-audio-slot={clip.sectionKey} id={slotElementId(clip.sectionKey)}>
+      <div className="audio-shell" aria-hidden="true">
+        <span className="aud-listen">
+          <span className="aud-listen-icon">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M9 6.5v11l9-5.5z" />
+            </svg>
+          </span>
+          <span className="aud-listen-word">Listen</span>
+          <span className="aud-listen-length">{listenMinutesLabel(clip.durationSeconds)}</span>
+        </span>
+      </div>
+    </div>
   )
 }

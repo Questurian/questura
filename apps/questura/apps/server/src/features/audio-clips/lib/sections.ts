@@ -15,6 +15,13 @@ import { headingText } from '@/features/articles/public/headingAnchors'
 
 export const INTRO_SECTION_KEY = 'intro'
 
+/**
+ * A standard article is read as one recording (ADR-0018, amended 2026-11-19):
+ * title, byline, dek, then the whole body. Per-section keys stay for
+ * listicles and itinerary stops later.
+ */
+export const ARTICLE_SECTION_KEY = 'article'
+
 export type ArticleSection = {
   key: string
   title: string
@@ -77,6 +84,34 @@ export function sectionsFromBlocks(blocks: Array<Record<string, unknown>>): Arti
   }
 
   return sections.filter((section) => section.key !== INTRO_SECTION_KEY || section.sentences.length > 0)
+}
+
+/** "By A", "By A and B", "By A, B and C". */
+export function bylineSentence(authors: string[]): string | null {
+  const names = authors.map((name) => name.replace(/\s+/g, ' ').trim()).filter(Boolean)
+  if (names.length === 0) return null
+  const list = names.length === 1 ? names[0] : `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}`
+  return `By ${list}.`
+}
+
+/**
+ * The whole article as one reading: its title, who wrote it, the dek under the
+ * title, then every section's sentences in page order.
+ */
+export function articleReading(input: {
+  title: string
+  authors: string[]
+  dek: string | null | undefined
+  blocks: Array<Record<string, unknown>>
+}): ArticleSection {
+  const sentences: string[] = []
+  const title = input.title.replace(/\s+/g, ' ').trim()
+  if (title) sentences.push(headingSentence(title))
+  const byline = bylineSentence(input.authors)
+  if (byline) sentences.push(byline)
+  if (input.dek) sentences.push(...splitSentences(input.dek))
+  for (const section of sectionsFromBlocks(input.blocks)) sentences.push(...section.sentences)
+  return { key: ARTICLE_SECTION_KEY, title: 'Whole article', sentences }
 }
 
 /** The text sent to the Narrator: sentences, one space apart. */

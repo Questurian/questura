@@ -4,7 +4,6 @@ import { GatedArticleBody } from '@/features/articles/components/GatedArticleBod
 import { ArticleShareButton } from '@/features/articles/components/ArticleShareButton'
 import { ArticleAudioLoader } from '@/features/audio/components/ArticleAudioLoader'
 import { ListenLine } from '@/features/audio/components/ListenLine'
-import { audioSlotHtml, introClip, withAudioSlots } from '@/features/audio/lib/slots'
 import { BookmarkButton } from '@/features/bookmarks/components/BookmarkButton'
 import { AuthorLink } from '@/features/authors/components/AuthorLink'
 import {
@@ -27,7 +26,7 @@ import { getPublicBaseUrl } from '@/lib/seo/publicBaseUrl'
 import { Article, type ArticleDisplayLayout } from './types'
 import { formatArticleDate } from '@/lib/dates'
 
-/** Share, bookmark and, on an article with audio, its "N-min listen" line: the same row in every layout. */
+/** Share and bookmark: the same row in every layout. */
 function ArticleShareRow({
   article,
   shareUrl,
@@ -58,7 +57,6 @@ function ArticleShareRow({
         />
         <BookmarkButton targetType="articles" targetId={article.id} />
       </div>
-      {article.audio?.clips.length ? <ListenLine audio={article.audio} /> : null}
     </div>
   )
 }
@@ -101,10 +99,9 @@ function ArticleHeroFigure({
 /** Blocks, paywall and author banner: shared by every layout. */
 function ArticleBody({ article, path, adPlan }: { article: Article; path?: string; adPlan: AdPlan }) {
   const gate = readGate(article)
-  const intro = introClip(article.audio)
   return (
     <div className="space-y-8 sm:space-y-10" data-article-body>
-      {intro ? <div dangerouslySetInnerHTML={{ __html: audioSlotHtml(intro) }} /> : null}
+      {article.audio?.clips.length ? <ListenLine audio={article.audio} /> : null}
       {article.audio?.clips.length ? (
         <ArticleAudioLoader audio={article.audio} articleTitle={article.title} returnTo={path ?? '/'} />
       ) : null}
@@ -113,7 +110,6 @@ function ArticleBody({ article, path, adPlan }: { article: Article; path?: strin
           articleId={article.id}
           gate={gate}
           path={path ?? '/'}
-          audio={article.audio}
           contents={article.tableOfContents}
           sample={
             <ArticleBlockStream
@@ -411,11 +407,9 @@ export function ArticlePage({ article: source, path }: { article: Article; path?
   // Each Airbnb takes in the section written about it before anything is
   // planned, so the ad plan indexes the blocks that are drawn. A locked
   // article's sample holds no cards, so `gate.shown` still counts its blocks.
-  // A narrated section's player sits under its heading (ADR-0018); the slots
-  // go in before the ad plan so its indexes count the blocks that are drawn.
   const article = {
     ...source,
-    contentBlocks: withAudioSlots(pairStayBoxes(source.contentBlocks ?? []), source.audio),
+    contentBlocks: pairStayBoxes(source.contentBlocks ?? []),
   }
   const gate = readGate(article)
   const adPlan = planArticleAds(article.contentBlocks, {

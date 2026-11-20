@@ -50,3 +50,20 @@ where it lives:
 - *Streaming the MP3 through the API after a membership check*: no new Bunny
   resource, but every second of audio passes through Railway. Rejected for
   expiring links on Bunny.
+
+## Amendment, 2026-11-19: one recording per standard article
+
+After the first live test the owner asked for one recording, not one per
+section. A standard article now has a single AudioClip with section key
+`article`: the Narrator reads the title, "By" and every author, the dek
+(`seoSection.metaDescription`), then the whole body (same p/h2/h3/li reading).
+The player sits directly above the article's text in every layout: a blue
+outlined play button, "Listen" and the length ("69 minutes"). Pressed, it opens
+into one row: play/pause, time heard, a thin progress line with a dot, the
+length, back and forward 15 seconds, and speed. The sentence highlight, the
+narrated-paragraph rule and Follow along are switched off for now
+(`TEXT_FOLLOW_ENABLED` in the client controller); the code stays.
+The per-section players and the
+Intro slot are gone from standard articles. Section keys stay in the collection
+for listicles and itinerary stops later. Older per-section clips stay in the
+studio as "Not attached" and are not drawn.

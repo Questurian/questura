@@ -96,7 +96,7 @@ _Avoid_: stop type, daypart, itinerary tag
 
 ### AudioClip
 
-One narrated recording of one Article section, played from the start of that section. Only a reader with Membership entitlement can play it; every reader sees it. An article's AudioClips, in section order, can play as one continuous listen.
+One narrated recording. A standard Article has one, read from its title, byline and dek through the whole body (section key `article`); listicles and itinerary stops may later have one per Article section. Only a reader with Membership entitlement can play it; every reader sees it. An article's AudioClips, in section order, can play as one continuous listen.
 _Avoid_: audio, podcast, voiceover, track, narration file
 
 ### Article section

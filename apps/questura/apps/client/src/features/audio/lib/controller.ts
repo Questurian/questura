@@ -2,7 +2,7 @@
 
 import { get, getBackendUrl, RequestError } from '@/lib/api'
 
-import { INTRO_SECTION_KEY, slotElementId, type ArticleAudioClip } from './slots'
+import { slotElementId, type ArticleAudioClip } from './slots'
 import { buildSentenceRanges, markNarratedBlocks, type SentenceRanges } from './sentenceRanges'
 
 /**
@@ -58,6 +58,14 @@ type ListenRecord = {
 }
 
 const HIGHLIGHT_NAME = 'audio-now'
+
+/**
+ * The sentence highlight, the narrated-paragraph rule and Follow along are
+ * switched off for now (owner, 2026-11-19): the player shows no Follow along
+ * switch and the page is never marked. The code stays; set this to true to
+ * bring them back.
+ */
+export const TEXT_FOLLOW_ENABLED = false
 const REPORT_EVERY_MS = 15_000
 
 const storage = {
@@ -243,8 +251,7 @@ export class AudioController {
   scrollToClip(clipId: number | null) {
     const clip = clipId === null ? null : this.clips.get(clipId)
     if (!clip) return
-    const slot = document.getElementById(slotElementId(clip.sectionKey))
-    const target = clip.sectionKey === INTRO_SECTION_KEY ? slot : document.getElementById(clip.sectionKey) ?? slot
+    const target = document.getElementById(slotElementId(clip.sectionKey))
     if (!target) return
     this.autoScrollAt = Date.now()
     window.scrollTo({ top: window.scrollY + target.getBoundingClientRect().top - 96, behavior: 'smooth' })
@@ -405,6 +412,7 @@ export class AudioController {
   }
 
   private updateSentence(force: boolean) {
+    if (!TEXT_FOLLOW_ENABLED) return
     const clipId = this.state.clipId
     const info = clipId === null ? null : this.info.get(clipId)
     const audio = this.audio
@@ -459,6 +467,7 @@ export class AudioController {
 
   /** A reader who scrolls on their own takes the page back: Follow along turns off. */
   private onManualScroll = (event: Event) => {
+    if (!TEXT_FOLLOW_ENABLED) return
     if (!this.state.follow || !this.audio || this.audio.paused) return
     if (Date.now() - this.autoScrollAt < 600) return
     if (event instanceof KeyboardEvent) {
