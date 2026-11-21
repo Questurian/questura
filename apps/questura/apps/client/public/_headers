@@ -1,0 +1,8 @@
+# Cloudflare Workers static-asset headers (not served as a file).
+#
+# Build files carry a content hash in their name, so the bytes at a given URL
+# never change. Browsers may keep them for a year without asking again. This
+# also means a page left over from the previous deploy keeps its stylesheet
+# and scripts after the deploy deletes them from the server (src/lib/release/staleBuild.ts).
+/_next/static/*
+  Cache-Control: public, max-age=31536000, immutable

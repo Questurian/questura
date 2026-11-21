@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 
 import { reportBrowserError } from '@/lib/observability/reportBrowserError';
+import { reloadForStaleBuild, shouldReloadForStaleBuild } from '@/lib/release/staleBuild';
 
 /**
  * The last page: shown when the root layout itself fails, so nothing from the
@@ -14,7 +15,8 @@ import { reportBrowserError } from '@/lib/observability/reportBrowserError';
  * the blue accent, with a hairline rule instead of a frame. Inline because the
  * stylesheet is part of what may have failed to load.
  *
- * Reports in production (lib/observability/reportBrowserError.ts).
+ * Reports in production (lib/observability/reportBrowserError.ts). A page left
+ * over from the previous deploy reloads instead (lib/release/staleBuild.ts).
  */
 
 const INK = '#1A1A1A';
@@ -30,9 +32,21 @@ export default function GlobalError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const reloading = useMemo(() => shouldReloadForStaleBuild(error), [error]);
+
   useEffect(() => {
     reportBrowserError(error, 'global-error');
-  }, [error]);
+    if (reloading) reloadForStaleBuild();
+  }, [error, reloading]);
+
+  // The warm ground alone for the instant before the fresh page arrives.
+  if (reloading) {
+    return (
+      <html lang="en" style={{ colorScheme: 'light' }}>
+        <body style={{ margin: 0, minHeight: '100vh', background: GROUND }} />
+      </html>
+    );
+  }
 
   return (
     <html lang="en" style={{ colorScheme: 'light' }}>
