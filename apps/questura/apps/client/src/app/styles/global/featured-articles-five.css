@@ -231,6 +231,17 @@
   margin-top: 8px;
 }
 
+/*
+ * Phones: the first section's titles a touch heavier so they pop. The small
+ * titles already use Cormorant's heaviest weight (700), so a hairline stroke
+ * in the text colour thickens every title the same small amount instead.
+ */
+@media (max-width: 767px) {
+  .city-five-cl-title {
+    -webkit-text-stroke: 0.3px currentColor;
+  }
+}
+
 .city-five-cl-dek {
   margin-top: 8px;
   overflow: hidden;
