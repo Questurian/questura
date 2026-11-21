@@ -43,11 +43,15 @@ async function pagePaths() {
   return [...new Set(paths)]
 }
 
-/** What the page's map is right now, read from the page itself. */
+/**
+ * What the page's map is right now, read from the page itself. Since #218 the
+ * picture sits beside the section, in the map frame (`data-map-surface`), so
+ * the whole frame is searched.
+ */
 function readMap(selector) {
   const section = document.querySelector(selector)
   if (!section) return { kind: document.querySelector('.gm-style') ? 'google-map' : 'none' }
-  const image = section.querySelector('img')
+  const image = (section.closest('[data-map-surface]') ?? section).querySelector('img')
   if (!image) return { kind: 'dots' }
   if (!image.complete) return { kind: 'loading' }
   return image.naturalWidth > 0 ? { kind: 'picture' } : { kind: 'broken-image', src: image.currentSrc || image.src }
@@ -73,7 +77,8 @@ async function checkOnce(context, path) {
     await page
       .waitForFunction(
         (selector) => {
-          const image = document.querySelector(selector)?.querySelector('img')
+          const section = document.querySelector(selector)
+          const image = (section?.closest('[data-map-surface]') ?? section)?.querySelector('img')
           return !image || image.complete
         },
         MAP_SELECTOR,
