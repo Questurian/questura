@@ -9,9 +9,12 @@ const MapTeaser = dynamic(() => import("./MapTeaser").then((module) => module.Ma
 const GoogleMapPanel = dynamic(() => import("./GoogleMapPanel"), { ssr: false, loading: MapWaiting });
 
 /** Neither Google's API nor its rendering code loads before access is known. */
-export function MapPanel(props: MapPanelProps = {}) {
+export function MapPanel({ revealedBottomPx, ...props }: MapPanelProps & {
+  /** Teaser only: of the inset, the strip the phone's hidden toolbars put back on screen right now. */
+  revealedBottomPx?: number;
+} = {}) {
   const { access } = useListicleMapSync();
-  if (access === "teaser") return <MapTeaser insetBottomPx={props.viewportInsetBottomPx} coveredBottomPx={props.coveredBottomPx} />;
+  if (access === "teaser") return <MapTeaser insetBottomPx={props.viewportInsetBottomPx} coveredBottomPx={props.coveredBottomPx} revealedBottomPx={revealedBottomPx} />;
   if (access === "waiting") return <MapWaiting />;
   return <GoogleMapPanel {...props} />;
 }

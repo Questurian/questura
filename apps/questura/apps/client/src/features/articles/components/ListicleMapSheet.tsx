@@ -98,7 +98,7 @@ export function ListicleMapSheet({
 }: {
   guides?: ListicleMapGuides
 }): JSX.Element | null {
-  const { points, activeId, scrollToEntry } = useListicleMapSync()
+  const { points, activeId, scrollToEntry, access } = useListicleMapSync()
   const [mode, setMode] = useState<ListicleMapMode>(INITIAL_LISTICLE_MAP_MODE)
   // The map is mounted the first time the reader asks for it and then kept,
   // so going back and forth never pays for a second billed map load.
@@ -114,6 +114,11 @@ export function ListicleMapSheet({
   // depends on whether the stop has a photo and a blurb - so it is measured
   // rather than assumed, and fed back into the camera as hidden space.
   const [overlayHeight, setOverlayHeight] = useState(LISTICLE_MAP_PILL_CLEARANCE)
+  // How much taller the screen is than the small viewport right now: the
+  // strip the toolbars give back when they hide. Only the locked picture
+  // follows it (MapTeaser); the Google map keeps its fixed geometry, so this
+  // is not tracked for members and their map never re-renders on scroll.
+  const [toolbarsHiddenPx, setToolbarsHiddenPx] = useState(0)
 
   useEffect(() => {
     const sync = () => {
@@ -138,6 +143,19 @@ export function ListicleMapSheet({
       window.removeEventListener('orientationchange', sync)
     }
   }, [])
+
+  useEffect(() => {
+    if (access !== 'teaser' || !viewport) return
+    const sync = () =>
+      setToolbarsHiddenPx(
+        Math.round(
+          Math.min(Math.max(window.innerHeight - viewport.small, 0), viewport.large - viewport.small),
+        ),
+      )
+    sync()
+    window.addEventListener('resize', sync)
+    return () => window.removeEventListener('resize', sync)
+  }, [access, viewport])
 
   useEffect(() => {
     const query = window.matchMedia('(prefers-reduced-motion: reduce)')
@@ -263,6 +281,7 @@ export function ListicleMapSheet({
             <MapPanel
               viewportInsetBottomPx={mapInset}
               coveredBottomPx={overlayHeight}
+              revealedBottomPx={toolbarsHiddenPx}
               paused={mode === 'list'}
               activeZoom={MODE_ACTIVE_ZOOM[mode]}
               fitPadding={MOBILE_FIT_PADDING}

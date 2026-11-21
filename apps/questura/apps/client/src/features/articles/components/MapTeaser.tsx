@@ -101,14 +101,22 @@ function JoinCall({ compact, href }: { compact: boolean; href: string }) {
  * `coveredBottomPx` is the on-screen part of that inset, under the phone's
  * List / Split / Map switch: the picture runs on under the switch to the
  * screen's edge, so the sheet never ends in a band of bare paper.
+ * `revealedBottomPx` is the part of the inset that the phone's toolbars put
+ * back on screen when they hide as the reader scrolls (iPhone Safari). The
+ * picture, its places and the join bar are laid out again for that taller
+ * strip, once per toolbar change, so it never ends above a band of bare
+ * paper either (owner, 2026-11-20).
  */
 export function MapTeaser({
-  insetBottomPx = 0,
+  insetBottomPx: insetWithToolbars = 0,
   coveredBottomPx = 0,
+  revealedBottomPx = 0,
 }: {
   insetBottomPx?: number
   coveredBottomPx?: number
+  revealedBottomPx?: number
 }): JSX.Element {
+  const insetBottomPx = Math.max(0, insetWithToolbars - revealedBottomPx)
   const { points, scrollToEntry, teaserKey, teaser } = useListicleMapSync()
   const pathname = usePathname()
   const boxRef = useRef<HTMLDivElement>(null)
