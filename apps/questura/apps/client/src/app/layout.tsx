@@ -62,7 +62,8 @@ export default async function RootLayout({
   return (
     // The pre-paint scripts below set `data-identity` and `data-nav-theme`
     // before React hydrates.
-    <html lang={DEFAULT_LOCALE} style={{ colorScheme: 'light' }} suppressHydrationWarning>
+    // Dark navbar by default: the script only clears this for a saved light choice.
+    <html lang={DEFAULT_LOCALE} data-nav-theme="dark" style={{ colorScheme: 'light' }} suppressHydrationWarning>
       <head>
         {/* Before first paint: which navbar controls this reader will get
             (lib/user/identityHint.ts). Must run ahead of the body. */}

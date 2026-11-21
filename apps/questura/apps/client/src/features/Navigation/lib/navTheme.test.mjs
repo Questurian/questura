@@ -17,14 +17,16 @@ const throwing = {
   },
 }
 
-test('light unless dark was saved', () => {
+test('dark unless light was saved', () => {
   const storage = memoryStorage()
-  assert.equal(readNavTheme(storage), 'light')
+  assert.equal(readNavTheme(storage), 'dark')
   storage.setItem(NAV_THEME_KEY, 'purple')
+  assert.equal(readNavTheme(storage), 'dark')
+  storage.setItem(NAV_THEME_KEY, 'light')
   assert.equal(readNavTheme(storage), 'light')
   storage.setItem(NAV_THEME_KEY, 'dark')
   assert.equal(readNavTheme(storage), 'dark')
-  assert.equal(readNavTheme(null), 'light')
+  assert.equal(readNavTheme(null), 'dark')
 })
 
 test('setNavTheme saves the choice and marks <html> only for dark', () => {
@@ -40,22 +42,23 @@ test('setNavTheme saves the choice and marks <html> only for dark', () => {
 
 test('blocked storage still repaints the page and never throws', () => {
   const root = { dataset: {} }
-  assert.equal(readNavTheme(throwing), 'light')
+  assert.equal(readNavTheme(throwing), 'dark')
   assert.doesNotThrow(() => setNavTheme('dark', throwing, root))
   assert.equal(root.dataset.navTheme, 'dark')
   assert.doesNotThrow(() => applyNavTheme('dark', null))
 })
 
 test('the pre-paint script agrees with readNavTheme', () => {
-  for (const [saved, expected] of [[null, undefined], ['light', undefined], ['dark', 'dark'], ['junk', undefined]]) {
+  for (const [saved, expected] of [[null, 'dark'], ['light', undefined], ['dark', 'dark'], ['junk', 'dark']]) {
     const storage = memoryStorage()
     if (saved) storage.setItem(NAV_THEME_KEY, saved)
-    const document = { documentElement: { dataset: {} } }
+    // The server renders <html data-nav-theme="dark">.
+    const document = { documentElement: { dataset: { navTheme: 'dark' } } }
     new Function('localStorage', 'document', NAV_THEME_SCRIPT)(storage, document)
     assert.equal(document.documentElement.dataset.navTheme, expected, `saved=${saved}`)
   }
-  // Storage that throws leaves the page light instead of breaking <head>.
+  // Storage that throws leaves the bar dark instead of breaking <head>.
   const document = { documentElement: { dataset: {} } }
   assert.doesNotThrow(() => new Function('localStorage', 'document', NAV_THEME_SCRIPT)(throwing, document))
-  assert.equal(document.documentElement.dataset.navTheme, undefined)
+  assert.equal(document.documentElement.dataset.navTheme, 'dark')
 })

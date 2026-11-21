@@ -1,15 +1,17 @@
 /**
- * The reader's navbar colour: light (the default) or dark. It recolours the
+ * The reader's navbar colour: dark (the default) or light. It recolours the
  * navbar only; the page underneath keeps its own palette.
  *
  * The choice is kept in this browser's localStorage and applied as
  * `<html data-nav-theme="dark">`. The palettes themselves are CSS tokens in
  * foundations.css ("Navbar theme"), so switching is one attribute write: no
  * React state, no re-render. An inline `<head>` script (below) applies the
- * saved choice before first paint, so a dark reader never sees the light bar
+ * saved choice before first paint, and the server already renders `<html>`
+ * with `data-nav-theme="dark"`, so a reader never sees the wrong bar
  * flash in first.
  *
- * No saved choice (first visit, private window, storage blocked) means light.
+ * No saved choice (first visit, private window, storage blocked) means dark
+ * (owner, 2026-11-21). Only a saved `light` gives the light bar.
  *
  * Dependency-free so node:test can run it.
  */
@@ -35,13 +37,13 @@ function defaultRoot(): ThemeRoot | null {
 
 export function readNavTheme(storage: ThemeStorage | null = defaultStorage()): NavTheme {
   try {
-    return storage?.getItem(NAV_THEME_KEY) === 'dark' ? 'dark' : 'light'
+    return storage?.getItem(NAV_THEME_KEY) === 'light' ? 'light' : 'dark'
   } catch {
-    return 'light'
+    return 'dark'
   }
 }
 
-/** Only dark sets the attribute; light removes it, so light is the CSS default. */
+/** Dark sets the attribute; light removes it (the CSS without it is the light bar). */
 export function applyNavTheme(theme: NavTheme, root: ThemeRoot | null = defaultRoot()): void {
   if (!root) return
   if (theme === 'dark') root.dataset.navTheme = 'dark'
@@ -64,6 +66,6 @@ export function setNavTheme(
 
 /**
  * Runs in `<head>` before first paint. Keep it tiny and in step with
- * `readNavTheme`: only `dark` sets the attribute.
+ * `readNavTheme`: only a saved `light` clears the attribute.
  */
-export const NAV_THEME_SCRIPT = `try{if(localStorage.getItem("${NAV_THEME_KEY}")==="dark")document.documentElement.dataset.navTheme="dark"}catch(e){}`
+export const NAV_THEME_SCRIPT = `(function(){var t=null;try{t=localStorage.getItem("${NAV_THEME_KEY}")}catch(e){}var d=document.documentElement.dataset;if(t==="light")delete d.navTheme;else d.navTheme="dark"})()`
