@@ -20,6 +20,14 @@ const nextConfig = {
   // (2026-10-01 audit). `withPayload` adds that header only when this is not
   // false, and Next's own is off either way.
   poweredByHeader: false,
+  experimental: {
+    // Every request passes through `src/proxy.ts`, and Next hands on only the
+    // first 10 MB of a body that does. A full-article narration MP3 is ~1 MB a
+    // minute, so a 26-minute AudioClip (25 MB) reached
+    // `/api/audio-clips/upload` cut short and was refused (2026-11-21). The
+    // route's own cap is 60 MB; this sits just above it.
+    proxyClientMaxBodySize: '64mb',
+  },
   async headers() {
     return [{ source: '/:path*', headers: SECURITY_HEADERS }]
   },
