@@ -329,10 +329,10 @@ html[data-identity="member"] .nav-subscribe[data-pending] {
 }
 
 /* Navbar theme (features/Navigation/lib/navTheme.ts). One navbar, two
-   palettes: light is the lab's Atlantic 100, dark is Atlantic 150. The reader
-   picks one in the menu; an inline <head> script sets `html[data-nav-theme]`
-   from their last choice before first paint, so a dark reader never sees the
-   light bar flash in.
+   palettes: light is the lab's Atlantic 100, dark is Atlantic 150. Dark is
+   the default (owner, 2026-11-21): the server renders `html[data-nav-theme=
+   "dark"]` and an inline <head> script clears it before first paint only for
+   a reader who picked light in the menu, so neither sees the wrong bar.
 
    Light lives on :root so anything outside the navbar that borrows its pieces
    always gets the light values. Dark is scoped to `.site-nav`, the navbar's
