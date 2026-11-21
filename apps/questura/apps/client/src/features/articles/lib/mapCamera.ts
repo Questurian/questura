@@ -53,6 +53,48 @@ export function shiftCenterSouthByPixels(
   }
 }
 
+/**
+ * The stops the overview frames: all of them, minus a few far strays.
+ *
+ * One club across town stretched a two-neighbourhood guide to the whole city,
+ * and on the phone's short split strip that left every other dot in a clump
+ * (owner, 2026-11-21: Le Paris in central Lima on the Miraflores & Barranco
+ * nightclubs). A stop counts as a stray when it sits more than
+ * `STRAY_FACTOR` times the typical distance from the middle of the guide.
+ * At most a tenth of the stops are dropped, and never on a short list, so a
+ * guide that is genuinely spread out keeps its whole frame. A stray still has
+ * its dot; the camera reaches it when the reader does.
+ */
+const STRAY_FACTOR = 3
+const STRAY_MIN_POINTS = 6
+const STRAY_MAX_SHARE = 0.1
+
+function median(values: number[]): number {
+  const sorted = [...values].sort((a, b) => a - b)
+  const mid = Math.floor(sorted.length / 2)
+  return sorted.length % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2
+}
+
+export function framedPoints<T extends CameraPoint>(points: T[]): T[] {
+  if (points.length < STRAY_MIN_POINTS) return points
+  const middle = {
+    lat: median(points.map((point) => point.lat)),
+    lng: median(points.map((point) => point.lng)),
+  }
+  const distances = points.map((point) => haversineMeters(middle, point))
+  const typical = median(distances)
+  if (typical === 0) return points
+  const limit = typical * STRAY_FACTOR
+  const strays = distances
+    .map((distance, index) => ({ distance, index }))
+    .filter(({ distance }) => distance > limit)
+    .sort((a, b) => b.distance - a.distance)
+    .slice(0, Math.floor(points.length * STRAY_MAX_SHARE))
+  if (strays.length === 0) return points
+  const dropped = new Set(strays.map(({ index }) => index))
+  return points.filter((_, index) => !dropped.has(index))
+}
+
 export type FitOptions = {
   /** Map div size in CSS pixels. */
   width: number
@@ -116,4 +158,47 @@ export function cameraForPoints(
   }
 
   return { center: shiftCenterSouthByPixels(center, zoom, inset / 2), zoom }
+}
+
+export type ActiveZoomOptions = {
+  /** The zoom a stop gets when nothing crowds it. */
+  baseZoom: number
+  /** Never closer than this, however tight the street. */
+  maxZoom: number
+  /** Centre-to-centre gap, in CSS pixels, the nearest neighbour must clear. */
+  minSeparationPx: number
+  /**
+   * Neighbours closer than this share a building or a corner: no zoom a
+   * reader would want separates them, so they do not count.
+   */
+  ignoreWithinMeters: number
+}
+
+/**
+ * How close to sit on the active stop: the mode's usual zoom, or closer when
+ * its nearest neighbour would otherwise sit on top of it.
+ *
+ * A fixed zoom reads well on a spread-out guide and as a clump on a street of
+ * bars a few doors apart (owner, 2026-11-21, Calle Berlin). So the camera
+ * steps in only as far as it takes for the closest other stop to clear
+ * `minSeparationPx`, and stops at `maxZoom` so a stop still shows its block.
+ */
+export function activeZoomFor(
+  active: CameraPoint,
+  points: CameraPoint[],
+  options: ActiveZoomOptions,
+): number {
+  const activeY = mercatorY(active.lat)
+  let nearest = Infinity
+  for (const point of points) {
+    if (point === active) continue
+    if (haversineMeters(active, point) < options.ignoreWithinMeters) continue
+    // World units at zoom 0, where the whole world is one 256px tile.
+    const dx = ((point.lng - active.lng) / 360) * WORLD_TILE_PX
+    const dy = ((mercatorY(point.lat) - activeY) / TWO_PI) * WORLD_TILE_PX
+    nearest = Math.min(nearest, Math.hypot(dx, dy))
+  }
+  if (!Number.isFinite(nearest) || nearest === 0) return options.baseZoom
+  const needed = Math.log2(options.minSeparationPx / nearest)
+  return Math.min(Math.max(options.baseZoom, needed), Math.max(options.maxZoom, options.baseZoom))
 }
