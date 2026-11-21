@@ -39,10 +39,15 @@ export type TeaserLabel = {
 
 type Box = { width: number; height: number; compact: boolean }
 
-/** The band the pins occupy, as fractions of the drawing's height. The call to join sits below it. */
+/**
+ * The band the pins occupy, as fractions of the drawing's height. On desktop
+ * the call to join sits below it; on the phone's split view the join bar sits
+ * above it, at the top of the strip, so the places are never under it
+ * (owner, 2026-11-20).
+ */
 const BANDS = {
   regular: { top: 0.09, bottom: 0.56 },
-  compact: { top: 0.16, bottom: 0.42 },
+  compact: { top: 0.32, bottom: 0.82 },
 }
 const SIDE_MARGIN = 0.08
 const LABEL_GAP_PX = 14

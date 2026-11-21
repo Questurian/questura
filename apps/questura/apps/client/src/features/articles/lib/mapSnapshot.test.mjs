@@ -98,3 +98,14 @@ test('every listed map picture exists in public/', () => {
     }
   }
 })
+
+test('under an opaque bar the picture may slide down off the top edge, no further than allowed', () => {
+  const places = [point('n', -12.05, -77.03), point('s', -12.1, -77.03)]
+  const box = { width: 390, height: 300 }
+  const pinned = layoutSnapshot(snapshot, places, box, { top: 250, bottom: 290 })
+  const slid = layoutSnapshot(snapshot, places, box, { top: 250, bottom: 290 }, 54)
+
+  assert.equal(pinned.image.top, 0)
+  assert.ok(slid.image.top > 0 && slid.image.top <= 54)
+  assert.ok(slid.pins[0].y > pinned.pins[0].y)
+})

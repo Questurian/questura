@@ -14,8 +14,10 @@ import { useOneFingerSwipe } from '@/features/articles/components/useOneFingerSw
 import {
   coveredHeight,
   hiddenBelowFold,
+  HOME_INDICATOR_ALLOWANCE_PX,
   INITIAL_LISTICLE_MAP_MODE,
   LISTICLE_MAP_PILL_CLEARANCE,
+  LOCKED_SPLIT_VISIBLE_FRACTION,
   sheetHeightPx,
   sheetTopForMode,
   LISTICLE_MAP_MODES,
@@ -112,6 +114,7 @@ export function ListicleMapSheet({
   // depends on whether the stop has a photo and a blurb - so it is measured
   // rather than assumed, and fed back into the camera as hidden space.
   const [overlayHeight, setOverlayHeight] = useState(LISTICLE_MAP_PILL_CLEARANCE)
+  const [overlayContentHeight, setOverlayContentHeight] = useState(LISTICLE_MAP_PILL_CLEARANCE - 16)
   useEffect(() => {
     const sync = () => {
       const next = measureViewport()
@@ -168,17 +171,30 @@ export function ListicleMapSheet({
     // List: the switch stays on screen to the very end (owner, 2026-11-20),
     // so the footer's last line must clear it too.
     body.style.paddingBottom = `${
-      mode === 'split' ? coveredHeight('split', viewport) : overlayHeight + 16
+      mode === 'split'
+        ? Math.max(
+            coveredHeight('split', viewport),
+            access === 'teaser' ? Math.round(viewport.large * LOCKED_SPLIT_VISIBLE_FRACTION) : 0,
+          )
+        : overlayHeight + 16
     }px`
     return () => {
       body.style.paddingBottom = previous
     }
-  }, [mode, viewport, overlayHeight])
+  }, [mode, viewport, overlayHeight, access])
 
   const overlayRef = useCallback((node: HTMLDivElement | null) => {
     if (!node) return
-    setOverlayHeight(node.offsetHeight)
-    const observer = new ResizeObserver(() => setOverlayHeight(node.offsetHeight))
+    const measure = () => {
+      setOverlayHeight(node.offsetHeight)
+      // Without the home-indicator padding, which changes as the toolbars
+      // come and go: the locked picture adds a fixed allowance instead.
+      setOverlayContentHeight(
+        node.offsetHeight - parseFloat(getComputedStyle(node).paddingBottom || '0'),
+      )
+    }
+    measure()
+    const observer = new ResizeObserver(measure)
     observer.observe(node)
     return () => observer.disconnect()
   }, [])
@@ -250,19 +266,22 @@ export function ListicleMapSheet({
   let translateY: number
   let hiddenBelow: number
   if (anchorBottom) {
-    const splitOnScreen = Math.max(
-      0,
-      viewport.small - sheetTopForMode('split', viewport, navbarHeight),
-    )
+    const splitOnScreen = Math.round(viewport.large * LOCKED_SPLIT_VISIBLE_FRACTION)
     translateY = mode === 'list' ? height : height - splitOnScreen
     hiddenBelow = translateY
   } else {
     translateY = sheetTopForMode(mode, viewport, navbarHeight)
     hiddenBelow = hiddenBelowFold(mode, viewport, navbarHeight)
   }
-  const mapInset = hiddenBelow + overlayHeight
+  // The locked picture measures the switch without its home-indicator padding
+  // plus a fixed allowance for it, so that padding appearing as the toolbars
+  // hide never moves its places.
+  const coverOverlay = teaser
+    ? overlayContentHeight + 16 + HOME_INDICATOR_ALLOWANCE_PX // 16: the switch's own 1rem gap
+    : overlayHeight
+  const mapInset = hiddenBelow + coverOverlay
   const coveredBottom =
-    overlayHeight + (teaser && mode === 'map' ? viewport.large - viewport.small : 0)
+    coverOverlay + (teaser && mode === 'map' ? viewport.large - viewport.small : 0)
 
   const activeIndex = points.findIndex((point) => point.id === activeId)
   const activePoint = activeIndex >= 0 ? points[activeIndex] : null

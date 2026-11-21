@@ -67,6 +67,22 @@ export const INITIAL_LISTICLE_MAP_MODE: ListicleMapMode = 'split'
 export const SPLIT_VISIBLE_FRACTION = 0.42
 
 /**
+ * Split's on-screen strip for the locked map picture (non-members), as a
+ * fraction of the large viewport. Taller than members' split: the dots are
+ * what sells the map, and they need room clear of the join bar (owner,
+ * 2026-11-20: "the dots have to be seen").
+ */
+export const LOCKED_SPLIT_VISIBLE_FRACTION = 0.46
+
+/**
+ * Height the phone's home-indicator strip can add under the switch once the
+ * browser's toolbars hide (`env(safe-area-inset-bottom)`, 34 px on current
+ * iPhones). The locked picture always keeps its places clear of it, so the
+ * toolbars coming and going never re-lays it out.
+ */
+export const HOME_INDICATOR_ALLOWANCE_PX = 34
+
+/**
  * The viewport heights that stay fixed while the reader scrolls: `small` with
  * the browser's toolbars showing, `large` with them hidden. On a desktop
  * browser the two are equal.

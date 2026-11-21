@@ -12,8 +12,10 @@ const SNAPSHOTS = snapshots as unknown as Record<string, MapSnapshotEntry>
 
 /** Below this much visible height (the phone's split view) the card becomes a bar. */
 const COMPACT_BELOW_PX = 460
-/** Room the phone's join bar takes at the bottom of the map, margin included. */
-const JOIN_BAR_PX = 76
+/** Room the phone's join bar takes across the top of the map, a gap below it included. */
+const JOIN_BAR_PX = 72
+/** How far the picture may slide down under that bar (its height, less a hair). */
+const JOIN_BAR_COVER_PX = 54
 /** Room the desktop join card takes at the bottom of the map, margin included. */
 const JOIN_CARD_PX = 320
 
@@ -44,12 +46,12 @@ function PinMark({ className }: { className: string }) {
  * The way in, as plain as the paywall beside the list (owner decision,
  * 2026-10-19): no count of places -- a short list should not look short --
  * and nothing to read but the offer. A card on desktop; a bar on the phone's
- * split view, where the places have to stay in sight above it.
+ * split view, at the top of the strip, so the places stay in sight below it.
  */
 function JoinCall({ compact, href }: { compact: boolean; href: string }) {
   if (compact) {
     return (
-      <div className="absolute inset-x-2.5 bottom-2.5 z-[4] flex items-center gap-2.5 border border-foreground/10 bg-background px-3.5 py-2.5 text-foreground">
+      <div className="absolute inset-x-0 top-0 z-[4] flex items-center gap-2.5 border-b border-foreground/15 bg-background px-3.5 py-2.5 text-foreground">
         <PinMark className="h-8 w-8 shrink-0" />
         <h2 className="min-w-0 flex-1 text-balance font-display text-[1rem] font-medium leading-tight">{HEADLINE}</h2>
         <Link
@@ -130,6 +132,10 @@ export function MapTeaser({
   // On screen, the switch's strip included: the picture fills this.
   const screenHeight = Math.max(0, size.height - insetBottomPx + Math.min(coveredBottomPx, insetBottomPx))
   const compact = visibleHeight > 0 && visibleHeight < COMPACT_BELOW_PX
+  // On the phone (split and the takeover alike) the call to join is the slim
+  // bar across the top, so the places below it are never covered (owner,
+  // 2026-11-20). The phone sheet always reports its switch; desktop reports 0.
+  const barOnTop = compact || coveredBottomPx > 0
   const href = `/join?returnTo=${encodeURIComponent(pathname || '/')}`
 
   const teaserPoints = useMemo<TeaserPoint[]>(
@@ -160,16 +166,18 @@ export function MapTeaser({
   const view = useMemo(() => {
     const box = { width: size.width, height: screenHeight }
     for (const entry of entries) for (const picture of picturesForBox(entry, box)) {
-      const focus = compact
-        ? { top: 16, bottom: visibleHeight - JOIN_BAR_PX - 8 }
+      // The phone's bar sits at the top of the strip, so the places go
+      // between it and the switch, where nothing covers them.
+      const focus = barOnTop
+        ? { top: JOIN_BAR_PX, bottom: visibleHeight - 10 }
         : picture === entry.tall
           ? { top: 40, bottom: visibleHeight - JOIN_CARD_PX }
           : undefined
-      const layout = layoutSnapshot(picture, teaserPoints, box, focus)
+      const layout = layoutSnapshot(picture, teaserPoints, box, focus, barOnTop ? JOIN_BAR_COVER_PX : 0)
       if (layout) return { snapshot: picture, layout }
     }
     return null
-  }, [entries, teaserPoints, size.width, screenHeight, visibleHeight, compact])
+  }, [entries, teaserPoints, size.width, screenHeight, visibleHeight, barOnTop])
   const snapshot = view?.snapshot
   const snapshotLayout = view?.layout ?? null
   const drawing = useMemo(
@@ -238,7 +246,7 @@ export function MapTeaser({
             {/* OpenStreetMap's licence asks for this credit wherever its map is shown. */}
             <span
               className="absolute right-2 z-[3] font-[family-name:var(--font-dm-sans)] text-[9.5px] text-foreground/55"
-              style={{ bottom: compact ? JOIN_BAR_PX : 6 }}
+              style={{ bottom: 6 }}
             >
               © OpenStreetMap
             </span>
@@ -285,7 +293,7 @@ export function MapTeaser({
           </>
         )}
 
-        <JoinCall compact={compact} href={href} />
+        <JoinCall compact={barOnTop} href={href} />
       </section>
     </div>
   )
