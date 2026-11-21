@@ -11,6 +11,7 @@ import { LocationComingSoon } from '@/features/search/components/LocationComingS
 import { LocationContentList } from '@/features/search/components/LocationContentList';
 import { fetchLocationContent } from '@/features/search/lib/fetchSearch';
 import { LIMA_HREF } from '@/lib/routing/peruLaunch';
+import { SITE_SHARE_IMAGE } from '@/lib/seo/siteShareCard';
 import { cityParams } from '@/lib/routing/publicRouteParams';
 import { publicUrlIndex } from '@/lib/routing/publicStaticParams';
 
@@ -75,8 +76,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     description: `Your guide to living in ${locationLabel}. Neighborhoods, accommodations, tours, and more.`,
     alternates: { canonical: `/${country}/${city}` },
     openGraph: {
+      type: 'website',
+      siteName: 'Questurian',
       title: `${locationLabel} — Questurian`,
       url: `/${country}/${city}`,
+      // The site card says "Lima · Peru" (lib/seo/siteShareCard.ts).
+      ...(`/${country}/${city}` === LIMA_HREF ? { images: [SITE_SHARE_IMAGE] } : {}),
     },
   };
 }

@@ -49,6 +49,11 @@ export const metadata: Metadata = {
   // favicon.ico, icon.svg, apple-icon.png and manifest.ts sit beside this file
   // and Next links them from every page by file convention.
   description: "Curated city guides, travel maps, itineraries, and local recommendations.",
+  // Share-card defaults every page inherits. No title, description or image
+  // here: a page without its own og:title is previewed by its <title>, and an
+  // image here would put the Lima card on pages that are not Lima's.
+  openGraph: { type: "website", siteName: "Questurian", locale: "en_US" },
+  twitter: { card: "summary_large_image" },
 };
 
 export default async function RootLayout({
