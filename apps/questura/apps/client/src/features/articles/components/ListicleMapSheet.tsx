@@ -262,6 +262,7 @@ export function ListicleMapSheet({
           {hasOpened ? (
             <MapPanel
               viewportInsetBottomPx={mapInset}
+              coveredBottomPx={overlayHeight}
               paused={mode === 'list'}
               activeZoom={MODE_ACTIVE_ZOOM[mode]}
               fitPadding={MOBILE_FIT_PADDING}

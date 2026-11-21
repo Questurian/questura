@@ -112,11 +112,13 @@ export function MapsListicleArticlePage({
 
       {headerOnly ? (
         <div className="px-3 pb-20 380:px-4 480:px-5 480:pb-24 550:px-6 sm:px-8 sm:pb-32">
-          {/* Empty, but the phone map reads where the list ends from it, as on
-              a locked itinerary. */}
-          <ListicleMapRegion>{null}</ListicleMapRegion>
-          <HeldBackSectionTargets ids={heldBackIds} />
-          {lockedSlot}
+          {/* The phone map reads where the list ends from this region. With
+              no places let through, the notice is what the reader is on, so
+              the List / Split / Map switch stays while it is in view. */}
+          <ListicleMapRegion>
+            <HeldBackSectionTargets ids={heldBackIds} />
+            {lockedSlot}
+          </ListicleMapRegion>
         </div>
       ) : (
         <div className="maps-listicle-entries px-3 pb-20 pt-4 380:px-4 380:pt-6 480:px-5 480:pt-8 480:pb-24 550:px-6 550:pt-10 sm:px-8 sm:pt-8 sm:pb-32">
@@ -164,13 +166,15 @@ export function MapsListicleArticlePage({
                 </section>
               )
             })}
+            {/* Inside the region, so the phone's view switch stays while the
+                notice is in view. */}
+            {lockedSlot ? (
+              <div className="pt-10 480:pt-12 sm:pt-14">
+                <HeldBackSectionTargets ids={heldBackIds} />
+                {lockedSlot}
+              </div>
+            ) : null}
           </ListicleMapRegion>
-          {lockedSlot ? (
-            <div className="pt-10 480:pt-12 sm:pt-14">
-              <HeldBackSectionTargets ids={heldBackIds} />
-              {lockedSlot}
-            </div>
-          ) : null}
         </div>
       )}
 

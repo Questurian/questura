@@ -11,7 +11,7 @@ const GoogleMapPanel = dynamic(() => import("./GoogleMapPanel"), { ssr: false, l
 /** Neither Google's API nor its rendering code loads before access is known. */
 export function MapPanel(props: MapPanelProps = {}) {
   const { access } = useListicleMapSync();
-  if (access === "teaser") return <MapTeaser insetBottomPx={props.viewportInsetBottomPx} />;
+  if (access === "teaser") return <MapTeaser insetBottomPx={props.viewportInsetBottomPx} coveredBottomPx={props.coveredBottomPx} />;
   if (access === "waiting") return <MapWaiting />;
   return <GoogleMapPanel {...props} />;
 }

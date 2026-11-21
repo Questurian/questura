@@ -365,9 +365,11 @@ export function ItineraryListicleArticlePage({
           ) : null}
 
           <StopList stops={stops} />
-        </ListicleMapRegion>
 
-        {lockedSlot}
+          {/* Inside the region, so the phone's view switch stays while the
+              notice is in view. */}
+          {lockedSlot}
+        </ListicleMapRegion>
 
         {/* The header keeps the byline to name and date; the author's photo
             and links sit here, after the plan, as on a standard article. */}
