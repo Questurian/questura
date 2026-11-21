@@ -5,6 +5,10 @@ import {
   resolveMediaSetForPlacement,
   type PublicImageAttribution,
 } from '@/features/media/lib/resolve-public-image'
+import {
+  hotelHighlights,
+  hotelLocation,
+} from '@/features/homepage-featured-content/hotel-grid/lib/candidate'
 
 /** Carries the photo's credit and sources for the credit line under it. */
 export type PublicHotelCardImage = PublicImageAttribution & {
@@ -14,10 +18,19 @@ export type PublicHotelCardImage = PublicImageAttribution & {
   height: number | null
 }
 
+/** An icon key and its label, as the homepage hotel grid prints them. */
+export type PublicHotelHighlight = { key: string; label: string }
+
+/** What `url` opens: a booking page, the hotel's own site, or only a map. */
+export type PublicHotelUrlKind = 'booking' | 'website' | 'map'
+
 export type PublicHotelCard = {
   id: number
   title: string
   url: string | null
+  urlKind: PublicHotelUrlKind | null
+  /** Up to three, e.g. Luxury, Walkable Downtown, Rooftop pool. */
+  highlights: PublicHotelHighlight[]
   type: string | null
   district: string | null
   price: string | null
@@ -90,17 +103,21 @@ export function toPublicHotelCard(hotel: Record<string, unknown>): PublicHotelCa
   const details = group(hotel.theDetails)
   const type = text(hotel.type)
 
+  const links: Array<[PublicHotelUrlKind, string | null]> = [
+    ['booking', httpUrl(details.bookingUrl)],
+    ['website', httpUrl(details.websiteUrl) ?? httpUrl(hotel.website)],
+    ['map', httpUrl(details.googleMapsUrl) ?? httpUrl(hotel.address)],
+  ]
+  const link = links.find(([, url]) => url !== null) ?? null
+
   return {
     id,
     title,
-    url:
-      httpUrl(details.bookingUrl) ??
-      httpUrl(details.websiteUrl) ??
-      httpUrl(hotel.website) ??
-      httpUrl(details.googleMapsUrl) ??
-      httpUrl(hotel.address),
+    url: link ? link[1] : null,
+    urlKind: link ? link[0] : null,
+    highlights: hotelHighlights(hotel),
     type: (type && TYPE_LABELS[type]) ?? text(core.type),
-    district: text(core.district),
+    district: text(core.district) ?? hotelLocation(hotel),
     price: priceTicks(hotel.priceLevel) ?? priceTicks(core.price),
     image: null,
   }

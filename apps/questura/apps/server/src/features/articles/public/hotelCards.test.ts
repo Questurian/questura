@@ -34,6 +34,31 @@ function payloadWithMediaSets(docs: unknown[]) {
 }
 
 describe('sanitizeHotelCards', () => {
+  it('carries the homepage hotel grid highlights and says what the link opens', async () => {
+    const blocks: Array<Record<string, unknown>> = [
+      {
+        blockType: 'hotel-card',
+        hotel: hotelDoc({
+          theExperience: { vibe: ['Luxury'], pool: ['rooftop'], rooftopLounge: true },
+          theDetails: { walkability: 'Walkable Downtown', websiteUrl: 'https://www.belmond.com/miraflores-park' },
+        }),
+      },
+    ]
+
+    await sanitizeHotelCards(blocks)
+
+    expect(blocks[0].hotel).toMatchObject({
+      url: 'https://www.belmond.com/miraflores-park',
+      urlKind: 'website',
+      highlights: [
+        { key: 'luxury', label: 'Luxury' },
+        { key: 'walkability', label: 'Walkable Downtown' },
+        { key: 'pool', label: 'Rooftop pool' },
+      ],
+    })
+  })
+
+
   it('reduces a published accommodation to the public card with its featured photo', async () => {
     const blocks: Array<Record<string, unknown>> = [
       { blockType: 'text', content: 'x' },
@@ -56,6 +81,8 @@ describe('sanitizeHotelCards', () => {
       id: 12,
       title: 'Belmond Miraflores Park',
       url: 'https://booking.example/belmond',
+      urlKind: 'booking',
+      highlights: [],
       type: 'Hotel',
       district: 'Miraflores',
       price: '$$$$',
@@ -152,7 +179,7 @@ describe('serializeArticleByCollection hotel cards', () => {
 
     const hotel = (article.contentBlocks as Array<Record<string, unknown>>)[0].hotel
     expect(Object.keys(hotel as object).sort()).toEqual(
-      ['district', 'id', 'image', 'price', 'title', 'type', 'url'],
+      ['district', 'highlights', 'id', 'image', 'price', 'title', 'type', 'url', 'urlKind'],
     )
   })
 })

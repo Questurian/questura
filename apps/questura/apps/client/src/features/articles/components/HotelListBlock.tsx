@@ -3,6 +3,7 @@ import { Star } from 'lucide-react'
 import { PublicImage } from '@/components/media/PublicImage'
 import type { HotelListBlock, StayListItem } from '../types'
 import { EditorialBox } from './EditorialBox'
+import { HotelCarouselLazy } from './HotelCarouselLazy'
 import { HotelFacts, HotelLinkLabel, HotelTitle } from './HotelCardBlock'
 
 /** Airbnb prints a whole rating with one decimal: 5.0, not 5. */
@@ -70,13 +71,17 @@ function StayRow({ stay }: { stay: StayListItem }): JSX.Element {
 }
 
 /**
- * A Stay List (owner, 2026-10-28): the hotels, or the Airbnbs, in one paper
- * box, one compact row each (square photo, name, facts, link), so a long list
- * reads like a guidebook index rather than a wall of cards. An article keeps
- * its hotel list and its Airbnb list apart.
+ * A Stay List (owner, 2026-10-28): the hotels, or the Airbnbs. A hotel list
+ * draws as the homepage hotel grid's carousel (owner, 2026-11-21); an Airbnb
+ * list stays one paper box, one compact row each (square photo, name, facts,
+ * link). An article keeps its hotel list and its Airbnb list apart.
  */
 export function HotelListBlockRenderer({ block }: { block: HotelListBlock }): JSX.Element | null {
   if (block.stays.length === 0) return null
+  // Hotels draw as the homepage hotel grid's cards (owner, 2026-11-21); Airbnbs keep the rows.
+  if (block.stays.every((stay) => stay.kind === 'hotel')) {
+    return <HotelCarouselLazy hotels={block.stays} label={block.label ?? 'Hotels'} />
+  }
   return (
     <EditorialBox
       as="section"

@@ -136,6 +136,10 @@ export type HotelCard = {
   title: string
   /** Booking page, else the hotel's own site, else its map link. Null when it has none. */
   url: string | null
+  /** What `url` opens; the carousel's button reads "Book now" or "See on map" from it. */
+  urlKind?: 'booking' | 'website' | 'map' | null
+  /** Up to three, drawn with icons as on the homepage hotel grid. */
+  highlights?: Array<{ key: string; label: string }>
   type: string | null
   district: string | null
   /** Dollar ticks, for example "$$$". */

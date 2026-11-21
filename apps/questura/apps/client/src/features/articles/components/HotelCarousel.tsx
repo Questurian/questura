@@ -1,20 +1,21 @@
 'use client'
 
 import type { JSX } from 'react'
-import { PublicImage } from '@/components/media/PublicImage'
+import { PlaceCarouselCard } from '@/features/CityDashboard/components/blocks/PlaceCarouselCard'
 import { useSnapCarousel } from '@/features/CityDashboard/components/blocks/useSnapCarousel'
 import type { HotelCard } from '../types'
 import { EditorialBoxLabel } from './EditorialBox'
-import { HotelFacts, HotelLinkLabel, HotelTitle } from './HotelCardBlock'
 
 // The homepage hotel grid's arrows (HotelGridPreviewContent), square ink keys.
 const arrowClass =
   'flex size-9 items-center justify-center bg-foreground text-[1.3rem] leading-none text-background transition-colors hover:bg-charcoal disabled:pointer-events-none disabled:bg-foreground/15 disabled:text-foreground/40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent sm:size-10'
 
 /**
- * Two or more hotel cards in a row, or a Hotel List, drawn as one swipeable
- * row (owner request, 2026-10-27): the in-article form of the homepage hotel
- * grid. The row scrolls natively, so it works before the arrows' script arrives.
+ * Two or more hotel cards in a row, or a Stay List of hotels, drawn as one
+ * swipeable row of the homepage hotel grid's own cards (owner, 2026-11-21:
+ * photo, name, price and district in blue, up to three highlights with icons,
+ * Book now). The row scrolls natively, so it works before the arrows' script
+ * arrives.
  */
 export function HotelCarousel({ hotels, label = 'Hotels' }: { hotels: HotelCard[]; label?: string }): JSX.Element {
   const { scrollRef, pageCount, activePage, scrollToPage, scrollByPage } = useSnapCarousel(hotels.length)
@@ -41,36 +42,23 @@ export function HotelCarousel({ hotels, label = 'Hotels' }: { hotels: HotelCard[
         className="relative flex snap-x snap-mandatory gap-3 overflow-x-auto [scrollbar-width:none] sm:gap-4 [&::-webkit-scrollbar]:hidden"
       >
         {hotels.map((hotel, index) => (
-          <article
+          <PlaceCarouselCard
             key={`${hotel.id}-${index}`}
-            aria-label={`${index + 1} of ${hotels.length}`}
-            className="group relative flex w-[80%] shrink-0 snap-start flex-col 480:w-[62%] sm:w-[44%]"
-          >
-            {hotel.image ? (
-              <PublicImage
-                src={hotel.image.url}
-                alt={hotel.image.alt}
-                width={720}
-                height={540}
-                sizes="(min-width: 640px) 360px, 80vw"
-                className="aspect-[4/3] w-full object-cover"
-              />
-            ) : (
-              <div aria-hidden className="aspect-[4/3] w-full bg-background-warm" />
-            )}
-            {/* The section is "Hotels", so the card carries no type label of its own. */}
-            <div className="flex flex-1 flex-col pt-3.5">
-              <HotelTitle hotel={hotel} className="text-[18px] leading-[1.28] sm:text-[20px]" />
-              <div className="mt-1.5">
-                <HotelFacts hotel={hotel} />
-              </div>
-              {hotel.url ? (
-                <div className="mt-auto pt-3">
-                  <HotelLinkLabel>Visit website</HotelLinkLabel>
-                </div>
-              ) : null}
-            </div>
-          </article>
+            title={hotel.title}
+            imageUrl={hotel.image?.url ?? null}
+            imageAlt={hotel.image?.alt}
+            imageSizes="(min-width: 640px) 340px, 80vw"
+            isPriority={false}
+            isLast={index === hotels.length - 1}
+            priceLevel={hotel.price}
+            location={hotel.district}
+            type={hotel.type}
+            highlights={hotel.highlights ?? []}
+            ctaHref={hotel.url}
+            ctaLabel={hotel.urlKind === 'map' ? 'See on map' : 'Book now'}
+            ctaExternal
+            widthClassName="w-[80%] 480:w-[62%] sm:w-[46%]"
+          />
         ))}
       </div>
 

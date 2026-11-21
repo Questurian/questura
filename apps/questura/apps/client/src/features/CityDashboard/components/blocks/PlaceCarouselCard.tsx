@@ -76,6 +76,12 @@ export type PlaceCarouselCardProps = {
   ctaHref?: string | null
   ctaLabel?: string
   ctaExternal?: boolean
+  /** The card's width. Default: the edge-bleed block carousels' peek rule. */
+  widthClassName?: string
+  /** Default: the title. */
+  imageAlt?: string
+  /** Default: the block carousels' `sizes`. */
+  imageSizes?: string
 }
 
 export function PlaceCarouselCard({
@@ -91,6 +97,9 @@ export function PlaceCarouselCard({
   ctaHref = null,
   ctaLabel = 'Book Now',
   ctaExternal = false,
+  widthClassName = CAROUSEL_CARD_WIDTH_CLASS,
+  imageAlt,
+  imageSizes = BLOCK_IMAGE_SIZES.carouselCard,
 }: PlaceCarouselCardProps): JSX.Element {
   const priceLabel = formatPriceLevel(priceLevel)
   const meta = [priceLabel, location?.toUpperCase()].filter(Boolean).join(' | ')
@@ -102,17 +111,17 @@ export function PlaceCarouselCard({
 
   return (
     <article
-      className={`city-article-card flex-none snap-always flex flex-col ${CAROUSEL_CARD_WIDTH_CLASS} ${isLast ? 'snap-end' : 'snap-start'}`}
+      className={`city-article-card flex-none snap-always flex flex-col ${widthClassName} ${isLast ? 'snap-end' : 'snap-start'}`}
     >
       <div className="city-article-image-shell relative aspect-[3/2] overflow-hidden bg-[#d7dcde]">
         {imageUrl ? (
           <PublicImage
             src={imageUrl}
-            alt={title}
+            alt={imageAlt || title}
             className="relative z-10 h-full w-full object-cover"
             fetchPriority={isPriority ? 'high' : 'auto'}
             loading={isPriority ? 'eager' : 'lazy'}
-            sizes={BLOCK_IMAGE_SIZES.carouselCard}
+            sizes={imageSizes}
           />
         ) : null}
         <NavigableImageTarget
