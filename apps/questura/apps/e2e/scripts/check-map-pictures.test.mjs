@@ -16,8 +16,14 @@ const PNG = Buffer.from(
   'base64',
 )
 const section = (inner) => `<section aria-label="Members' map">${inner}</section>`
+// The live shape since #218: the picture sits beside the section, in the same
+// map frame, and the section holds only the places laid over it.
+const framed = (picture) =>
+  `<div data-map-surface=""><div aria-hidden="true">${picture}</div>${section('<span></span>')}</div>`
 const PAGES = {
   '/peru/lima/maps/good': section('<img src="/map.png" alt="">'),
+  '/peru/lima/maps/framed': framed('<img src="/map.png" alt="">'),
+  '/peru/lima/maps/framed-dots': framed(''),
   '/peru/lima/itineraries/good': section('<img src="/map.png" alt="">'),
   '/peru/lima/maps/free': '<div class="gm-style"></div>',
   '/peru/lima/maps/dots': section('<svg></svg>'),
@@ -69,9 +75,14 @@ describe('check-map-pictures', { timeout: 300_000 }, () => {
   after(() => servers.forEach((server) => server.close()))
 
   it('passes pictures and free Google maps, and only looks at guides and itineraries', async () => {
-    const { code, out } = await site(['/peru/lima/maps/good', '/peru/lima/itineraries/good', '/peru/lima/maps/free'])
+    const { code, out } = await site([
+      '/peru/lima/maps/good',
+      '/peru/lima/maps/framed',
+      '/peru/lima/itineraries/good',
+      '/peru/lima/maps/free',
+    ])
     assert.equal(code, 0, out)
-    assert.match(out, /3 pages on 2 screen sizes: 0 failed/)
+    assert.match(out, /4 pages on 2 screen sizes: 0 failed/)
     assert.doesNotMatch(out, /\/about/)
   })
 
@@ -79,6 +90,7 @@ describe('check-map-pictures', { timeout: 300_000 }, () => {
     const { code, out } = await site([
       '/peru/lima/maps/good',
       '/peru/lima/maps/dots',
+      '/peru/lima/maps/framed-dots',
       '/peru/lima/maps/broken',
       '/peru/lima/maps/nothing',
       '/peru/lima/maps/gone',
@@ -86,11 +98,12 @@ describe('check-map-pictures', { timeout: 300_000 }, () => {
     assert.equal(code, 1, out)
     assert.match(out, /FAIL {2}desktop {2}\/peru\/lima\/maps\/dots {2}shows the dots drawing/)
     assert.match(out, /FAIL {2}phone {4}\/peru\/lima\/maps\/dots {2}shows the dots drawing/)
+    assert.match(out, /FAIL {2}desktop {2}\/peru\/lima\/maps\/framed-dots {2}shows the dots drawing/)
     assert.match(out, /\/peru\/lima\/maps\/broken {2}picture did not load/)
     assert.match(out, /\/peru\/lima\/maps\/nothing {2}no map on the page/)
     assert.match(out, /\/peru\/lima\/maps\/gone {2}HTTP 404/)
     assert.match(out, /ok {4}desktop {2}\/peru\/lima\/maps\/good/)
-    assert.match(out, /5 pages on 2 screen sizes: 8 failed/)
+    assert.match(out, /6 pages on 2 screen sizes: 10 failed/)
   })
 
   it('fails when the sitemap lists nothing to check, rather than passing on nothing', async () => {
