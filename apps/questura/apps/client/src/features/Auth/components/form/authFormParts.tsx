@@ -7,7 +7,7 @@
  */
 
 import { ArrowLeft } from 'lucide-react';
-import GoogleSignInButton from '../google/GoogleSignInButton';
+import ContinueWithGoogle from '../google/ContinueWithGoogle';
 
 const authCard =
   'w-full max-w-[460px] rounded-[3px] bg-background px-6 pb-8 font-[family-name:var(--font-dm-sans)] text-foreground ring-1 ring-foreground/10 480:px-10 480:pb-10';
@@ -99,7 +99,8 @@ export function AuthNotice({ messages }: { messages: string[] }) {
   );
 }
 
-/** "or", then the Google button. Both steps end with it. */
+/** "or", then the Google button (a note instead inside Instagram and other
+ *  in-app browsers, where Google refuses sign-in). Both steps end with it. */
 export function OrContinueWithGoogle() {
   return (
     <div>
@@ -110,7 +111,7 @@ export function OrContinueWithGoogle() {
         </span>
         <span aria-hidden="true" className="h-px flex-1 bg-foreground/15" />
       </div>
-      <GoogleSignInButton className="mt-5 w-full">Continue with Google</GoogleSignInButton>
+      <ContinueWithGoogle className="mt-5 w-full" />
     </div>
   );
 }
