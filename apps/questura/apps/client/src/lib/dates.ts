@@ -74,3 +74,32 @@ export function formatArticleDate(value: DateInput, style: ArticleDateStyle): st
   const date = toValidDate(value)
   return date ? articleDateFormats[style].format(date) : null
 }
+
+const WEEKDAYS = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
+
+/**
+ * Weekday (0 = Sunday) and minutes past midnight at a venue, in the venue's
+ * own zone (its stored `ianaTimeId`), for "Open now" in the details modal.
+ * `null` for a missing or unknown zone: no guessing from the reader's clock.
+ */
+export function clockInTimeZone(
+  now: Date,
+  timeZone: string | null | undefined,
+): { day: number; minutes: number } | null {
+  if (!timeZone) return null
+  try {
+    const parts = new Intl.DateTimeFormat('en-US', {
+      timeZone,
+      weekday: 'long',
+      hour: '2-digit',
+      minute: '2-digit',
+      hourCycle: 'h23',
+    }).formatToParts(now)
+    const get = (type: string) => parts.find((p) => p.type === type)?.value ?? ''
+    const day = WEEKDAYS.indexOf(get('weekday').toLowerCase())
+    if (day < 0) return null
+    return { day, minutes: Number(get('hour')) * 60 + Number(get('minute')) }
+  } catch {
+    return null
+  }
+}

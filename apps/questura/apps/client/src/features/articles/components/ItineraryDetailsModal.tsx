@@ -1,29 +1,33 @@
 'use client'
 
-import type { JSX } from 'react'
+import type { JSX, ReactNode } from 'react'
 import { useCallback, useEffect, useId, useState } from 'react'
 import { X } from 'lucide-react'
 
 const triggerLinkClass =
   'maps-listicle-info-label break-words text-left text-[12px] font-light leading-tight text-foreground/72 hover:text-foreground focus-visible:text-foreground focus-visible:outline-none 480:text-[13px] sm:text-[14px]'
 
-export type ItineraryDetailRow = {
-  key: string
-  icon: JSX.Element
-  label: string
-  value: string
-}
-
+/**
+ * The "Show Amenities and Details" sheet shared by nightlife and stays (owner,
+ * 2026-11-20). One frame for both: blue mono kicker, serif name, a grey line
+ * under it, square corners on the page ground, sections split by hairlines
+ * and opened by a small blue label, the place in the footer. The body is the
+ * caller's: stays list label/value rows (`DetailsRows`), nightlife a strip of
+ * scales over a two-column grid (`DetailsGrid`).
+ */
 export function ItineraryDetailsModal({
+  kicker,
   venueTitle,
-  heading,
-  rows,
-  finePrint,
+  subtitle,
+  footer,
+  children,
 }: {
+  kicker: string
   venueTitle: string
-  heading: string
-  rows: ItineraryDetailRow[]
-  finePrint: string[]
+  subtitle?: string
+  footer?: string
+  /** Rendered only while open, so it may read the clock. */
+  children: () => ReactNode
 }): JSX.Element {
   const [open, setOpen] = useState(false)
   const titleId = useId()
@@ -73,51 +77,97 @@ export function ItineraryDetailsModal({
           />
           <div
             id={dialogId}
-            className="relative z-[101] flex max-h-[min(85dvh,32rem)] w-full max-w-md flex-col rounded-t-lg bg-background shadow-lg sm:max-h-[85vh] sm:rounded-lg"
+            className="relative z-[101] flex max-h-[88dvh] w-full max-w-[420px] flex-col bg-background text-foreground shadow-[0_18px_50px_rgb(0_0_0/0.18)] sm:max-h-[85vh]"
             role="dialog"
             aria-modal="true"
             aria-labelledby={titleId}
           >
-            <div className="flex shrink-0 items-start justify-between gap-3 border-b border-foreground/10 px-4 py-3">
-              <h2
-                id={titleId}
-                className="pr-2 font-display text-[1.05rem] font-semibold leading-tight text-foreground"
-              >
-                {heading} · {venueTitle}
-              </h2>
+            <div className="flex shrink-0 items-start justify-between gap-3 px-5 pb-4 pt-5">
+              <div className="min-w-0">
+                <p className="mb-1.5 font-mono text-[11px] uppercase tracking-[0.08em] text-accent">
+                  {kicker}
+                </p>
+                <h2
+                  id={titleId}
+                  className="font-display text-[22px] font-semibold leading-[1.15]"
+                >
+                  {venueTitle}
+                </h2>
+                {subtitle ? (
+                  <p className="mt-1 text-[12.5px] text-foreground/55">{subtitle}</p>
+                ) : null}
+              </div>
               <button
                 type="button"
                 onClick={close}
-                className="shrink-0 rounded-sm p-1 text-foreground/50 transition-colors hover:bg-foreground/5 hover:text-foreground"
-                aria-label={`Close ${heading.toLowerCase()}`}
+                className="-mr-1 shrink-0 p-1 text-foreground/50 transition-colors hover:text-foreground"
+                aria-label={`Close ${kicker.toLowerCase()}`}
               >
                 <X className="size-5" strokeWidth={1.75} />
               </button>
             </div>
-            <ul className="m-0 min-h-0 flex-1 list-none space-y-0 overflow-y-auto overscroll-contain p-0">
-              {rows.map((row) => (
-                <li
-                  key={row.key}
-                  className="flex items-center gap-3 border-b border-foreground/08 px-4 py-2.5 last:border-b-0"
-                >
-                  <span>{row.icon}</span>
-                  <span className="min-w-0 flex-1 text-[12px] font-semibold text-[var(--maps-listicle-accent)]">
-                    {row.label}
-                  </span>
-                  <span className="max-w-[60%] text-right text-[12px] leading-snug text-foreground/90">
-                    {row.value}
-                  </span>
-                </li>
-              ))}
-            </ul>
-            {finePrint.length > 0 ? (
-              <p className="shrink-0 border-t border-foreground/10 px-4 py-3 text-[10px] font-medium leading-snug tracking-[0.02em] text-foreground/40 480:text-[11px]">
-                {finePrint.join(' · ')}
+            <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">{children()}</div>
+            {footer ? (
+              <p className="shrink-0 border-t border-foreground/10 px-5 pb-4 pt-3 text-[11px] text-foreground/55">
+                {footer}
               </p>
             ) : null}
           </div>
         </div>
       ) : null}
     </>
+  )
+}
+
+/** A hairline-topped block opened by the small blue label. */
+export function DetailsSection({
+  label,
+  children,
+}: {
+  label?: string
+  children: ReactNode
+}): JSX.Element {
+  return (
+    <section className="border-t border-foreground/10 px-5 py-3.5">
+      {label ? (
+        <h3 className="mb-2.5 font-mono text-[10.5px] font-medium uppercase tracking-[0.08em] text-accent">
+          {label}
+        </h3>
+      ) : null}
+      {children}
+    </section>
+  )
+}
+
+export type DetailsItem = { key: string; label: string; value: string }
+
+/** Label left, value right, one column each (stays). */
+export function DetailsRows({ items }: { items: DetailsItem[] }): JSX.Element {
+  return (
+    <dl className="m-0 grid grid-cols-[minmax(0,9.5em)_1fr] gap-x-4 gap-y-[7px] text-[13px] leading-[1.4]">
+      {items.map((item) => (
+        <div key={item.key} className="contents">
+          <dt className="text-foreground/55">{item.label}</dt>
+          <dd className="m-0 tabular-nums">{item.value}</dd>
+        </div>
+      ))}
+    </dl>
+  )
+}
+
+/** Label over value in two columns; long values take the full width (nightlife). */
+export function DetailsGrid({ items }: { items: DetailsItem[] }): JSX.Element {
+  return (
+    <dl className="m-0 grid grid-flow-row-dense grid-cols-2 gap-x-5 gap-y-3">
+      {items.map((item) => (
+        <div
+          key={item.key}
+          className={item.value.length > 26 ? 'col-span-2 min-w-0' : 'min-w-0'}
+        >
+          <dt className="mb-0.5 text-[11px] text-foreground/55">{item.label}</dt>
+          <dd className="m-0 text-[13px] leading-[1.4]">{item.value}</dd>
+        </div>
+      ))}
+    </dl>
   )
 }
