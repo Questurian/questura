@@ -1,9 +1,10 @@
 import { createHash } from 'node:crypto'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { anchorArticleHeadings } from '@/features/articles/public/headingAnchors'
 
 import { coveredSeconds, mergeRanges, normalizeRanges } from './listens'
+import { articleIdsWithAudio } from './public-audio'
 import { articleReading, bylineSentence, clipMatchesSection, isMostlyLinks, sectionsFromBlocks, splitSentences } from './sections'
 import { audioStorageKey, signAudioUrl } from './storage'
 
@@ -189,5 +190,21 @@ describe('signed audio links', () => {
 
   it('names files per environment, article and section, new each time', () => {
     expect(audioStorageKey(54, 'plan-the-trip', 123)).toMatch(/^(live|local)\/articles\/54\/plan-the-trip-123\.mp3$/)
+  })
+})
+
+describe('articleIdsWithAudio', () => {
+  it('asks once, without the count query, and answers the ids that have clips', async () => {
+    const find = vi.fn().mockResolvedValue({ docs: [{ articleId: 2 }, { articleId: 2 }, { articleId: 5 }] })
+    const ids = await articleIdsWithAudio({ find } as never, [2, 3, 5, 2, Number.NaN])
+    expect(find).toHaveBeenCalledTimes(1)
+    expect(find.mock.calls[0]![0]).toMatchObject({ collection: 'audio-clips', where: { articleId: { in: [2, 3, 5] } }, pagination: false, depth: 0 })
+    expect([...ids].sort()).toEqual([2, 5])
+  })
+
+  it('does not query for no articles', async () => {
+    const find = vi.fn()
+    expect((await articleIdsWithAudio({ find } as never, [])).size).toBe(0)
+    expect(find).not.toHaveBeenCalled()
   })
 })

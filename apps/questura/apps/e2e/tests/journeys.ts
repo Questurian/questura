@@ -12,14 +12,20 @@ import { HOME_PATH, expect as defaultExpect, expectImagesDecode, expectNoHorizon
 const segments = (path: string) => path.split('/').filter(Boolean).length
 const pathOf = (page: Page) => new URL(page.url()).pathname
 
-/** The first visible same-site link whose path has `count` segments (not an author page). */
-async function linkWithSegments(page: Page, count: number, notTo: string, expect: Expect) {
+/**
+ * The first visible same-site link whose path has `count` segments (not an
+ * author page), under `within` when given. From a country page the city must
+ * be one of that country's: the navbar's fixed Lima link (`/peru/lima`) comes
+ * first in the page and is a 404 in the sandbox, which has no Peru (#221's
+ * runs, 2026-11-21).
+ */
+async function linkWithSegments(page: Page, count: number, notTo: string, expect: Expect, within = '/') {
   const hrefs = await page.locator('a[href^="/"]').evaluateAll((anchors) =>
     anchors.filter((a) => (a as HTMLElement).offsetParent !== null).map((a) => a.getAttribute('href') ?? ''),
   )
   const href = hrefs.find((h) => {
     const path = h.split(/[?#]/)[0]!
-    return segments(path) === count && !path.startsWith('/authors/') && path !== notTo
+    return segments(path) === count && path.startsWith(within) && !path.startsWith('/authors/') && path !== notTo
   })
   expect(href, `a visible link with ${count} path segments on ${pathOf(page)}`).toBeTruthy()
   return page.locator(`a[href="${href}"]`).locator('visible=true').first()
@@ -56,7 +62,9 @@ export async function browseJourney(page: Page, { expect = defaultExpect, imageT
 
   // The real site's home already is its default city.
   if (segments(pathOf(page)) !== 2) {
-    await (await linkWithSegments(page, 2, pathOf(page), expect)).click()
+    const from = pathOf(page)
+    const within = segments(from) === 1 ? `${from}/` : '/'
+    await (await linkWithSegments(page, 2, from, expect, within)).click()
     await expect.poll(() => segments(pathOf(page))).toBe(2)
     await whole()
     await expectImagesDecode(page, imageTimeout)
