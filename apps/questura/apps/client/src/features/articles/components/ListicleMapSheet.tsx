@@ -1,9 +1,8 @@
 'use client'
 
-import { useCallback, useEffect, useRef, useState, type JSX } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type JSX } from 'react'
 import { CornerUpLeft, List, Map as MapIcon, MapPin, Rows2 } from 'lucide-react'
 import type { ListicleMapGuides } from '@/features/articles/components/ListicleMapGuidesMenu'
-import { LISTICLE_MAP_REGION_SELECTOR } from '@/features/articles/components/ListicleMapRegion'
 import { MapPanel } from '@/features/articles/components/MapPanel'
 import { ListicleMapVenueCard } from '@/features/articles/components/ListicleMapVenueCard'
 import { useListicleMapSync } from '@/features/articles/components/ListicleMapSync'
@@ -75,10 +74,10 @@ function measureViewport(): ViewportHeights {
  * `list` parks the sheet off screen, `split` shows the map under the copy the
  * reader is scrolling, and `map` is a takeover that covers everything but the
  * navbar.
- * The switch stays put in all three while the list is in front of the reader,
- * so there is always one visible control saying where you are and how to get
- * back. Once the list has scrolled away, the switch gets out of the article
- * footer's way. The takeover also floats a card for the active stop, because
+ * The switch stays put in all three, all the way to the footer (owner,
+ * 2026-11-20: it used to slide away once the list had scrolled past), so
+ * there is always one visible control saying where you are and how to get
+ * back. The body is padded so the footer's last line still clears it. The takeover also floats a card for the active stop, because
  * it is the one mode where the reading column cannot say what a pin is.
  *
  * The switch is the only way to change mode. A drag handle used to sit on the
@@ -109,17 +108,10 @@ export function ListicleMapSheet({
   // hard-coding it.
   const [navbarHeight, setNavbarHeight] = useState(0)
   const [reduceMotion, setReduceMotion] = useState(false)
-  const [hasPassedListRegion, setHasPassedListRegion] = useState(false)
   // The card and switch cover the bottom of the map, and the card's height
   // depends on whether the stop has a photo and a blurb - so it is measured
   // rather than assumed, and fed back into the camera as hidden space.
   const [overlayHeight, setOverlayHeight] = useState(LISTICLE_MAP_PILL_CLEARANCE)
-  // How much taller the screen is than the small viewport right now: the
-  // strip the toolbars give back when they hide. Only the locked picture
-  // follows it (MapTeaser); the Google map keeps its fixed geometry, so this
-  // is not tracked for members and their map never re-renders on scroll.
-  const [toolbarsHiddenPx, setToolbarsHiddenPx] = useState(0)
-
   useEffect(() => {
     const sync = () => {
       const next = measureViewport()
@@ -145,19 +137,6 @@ export function ListicleMapSheet({
   }, [])
 
   useEffect(() => {
-    if (access !== 'teaser' || !viewport) return
-    const sync = () =>
-      setToolbarsHiddenPx(
-        Math.round(
-          Math.min(Math.max(window.innerHeight - viewport.small, 0), viewport.large - viewport.small),
-        ),
-      )
-    sync()
-    window.addEventListener('resize', sync)
-    return () => window.removeEventListener('resize', sync)
-  }, [access, viewport])
-
-  useEffect(() => {
     const query = window.matchMedia('(prefers-reduced-motion: reduce)')
     const sync = () => setReduceMotion(query.matches)
     sync()
@@ -168,33 +147,6 @@ export function ListicleMapSheet({
   useEffect(() => {
     if (mode !== 'list') setHasOpened(true)
   }, [mode])
-
-  useEffect(() => {
-    const region = document.querySelector<HTMLElement>(LISTICLE_MAP_REGION_SELECTOR)
-    if (!region) return
-
-    const sync = () => {
-      setHasPassedListRegion(
-        region.getBoundingClientRect().bottom <= window.innerHeight / 2,
-      )
-    }
-    // Use the viewport's lower half as the active observation area. The
-    // region stops intersecting exactly when its trailing edge crosses the
-    // centre line, in either scroll direction.
-    const intersectionObserver = new IntersectionObserver(sync, {
-      rootMargin: '-50% 0px 0px',
-    })
-    const resizeObserver = new ResizeObserver(sync)
-
-    sync()
-    intersectionObserver.observe(region)
-    resizeObserver.observe(region)
-
-    return () => {
-      intersectionObserver.disconnect()
-      resizeObserver.disconnect()
-    }
-  }, [])
 
   /**
    * Split parks an opaque sheet over the bottom of the viewport, and the page
@@ -209,15 +161,19 @@ export function ListicleMapSheet({
    * the page stops with its last line resting on the sheet's top edge.
    */
   useEffect(() => {
-    if (mode !== 'split' || !viewport) return
+    if (mode === 'map' || !viewport) return
 
     const body = document.body
     const previous = body.style.paddingBottom
-    body.style.paddingBottom = `${coveredHeight('split', viewport)}px`
+    // List: the switch stays on screen to the very end (owner, 2026-11-20),
+    // so the footer's last line must clear it too.
+    body.style.paddingBottom = `${
+      mode === 'split' ? coveredHeight('split', viewport) : overlayHeight + 16
+    }px`
     return () => {
       body.style.paddingBottom = previous
     }
-  }, [mode, viewport])
+  }, [mode, viewport, overlayHeight])
 
   const overlayRef = useCallback((node: HTMLDivElement | null) => {
     if (!node) return
@@ -250,16 +206,67 @@ export function ListicleMapSheet({
     setMode('list')
   }, [activeId, scrollToEntry])
 
+  // Switching between the bottom-hung sheet (locked split/list) and the
+  // top-hung takeover changes what its transform is measured from. Start the
+  // slide from where the sheet was, so the switch animates instead of jumping.
+  const sheetRef = useRef<HTMLDivElement>(null)
+  const lastPlacement = useRef<{ anchorBottom: boolean; translateY: number } | null>(null)
+  useLayoutEffect(() => {
+    const el = sheetRef.current
+    if (!el || !viewport) return
+    const now = {
+      anchorBottom: el.style.bottom === '0px',
+      // Where it is going, not where a running slide has it this frame.
+      translateY: Number(/translateY\((-?[\d.]+)px\)/.exec(el.style.transform)?.[1] ?? 0),
+    }
+    const last = lastPlacement.current
+    lastPlacement.current = now
+    if (!last || last.anchorBottom === now.anchorBottom || reduceMotion) return
+    const shift = window.innerHeight - el.offsetHeight
+    const startY = last.translateY + (last.anchorBottom ? shift : 0) - (now.anchorBottom ? shift : 0)
+    const target = el.style.transform
+    const easing = el.style.transition
+    el.style.transition = 'none'
+    el.style.transform = `translateY(${startY}px)`
+    void el.offsetHeight
+    el.style.transition = easing
+    el.style.transform = target
+  })
+
   if (points.length === 0 || !viewport) return null
 
   const height = sheetHeightPx(viewport)
-  const translateY = sheetTopForMode(mode, viewport, navbarHeight)
-  const mapInset = hiddenBelowFold(mode, viewport, navbarHeight) + overlayHeight
+  // The locked picture (non-members) cannot follow the toolbars the way a
+  // Google map's camera is kept from doing: re-laying it out on every toolbar
+  // resize made it jitter while scrolling, and laying it out once for the small
+  // viewport left bare paper under it once the toolbars hid (owner,
+  // 2026-11-20, iPhone). So in list and split its sheet hangs from the bottom
+  // of the screen like the switch does: the browser slides it with the
+  // toolbars, its on-screen strip keeps one height, nothing is redrawn. The
+  // takeover stays hung from the top, under the navbar, with its picture
+  // drawn tall enough for the toolbars-hidden screen.
+  const teaser = access === 'teaser'
+  const anchorBottom = teaser && mode !== 'map'
+  let translateY: number
+  let hiddenBelow: number
+  if (anchorBottom) {
+    const splitOnScreen = Math.max(
+      0,
+      viewport.small - sheetTopForMode('split', viewport, navbarHeight),
+    )
+    translateY = mode === 'list' ? height : height - splitOnScreen
+    hiddenBelow = translateY
+  } else {
+    translateY = sheetTopForMode(mode, viewport, navbarHeight)
+    hiddenBelow = hiddenBelowFold(mode, viewport, navbarHeight)
+  }
+  const mapInset = hiddenBelow + overlayHeight
+  const coveredBottom =
+    overlayHeight + (teaser && mode === 'map' ? viewport.large - viewport.small : 0)
 
   const activeIndex = points.findIndex((point) => point.id === activeId)
   const activePoint = activeIndex >= 0 ? points[activeIndex] : null
   const showMap = mode !== 'list'
-  const showControls = !hasPassedListRegion
   const transition = reduceMotion
     ? 'none'
     : 'transform 340ms cubic-bezier(0.22, 1, 0.36, 1)'
@@ -270,18 +277,23 @@ export function ListicleMapSheet({
         data-listicle-map-sheet=""
         id="listicle-map-sheet-panel"
         // Page UI stays below the navbar (40) and site dialogs (50).
-        className={`fixed inset-x-0 top-0 z-30 flex flex-col bg-background 1024:hidden ${
+        ref={sheetRef}
+        className={`fixed inset-x-0 z-30 flex flex-col bg-background 1024:hidden ${
           mode === 'split' ? 'border-t-[3px] border-double border-foreground/55' : ''
         }`}
-        style={{ height, transform: `translateY(${translateY}px)`, transition }}
+        style={{
+          ...(anchorBottom ? { top: 'auto', bottom: 0 } : { top: 0 }),
+          height,
+          transform: `translateY(${translateY}px)`,
+          transition,
+        }}
         inert={!showMap}
       >
         <div ref={mapSwipeRef} className="min-h-0 flex-1">
           {hasOpened ? (
             <MapPanel
               viewportInsetBottomPx={mapInset}
-              coveredBottomPx={overlayHeight}
-              revealedBottomPx={toolbarsHiddenPx}
+              coveredBottomPx={coveredBottom}
               paused={mode === 'list'}
               activeZoom={MODE_ACTIVE_ZOOM[mode]}
               fitPadding={MOBILE_FIT_PADDING}
@@ -300,18 +312,8 @@ export function ListicleMapSheet({
         ref={overlayRef}
         data-listicle-map-sheet=""
         data-listicle-map-controls=""
-        aria-hidden={!showControls}
         className="pointer-events-none fixed inset-x-0 bottom-0 z-[35] flex flex-col items-center gap-2.5 px-3 1024:hidden"
-        style={{
-          paddingBottom: 'calc(1rem + env(safe-area-inset-bottom))',
-          transform: showControls
-            ? 'translateY(0)'
-            : 'translateY(calc(100% + 2rem))',
-          transition: reduceMotion
-            ? 'none'
-            : 'transform 260ms cubic-bezier(0.22, 1, 0.36, 1)',
-        }}
-        inert={!showControls}
+        style={{ paddingBottom: 'calc(1rem + env(safe-area-inset-bottom))' }}
       >
         <div ref={cardSwipeRef} className="contents">
           {mode === 'map' && activePoint ? (
