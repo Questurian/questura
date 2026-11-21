@@ -16,6 +16,7 @@ import { listicleSectionAnchors } from '@/features/articles/lib/listicleSectionG
 import { MapsArticleLayout } from '@/features/articles/layouts/MapsArticleLayout'
 import { isMapsListicleArticle } from '@/features/articles/types/mapsListicle'
 import type { ArticleScope } from '@/features/articles/lib/articleScope'
+import { ListicleMapSheetFrame } from '@/features/articles/components/ListicleMapSheetFrame'
 
 type RenderMapsArticleRouteParams = {
   scope: Extract<ArticleScope, { kind: 'city' }>
@@ -83,6 +84,7 @@ export async function renderMapsArticleRoute({
         city={scope.city}
         gate={gate}
         paywallNotice={locked && gate ? <PaywallNotice gate={gate} returnTo={path} fade={false} /> : null}
+        mapSheetFrame={<ListicleMapSheetFrame returnTo={path} />}
       />
     </>
   )

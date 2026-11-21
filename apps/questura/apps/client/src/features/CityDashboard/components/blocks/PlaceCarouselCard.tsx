@@ -113,7 +113,7 @@ export function PlaceCarouselCard({
     <article
       className={`city-article-card flex-none snap-always flex flex-col ${widthClassName} ${isLast ? 'snap-end' : 'snap-start'}`}
     >
-      <div className="city-article-image-shell relative aspect-[3/2] overflow-hidden bg-[#d7dcde]">
+      <div className="city-article-image-shell relative aspect-[3/2] overflow-hidden bg-photo-placeholder">
         {imageUrl ? (
           <PublicImage
             src={imageUrl}

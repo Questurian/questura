@@ -34,6 +34,8 @@ interface MapsArticleLayoutProps {
    * JavaScript, which is over the cap (perf/budgets.json).
    */
   paywallNotice?: ReactNode
+  /** The phone map sheet as the server paints it (ListicleMapSheetFrame). */
+  mapSheetFrame?: ReactNode
 }
 
 export function MapsArticleLayout({
@@ -47,6 +49,7 @@ export function MapsArticleLayout({
   city,
   gate,
   paywallNotice = null,
+  mapSheetFrame = null,
 }: MapsArticleLayoutProps): JSX.Element {
   // `gate` comes from the server once, so `gate.mapPins` keeps one identity
   // across renders: a fresh array would rebuild every marker and re-frame the
@@ -110,6 +113,7 @@ export function MapsArticleLayout({
         footer={footer}
         country={country}
         city={city}
+        mapSheetFrame={mapSheetFrame}
       >
         <MapsListicleArticlePage
           article={effectiveArticle}

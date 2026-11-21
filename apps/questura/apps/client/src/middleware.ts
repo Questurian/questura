@@ -9,6 +9,9 @@ import {
   WELL_KNOWN_PREFIX,
 } from '@/lib/wellKnown'
 
+/** Renders the site's 404 page (app/page-not-found/page.tsx). */
+const NOT_FOUND_PAGE_PATH = '/page-not-found'
+
 function isAssetPath(pathname: string): boolean {
   if (pathname.startsWith('/_next')) return true
   if (pathname.startsWith('/api')) return true
@@ -91,8 +94,9 @@ export function middleware(request: NextRequest) {
     if (redirect) return redirect
   }
 
+  // The site's own 404 page, not a bare plain-text one (app/page-not-found).
   if (!isPublicPageEnabled(pathname)) {
-    return new NextResponse('Not Found', { status: 404 })
+    return NextResponse.rewrite(new URL(NOT_FOUND_PAGE_PATH, request.url), { status: 404 })
   }
 
   return NextResponse.next()

@@ -7,10 +7,11 @@ import {
 
 /**
  * Playfair at 900 for the section heading only. The root layout loads the
- * family up to 700; declaring the black cut here means next/font preloads it
- * on the routes that render a listicle, not on every page.
+ * family up to 700. Not preloaded: section headings sit below the first
+ * screen, and a preload put this file ahead of the fonts and photo the reader
+ * sees first. The browser fetches it as soon as a heading is in the page.
  */
-const playfairBlack = Playfair_Display({ weight: "900", subsets: ["latin"], display: "swap" });
+const playfairBlack = Playfair_Display({ weight: "900", subsets: ["latin"], display: "swap", preload: false });
 
 const RULE =
   "h-[7px] min-w-[18px] flex-1 border-y-2 border-accent sm:h-[8px] sm:min-w-6 sm:border-y-[2.5px]";

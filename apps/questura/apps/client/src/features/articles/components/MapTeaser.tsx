@@ -2,11 +2,12 @@
 
 import { useEffect, useMemo, useRef, useState, type JSX } from 'react'
 import { usePathname } from 'next/navigation'
-import Link from '@/components/navigation/PublicLink'
 import { useListicleMapSync } from '@/features/articles/components/ListicleMapSync'
 import snapshots from '@/features/articles/data/mapTeasers.json'
 import { layoutSnapshot, picturesForBox, type MapSnapshotEntry } from '@/features/articles/lib/mapSnapshot'
 import { layoutMapTeaser, type TeaserPoint } from '@/features/articles/lib/mapTeaserLayout'
+import { markPhotoReady } from '@/lib/media/photoReady'
+import { MapJoinCall as JoinCall } from '@/features/articles/components/MapJoinCall'
 
 const SNAPSHOTS = snapshots as unknown as Record<string, MapSnapshotEntry>
 
@@ -23,65 +24,6 @@ const PAPER_GRID = {
   backgroundImage:
     'linear-gradient(rgb(26 26 26 / 0.045) 1px, transparent 1px), linear-gradient(90deg, rgb(26 26 26 / 0.045) 1px, transparent 1px)',
   backgroundSize: '56px 56px',
-}
-
-/** The same words as the paywall beside the list (PaywallNotice). */
-const UNLOCK = 'Become a member to unlock'
-const HEADLINE = 'See every place on the map.'
-
-/** A map pin standing on rings that spread out from where it lands. */
-function PinMark({ className }: { className: string }) {
-  return (
-    <svg aria-hidden="true" viewBox="0 0 48 48" className={`text-accent ${className}`}>
-      <ellipse cx="24" cy="40" rx="20" ry="6" fill="none" stroke="currentColor" strokeWidth="1.5" opacity="0.28" />
-      <ellipse cx="24" cy="40" rx="13" ry="4" fill="none" stroke="currentColor" strokeWidth="1.75" opacity="0.5" />
-      <ellipse cx="24" cy="40" rx="6.5" ry="2" fill="currentColor" opacity="0.7" />
-      <path d="M24 40C24 40 13 27.5 13 17.5a11 11 0 1 1 22 0C35 27.5 24 40 24 40Z" fill="currentColor" />
-      <circle cx="24" cy="17.5" r="4.2" className="fill-background" />
-    </svg>
-  )
-}
-
-/**
- * The way in, as plain as the paywall beside the list (owner decision,
- * 2026-10-19): no count of places -- a short list should not look short --
- * and nothing to read but the offer. A card on desktop; a bar on the phone's
- * split view, at the top of the strip, so the places stay in sight below it.
- */
-function JoinCall({ compact, href }: { compact: boolean; href: string }) {
-  if (compact) {
-    return (
-      <div className="absolute inset-x-0 top-0 z-[4] flex items-center gap-2.5 border-b border-foreground/15 bg-background px-3.5 py-2.5 text-foreground">
-        <PinMark className="h-8 w-8 shrink-0" />
-        <h2 className="min-w-0 flex-1 text-balance font-display text-[1rem] font-medium leading-tight">{HEADLINE}</h2>
-        <Link
-          href={href}
-          className="inline-flex min-h-[38px] shrink-0 items-center rounded-sm bg-accent px-3.5 font-[family-name:var(--font-dm-sans)] text-[0.84rem] font-semibold text-background transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
-        >
-          Become a member
-        </Link>
-      </div>
-    )
-  }
-
-  return (
-    <div className="absolute bottom-10 left-1/2 z-[4] w-[min(400px,calc(100%-40px))] -translate-x-1/2 border border-foreground/10 bg-background px-7 pb-5 pt-5 text-center text-foreground">
-      <PinMark className="mx-auto mb-2.5 h-12 w-12" />
-      <h2 className="text-balance font-display text-[1.5rem] font-medium leading-[1.15] tracking-[-0.015em]">{HEADLINE}</h2>
-      <Link
-        href={href}
-        className="mt-5 inline-flex min-h-[48px] w-full items-center justify-center rounded-sm bg-accent px-6 font-[family-name:var(--font-dm-sans)] text-[15px] font-semibold tracking-[0.01em] text-background transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
-      >
-        {UNLOCK}
-      </Link>
-      <p className="mt-3.5 font-[family-name:var(--font-dm-sans)] text-[13px] leading-relaxed text-foreground/80">
-        Already a member?{' '}
-        <Link href={href} className="font-semibold text-accent underline underline-offset-4 hover:text-foreground">
-          Sign in
-        </Link>
-      </p>
-    </div>
-  )
 }
 
 /**
@@ -180,6 +122,10 @@ export function MapTeaser({
   }, [entries, teaserPoints, size.width, screenHeight, visibleHeight, barOnTop])
   const snapshot = view?.snapshot
   const snapshotLayout = view?.layout ?? null
+  // Nothing is drawn until the box has a size: before that the picture cannot
+  // be laid out, and the drawn fallback would flash its dots first.
+  const measured = size.width > 0 && size.height > 0
+  const awaitingPicture = !measured
   const drawing = useMemo(
     () => (snapshotLayout ? null : layoutMapTeaser(teaserPoints, { width: size.width, height: visibleHeight, compact })),
     [snapshotLayout, teaserPoints, size.width, visibleHeight, compact],
@@ -191,6 +137,7 @@ export function MapTeaser({
       type="button"
       onClick={() => scrollToEntry(id)}
       aria-label={`Go to place ${number} in the list`}
+      data-photo-overlay
       className="absolute z-[2] grid h-[26px] w-[26px] -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-accent font-[family-name:var(--font-dm-sans)] text-[12px] font-semibold text-background shadow-[0_0_0_3px_var(--background),0_4px_10px_-4px_rgb(26_26_26/0.5)] transition-colors hover:bg-[#3451C7] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
       style={{ left, top }}
     >
@@ -199,7 +146,15 @@ export function MapTeaser({
   )
 
   return (
-    <div ref={boxRef} className="relative h-full w-full overflow-hidden bg-paper" style={snapshotLayout ? undefined : PAPER_GRID}>
+    // data-photo-frame: the places and the credit wait for the picture and fade
+    // in with it (foundations.css), so no dot ever sits on bare paper.
+    <div
+      ref={boxRef}
+      data-photo-frame
+      data-map-surface=""
+      className="relative h-full w-full overflow-hidden bg-paper"
+      style={snapshotLayout || awaitingPicture ? undefined : PAPER_GRID}
+    >
       {snapshot && snapshotLayout ? (
         <div aria-hidden="true" className="absolute inset-x-0 top-0 overflow-hidden" style={{ height: screenHeight > 0 ? screenHeight : '100%' }}>
           {/* eslint-disable-next-line @next/next/no-img-element -- a fixed, pre-rendered picture with its own two sizes; the markers are laid over it in CSS px */}
@@ -210,6 +165,10 @@ export function MapTeaser({
             alt=""
             aria-hidden="true"
             decoding="async"
+            data-fade=""
+            ref={(image) => { markPhotoReady(image) }}
+            onLoad={(event) => markPhotoReady(event.currentTarget)}
+            suppressHydrationWarning
             className="absolute max-w-none select-none"
             style={{
               left: snapshotLayout.image.left,
@@ -234,6 +193,7 @@ export function MapTeaser({
                 <span
                   key={pin.id}
                   aria-hidden="true"
+                  data-photo-overlay
                   className={`absolute z-[1] -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent ${
                     compact
                       ? 'h-[11px] w-[11px] shadow-[0_0_0_2px_var(--background),0_2px_5px_rgb(26_26_26/0.25)]'
@@ -245,13 +205,14 @@ export function MapTeaser({
             )}
             {/* OpenStreetMap's licence asks for this credit wherever its map is shown. */}
             <span
+              data-photo-overlay
               className="absolute right-2 z-[3] font-[family-name:var(--font-dm-sans)] text-[9.5px] text-foreground/55"
               style={{ bottom: 6 }}
             >
               © OpenStreetMap
             </span>
           </>
-        ) : (
+        ) : awaitingPicture ? null : (
           <>
             <svg
               aria-hidden="true"

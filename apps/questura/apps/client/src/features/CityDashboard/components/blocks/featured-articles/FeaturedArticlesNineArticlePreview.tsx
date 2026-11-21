@@ -13,6 +13,7 @@ import { AuthorLink } from '@/features/authors/components/AuthorLink'
 import { AudioBadge } from '@/features/audio/components/AudioBadge'
 import { NavigableImageTarget } from '../NavigableImageTarget'
 import { PublicImage, PublicSource } from '@/components/media/PublicImage'
+import { PicturePreload } from '@/components/media/PicturePreload'
 import { BLOCK_IMAGE_SIZES } from '../blockImageSizes'
 import { heroImagePriority, type ImagePriority } from '../heroImagePriority'
 import { ArticleKickerLabel } from '../ArticleKickerLabel'
@@ -49,7 +50,7 @@ function WideCard({ article }: SlotCardProps): JSX.Element {
 
   return (
     <section className="city-article-card city-article-card--nine-wide grid gap-3 px-[var(--block-gutter)] py-4">
-      <div className="city-article-image-shell relative aspect-square overflow-hidden bg-[#d7dcde] 768:aspect-[16/9]">
+      <div className="city-article-image-shell relative aspect-square overflow-hidden bg-photo-placeholder 768:aspect-[16/9]">
         {hasImage ? (
           <picture className="block h-full w-full">
             {desktopImageUrl ? (
@@ -119,9 +120,15 @@ function CenterHeroCard({ article, imagePriority }: CenterHeroCardProps): JSX.El
 
   return (
     <section className="city-article-card city-article-card--nine-hero grid gap-3 px-[var(--block-gutter)] py-4">
-      <div className="city-article-image-shell relative aspect-square overflow-hidden bg-[#d7dcde] 768:aspect-[3/2]">
+      <div className="city-article-image-shell relative aspect-square overflow-hidden bg-photo-placeholder 768:aspect-[3/2]">
         {hasImage ? (
           <picture className="block h-full w-full">
+            {imagePriority.fetchPriority === 'high' ? (
+              <PicturePreload
+                source={desktopImageUrl ? { src: desktopImageUrl, media: '(min-width: 768px)', sizes: BLOCK_IMAGE_SIZES.centreFeature } : null}
+                fallback={{ src: fallbackImageUrl, sizes: BLOCK_IMAGE_SIZES.centreFeature }}
+              />
+            ) : null}
             {desktopImageUrl ? (
               <PublicSource media="(min-width: 768px)" src={desktopImageUrl} sizes={BLOCK_IMAGE_SIZES.centreFeature} />
             ) : null}
@@ -212,7 +219,7 @@ function HorizontalCard({ article }: SlotCardProps): JSX.Element {
         </p>
       </div>
 
-      <div className="city-article-image-shell relative aspect-[4/3] overflow-hidden bg-[#d7dcde]">
+      <div className="city-article-image-shell relative aspect-[4/3] overflow-hidden bg-photo-placeholder">
         {imageUrl ? (
           <PublicImage
             src={imageUrl}

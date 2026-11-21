@@ -9,7 +9,11 @@ import type { DestinationHeaderTextFont } from "../../../types";
  * when it draws it. DM Sans comes from SiteFonts and the serif from the root
  * layout, so they are not declared again here.
  */
-const jost = Jost({ subsets: ["latin"], preload: false });
+// Except Jost: it is the shared style's default (destinationHeaderMetrics.ts)
+// and what every live header draws, and unpreloaded it arrived seconds after
+// the header on a phone, so the paragraph visibly changed font (audit,
+// 2026-11-21). One 10 KB file.
+const jost = Jost({ subsets: ["latin"] });
 const lato = Lato({ subsets: ["latin"], weight: ["300", "400"], preload: false });
 const raleway = Raleway({ subsets: ["latin"], preload: false });
 const manrope = Manrope({ subsets: ["latin"], preload: false });

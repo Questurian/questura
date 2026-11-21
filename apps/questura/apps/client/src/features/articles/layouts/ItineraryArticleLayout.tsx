@@ -38,6 +38,8 @@ interface ItineraryArticleLayoutProps {
    * first-load JavaScript, which is over the cap (perf/budgets.json).
    */
   paywallNotice?: ReactNode
+  /** The phone map sheet as the server paints it (ListicleMapSheetFrame). */
+  mapSheetFrame?: ReactNode
   /** The studio preview follows the day being edited. Readers never pass this. */
   followDayIndex?: number
   studioPreview?: boolean
@@ -53,6 +55,7 @@ export function ItineraryArticleLayout({
   city,
   gate,
   paywallNotice = null,
+  mapSheetFrame = null,
   followDayIndex,
   studioPreview,
 }: ItineraryArticleLayoutProps): JSX.Element {
@@ -185,6 +188,7 @@ export function ItineraryArticleLayout({
         footer={footer}
         country={country}
         city={city}
+        mapSheetFrame={mapSheetFrame}
       >
         <ItineraryListicleArticlePage
           article={effectiveArticle}

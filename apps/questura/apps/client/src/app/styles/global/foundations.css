@@ -41,6 +41,14 @@ html {
   --paper-accent: color-mix(in srgb, var(--accent) 9%, var(--background));
   --maps-listicle-chip: #e4e0d8;
 
+  /* What a photo's frame shows until the photo has fully arrived. Flat and in
+     the page's warm family, a shade under --background-warm so the frame
+     still reads as "a photo goes here". No shimmer: the photo fades in over
+     it (lib/media/photoReady.ts), and a still box looks calmer than a moving
+     one. The dark one is for photos on ink blocks. */
+  --photo-placeholder: #E6DDCF;
+  --photo-placeholder-dark: #2A2724;
+
   /* Typography */
   --font-display: 'Playfair Display', Georgia, serif;
 
@@ -76,6 +84,8 @@ html {
   --color-accent: var(--accent);
   --color-accent-soft: var(--accent-soft);
   --color-paper: var(--paper);
+  --color-photo-placeholder: var(--photo-placeholder);
+  --color-photo-placeholder-dark: var(--photo-placeholder-dark);
   --color-paper-accent: var(--paper-accent);
 
   /* Navbar palette (see "Navbar theme" below). Registered here so the navbar
@@ -126,6 +136,49 @@ body {
   background: #F5F0E8 !important;
   color: #1A1A1A !important;
   font-family: var(--font-geist-sans), system-ui, sans-serif;
+}
+
+/* PHOTOS APPEAR WHOLE (lib/media/photoReady.ts). A reader-facing photo
+   (PublicImage, data-fade) stays transparent over its frame's placeholder
+   until the file has fully arrived, then fades in. Without this a photo paints
+   top-down in strips while it downloads. `animation`, not `transition`, so
+   images that already transition (hover zooms) keep theirs; only a `from`
+   keyframe, so an image with its own opacity ends on it. */
+img[data-fade]:not([data-loaded]) {
+  opacity: 0;
+}
+
+img[data-fade][data-loaded] {
+  animation: photo-fade-in 220ms ease-out;
+}
+
+@keyframes photo-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+/* Anything laid over a photo (an Audio badge, a bookmark button, a credit)
+   waits with it, so no label sits on an empty box. Mark the overlay
+   data-photo-overlay, and the frame data-photo-frame unless it is already
+   one of the site's photo frames. */
+:is([data-photo-frame], .city-article-image-shell, .shimmer-image):has(img[data-fade]:not([data-loaded]))
+  [data-photo-overlay] {
+  opacity: 0;
+}
+
+/* An animation rather than a transition, so overlays keep their own
+   transitions (a button's hover colour). */
+:is([data-photo-frame], .city-article-image-shell, .shimmer-image):has(img[data-fade][data-loaded])
+  [data-photo-overlay] {
+  animation: photo-fade-in 220ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  img[data-fade][data-loaded],
+  [data-photo-overlay] {
+    animation: none !important;
+  }
 }
 
 /* Display Font Utility */
@@ -219,6 +272,11 @@ a[href][data-no-hover-underline]:focus-visible :is(h1, h2, h3, h4, h5, h6),
    alone on purpose: the system progress cursor read as too loud. The line is
    static -- an activity signal, not fake progress -- so there is no motion
    for reduced-motion readers to opt out of. */
+/* Page-change feedback (NavigationFeedback). A tap that has to wait for the
+   server leaves the old page up; a static hairline read as "did my tap
+   work?" (audit, 2026-11-21). After 150 ms the bar appears and creeps across
+   the top, quickly at first and then slower, so it always looks alive and
+   never reaches the end before the new page does. */
 .nav-feedback {
   position: fixed;
   inset: 0 0 auto;
@@ -227,15 +285,35 @@ a[href][data-no-hover-underline]:focus-visible :is(h1, h2, h3, h4, h5, h6),
   background: var(--accent);
   opacity: 0;
   pointer-events: none;
+  transform: scaleX(0);
+  transform-origin: left center;
 }
 
 html[data-navigating] .nav-feedback {
-  animation: nav-feedback-show 0s linear 150ms forwards;
+  animation:
+    nav-feedback-show 0s linear 150ms forwards,
+    nav-feedback-progress 10s cubic-bezier(0.1, 0.65, 0.2, 1) 150ms forwards;
 }
 
 @keyframes nav-feedback-show {
   to {
     opacity: 1;
+  }
+}
+
+@keyframes nav-feedback-progress {
+  from {
+    transform: scaleX(0.08);
+  }
+  to {
+    transform: scaleX(0.92);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-navigating] .nav-feedback {
+    transform: none;
+    animation: nav-feedback-show 0s linear 150ms forwards;
   }
 }
 

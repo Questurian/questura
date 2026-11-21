@@ -70,8 +70,8 @@ export async function ArticleIndexPage({ scope, type, page, lang }: Props) {
             <li key={item.id} className="group">
               <Link href={item.href} className="block">
                 {item.thumbnail && (
-                  <div className="relative mb-4 aspect-[4/3] w-full overflow-hidden rounded-lg bg-foreground/5">
-                    <div className="absolute right-2 top-2 z-10">
+                  <div data-photo-frame className="relative mb-4 aspect-[4/3] w-full overflow-hidden rounded-lg bg-photo-placeholder">
+                    <div data-photo-overlay className="absolute right-2 top-2 z-10">
                       <BookmarkButton
                         targetType={type}
                         targetId={Number(item.id)}

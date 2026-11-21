@@ -45,7 +45,7 @@ function ThreeArticleCard({
 
   return (
     <article className="city-article-card group flex min-w-0 flex-col">
-      <div className="city-article-image-shell relative aspect-square overflow-hidden bg-[#d7dcde] 768:aspect-[1.92/1]">
+      <div className="city-article-image-shell relative aspect-square overflow-hidden bg-photo-placeholder 768:aspect-[1.92/1]">
         {imageUrl ? (
           <PhoneSquareImage
             article={article}
@@ -120,7 +120,7 @@ function GridArticleCard({
   const inner = (
     <>
       <div
-        className={`city-article-image-shell relative aspect-square overflow-hidden bg-[#d7dcde] ${useSquareImage ? '' : '768:aspect-[16/10]'}`}
+        className={`city-article-image-shell relative aspect-square overflow-hidden bg-photo-placeholder ${useSquareImage ? '' : '768:aspect-[16/10]'}`}
       >
         {imageUrl && useSquareImage ? (
           <PublicImage

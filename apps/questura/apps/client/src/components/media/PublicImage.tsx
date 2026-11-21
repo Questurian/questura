@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, type CSSProperties, type ReactEventHand
 
 import { buildSrcSet } from "@/components/media/imageSrcSet";
 import { retryOriginalImage } from "@/components/media/retryOriginalImage";
+import { markPhotoReady } from "@/lib/media/photoReady";
 
 export type PublicImageProps = {
   src: string;
@@ -33,6 +34,13 @@ export type PublicImageProps = {
     | null;
   onLoad?: ReactEventHandler<HTMLImageElement>;
   onError?: ReactEventHandler<HTMLImageElement>;
+  /**
+   * Hold the photo back until it has fully downloaded, then fade it in
+   * (lib/media/photoReady.ts). On by default: a photo painting strip by strip
+   * is never what a reader should see. Off only where something else already
+   * decides when the image shows.
+   */
+  fade?: boolean;
 };
 
 export function PublicImage({
@@ -40,9 +48,11 @@ export function PublicImage({
   decoding = "async",
   fetchPriority,
   imgRef,
+  fade = true,
   loading,
   priority = false,
   onError,
+  onLoad,
   sizes,
   src,
   width,
@@ -53,6 +63,8 @@ export function PublicImage({
   const setImageRef = useCallback(
     (image: HTMLImageElement | null) => {
       imageRef.current = image;
+      // A cached file can finish before React attaches onLoad.
+      markPhotoReady(image);
       if (typeof imgRef === "function") imgRef(image);
       else if (imgRef) imgRef.current = image;
     },
@@ -63,7 +75,10 @@ export function PublicImage({
   // not replay that event, so check once the element is ours.
   useEffect(() => {
     const image = imageRef.current;
-    if (image?.complete && image.naturalWidth === 0) retryOriginalImage(image);
+    if (!image) return;
+    if (image.complete && image.naturalWidth === 0) retryOriginalImage(image);
+    else if (!image.complete) image.removeAttribute("data-loaded"); // a new photo in the same frame
+    else markPhotoReady(image);
   }, [src]);
 
   return (
@@ -71,6 +86,13 @@ export function PublicImage({
     <img
       {...props}
       ref={setImageRef}
+      data-fade={fade ? "" : undefined}
+      /* The <head> script adds data-loaded before hydration (photoReady.ts). */
+      suppressHydrationWarning
+      onLoad={(event) => {
+        markPhotoReady(event.currentTarget);
+        onLoad?.(event);
+      }}
       onError={(event) => {
         if (!retryOriginalImage(event.currentTarget)) onError?.(event);
       }}

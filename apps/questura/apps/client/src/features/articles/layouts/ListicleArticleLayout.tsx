@@ -18,6 +18,11 @@ interface ListicleArticleLayoutProps {
   country: string
   city?: string | null
   format?: 'maps' | 'itinerary'
+  /**
+   * The phone map sheet as the server paints it (ListicleMapSheetFrame),
+   * rendered by the route so it costs no JavaScript.
+   */
+  mapSheetFrame?: ReactNode
 }
 
 // The phone map sheet draws nothing until the browser has measured the
@@ -46,41 +51,40 @@ export function ListicleArticleLayout({
   country,
   city,
   format = 'itinerary',
+  mapSheetFrame = null,
 }: ListicleArticleLayoutProps): JSX.Element {
   const { mapsEnabled } = useDevStore()
   const isDesktopMap = useIsDesktopMap()
   // Below 1024 the map lives in a bottom sheet instead of a side column. The
   // two never coexist: a CSS-hidden column would still mount MapPanel, and
   // that instantiates a billed google.maps.Map nothing can display.
-  const showMapColumn = mapsEnabled && isDesktopMap
+  //
+  // What exists from the server's first paint is only the shape: the column
+  // and its divider (shown by CSS from 1024 up) and, below 1024, a frame of
+  // the phone sheet. Nothing billed mounts until the browser has said which
+  // one this reader gets; the real map then fades in over the same paper, so
+  // the page never changes shape while it loads.
+  const showMapColumn = mapsEnabled
+  const mountColumnMap = mapsEnabled && isDesktopMap
   const showMapSheet = mapsEnabled && !isDesktopMap
   // Only the sheet takes guides: desktop reaches the same links through the
   // shelf under the map column and the section at the foot of the article.
   const guides = { articles: relatedArticles, country, city }
   // A non-member's shelf is locked like the prose beside it: whited out into
   // the page and out of reach. Their guides are locked too.
-  const { access } = useListicleMapSync()
+  const { access, points } = useListicleMapSync()
   const shelfLocked = access === 'teaser'
 
   return (
     <>
-      <link rel="preconnect" href="https://www.instagram.com" />
-      <link
-        rel="preconnect"
-        href="https://www.cdninstagram.com"
-        crossOrigin="anonymous"
-      />
-      <link rel="dns-prefetch" href="https://platform.instagram.com" />
-      {/* Warm the embed.js download in parallel with hydration; the runtime
-          loader in InstagramEmbedBlock then hits the HTTP cache. */}
-      <link
-        rel="preload"
-        href="https://www.instagram.com/embed.js"
-        as="script"
-      />
+      {/* No Instagram preconnect or embed.js preload here: every map guide
+          and itinerary paid for them, with or without a post, ahead of its
+          own photos and map. InstagramEmbedBlock preconnects and loads the
+          script itself once the page has loaded. */}
       <div
         data-article-layout="listicle"
         data-listicle-format={format}
+        data-map-access={access}
         className="relative 1024:max-w-[1600px] 1024:mx-auto"
         style={listicleLayoutStyle}
       >
@@ -103,16 +107,17 @@ export function ListicleArticleLayout({
           {showMapColumn && (
             <div
               data-map-locked={shelfLocked ? '' : undefined}
+              data-map-access={access}
               className={`maps-map-column hidden 1024:flex 1024:flex-col ${shelfLocked ? '' : '1024:sticky 1024:self-start'}`}
             >
-              <div className="flex-1 min-h-0">
+              <div className="flex-1 min-h-0 bg-paper">
                 {/* No guides menu here: the shelf under this map already shows
                     the same links. The menu exists for the phone takeover,
                     which has no shelf. */}
-                <MapPanel />
+                {mountColumnMap ? <MapPanel /> : null}
               </div>
-              {shelfLocked ? (
-                <div inert className="relative shrink-0 select-none">
+              {access !== 'open' ? (
+                <div inert={shelfLocked} className="maps-locked-shelf relative shrink-0 select-none">
                   <RelatedListicleShelf
                     articles={relatedArticles}
                     country={country}
@@ -122,7 +127,7 @@ export function ListicleArticleLayout({
                       ends: phones have no shelf, so nothing here is on
                       offer. It keeps its height so the map ends where the
                       article does. */}
-                  <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-10 bg-background" />
+                  <div aria-hidden="true" className="maps-locked-shelf-cover pointer-events-none absolute inset-0 z-10 bg-background" />
                 </div>
               ) : (
                 <RelatedListicleShelf
@@ -144,6 +149,7 @@ export function ListicleArticleLayout({
           />
         ) : null}
         {showMapSheet ? <ListicleMapSheet guides={guides} /> : null}
+        {mapsEnabled && points.length > 0 ? mapSheetFrame : null}
       </div>
     </>
   )

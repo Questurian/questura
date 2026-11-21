@@ -47,7 +47,7 @@ function MagazineHeroCard({ article, imagePriority }: MagazineHeroCardProps): JS
 
   return (
     <section className="city-article-card city-five-hero-card">
-      <div className="city-article-image-shell city-five-hero-image relative aspect-square overflow-hidden bg-[#d7dcde]">
+      <div className="city-article-image-shell city-five-hero-image relative aspect-square overflow-hidden bg-photo-placeholder">
         {imageUrl ? (
           <PublicImage
             src={imageUrl}

@@ -51,7 +51,7 @@ function CarouselArticleCard({ article, isPriority, isLast }: CarouselArticleCar
 
   const inner = (
     <>
-      <div className="relative aspect-square overflow-hidden bg-[#d7dcde] 768:aspect-[3/2]">
+      <div className="relative aspect-square overflow-hidden bg-photo-placeholder 768:aspect-[3/2]">
         {imageUrl ? (
           <PhoneSquareImage
             article={article}

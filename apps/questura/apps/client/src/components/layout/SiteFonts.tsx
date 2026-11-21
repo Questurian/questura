@@ -11,10 +11,14 @@ import { DM_Sans, Roboto } from "next/font/google";
  * preloaded only on the routes that mount this wrapper.
  */
 const dmSans = DM_Sans({ variable: "--font-dm-sans", subsets: ["latin"] });
+// Roboto draws one thing, the Google sign-in button inside the sign-in
+// modal. Preloading it put a font no first screen uses ahead of the page's
+// photo and its real fonts, so it loads when that button is drawn instead.
 const roboto = Roboto({
   variable: "--font-roboto",
   weight: ["400", "500", "700"],
   subsets: ["latin"],
+  preload: false,
 });
 
 /*

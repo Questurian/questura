@@ -80,7 +80,7 @@ function ArticleThumb({
   const imageUrl = article.imageUrlSquare ?? article.imageUrl ?? null
 
   return (
-    <div className={`relative aspect-square shrink-0 overflow-hidden bg-[#d7dcde] ${className}`}>
+    <div className={`relative aspect-square shrink-0 overflow-hidden bg-photo-placeholder ${className}`}>
       {imageUrl ? (
         <PublicImage
           src={imageUrl}

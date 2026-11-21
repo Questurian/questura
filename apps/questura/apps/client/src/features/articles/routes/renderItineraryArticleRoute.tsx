@@ -14,6 +14,7 @@ import { fetchRelatedMapsArticles } from '@/features/articles/lib/fetchRelatedMa
 import { ItineraryArticleLayout } from '@/features/articles/layouts/ItineraryArticleLayout'
 import { isListicleItineraryArticle } from '@/features/articles/types/itineraryListicle'
 import type { ArticleScope } from '@/features/articles/lib/articleScope'
+import { ListicleMapSheetFrame } from '@/features/articles/components/ListicleMapSheetFrame'
 
 type RenderItineraryArticleRouteParams = {
   scope: Extract<ArticleScope, { kind: 'city' }>
@@ -64,6 +65,7 @@ export async function renderItineraryArticleRoute({
         city={scope.city}
         gate={gate}
         paywallNotice={locked && gate ? <PaywallNotice gate={gate} returnTo={path} fade={false} /> : null}
+        mapSheetFrame={<ListicleMapSheetFrame returnTo={path} />}
       />
     </>
   )
