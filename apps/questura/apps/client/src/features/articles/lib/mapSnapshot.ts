@@ -75,6 +75,12 @@ export function layoutSnapshot(
    * put the places' middle there. Without it the picture is pinned to the top.
    */
   focus?: { top: number; bottom: number },
+  /**
+   * How far down the picture may slide to reach the focus, leaving paper above
+   * it. Only for a box whose top is covered by something opaque that wide (the
+   * phone's join bar). Without it the picture never leaves the top edge.
+   */
+  slackTop = 0,
 ): SnapshotLayout | null {
   if (box.width <= 0 || box.height <= 0 || points.length === 0) return null
 
@@ -104,7 +110,7 @@ export function layoutSnapshot(
     const ys = inFrame.map(({ fy }) => fy * scale)
     const placesMiddle = (Math.min(...ys) + Math.max(...ys)) / 2
     const wanted = (focus.top + focus.bottom) / 2 - placesMiddle
-    top = Math.min(0, Math.max(box.height - height, wanted))
+    top = Math.min(Math.max(0, slackTop), Math.max(box.height - height, wanted))
   }
 
   return {
