@@ -62,13 +62,18 @@ test('global-error hands the error to the reporter (item 3), not to the page', (
 async function loadPage() {
   const ts = require('typescript')
   const { outputText } = ts.transpileModule(
-    source.replace(
-      /import \{ reportBrowserError \} from '@\/lib\/observability\/reportBrowserError';?/,
-      'const reportBrowserError = (...args) => { globalThis.__reported = args };',
-    ),
+    source
+      .replace(
+        /import \{ reportBrowserError \} from '@\/lib\/observability\/reportBrowserError';?/,
+        'const reportBrowserError = (...args) => { globalThis.__reported = args };',
+      )
+      .replace(
+        /import \{ reloadForStaleBuild, shouldReloadForStaleBuild \} from '@\/lib\/release\/staleBuild';?/,
+        'const shouldReloadForStaleBuild = () => Boolean(globalThis.__staleBuild); const reloadForStaleBuild = () => {};',
+      ),
     { compilerOptions: { jsx: ts.JsxEmit.ReactJSX, module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 } },
   )
-  assert.doesNotMatch(outputText, /@\/lib\/observability/, 'the reporter import was not stubbed')
+  assert.doesNotMatch(outputText, /@\/lib\/(observability|release)/, 'an import was not stubbed')
   const outdir = join(CLIENT, 'node_modules', '.cache', 'global-error-test')
   mkdirSync(outdir, { recursive: true })
   const outfile = join(outdir, `global-error-${process.pid}.mjs`)
@@ -94,4 +99,18 @@ test('global-error renders a plain page with a way back, a reference and no erro
 
   const withoutDigest = renderToStaticMarkup(createElement(GlobalError, { error: new Error('x'), reset: () => undefined }))
   assert.doesNotMatch(withoutDigest, /Reference/)
+})
+
+test('global-error shows only the warm ground while a page from the previous deploy reloads', { skip }, async () => {
+  const GlobalError = await loadPage()
+  const { createElement } = require('react')
+  const { renderToStaticMarkup } = require('react-dom/server')
+  globalThis.__staleBuild = true
+  try {
+    const html = renderToStaticMarkup(createElement(GlobalError, { error: new Error('Loading CSS chunk 12 failed.'), reset: () => undefined }))
+    assert.match(html, /^<html lang="en"/)
+    assert.doesNotMatch(html, /Something went wrong/)
+  } finally {
+    delete globalThis.__staleBuild
+  }
 })

@@ -1,14 +1,24 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { reportBrowserError } from '@/lib/observability/reportBrowserError';
+import { reloadForStaleBuild, shouldReloadForStaleBuild } from '@/lib/release/staleBuild';
 
-/** Next 16 can recover an on-demand server-render failure through this boundary. */
+/**
+ * Next 16 can recover an on-demand server-render failure through this boundary.
+ * A page left over from the previous deploy reloads instead (lib/release/staleBuild.ts).
+ */
 export default function Error({ error, retry }: { error: Error & { digest?: string }; retry: () => void }) {
+  const reloading = useMemo(() => shouldReloadForStaleBuild(error), [error]);
+
   useEffect(() => {
     if (process.env.NODE_ENV === 'development') console.error('Application error:', error);
     reportBrowserError(error, 'error');
-  }, [error]);
+    if (reloading) reloadForStaleBuild();
+  }, [error, reloading]);
+
+  // Nothing to read for the instant before the fresh page arrives.
+  if (reloading) return null;
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-background px-5 text-foreground">
