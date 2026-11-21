@@ -38,11 +38,25 @@ import {
  * is declared so the map is fully described by its mode.
  */
 const MODE_ACTIVE_ZOOM: Record<ListicleMapMode, number> = {
-  list: 15.5,
-  split: 15.5,
-  map: 15.25,
+  list: 16,
+  split: 16,
+  map: 15.75,
 }
+/**
+ * A stop crowded by a neighbour a few doors down steps in past its mode's
+ * zoom until the two dots part (`activeZoomFor`), up to here: still a block,
+ * not a single building.
+ */
+const MOBILE_MAX_ACTIVE_ZOOM = 17
 const MOBILE_FIT_PADDING = 28
+/**
+ * The overview fits the dots almost exactly. The split slice is a short strip,
+ * so the desktop's 1.5-level step back left a 5 km guide as one clump over
+ * the whole Lima coast (owner, 2026-11-21).
+ */
+const MOBILE_OVERVIEW_ZOOM_OUT = 0.2
+/** Below the desktop's 13px, so a dense street still reads as separate dots. */
+const MOBILE_DOT_SIZE = 10
 
 /**
  * Reads the small and large viewport heights (`svh` / `lvh`). Unlike
@@ -308,6 +322,9 @@ export function ListicleMapSheet({
               coveredBottomPx={coveredBottom}
               paused={mode === 'list'}
               activeZoom={MODE_ACTIVE_ZOOM[mode]}
+              maxActiveZoom={MOBILE_MAX_ACTIVE_ZOOM}
+              overviewZoomOut={MOBILE_OVERVIEW_ZOOM_OUT}
+              dotSize={MOBILE_DOT_SIZE}
               fitPadding={MOBILE_FIT_PADDING}
               guides={guides}
               // Split keeps the article on screen with its day tabs and its
@@ -318,6 +335,25 @@ export function ListicleMapSheet({
             />
           ) : null}
         </div>
+        {/* Where you are, small, in the corner across from More guides
+            (owner, 2026-11-21: over the switch it took a whole row of map). */}
+        {mode === 'split' && activePoint ? (
+          <button
+            type="button"
+            onClick={handleReturnToEntry}
+            aria-label={`Back to ${activePoint.title} in the guide`}
+            className="absolute left-3 top-3 z-10 flex h-8 max-w-[calc(100%-11rem)] items-center gap-1.5 rounded-full border border-foreground/15 bg-paper/95 pl-2 pr-2.5 shadow-[0_4px_14px_rgba(26,26,26,0.16)] before:absolute before:-inset-x-1 before:-inset-y-1.5 before:content-['']"
+          >
+            <MapPin className="size-[13px] shrink-0 text-accent" aria-hidden="true" />
+            <span className="min-w-0 truncate text-[12px] font-semibold leading-none text-foreground">
+              {activePoint.title}
+            </span>
+            <span className="shrink-0 text-[10px] font-bold uppercase leading-none tracking-[0.1em] text-foreground/45">
+              {activeIndex + 1}/{points.length}
+            </span>
+            <CornerUpLeft className="size-3 shrink-0 text-foreground/45" aria-hidden="true" />
+          </button>
+        ) : null}
       </div>
 
       <div
@@ -337,26 +373,6 @@ export function ListicleMapSheet({
             />
           ) : null}
         </div>
-
-        {mode === 'split' && activePoint ? (
-          <button
-            type="button"
-            onClick={handleReturnToEntry}
-            className="pointer-events-auto flex max-w-full items-center gap-2 rounded-full border border-foreground/15 bg-paper px-3.5 py-2 shadow-[0_6px_20px_rgba(26,26,26,0.18)]"
-          >
-            <MapPin className="size-4 shrink-0 text-accent" aria-hidden="true" />
-            <span className="min-w-0 truncate text-[13px] font-semibold leading-none text-foreground">
-              {activePoint.title}
-            </span>
-            <span className="shrink-0 text-[11px] font-bold uppercase leading-none tracking-[0.12em] text-foreground/45">
-              {activeIndex + 1}/{points.length}
-            </span>
-            <CornerUpLeft
-              className="size-3.5 shrink-0 text-foreground/45"
-              aria-hidden="true"
-            />
-          </button>
-        ) : null}
 
         <ListicleMapSwitch mode={mode} onSelect={setMode} />
       </div>

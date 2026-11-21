@@ -37,8 +37,8 @@
 export const LISTICLE_MAP_PILL_CLEARANCE = 72
 
 /**
- * The floating stack at the bottom of the screen (switch, active-stop chip,
- * venue card). Menus that drop down over the map stop above it.
+ * The floating stack at the bottom of the screen (switch and the
+ * takeover's venue card). Menus that drop down over the map stop above it.
  */
 export const LISTICLE_MAP_CONTROLS_SELECTOR = '[data-listicle-map-controls]'
 

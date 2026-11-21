@@ -13,7 +13,9 @@ import {
   type ListicleMapPoint,
 } from '@/features/articles/components/ListicleMapSync'
 import {
+  activeZoomFor,
   cameraForPoints,
+  framedPoints,
   haversineMeters,
   shiftCenterSouthByPixels,
   type LatLng,
@@ -101,6 +103,13 @@ const PIN_WIDTH = 29
 const PIN_HEIGHT = 37
 const DOT_SIZE = 13
 /**
+ * Neighbours this close share a door or a corner: zooming in to split them
+ * would show one block and nothing else.
+ */
+const ACTIVE_IGNORE_WITHIN_METERS = 12
+/** How far the nearest other stop must sit from the active one, centre to centre. */
+const ACTIVE_MIN_SEPARATION_PX = 26
+/**
  * Broad-shouldered teardrop: head circle (centre 12,12.6, r 10) with tail
  * edges tangent to it, so the shoulders meet the tail without a crease and
  * the shape stays stout rather than balloon-on-a-string. The tail closes to
@@ -176,8 +185,8 @@ function pinSvg(kind: ListicleMapPoint['kind']): SVGSVGElement {
 }
 
 /** Small solid dot centred on the coordinate, for stops that aren't active. */
-function dotSvg(): SVGSVGElement {
-  const svg = svgRoot('0 0 12 12', DOT_SIZE, DOT_SIZE)
+function dotSvg(size: number): SVGSVGElement {
+  const svg = svgRoot('0 0 12 12', size, size)
   svg.style.filter = DOT_SHADOW
 
   const circle = document.createElementNS(SVG_NS, 'circle')
@@ -204,7 +213,7 @@ type MarkerContent = {
  * points skip the dot and show a scaled-down house pin, swelling to full size
  * when active.
  */
-function createMarkerContent(point: ListicleMapPoint): MarkerContent {
+function createMarkerContent(point: ListicleMapPoint, dotSize: number): MarkerContent {
   const isStay = point.kind === 'stay'
 
   // AdvancedMarkerElement anchors content bottom-centre: the pin's tip and the
@@ -221,7 +230,7 @@ function createMarkerContent(point: ListicleMapPoint): MarkerContent {
   pin.style.transformOrigin = 'bottom center'
   pin.style.transition = SWELL
 
-  const dot = dotSvg()
+  const dot = dotSvg(dotSize)
   dot.style.position = 'absolute'
   dot.style.left = '50%'
   dot.style.bottom = '0'
@@ -264,6 +273,20 @@ export type MapPanelProps = {
   paused?: boolean
   /** Small viewports need a wider view to keep a stop in context. */
   activeZoom?: number
+  /**
+   * The closest the camera may step in on the active stop when a neighbour
+   * crowds it (`activeZoomFor`). Defaults to `activeZoom`: no stepping in.
+   */
+  maxActiveZoom?: number
+  /**
+   * Zoom levels the overview backs off from the exact fit. The desktop
+   * column is tall and keeps air around the pins; the phone's split slice is
+   * a strip, and backing off there shrank a whole guide into one clump over
+   * the Lima coast (owner, 2026-11-21).
+   */
+  overviewZoomOut?: number
+  /** Idle stop dot diameter in CSS pixels; the phone draws them smaller. */
+  dotSize?: number
   fitPadding?: number
   /** Related guides for the on-map menu; omitted when there are none. */
   guides?: ListicleMapGuides
@@ -288,6 +311,9 @@ export default function GoogleMapPanel({
   viewportInsetBottomPx = 0,
   paused = false,
   activeZoom = ACTIVE_ZOOM,
+  maxActiveZoom,
+  overviewZoomOut = OVERVIEW_ZOOM_OUT,
+  dotSize = DOT_SIZE,
   fitPadding = FIT_PADDING,
   guides,
   showArticleControls = true,
@@ -365,7 +391,7 @@ export default function GoogleMapPanel({
     markersById.current.clear()
 
     for (const point of points) {
-      const content = createMarkerContent(point)
+      const content = createMarkerContent(point, dotSize)
       const marker = new lib.AdvancedMarkerElement({
         map,
         position: { lat: point.lat, lng: point.lng },
@@ -378,7 +404,7 @@ export default function GoogleMapPanel({
       }
       markersById.current.set(point.id, { marker, content })
     }
-  }, [ready, points, scrollToEntry])
+  }, [ready, points, scrollToEntry, dotSize])
 
   useEffect(() => {
     const map = mapInstance.current
@@ -403,16 +429,24 @@ export default function GoogleMapPanel({
     const active = locked
       ? undefined
       : points.find((point) => point.id === activeId)
+    const stopZoom = active
+      ? activeZoomFor(active, points, {
+          baseZoom: activeZoom,
+          maxZoom: maxActiveZoom ?? activeZoom,
+          minSeparationPx: ACTIVE_MIN_SEPARATION_PX,
+          ignoreWithinMeters: ACTIVE_IGNORE_WITHIN_METERS,
+        })
+      : activeZoom
     const camera = active
       ? {
           center: shiftCenterSouthByPixels(
             { lat: active.lat, lng: active.lng },
-            activeZoom,
+            stopZoom,
             viewportInsetBottomPx / 2,
           ),
-          zoom: activeZoom,
+          zoom: stopZoom,
         }
-      : cameraForPoints(points, {
+      : cameraForPoints(framedPoints(points), {
           width: mapRef.current.clientWidth,
           height: mapRef.current.clientHeight,
           insetBottom: viewportInsetBottomPx,
@@ -420,7 +454,7 @@ export default function GoogleMapPanel({
           maxZoom: MAX_FIT_ZOOM,
           zoomOut: points.every((point) => point.inert)
             ? INERT_OVERVIEW_ZOOM_OUT
-            : OVERVIEW_ZOOM_OUT,
+            : overviewZoomOut,
           singlePointZoom: SINGLE_POINT_OVERVIEW_ZOOM,
           fallback: { center: LIMA_CENTER, zoom: DEFAULT_ZOOM },
         })
@@ -432,7 +466,7 @@ export default function GoogleMapPanel({
       map.moveCamera(camera)
     }
     hasFramedPoints.current = true
-  }, [ready, activeId, points, locked, paused, viewportInsetBottomPx, activeZoom, fitPadding])
+  }, [ready, activeId, points, locked, paused, viewportInsetBottomPx, activeZoom, maxActiveZoom, overviewZoomOut, fitPadding])
 
   useEffect(() => {
     if (!ready) return
