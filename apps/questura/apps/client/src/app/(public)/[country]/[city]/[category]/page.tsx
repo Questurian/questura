@@ -1,4 +1,6 @@
 import type { Metadata } from 'next'
+import { LIMA_HREF } from '@/lib/routing/peruLaunch'
+import { SITE_SHARE_IMAGE } from '@/lib/seo/siteShareCard'
 import {
   fetchNeighborhoodHomepage,
 } from '@/features/CityDashboard'
@@ -46,8 +48,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description: `Your Questurian guide to ${label}.`,
       alternates: { canonical: `/${country}/${city}/${category}` },
       openGraph: {
+        type: 'website',
+        siteName: 'Questurian',
         title: `${label} — Questurian`,
         url: `/${country}/${city}/${category}`,
+        ...(`/${country}/${city}` === LIMA_HREF ? { images: [SITE_SHARE_IMAGE] } : {}),
       },
     }
   }
