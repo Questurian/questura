@@ -97,9 +97,18 @@ function JoinCall({ compact, href }: { compact: boolean; href: string }) {
  * related-guides menu is not offered here: a non-member's guides are locked.
  *
  * `insetBottomPx` is how much of the map the phone sheet hides at the bottom;
- * the map and its call to join stay inside what is on screen.
+ * the places and the call to join stay inside what is clear of it.
+ * `coveredBottomPx` is the on-screen part of that inset, under the phone's
+ * List / Split / Map switch: the picture runs on under the switch to the
+ * screen's edge, so the sheet never ends in a band of bare paper.
  */
-export function MapTeaser({ insetBottomPx = 0 }: { insetBottomPx?: number }): JSX.Element {
+export function MapTeaser({
+  insetBottomPx = 0,
+  coveredBottomPx = 0,
+}: {
+  insetBottomPx?: number
+  coveredBottomPx?: number
+}): JSX.Element {
   const { points, scrollToEntry, teaserKey, teaser } = useListicleMapSync()
   const pathname = usePathname()
   const boxRef = useRef<HTMLDivElement>(null)
@@ -116,6 +125,8 @@ export function MapTeaser({ insetBottomPx = 0 }: { insetBottomPx?: number }): JS
   }, [])
 
   const visibleHeight = Math.max(0, size.height - insetBottomPx)
+  // On screen, the switch's strip included: the picture fills this.
+  const screenHeight = Math.max(0, size.height - insetBottomPx + Math.min(coveredBottomPx, insetBottomPx))
   const compact = visibleHeight > 0 && visibleHeight < COMPACT_BELOW_PX
   const href = `/join?returnTo=${encodeURIComponent(pathname || '/')}`
 
@@ -142,8 +153,10 @@ export function MapTeaser({ insetBottomPx = 0 }: { insetBottomPx?: number }): JS
   // the guide's places have moved off it. On a phone's short split view the
   // join bar takes the bottom, and in a locked desktop column the join card
   // does, so the picture slides to keep the places in the strip above it.
+  // The picture covers everything on screen, under the switch too; the places
+  // still aim at the strip clear of it.
   const view = useMemo(() => {
-    const box = { width: size.width, height: visibleHeight }
+    const box = { width: size.width, height: screenHeight }
     for (const entry of entries) for (const picture of picturesForBox(entry, box)) {
       const focus = compact
         ? { top: 16, bottom: visibleHeight - JOIN_BAR_PX - 8 }
@@ -154,7 +167,7 @@ export function MapTeaser({ insetBottomPx = 0 }: { insetBottomPx?: number }): JS
       if (layout) return { snapshot: picture, layout }
     }
     return null
-  }, [entries, teaserPoints, size.width, visibleHeight, compact])
+  }, [entries, teaserPoints, size.width, screenHeight, visibleHeight, compact])
   const snapshot = view?.snapshot
   const snapshotLayout = view?.layout ?? null
   const drawing = useMemo(
@@ -177,6 +190,26 @@ export function MapTeaser({ insetBottomPx = 0 }: { insetBottomPx?: number }): JS
 
   return (
     <div ref={boxRef} className="relative h-full w-full overflow-hidden bg-paper" style={snapshotLayout ? undefined : PAPER_GRID}>
+      {snapshot && snapshotLayout ? (
+        <div aria-hidden="true" className="absolute inset-x-0 top-0 overflow-hidden" style={{ height: screenHeight > 0 ? screenHeight : '100%' }}>
+          {/* eslint-disable-next-line @next/next/no-img-element -- a fixed, pre-rendered picture with its own two sizes; the markers are laid over it in CSS px */}
+          <img
+            src={snapshot.srcSmall}
+            srcSet={`${snapshot.srcSmall} ${snapshot.width}w, ${snapshot.src} ${snapshot.width * 2}w`}
+            sizes={`${Math.round(snapshotLayout.image.width)}px`}
+            alt=""
+            aria-hidden="true"
+            decoding="async"
+            className="absolute max-w-none select-none"
+            style={{
+              left: snapshotLayout.image.left,
+              top: snapshotLayout.image.top,
+              width: snapshotLayout.image.width,
+              height: snapshotLayout.image.height,
+            }}
+          />
+        </div>
+      ) : null}
       <section
         aria-label="Members' map"
         className="absolute inset-x-0 top-0 overflow-hidden"
@@ -184,22 +217,6 @@ export function MapTeaser({ insetBottomPx = 0 }: { insetBottomPx?: number }): JS
       >
         {snapshot && snapshotLayout ? (
           <>
-            {/* eslint-disable-next-line @next/next/no-img-element -- a fixed, pre-rendered picture with its own two sizes; the markers are laid over it in CSS px */}
-            <img
-              src={snapshot.srcSmall}
-              srcSet={`${snapshot.srcSmall} ${snapshot.width}w, ${snapshot.src} ${snapshot.width * 2}w`}
-              sizes={`${Math.round(snapshotLayout.image.width)}px`}
-              alt=""
-              aria-hidden="true"
-              decoding="async"
-              className="absolute max-w-none select-none"
-              style={{
-                left: snapshotLayout.image.left,
-                top: snapshotLayout.image.top,
-                width: snapshotLayout.image.width,
-                height: snapshotLayout.image.height,
-              }}
-            />
             {snapshotLayout.pins.map((pin) =>
               pin.free ? (
                 freePin(pin.id, pin.number, pin.x, pin.y)

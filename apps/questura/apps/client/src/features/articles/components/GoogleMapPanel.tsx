@@ -253,6 +253,13 @@ export type MapPanelProps = {
    * rather than the div's own center. Desktop leaves this at 0.
    */
   viewportInsetBottomPx?: number
+  /**
+   * Of `viewportInsetBottomPx`, the part that is on screen but under the
+   * phone's floating controls. The locked teaser draws its picture under them,
+   * flush to the screen's edge, and keeps its places and join bar above them.
+   * The Google map fills its div anyway, so it ignores this.
+   */
+  coveredBottomPx?: number
   /** Hold the camera still while the map is out of sight (sheet collapsed). */
   paused?: boolean
   /** Small viewports need a wider view to keep a stop in context. */
