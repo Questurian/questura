@@ -1,32 +1,12 @@
 'use client'
 
 import type { JSX } from 'react'
+import { BedDouble } from 'lucide-react'
 import {
-  Baby,
-  Bath,
-  BedDouble,
-  Building2,
-  Car,
-  CircleDollarSign,
-  Coffee,
-  Dumbbell,
-  Footprints,
-  Laptop,
-  LogIn,
-  LogOut,
-  Mail,
-  MapPin,
-  Snowflake,
-  Sparkles,
-  Sunset,
-  UserPlus,
-  UtensilsCrossed,
-  Waves,
-  Wifi,
-} from 'lucide-react'
-import {
+  DetailsRows,
+  DetailsSection,
   ItineraryDetailsModal,
-  type ItineraryDetailRow,
+  type DetailsItem,
 } from '@/features/articles/components/ItineraryDetailsModal'
 import { formatPriceTier, isHttpUrl } from '@/features/articles/lib/listicleVenueFormatters'
 import type { GridCell } from '@/features/articles/components/ListicleVenueInfoGrid'
@@ -83,66 +63,70 @@ function formatClockTime(raw: string): string {
 const accentClass =
   'maps-listicle-info-icon text-[var(--maps-listicle-accent)] shrink-0 size-[15px] 480:size-[16px] sm:size-[17px]'
 
-function buildAmenityRows(item: ListicleVenue): ItineraryDetailRow[] {
+type StaySection = { label: string; items: DetailsItem[] }
+
+/** Option A (owner, 2026-11-20): three labelled groups of label/value rows, no icons. */
+function buildStaySections(item: ListicleVenue): StaySection[] {
   const raw = item as unknown as Record<string, unknown>
   const core = group(item, 'core')
   const theStay = group(item, 'theStay')
   const theExperience = group(item, 'theExperience')
   const theDetails = group(item, 'theDetails')
 
-  const rows: ItineraryDetailRow[] = []
-  const push = (key: string, icon: JSX.Element, label: string, value: string) => {
-    if (value) rows.push({ key, icon, label, value })
-  }
-  const pushBool = (key: string, icon: JSX.Element, label: string, value: unknown) => {
-    const b = bool(value)
-    if (b !== null) push(key, icon, label, b ? 'Yes' : 'No')
-  }
-  const pushList = (key: string, icon: JSX.Element, label: string, value: unknown) => {
-    const values = list(value)
-    if (values.length > 0) push(key, icon, label, values.map(titleCase).join(', '))
+  const section = (label: string) => {
+    const items: DetailsItem[] = []
+    const add = (key: string, name: string, value: string) => {
+      if (value) items.push({ key, label: name, value })
+    }
+    const addBool = (key: string, name: string, value: unknown) => {
+      const b = bool(value)
+      if (b !== null) add(key, name, b ? 'Yes' : 'No')
+    }
+    const addList = (key: string, name: string, value: unknown) => {
+      add(key, name, list(value).map(titleCase).join(', '))
+    }
+    return { label, items, add, addBool, addList }
   }
 
-  push('price', <CircleDollarSign className={accentClass} strokeWidth={1.75} aria-hidden />, 'Price', formatPriceTier(core.price))
+  const basics = section('The basics')
   const stayType = text(core.type) || text(item.type)
-  if (stayType) push('stay-type', <Building2 className={accentClass} strokeWidth={1.75} aria-hidden />, 'Stay type', titleCase(stayType))
-  push('district', <MapPin className={accentClass} strokeWidth={1.75} aria-hidden />, 'Neighborhood', text(core.district))
-
+  basics.add('stay-type', 'Stay type', stayType ? titleCase(stayType) : '')
+  basics.add('price', 'Price', formatPriceTier(core.price))
+  basics.add('district', 'Neighborhood', text(core.district))
   const checkIn = text(theDetails.checkInTime)
-  if (checkIn) push('check-in', <LogIn className={accentClass} strokeWidth={1.75} aria-hidden />, 'Check-in', formatClockTime(checkIn))
+  basics.add('check-in', 'Check-in', checkIn ? formatClockTime(checkIn) : '')
   const checkOut = text(theDetails.checkOutTime)
-  if (checkOut) push('check-out', <LogOut className={accentClass} strokeWidth={1.75} aria-hidden />, 'Check-out', formatClockTime(checkOut))
+  basics.add('check-out', 'Check-out', checkOut ? formatClockTime(checkOut) : '')
+  basics.add('email', 'Email', text(raw.email))
 
-  pushBool('wifi', <Wifi className={accentClass} strokeWidth={1.75} aria-hidden />, 'Wi-Fi', theStay.wifi)
-  pushBool('ac', <Snowflake className={accentClass} strokeWidth={1.75} aria-hidden />, 'Air conditioning', theStay.ac)
-  pushBool('breakfast', <Coffee className={accentClass} strokeWidth={1.75} aria-hidden />, 'Breakfast served', theStay.breakfastServed)
-  pushBool('kids', <Baby className={accentClass} strokeWidth={1.75} aria-hidden />, 'Kid-friendly', theStay.kidFriendly)
-  pushBool('extra-guest', <UserPlus className={accentClass} strokeWidth={1.75} aria-hidden />, 'Extra guest fee', theStay.extraGuestFee)
-  pushList('parking', <Car className={accentClass} strokeWidth={1.75} aria-hidden />, 'Parking', theStay.parking)
+  const stay = section('The stay')
+  stay.addBool('wifi', 'Wi-Fi', theStay.wifi)
+  stay.addBool('ac', 'Air conditioning', theStay.ac)
+  stay.addBool('breakfast', 'Breakfast', theStay.breakfastServed)
+  stay.addBool('kids', 'Kid-friendly', theStay.kidFriendly)
+  stay.addBool('extra-guest', 'Extra guest fee', theStay.extraGuestFee)
+  stay.addList('parking', 'Parking', theStay.parking)
 
-  pushList('vibe', <Sparkles className={accentClass} strokeWidth={1.75} aria-hidden />, 'Vibe', theExperience.vibe)
-  pushBool('restaurant', <UtensilsCrossed className={accentClass} strokeWidth={1.75} aria-hidden />, 'Restaurant', theExperience.restaurant)
-  pushList('pool', <Waves className={accentClass} strokeWidth={1.75} aria-hidden />, 'Pool', theExperience.pool)
-  pushBool('rooftop', <Sunset className={accentClass} strokeWidth={1.75} aria-hidden />, 'Rooftop lounge', theExperience.rooftopLounge)
-  pushList('jacuzzi', <Bath className={accentClass} strokeWidth={1.75} aria-hidden />, 'Jacuzzi', theExperience.jacuzzi)
+  const experience = section('The experience')
+  experience.addList('vibe', 'Vibe', theExperience.vibe)
+  experience.addBool('restaurant', 'Restaurant', theExperience.restaurant)
+  experience.addList('pool', 'Pool', theExperience.pool)
+  experience.addBool('rooftop', 'Rooftop lounge', theExperience.rooftopLounge)
+  experience.addList('jacuzzi', 'Jacuzzi', theExperience.jacuzzi)
   const gym = text(theExperience.gym)
-  if (gym && gym !== 'None') push('gym', <Dumbbell className={accentClass} strokeWidth={1.75} aria-hidden />, 'Gym', gym)
+  experience.add('gym', 'Gym', gym && gym !== 'None' ? gym : '')
   const workspace = text(theExperience.workspace)
-  if (workspace && workspace !== 'None') push('workspace', <Laptop className={accentClass} strokeWidth={1.75} aria-hidden />, 'Workspace', workspace)
+  experience.add('workspace', 'Workspace', workspace && workspace !== 'None' ? workspace : '')
+  experience.add('walkability', 'Getting around', text(theDetails.walkability))
 
-  const walkability = text(theDetails.walkability)
-  if (walkability) push('walkability', <Footprints className={accentClass} strokeWidth={1.75} aria-hidden />, 'Getting around', walkability)
-  const email = text(raw.email)
-  if (email) push('email', <Mail className={accentClass} strokeWidth={1.75} aria-hidden />, 'Email', email)
-
-  return rows
+  return [basics, stay, experience]
+    .filter((s) => s.items.length > 0)
+    .map(({ label, items }) => ({ label, items }))
 }
 
-function buildFinePrint(item: ListicleVenue): string[] {
+function buildFooter(item: ListicleVenue): string {
   const raw = item as unknown as Record<string, unknown>
   const locationRef = group(item, 'locationRef')
-
-  const parts: string[] = []
   const place = [
     text(locationRef.neighborhoodName),
     text(locationRef.cityName),
@@ -150,15 +134,10 @@ function buildFinePrint(item: ListicleVenue): string[] {
   ]
     .filter(Boolean)
     .join(', ')
-  if (place) parts.push(place)
-  const timezone = text(raw.ianaTimeId)
-  if (timezone) parts.push(timezone)
-  if (typeof raw.latitude === 'number' && typeof raw.longitude === 'number') {
-    parts.push(`${raw.latitude.toFixed(4)}, ${raw.longitude.toFixed(4)}`)
-  }
   const source = text(raw.sourceName)
-  if (source && source !== item.title) parts.push(`Source: ${source}`)
-  return parts
+  return [place, source && source !== item.title ? `Source: ${source}` : '']
+    .filter(Boolean)
+    .join(' · ')
 }
 
 /**
@@ -166,20 +145,33 @@ function buildFinePrint(item: ListicleVenue): string[] {
  * Null when the accommodation has no profile data to show.
  */
 export function buildStayAmenitiesCell(item: ListicleVenue): GridCell | null {
-  const rows = buildAmenityRows(item)
-  const finePrint = buildFinePrint(item)
-  if (rows.length === 0 && finePrint.length === 0) return null
+  const sections = buildStaySections(item)
+  if (sections.length === 0) return null
+
+  const core = group(item, 'core')
+  const stayType = text(core.type) || text(item.type)
+  const subtitle = [stayType ? titleCase(stayType) : '', text(core.district)]
+    .filter(Boolean)
+    .join(' · ')
 
   return {
     key: 'stay-amenities',
     icon: <BedDouble className={accentClass} strokeWidth={1.75} aria-hidden />,
     node: (
       <ItineraryDetailsModal
+        kicker="Stay details"
         venueTitle={item.title}
-        heading="Amenities"
-        rows={rows}
-        finePrint={finePrint}
-      />
+        subtitle={subtitle}
+        footer={buildFooter(item)}
+      >
+        {() =>
+          sections.map((s) => (
+            <DetailsSection key={s.label} label={s.label}>
+              <DetailsRows items={s.items} />
+            </DetailsSection>
+          ))
+        }
+      </ItineraryDetailsModal>
     ),
   }
 }
