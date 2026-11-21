@@ -34,7 +34,7 @@ test('the homepage carries a full link preview with the site card', () => {
   assert.match(page, /twitter: \{ card: 'summary_large_image'[\s\S]*images: \[SITE_SHARE_IMAGE\]/)
 })
 
-test('the root layout sets no share image, so the Lima card never lands on a page that is not Lima', () => {
+test('the root layout sets no share image: pages opt in to the site card', () => {
   const layout = readFileSync(client('src/app/layout.tsx'), 'utf8')
   assert.match(layout, /openGraph: \{ type: "website", siteName: "Questurian"/)
   assert.doesNotMatch(layout, /SITE_SHARE_IMAGE|images:/)
