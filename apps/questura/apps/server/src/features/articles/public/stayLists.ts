@@ -5,6 +5,7 @@ import {
   featuredMediaSetId,
   resolveWideCardImages,
   toPublicHotelCard,
+  type PublicHotelCard,
   type PublicHotelCardImage,
 } from './hotelCards'
 
@@ -17,6 +18,8 @@ export type PublicStay = {
   id: number
   title: string
   url: string | null
+  urlKind: PublicHotelCard['urlKind']
+  highlights: PublicHotelCard['highlights']
   /** "Hotel", "Boutique Hotel", "Airbnb"... */
   type: string | null
   district: string | null
@@ -48,6 +51,8 @@ function toStay(entry: unknown): { stay: PublicStay; mediaSetId: number | null }
         id: airbnb.id,
         title: airbnb.title,
         url: airbnb.listingUrl,
+        urlKind: airbnb.listingUrl ? 'booking' : null,
+        highlights: [],
         type: 'Airbnb',
         district: airbnb.area,
         price: null,

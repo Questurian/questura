@@ -44,7 +44,8 @@ function neighborhoodFromPipeKey(value: unknown): string | null {
     .join(' ')
 }
 
-function hotelLocation(doc: AccommodationDocLike): string | null {
+/** Shared with article hotel cards (`articles/public/hotelCards.ts`). */
+export function hotelLocation(doc: AccommodationDocLike): string | null {
   const district = text(group(doc, 'core').district)
   if (district) return district
   if (isRecord(doc.locationRef)) {
@@ -56,7 +57,11 @@ function hotelLocation(doc: AccommodationDocLike): string | null {
   return neighborhoodFromPipeKey(key)
 }
 
-function hotelHighlights(doc: AccommodationDocLike): ReferenceCardHighlight[] {
+/**
+ * Up to three things worth knowing about a stay, each with an icon key. The
+ * homepage hotel grid and article hotel carousels draw the same rows.
+ */
+export function hotelHighlights(doc: AccommodationDocLike): ReferenceCardHighlight[] {
   const theStay = group(doc, 'theStay')
   const theExperience = group(doc, 'theExperience')
   const theDetails = group(doc, 'theDetails')
