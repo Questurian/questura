@@ -49,7 +49,7 @@ function PinMark({ className }: { className: string }) {
 function JoinCall({ compact, href }: { compact: boolean; href: string }) {
   if (compact) {
     return (
-      <div className="absolute inset-x-2.5 bottom-2.5 z-[4] flex items-center gap-2.5 border border-foreground/10 bg-background px-3.5 py-2.5 text-foreground shadow-[0_12px_30px_-18px_rgb(26_26_26/0.5)]">
+      <div className="absolute inset-x-2.5 bottom-2.5 z-[4] flex items-center gap-2.5 border border-foreground/10 bg-background px-3.5 py-2.5 text-foreground">
         <PinMark className="h-8 w-8 shrink-0" />
         <h2 className="min-w-0 flex-1 text-balance font-display text-[1rem] font-medium leading-tight">{HEADLINE}</h2>
         <Link
@@ -63,7 +63,7 @@ function JoinCall({ compact, href }: { compact: boolean; href: string }) {
   }
 
   return (
-    <div className="absolute bottom-10 left-1/2 z-[4] w-[min(400px,calc(100%-40px))] -translate-x-1/2 border border-foreground/10 bg-background px-7 pb-5 pt-5 text-center text-foreground shadow-[0_18px_44px_-24px_rgb(26_26_26/0.45)]">
+    <div className="absolute bottom-10 left-1/2 z-[4] w-[min(400px,calc(100%-40px))] -translate-x-1/2 border border-foreground/10 bg-background px-7 pb-5 pt-5 text-center text-foreground">
       <PinMark className="mx-auto mb-2.5 h-12 w-12" />
       <h2 className="text-balance font-display text-[1.5rem] font-medium leading-[1.15] tracking-[-0.015em]">{HEADLINE}</h2>
       <Link
@@ -101,22 +101,16 @@ function JoinCall({ compact, href }: { compact: boolean; href: string }) {
  * `coveredBottomPx` is the on-screen part of that inset, under the phone's
  * List / Split / Map switch: the picture runs on under the switch to the
  * screen's edge, so the sheet never ends in a band of bare paper.
- * `revealedBottomPx` is the part of the inset that the phone's toolbars put
- * back on screen when they hide as the reader scrolls (iPhone Safari). The
- * picture, its places and the join bar are laid out again for that taller
- * strip, once per toolbar change, so it never ends above a band of bare
- * paper either (owner, 2026-11-20).
+ * In the phone takeover it also takes in the strip the browser's toolbars give
+ * back when they hide, so the picture is drawn once, tall enough for both.
  */
 export function MapTeaser({
-  insetBottomPx: insetWithToolbars = 0,
+  insetBottomPx = 0,
   coveredBottomPx = 0,
-  revealedBottomPx = 0,
 }: {
   insetBottomPx?: number
   coveredBottomPx?: number
-  revealedBottomPx?: number
 }): JSX.Element {
-  const insetBottomPx = Math.max(0, insetWithToolbars - revealedBottomPx)
   const { points, scrollToEntry, teaserKey, teaser } = useListicleMapSync()
   const pathname = usePathname()
   const boxRef = useRef<HTMLDivElement>(null)
