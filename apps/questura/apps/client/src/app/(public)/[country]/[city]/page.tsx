@@ -80,7 +80,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       siteName: 'Questurian',
       title: `${locationLabel} — Questurian`,
       url: `/${country}/${city}`,
-      // The site card says "Lima · Peru" (lib/seo/siteShareCard.ts).
+      // Lima uses the site card (lib/seo/siteShareCard.ts); other cities have
+      // no picture of their own yet.
       ...(`/${country}/${city}` === LIMA_HREF ? { images: [SITE_SHARE_IMAGE] } : {}),
     },
   };
