@@ -84,7 +84,11 @@ export async function publicAudioForArticle(payload: Payload, articleId: number)
   return { clips, totalSeconds: Math.round(clips.reduce((sum, clip) => sum + clip.durationSeconds, 0)) }
 }
 
-/** Which of these articles have at least one clip, for the cards' Audio badge. */
+/**
+ * Which of these articles have at least one clip, for the cards' Audio badge.
+ * One statement: `pagination: false` skips the count query nobody reads (it
+ * pushed the city page read from 8 to 10 statements; perf/budgets.json).
+ */
 export async function articleIdsWithAudio(payload: Payload, articleIds: number[]): Promise<Set<number>> {
   const ids = [...new Set(articleIds.filter((id) => Number.isInteger(id)))]
   if (ids.length === 0) return new Set()
@@ -92,6 +96,7 @@ export async function articleIdsWithAudio(payload: Payload, articleIds: number[]
     collection: 'audio-clips',
     where: { articleId: { in: ids } },
     limit: 1000,
+    pagination: false,
     depth: 0,
     overrideAccess: true,
     select: { articleId: true },
