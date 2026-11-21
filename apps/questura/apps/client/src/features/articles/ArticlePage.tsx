@@ -90,7 +90,7 @@ function ArticleHeroFigure({
         />
       </div>
       <figcaption className="px-4 pt-2 1024:px-0">
-        <PhotoCreditLine credit={photoCredit(featuredImage)} tone={tone} />
+        <PhotoCreditLine credit={photoCredit(featuredImage)} tone={tone} size="small" />
       </figcaption>
     </figure>
   )

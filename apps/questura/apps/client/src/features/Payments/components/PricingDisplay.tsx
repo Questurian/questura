@@ -22,34 +22,27 @@ const tickerItems = [
 
 /*
  * The same on both cards: the plans differ only in billing. Every line must be
- * something membership really gives today (Design 101 also listed audio
- * versions of articles, which the site does not have).
+ * something membership really gives today. Listening is members-only: a
+ * non-member who presses play gets the join panel (features/audio).
  */
 const planBenefits = [
   'Every article, no paywalls',
+  'Listen to guides, read aloud',
   'Local food & neighborhood guides',
   'Day-by-day travel itineraries',
   'All our local travel experts',
 ];
 
-function PlanArrowLink({ href, label, disabled }: { href: string; label: string; disabled: boolean }) {
+/** A full-width button that names the plan; its hit area covers the whole card (join-showcase.css). */
+function PlanButton({ href, label, disabled }: { href: string; label: string; disabled: boolean }) {
   const content = (
     <>
-      <span>{label}</span>
-      <svg viewBox="0 0 56 56" fill="none" aria-hidden="true">
-        <circle className="join-plan-arrow-ring-track" cx="28" cy="28" r="25" strokeWidth="1.5" />
-        <circle
-          className="join-plan-arrow-ring-progress"
-          cx="28"
-          cy="28"
-          r="25"
-          pathLength="100"
-          strokeWidth="1.5"
-        />
+      {label}
+      <svg viewBox="0 0 14 10" fill="none" aria-hidden="true">
         <path
-          d="M20 28H36M30 22L36 28L30 34"
+          d="M.75 5h12.5M8.75.75 13.25 5l-4.5 4.25"
           stroke="currentColor"
-          strokeWidth="1.75"
+          strokeWidth="1.5"
           strokeLinecap="round"
           strokeLinejoin="round"
         />
@@ -57,14 +50,12 @@ function PlanArrowLink({ href, label, disabled }: { href: string; label: string;
     </>
   );
 
-  // The label is hidden on phones, where the whole card is the link, so the
-  // accessible name is set explicitly to the same words.
   return disabled ? (
-    <span role="link" aria-disabled="true" aria-label={label} className="join-plan-arrow">
+    <span role="link" aria-disabled="true" className="join-plan-button">
       {content}
     </span>
   ) : (
-    <PlanLink href={href} prefetch={false} aria-label={label} className="join-plan-arrow">
+    <PlanLink href={href} prefetch={false} className="join-plan-button">
       {content}
     </PlanLink>
   );
@@ -101,7 +92,7 @@ function AnnualPlanCard({
       <div className="join-plan-content">
         <div className="join-plan-heading">
           <h3 className="join-plan-name">Annual</h3>
-          {saving ? <span className="join-plan-badge">Save {saving.percentOff}%</span> : null}
+          {saving ? <span className="join-plan-save">Save {saving.percentOff}%</span> : null}
         </div>
         <div className="join-plan-price">
           <span className="join-plan-amount">{formatPlanAmount(plan)}</span>
@@ -123,7 +114,7 @@ function AnnualPlanCard({
           </p>
         ) : null}
         <PlanBenefits planName="Annual" />
-        <PlanArrowLink href="/purchase/yearly" label="Choose annual" disabled={preview} />
+        <PlanButton href="/purchase/yearly" label="Choose annual" disabled={preview} />
       </div>
     </div>
   );
@@ -140,8 +131,9 @@ function MonthlyPlanCard({ plan, preview }: { plan: MembershipPlan; preview: boo
           <span className="join-plan-amount">{formatPlanAmount(plan)}</span>
           <span className="join-plan-unit">/{formatPlanInterval(plan)}</span>
         </div>
+        <p className="join-plan-billing">Billed every month</p>
         <PlanBenefits planName="Monthly" />
-        <PlanArrowLink href="/purchase/monthly" label="Choose monthly" disabled={preview} />
+        <PlanButton href="/purchase/monthly" label="Choose monthly" disabled={preview} />
       </div>
     </div>
   );

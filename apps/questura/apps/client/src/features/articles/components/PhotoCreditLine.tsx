@@ -14,11 +14,14 @@ import type { PhotoCredit } from '@/features/articles/lib/photoCredit'
 export function PhotoCreditLine({
   credit,
   tone = 'light',
+  size = 'default',
   className = '',
 }: {
   credit: PhotoCredit
   /** `dark` for a photo set on the ink header band. */
   tone?: 'light' | 'dark'
+  /** `small` for the header photo: still readable, less prominent under a full-width picture. */
+  size?: 'default' | 'small'
   className?: string
 }): JSX.Element {
   const listId = useId()
@@ -26,7 +29,9 @@ export function PhotoCreditLine({
   return (
     <div
       data-photo-credit
-      className={`relative flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5 font-mono text-[11px] leading-[1.4] ${
+      className={`relative flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5 font-mono ${
+        size === 'small' ? 'text-[9.5px] leading-[1.35] tracking-[0.01em]' : 'text-[11px] leading-[1.4]'
+      } ${
         tone === 'dark' ? 'text-white/50' : 'text-foreground/50'
       } ${className}`}
     >
