@@ -67,7 +67,7 @@
   width: 86px;
   height: 72px;
   overflow: hidden;
-  background: #d7dcde;
+  background: var(--photo-placeholder);
   z-index: 2;
 }
 

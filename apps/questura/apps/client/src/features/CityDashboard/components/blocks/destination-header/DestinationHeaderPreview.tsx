@@ -58,11 +58,14 @@ function Crumb({
   name,
   style,
   className = "",
+  flagLoading,
 }: {
   location: CityHomepageLocation | null | undefined;
   name: string | null;
   style: DestinationHeaderStyle;
   className?: string;
+  /** The header's own image priority, so a first-screen flag arrives with the text. */
+  flagLoading: "eager" | "lazy";
 }): JSX.Element | null {
   const country = location?.countryName?.trim();
   const city = (location?.cityName ?? name)?.trim();
@@ -80,7 +83,7 @@ function Crumb({
             className="relative mr-[0.55em] flex shrink-0 after:absolute after:inset-0 after:shadow-[inset_0_0_0_0.5px_rgb(26_26_26/0.16)]"
             style={{ height: cap, width: crumbFlagWidth(style) }}
           >
-            <CountryFlag code={location.countryCode} className="block h-full w-full" />
+            <CountryFlag code={location.countryCode} className="block h-full w-full" loading={flagLoading} />
           </span>
         ) : null}
         <span>{country}</span>
@@ -165,6 +168,7 @@ export function DestinationHeaderPreview({
       name={block.sectionHeading}
       style={style}
       className={className}
+      flagLoading={heroImagePriority(blockIndex).loading}
     />
   );
 

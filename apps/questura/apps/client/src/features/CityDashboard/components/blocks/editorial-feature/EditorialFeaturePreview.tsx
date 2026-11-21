@@ -10,6 +10,7 @@ import type {
 } from '../../../types'
 import { BlockSection } from '../BlockSection'
 import { PublicImage, PublicSource } from '@/components/media/PublicImage'
+import { PicturePreload } from '@/components/media/PicturePreload'
 import { BLOCK_IMAGE_SIZES } from '../blockImageSizes'
 import { PHONE_SQUARE_MEDIA } from '../PhoneSquareImage'
 import { heroImagePriority } from '../heroImagePriority'
@@ -173,6 +174,12 @@ export function EditorialFeaturePreview({
             <Linked href={featureHref}
               className={`group/image block h-full outline-none focus-visible:ring-2 focus-visible:ring-inset ${tone.focus}`}>
               <picture className="block h-full w-full">
+                {imagePriority.fetchPriority === 'high' ? (
+                  <PicturePreload
+                    source={portrait?.url ? { src: portrait.url, media: '(min-width: 768px)', sizes: BLOCK_IMAGE_SIZES.featureImage } : null}
+                    fallback={{ src: fallbackImage.url, sizes: BLOCK_IMAGE_SIZES.featureImage }}
+                  />
+                ) : null}
                 {portrait?.url ? <PublicSource media="(min-width: 768px)" src={portrait.url} sizes={BLOCK_IMAGE_SIZES.featureImage} /> : null}
                 <PublicImage
                   src={fallbackImage.url}

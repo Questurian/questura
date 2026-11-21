@@ -13,6 +13,7 @@ import { AuthorLink } from '@/features/authors/components/AuthorLink'
 import { AudioBadge } from '@/features/audio/components/AudioBadge'
 import { NavigableImageTarget } from '../NavigableImageTarget'
 import { PublicImage, PublicSource } from '@/components/media/PublicImage'
+import { PicturePreload } from '@/components/media/PicturePreload'
 import { BLOCK_IMAGE_SIZES } from '../blockImageSizes'
 import { heroImagePriority, type ImagePriority } from '../heroImagePriority'
 import { FeaturedArticlesFourOneOverThree } from './FeaturedArticlesFourOneOverThree'
@@ -52,9 +53,15 @@ function HeroArticleCard({ article, imagePriority }: HeroArticleCardProps): JSX.
 
   return (
     <section className="city-article-card city-four-hero-card">
-      <div className="city-article-image-shell city-four-hero-image relative aspect-square overflow-hidden bg-[#d7dcde]">
+      <div className="city-article-image-shell city-four-hero-image relative aspect-square overflow-hidden bg-photo-placeholder">
         {hasImage ? (
           <picture className="block h-full w-full">
+            {imagePriority.fetchPriority === 'high' ? (
+              <PicturePreload
+                source={desktopImageUrl ? { src: desktopImageUrl, media: '(min-width: 1024px)', sizes: BLOCK_IMAGE_SIZES.hero } : null}
+                fallback={{ src: fallbackImageUrl, sizes: BLOCK_IMAGE_SIZES.hero }}
+              />
+            ) : null}
             {desktopImageUrl ? (
               <PublicSource media="(min-width: 1024px)" src={desktopImageUrl} sizes={BLOCK_IMAGE_SIZES.hero} />
             ) : null}

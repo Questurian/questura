@@ -1,6 +1,7 @@
 import type { JSX } from 'react'
 
 import { PublicImage, PublicSource } from '@/components/media/PublicImage'
+import { PicturePreload } from '@/components/media/PicturePreload'
 import type { FeaturedArticleTeaser } from '../../types'
 import type { ImagePriority } from './heroImagePriority'
 
@@ -35,6 +36,12 @@ export function PhoneSquareImage({
 
   return (
     <picture className="block h-full w-full">
+      {priority.fetchPriority === 'high' ? (
+        <PicturePreload
+          source={wideUrl && wideUrl !== squareUrl ? { src: wideUrl, media: PHONE_SQUARE_MEDIA, sizes } : null}
+          fallback={{ src: squareUrl, sizes }}
+        />
+      ) : null}
       {wideUrl && wideUrl !== squareUrl ? (
         <PublicSource media={PHONE_SQUARE_MEDIA} src={wideUrl} sizes={sizes} />
       ) : null}

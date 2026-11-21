@@ -10,6 +10,7 @@ import { AuthorLink } from '@/features/authors/components/AuthorLink'
 import { AudioBadge } from '@/features/audio/components/AudioBadge'
 import { NavigableImageTarget } from '../NavigableImageTarget'
 import { PublicImage, PublicSource } from '@/components/media/PublicImage'
+import { PicturePreload } from '@/components/media/PicturePreload'
 import { BLOCK_IMAGE_SIZES } from '../blockImageSizes'
 import { isPriorityImage } from '../heroImagePriority'
 import { BLOCK_TYPE, blockTitleLength } from '../blockType'
@@ -63,9 +64,15 @@ function FeaturedArticlePreviewCard({
         placement ? `city-article-card--${placement}` : null,
       )}
     >
-      <div className="city-article-image-shell relative aspect-square overflow-hidden bg-[#d7dcde] 768:aspect-[1200/630]">
+      <div className="city-article-image-shell relative aspect-square overflow-hidden bg-photo-placeholder 768:aspect-[1200/630]">
         {hasImage ? (
           <picture className="block h-full w-full">
+            {isPriority ? (
+              <PicturePreload
+                source={desktopImageUrl ? { src: desktopImageUrl, media: '(min-width: 768px)', sizes: BLOCK_IMAGE_SIZES.featuredLeftCard } : null}
+                fallback={{ src: fallbackImageUrl, sizes: BLOCK_IMAGE_SIZES.featuredLeftCard }}
+              />
+            ) : null}
             {desktopImageUrl ? (
               <PublicSource media="(min-width: 768px)" src={desktopImageUrl} sizes={BLOCK_IMAGE_SIZES.featuredLeftCard} />
             ) : null}

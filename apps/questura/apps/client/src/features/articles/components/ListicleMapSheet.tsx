@@ -1,7 +1,8 @@
 'use client'
 
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type JSX } from 'react'
-import { CornerUpLeft, List, Map as MapIcon, MapPin, Rows2 } from 'lucide-react'
+import { CornerUpLeft, MapPin } from 'lucide-react'
+import { ListicleMapSwitch } from '@/features/articles/components/ListicleMapSwitch'
 import type { ListicleMapGuides } from '@/features/articles/components/ListicleMapGuidesMenu'
 import { MapPanel } from '@/features/articles/components/MapPanel'
 import { ListicleMapVenueCard } from '@/features/articles/components/ListicleMapVenueCard'
@@ -20,8 +21,6 @@ import {
   LOCKED_SPLIT_VISIBLE_FRACTION,
   sheetHeightPx,
   sheetTopForMode,
-  LISTICLE_MAP_MODES,
-  LISTICLE_MAP_MODE_LABELS,
   type ListicleMapMode,
   type ViewportHeights,
 } from '@/features/articles/components/ListicleMapModes'
@@ -44,12 +43,6 @@ const MODE_ACTIVE_ZOOM: Record<ListicleMapMode, number> = {
   map: 15.25,
 }
 const MOBILE_FIT_PADDING = 28
-
-const MODE_ICONS: Record<ListicleMapMode, typeof List> = {
-  list: List,
-  split: Rows2,
-  map: MapIcon,
-}
 
 /**
  * Reads the small and large viewport heights (`svh` / `lvh`). Unlike
@@ -365,33 +358,7 @@ export function ListicleMapSheet({
           </button>
         ) : null}
 
-        <div
-          role="group"
-          aria-label="Article view"
-          className="pointer-events-auto flex items-center gap-0.5 rounded-full border border-foreground/15 bg-paper p-1 shadow-[0_6px_20px_rgba(26,26,26,0.18)]"
-        >
-          {LISTICLE_MAP_MODES.map((option) => {
-            const isCurrent = option === mode
-            const Icon = MODE_ICONS[option]
-            return (
-              <button
-                key={option}
-                type="button"
-                aria-pressed={isCurrent}
-                aria-controls="listicle-map-sheet-panel"
-                onClick={() => setMode(option)}
-                className={`flex items-center gap-1.5 rounded-full px-3.5 py-2 text-[12px] font-bold uppercase leading-none tracking-[0.12em] transition-colors 380:px-4 ${
-                  isCurrent
-                    ? 'bg-accent text-white'
-                    : 'text-foreground/60 hover:text-foreground'
-                }`}
-              >
-                <Icon className="size-[15px] shrink-0" aria-hidden="true" />
-                {LISTICLE_MAP_MODE_LABELS[option]}
-              </button>
-            )
-          })}
-        </div>
+        <ListicleMapSwitch mode={mode} onSelect={setMode} />
       </div>
     </>
   )

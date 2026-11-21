@@ -42,7 +42,7 @@
   width: 88px;
   height: 88px;
   overflow: hidden;
-  background: #d7dcde;
+  background: var(--photo-placeholder);
   align-self: center;
 }
 
@@ -218,7 +218,7 @@
   width: 100%;
   aspect-ratio: 1 / 1;
   overflow: hidden;
-  background: #d7dcde;
+  background: var(--photo-placeholder);
 }
 
 .city-five-cl-copy {

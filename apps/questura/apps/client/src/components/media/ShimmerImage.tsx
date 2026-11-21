@@ -20,11 +20,11 @@ export function ShimmerImage({
   const wrapperRef = useRef<HTMLDivElement>(null)
   const [imageState, setImageState] = useState<ImageState>('loading')
 
-  // The image is opaque from the first paint and sits above the shimmer, so
-  // this state never decides whether it is visible (#594). It only stops the
-  // shimmer animation and styles a failure. Cached images can finish before
-  // hydration attaches onLoad, so reconcile after every src change too —
-  // otherwise the shimmer would keep animating under a ready image.
+  // The frame shows the flat placeholder and the photo fades in over it once
+  // it has fully arrived; that needs no React (lib/media/photoReady.ts), so
+  // this state never decides whether the photo is visible (#594). It only
+  // styles a failure. Cached images can finish before hydration attaches
+  // onLoad, so reconcile after every src change too.
   useEffect(() => {
     setImageState('loading')
     const image = wrapperRef.current?.querySelector('img')

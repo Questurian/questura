@@ -314,6 +314,10 @@ export default function GoogleMapPanel({
   // of the active band) animates.
   const hasFramedPoints = useRef(false)
   const [ready, setReady] = useState(false)
+  // The map stays transparent over the paper ground until its first tiles
+  // have drawn, then fades in with its pins in one piece. Without this the
+  // reader sees an empty box, then pins on nothing, then the streets.
+  const [tilesShown, setTilesShown] = useState(false)
 
   useEffect(() => {
     setOptions({
@@ -335,12 +339,20 @@ export default function GoogleMapPanel({
           clickableIcons: false,
         })
         markerLib.current = marker
+        google.maps.event.addListenerOnce(mapInstance.current, 'tilesloaded', () => {
+          if (!cancelled) setTilesShown(true)
+        })
         setReady(true)
       },
     )
+    // Never leave a map hidden because Google did not report its tiles.
+    const reveal = window.setTimeout(() => {
+      if (!cancelled) setTilesShown(true)
+    }, 6000)
 
     return () => {
       cancelled = true
+      window.clearTimeout(reveal)
     }
   }, [])
 
@@ -439,8 +451,12 @@ export default function GoogleMapPanel({
   }, [])
 
   return (
-    <div className="relative h-full w-full">
-      <div ref={mapRef} className="h-full w-full" />
+    <div data-map-surface="" className="relative h-full w-full bg-paper">
+      <div
+        ref={mapRef}
+        className="h-full w-full transition-opacity duration-300 ease-out motion-reduce:transition-none"
+        style={{ opacity: tilesShown ? 1 : 0 }}
+      />
       {/* Where you are on the left, where you can go on the right, so the
           controls never fight for the same corner. */}
       {showArticleControls ? (

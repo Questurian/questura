@@ -920,56 +920,38 @@
   display: none;
 }
 
-/* Editorial media keeps its final footprint while remote images load. */
+/* Editorial media keeps its final footprint while remote images load. The
+   frame shows the flat warm placeholder; the photo inside fades in over it
+   once it has fully arrived (foundations.css, img[data-fade]), which needs no
+   hydration: the <head> script marks it (#594 still holds). A photo that
+   fails keeps the placeholder instead of the broken-image glyph. */
 .shimmer-image {
   position: relative;
   isolation: isolate;
   overflow: hidden;
-  background-color: #d7dcde;
+  background-color: var(--photo-placeholder);
 }
 
-.shimmer-image::before,
-.itinerary-skeleton-block {
-  background: linear-gradient(90deg, #d1d7da 0%, #edf0f1 45%, #c9d0d3 100%);
-  background-size: 240% 100%;
-  animation: city-skeleton-shimmer 1.35s ease-in-out infinite;
-}
-
-.shimmer-image::before {
-  position: absolute;
-  z-index: 0;
-  inset: 0;
-  content: '';
-  opacity: 1;
-  transition: opacity 240ms ease;
-}
-
-/* Opaque from the first paint, and stacked above the shimmer. A decoded image
-   — cached, or simply faster than the bundle — covers the shimmer with no
-   JavaScript at all, so article headers are visible before hydration (#594).
-   `data-image-state` is only needed to stop the animation and to style a
-   failure, never to reveal the image. */
 .shimmer-image > img {
   position: relative;
   z-index: 1;
-  opacity: 1;
-  transition: opacity 300ms ease;
 }
 
-.shimmer-image[data-image-state='loaded']::before {
-  opacity: 0;
-  animation: none;
-}
-
-/* A broken image keeps its flat fallback instead of showing the browser's
-   broken-image glyph. This is the one state that still needs hydration. */
 .shimmer-image[data-image-state='failed'] > img {
   opacity: 0;
 }
 
-.shimmer-image[data-image-state='failed']::before {
-  background: #d7dcde;
-  animation: none;
+/* The itinerary's loading page (loading.tsx): the same flat warm boxes, with
+   a slow breath so the page does not look frozen. */
+.itinerary-skeleton-block {
+  background: var(--photo-placeholder);
+  animation: skeleton-breathe 1.6s ease-in-out infinite;
+}
+
+@keyframes skeleton-breathe {
+  50% {
+    opacity: 0.55;
+  }
 }
 
 .itinerary-skeleton-block {
@@ -1025,7 +1007,18 @@
     transition: width 360ms cubic-bezier(0.22, 1, 0.36, 1);
   }
 
-  /* Locked: as tall as the article beside it, scrolling with it (see ListicleArticleLayout). */
+  /* Locked: as tall as the article beside it, scrolling with it (see ListicleArticleLayout).
+     While the reader is still being identified, the head script's guess
+     (html[data-identity]) lays the column out the way it will end, so a
+     non-member's column does not start pinned and then let go. */
+  html:not([data-identity='member']) [data-article-layout='listicle'] .maps-map-column[data-map-access='waiting'] {
+    position: static;
+    align-self: auto;
+    top: auto;
+    height: auto;
+    margin-top: 25px;
+  }
+
   [data-article-layout='listicle'] .maps-map-column[data-map-locked] {
     top: auto;
     height: auto;
@@ -1077,8 +1070,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .shimmer-image::before,
-  .shimmer-image > img,
   .itinerary-skeleton-block {
     animation: none;
     transition: none;
@@ -1089,4 +1080,46 @@
   [data-article-layout='listicle'] .maps-map-column {
     transition: none;
   }
+}
+
+/* A non-member's shelf under the locked map is whited out to the page ground.
+   Painted from the first frame on the head script's guess, so the shelf does
+   not show and then vanish (ListicleArticleLayout). */
+.maps-locked-shelf-cover {
+  display: none;
+}
+
+.maps-map-column[data-map-access='teaser'] .maps-locked-shelf-cover,
+html:not([data-identity='member']) .maps-map-column[data-map-access='waiting'] .maps-locked-shelf-cover {
+  display: block;
+}
+
+/* The phone map sheet's server-painted frame (ListicleMapSheetFrame). Split
+   view geometry from ListicleMapModes: a member's sheet shows 42% of the large
+   viewport from a top-hung sheet (100svh - 58lvh on screen); the locked
+   picture's sheet hangs from the bottom and shows 46% of it. */
+.map-sheet-frame {
+  height: 42vh;
+  height: calc(100svh - 58lvh);
+}
+
+.map-sheet-frame-join {
+  display: none;
+}
+
+[data-map-access='teaser'] .map-sheet-frame,
+html:not([data-identity='member']) [data-map-access='waiting'] .map-sheet-frame {
+  height: 46vh;
+  height: 46lvh;
+}
+
+[data-map-access='teaser'] .map-sheet-frame-join,
+html:not([data-identity='member']) [data-map-access='waiting'] .map-sheet-frame-join {
+  display: block;
+}
+
+/* Steps aside once the real sheet has a map to show; that map fades in over
+   the same paper (GoogleMapPanel, MapTeaser). */
+:root:has([data-listicle-map-sheet] [data-map-surface]) [data-map-sheet-frame] {
+  display: none;
 }

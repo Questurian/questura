@@ -13,6 +13,7 @@ import { AuthorLink } from '@/features/authors/components/AuthorLink'
 import { AudioBadge } from '@/features/audio/components/AudioBadge'
 import { NavigableImageTarget } from '../NavigableImageTarget'
 import { PublicImage, PublicSource } from '@/components/media/PublicImage'
+import { PicturePreload } from '@/components/media/PicturePreload'
 import { BLOCK_IMAGE_SIZES } from '../blockImageSizes'
 import { LAZY_IMAGE, heroImagePriority, type ImagePriority } from '../heroImagePriority'
 import { PhoneSquareImage } from '../PhoneSquareImage'
@@ -62,7 +63,7 @@ function HeroArticleCard({ article, imagePriority }: HeroArticleCardProps): JSX.
 
   return (
     <section className="city-article-card city-three-hero-card">
-      <div className="city-article-image-shell city-three-hero-image relative aspect-square overflow-hidden bg-[#d7dcde]">
+      <div className="city-article-image-shell city-three-hero-image relative aspect-square overflow-hidden bg-photo-placeholder">
         {imageUrl ? (
           <PublicImage
             src={imageUrl}
@@ -184,6 +185,12 @@ function CenterFeatureCard({ article, imagePriority }: CenterFeatureCardProps): 
       <div className="city-article-image-shell city-three-stack-image city-three-fc-center-image">
         {hasImage ? (
           <picture className="block h-full w-full">
+            {imagePriority.fetchPriority === 'high' ? (
+              <PicturePreload
+                source={desktopImageUrl ? { src: desktopImageUrl, media: '(min-width: 1024px)', sizes: BLOCK_IMAGE_SIZES.centreFeature } : null}
+                fallback={{ src: fallbackImageUrl, sizes: BLOCK_IMAGE_SIZES.centreFeature }}
+              />
+            ) : null}
             {desktopImageUrl ? (
               <PublicSource media="(min-width: 1024px)" src={desktopImageUrl} sizes={BLOCK_IMAGE_SIZES.centreFeature} />
             ) : null}

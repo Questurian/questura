@@ -12,6 +12,7 @@ import { NavigationFeedback } from "@/components/navigation/NavigationFeedback";
 import { WebVitals } from "@/components/observability/WebVitals";
 import { IDENTITY_HINT_SCRIPT } from "@/lib/user/identityHint";
 import { NAV_THEME_SCRIPT } from "@/features/Navigation/lib/navTheme";
+import { PHOTO_READY_SCRIPT } from "@/lib/media/photoReadyScript";
 import { getBackendUrl } from "@/lib/api/api-config";
 import { getPublicBaseUrl } from "@/lib/seo/publicBaseUrl";
 
@@ -69,6 +70,9 @@ export default async function RootLayout({
         {/* Before first paint: the reader's navbar colour
             (features/Navigation/lib/navTheme.ts). */}
         <script dangerouslySetInnerHTML={{ __html: NAV_THEME_SCRIPT }} />
+        {/* Before the body: photos fade in whole once downloaded, not strip
+            by strip (lib/media/photoReady.ts). */}
+        <script dangerouslySetInnerHTML={{ __html: PHOTO_READY_SCRIPT }} />
       </head>
       {/* Every photo on the site is served from the image CDN, so a cold visit
           otherwise pays DNS + TLS against a second origin before the first

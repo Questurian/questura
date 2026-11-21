@@ -62,15 +62,6 @@
   }
 }
 
-@keyframes city-skeleton-shimmer {
-  from {
-    background-position: 140% 0;
-  }
-  to {
-    background-position: -140% 0;
-  }
-}
-
 @keyframes text-reveal {
   from {
     opacity: 0;
@@ -169,12 +160,8 @@
   position: absolute;
   inset: 0;
   z-index: 0;
-  background: linear-gradient(90deg, #d1d7da 0%, #edf0f1 45%, #c9d0d3 100%);
-  background-size: 240% 100%;
-  /* The photo paints over this when it arrives; nothing tells CSS that it
-     has, so the shimmer runs a fixed number of times and then rests on the
-     static gradient rather than animating forever behind every loaded image. */
-  animation: city-skeleton-shimmer 1.35s ease-in-out 8;
+  /* Flat placeholder; the photo fades in over it (foundations.css). */
+  background: var(--photo-placeholder);
 }
 
 /* Author profile photo: same shimmer treatment, tinted for the beige header */
@@ -184,19 +171,15 @@
   inset: 0;
   z-index: 0;
   opacity: 1;
-  background: linear-gradient(90deg, #d8d4cd 0%, #e9e5de 45%, #d3cfc7 100%);
-  background-size: 240% 100%;
-  animation: city-skeleton-shimmer 1.35s ease-in-out infinite;
+  background: var(--photo-placeholder);
   transition: opacity 0.24s ease;
 }
 
 .author-avatar-shell[data-image-loaded='true']::before {
   opacity: 0;
-  animation: none;
 }
 
 /* Dark-surface variant (e.g. hero article block on a black background). */
 .city-article-card--dark .city-article-image-shell::before {
-  background: linear-gradient(90deg, #1c1c1c 0%, #313131 45%, #1a1a1a 100%);
-  background-size: 240% 100%;
+  background: var(--photo-placeholder-dark);
 }

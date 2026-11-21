@@ -7,6 +7,7 @@ import { AuthorLink } from '@/features/authors/components/AuthorLink'
 import { AudioBadge } from '@/features/audio/components/AudioBadge'
 import { NavigableImageTarget } from '../NavigableImageTarget'
 import { PublicImage, PublicSource } from '@/components/media/PublicImage'
+import { PicturePreload } from '@/components/media/PicturePreload'
 import { BLOCK_IMAGE_SIZES } from '../blockImageSizes'
 import { BLOCK_TYPE, blockTitleLength } from '../blockType'
 import { LAZY_IMAGE, type ImagePriority } from '../heroImagePriority'
@@ -39,6 +40,12 @@ function OneOverThreeCard({ article, lead, imagePriority }: CardProps): JSX.Elem
       <div className="city-article-image-shell city-four-o3-image">
         {fallbackImageUrl ? (
           <picture className="block h-full w-full">
+            {imagePriority.fetchPriority === 'high' ? (
+              <PicturePreload
+                source={wideImageUrl ? { src: wideImageUrl, media: '(min-width: 768px)', sizes } : null}
+                fallback={{ src: fallbackImageUrl, sizes }}
+              />
+            ) : null}
             {wideImageUrl ? (
               <PublicSource media="(min-width: 768px)" src={wideImageUrl} sizes={sizes} />
             ) : null}
