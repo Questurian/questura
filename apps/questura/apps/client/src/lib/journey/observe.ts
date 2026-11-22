@@ -45,7 +45,7 @@ function onScreen(ownDetails: boolean): Array<{ k: Kind; x: string }> {
 
   let current: Element | null = null
   for (const heading of document.querySelectorAll('main h2, main h3, article h2, article h3')) {
-    if (!heading.getClientRects().length || heading.closest('[data-paywalled], [data-map-join], [data-membership-pitch], .join-plan-card')) continue
+    if (!heading.getClientRects().length || heading.closest('[data-paywalled], [data-map-join], .aud-lock, [data-membership-pitch], .join-plan-card')) continue
     if (heading.getBoundingClientRect().top <= window.innerHeight / 2) current = heading
   }
   const section = current?.textContent?.replace(/\s+/g, ' ').trim().slice(0, 80)
@@ -53,6 +53,10 @@ function onScreen(ownDetails: boolean): Array<{ k: Kind; x: string }> {
 
   if ([...document.querySelectorAll('aside[data-paywalled]')].some((element) => isSeen(element))) seen.push({ k: 'paywall', x: 'Guide paywall' })
   if ([...document.querySelectorAll('[data-map-join]')].some((element) => isSeen(element))) seen.push({ k: 'paywall', x: 'Map paywall' })
+  // Pressing Listen without a membership opens its own paywall, on free guides too.
+  if ([...document.querySelectorAll('.aud-lock')].some((element) => isSeen(element))) {
+    seen.push({ k: 'paywall', x: 'Audio paywall' })
+  }
   // A free guide's own ask for the sale (MembershipPitch, which states the price).
   if ([...document.querySelectorAll('[data-membership-pitch]')].some((element) => isSeen(element))) {
     seen.push({ k: 'paywall', x: 'Join box' })
