@@ -40,7 +40,7 @@ const ENTRYPOINTS = [
   },
   {
     path: 'src/app/styles/join-route.css',
-    imports: ['./global/join-showcase.css'],
+    imports: ['./global/join-page.css'],
   },
 ]
 

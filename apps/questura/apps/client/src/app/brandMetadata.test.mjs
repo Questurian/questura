@@ -36,8 +36,11 @@ test('the middleware passes icon and manifest paths straight through', () => {
 // 2026-09-27 live check (#7): /join sent only a title and description, so the
 // subscribe link pasted into a text or post showed no card and no picture.
 test('/join carries a full link preview and still no price', () => {
-  const join = readFileSync(here('./join/page.tsx'), 'utf8')
-  const metadata = join.slice(join.indexOf('const title'), join.indexOf('async function JoinPricing'))
+  // One object serves /join and every page served at /join (the test's arms).
+  const metadata = readFileSync(here('./join/joinMetadata.ts'), 'utf8')
+  for (const page of ['./join/page.tsx', './join/[arm]/page.tsx']) {
+    assert.match(readFileSync(here(page), 'utf8'), /export const metadata = joinMetadata/, `${page} uses the shared metadata`)
+  }
   assert.match(metadata, /canonical: '\/join'/)
   assert.match(metadata, /openGraph: \{[\s\S]*images: \[shareImage\]/)
   assert.match(metadata, /card: 'summary_large_image'/)
@@ -45,4 +48,6 @@ test('/join carries a full link preview and still no price', () => {
   const image = metadata.match(/url: '(\/images\/join\/[^']+\.jpg)'/)
   assert.ok(image, 'expected a JPEG share image under /images/join')
   assert.ok(existsSync(here(`../../public${image[1]}`)), `public${image[1]} is missing`)
+  // Handoff 03: claims the owner has not confirmed stay out of the description.
+  assert.doesNotMatch(metadata, /travel experts|every city we cover|written by locals/i)
 })

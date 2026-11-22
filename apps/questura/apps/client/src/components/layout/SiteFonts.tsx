@@ -1,4 +1,4 @@
-import { DM_Sans, Roboto } from "next/font/google";
+import { Cormorant_Garamond, DM_Sans, Geist_Mono, Roboto } from "next/font/google";
 
 /*
  * Fonts used by the site chrome and content routes, but not by the /join
@@ -11,6 +11,15 @@ import { DM_Sans, Roboto } from "next/font/google";
  * preloaded only on the routes that mount this wrapper.
  */
 const dmSans = DM_Sans({ variable: "--font-dm-sans", subsets: ["latin"] });
+// Moved from the root layout (2026-11-22): /join uses neither, and on the
+// speed budget's phone their 62 kB held its hero photo past 2.5 s. Every
+// route that draws them mounts this wrapper.
+const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
+const editorialSerif = Cormorant_Garamond({
+  variable: "--font-editorial-serif",
+  weight: ["400", "500", "600", "700"],
+  subsets: ["latin"],
+});
 // Roboto draws one thing, the Google sign-in button inside the sign-in
 // modal. Preloading it put a font no first screen uses ahead of the page's
 // photo and its real fonts, so it loads when that button is drawn instead.
@@ -33,7 +42,7 @@ export function SiteFonts({
 }>) {
   return (
     <div
-      className={`${dmSans.variable} ${roboto.variable}`}
+      className={`${dmSans.variable} ${roboto.variable} ${geistMono.variable} ${editorialSerif.variable}`}
       style={{ display: "contents" }}
     >
       {children}
