@@ -8,7 +8,9 @@
 // `wrangler secret put`.
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "main": ".open-next/worker.js",
+  // Our entry wraps the adapter's .open-next/worker.js to add Google's
+  // full-text view after every cache (ADR-0009). Inert without its secret.
+  "main": "cloudflare/worker.js",
   "name": "questura-client",
 
   // Pinned to the date this configuration was written against, not "today":
@@ -103,6 +105,11 @@
   //                                 server-side call. Same value as the
   //                                 backend and the Cloudflare Transform
   //                                 Rule. Server-only: never NEXT_PUBLIC_.
+  //   QUESTURA_CRAWLER_BODY_KEY     optional, and the on/off switch for
+  //                                 Google's full-text view (ADR-0009).
+  //                                 At least 32 characters, the same
+  //                                 value as the backend's. Delete it on
+  //                                 either side to switch the view off.
   //   CACHE_PURGE_API_TOKEN         cache purge only. Cache Purge permission
   //   CACHE_PURGE_ZONE_ID           on this zone and nothing else. These
   //                                 are the names the adapter reads
