@@ -28,6 +28,8 @@ test('every other page opens with the thin bar', () => {
     '/peru/lima/food/best-ceviche',
     '/peru/lima/food',
     '/authors/alan',
+    '/about',
+    '/contact',
     '/eat',
     '/stay',
     '/faq',

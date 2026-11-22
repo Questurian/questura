@@ -9,11 +9,13 @@ export const PERU_LAUNCH_ENABLED =
 const SITE_PAGES = new Set([
   '/',
   LIMA_HREF,
+  '/about',
   '/eat',
   '/stay',
   '/itineraries',
   '/auth-callback-close',
   '/auth-error',
+  '/contact',
   '/faq',
   '/join',
   '/newsletters/confirm',
