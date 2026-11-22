@@ -245,6 +245,16 @@ describe('checkout sign-up', () => {
     expect(w.sessions).toHaveLength(1)
   })
 
+  it('still lets the buyer pay when the verification mail cannot be sent', async () => {
+    const w = world()
+    mocks.verification.mockResolvedValue({ success: false, error: 'Resend is down' })
+
+    const result = await w.buy('buyer@example.com')
+
+    expect(result.status).toBe(200)
+    expect(result.cookie).toContain('session_token')
+  })
+
   it('refuses a staff email', async () => {
     const w = world()
     mocks.isStaff.mockResolvedValue(true)
