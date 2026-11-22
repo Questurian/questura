@@ -25,6 +25,8 @@ export type JoinPhoto = {
    * never shows inside a thumbnail.
    */
   zoom?: number
+  /** The point the zoom grows from, when the middle is not the subject. */
+  origin?: string
 }
 
 const SHAPES = {
@@ -52,27 +54,28 @@ export const PHOTOS = {
   road: photo('questurian-peru-barranco-20_thumbnail.webp'),
   cathedral: photo('1794289163133-source-2475_wide.webp', { focus: '50% 30%' }),
   dunes: photo('questurian-peru-barranco-36_wide.webp', { focus: '50% 60%' }),
-  sunsetWide: photo('27-tapas_1775120329327_wide-7.webp'),
-  sunsetSquare: photo('27-tapas_1775120329327_square-7.webp'),
+  sunsetWide: photo('instagram-803-position-0-source-4429_wide.webp', { focus: '50% 48%' }),
+  sunsetSquare: photo('instagram-803-position-0-source-4429_square.webp'),
   club: photo('casa-bulbo_instagram-242-legacy-9_square-1.webp', { focus: '50% 30%' }),
-  cevicheSquare: photo('la-73_1774426047892_wide-square.webp'),
+  cevicheSquare: photo('1791208292180-source-1947_square.webp', { focus: '40% 45%', zoom: 1.28, origin: '36% 36%' }),
   anticucho: photo('1792802780046-source-2217_square.webp'),
   fine: photo('astrid-y-gastn_1779500348037_square-7.webp', { focus: '50% 55%' }),
-  lomo: photo('composite-the-best-lomo-saltado-in-lima-1791566602031_square.webp', { zoom: 1.85 }),
-  chifa: photo('composite-the-best-chifa-restaurants-in-lima-1791844562271_square.webp', { zoom: 1.55 }),
-  pollo: photo('composite-the-best-pollo-a-la-brasa-in-lima-1791830493016_square.webp', { zoom: 1.75 }),
-  rooftop: photo('composite-the-best-rooftop-bars-in-lima-1791688709222_square.webp', { zoom: 1.55 }),
-  sandwich: photo('antigua-taberna-queirolo_1791751408202_square.webp'),
-  brunch: photo('ch-ch-miraflores_1770091514657_wide-1.webp'),
-  bars: photo('questurian-night-life-59_wide.webp'),
-  isidro: photo('isidro-bistr-limeo_1775092369073_wide.webp'),
+  lomo: photo('el-rey-del-lomo_1791164193909_square.webp'),
+  chifa: photo('the-261005pfaq_square.webp', { focus: '50% 55%', zoom: 1.08, origin: '50% 56%' }),
+  // Zoomed on the bird (owner, 2026-11-22: "zoomed in just a tad bit").
+  pollo: photo('la-lea-jr-de-la-unin_1791808713080_square.webp', { focus: '50% 60%', zoom: 1.42, origin: '62% 56%' }),
+  rooftop: photo('1792949731837-source-2346_square.webp', { focus: '50% 45%' }),
+  sandwich: photo('1792888392968-source-2250_square.webp', { focus: '50% 60%' }),
+  brunch: photo('ch-ch-miraflores_1770091514657_wide-1.webp', { focus: '50% 42%' }),
+  bars: photo('google-3238-source-4157_square.webp'),
+  isidro: photo('astrid-y-gastn_1769830926270_wide-6.webp', { focus: '60% 40%' }),
   oneDay: photo('composite-one-day-in-lima-peru-historic-sites-walking-tour-and-evening-nightlife-guide-1793652831112_square.webp'),
   night: photo('composite-how-to-spend-a-night-in-barranco-lima-1794723071041_square.webp'),
-  central: photo('central-876111dzhs_square.webp'),
-  ocean: photo('the-3378041gsm_editorial.webp'),
+  central: photo('instagram-172-legacy-0-source-2993_square.webp'),
+  ocean: photo('oceanfront-condo-with-a-terrace_square.jpg', { focus: '50% 45%' }),
   pool: photo('18th-floor-ocean-view-apartment-in-barranco_square.jpg', { focus: '50% 45%' }),
   terrace: photo('studio-with-a-rooftop-terrace-near-the-cliffs_square.webp'),
-  room: photo('llamitas-home-barranco-the-original-balcony-apartment_square.jpg'),
+  room: photo('art-filled-tower-loft-in-a-restored-barranco-house_square.jpg'),
   homes: photo('composite-the-best-airbnbs-in-miraflores-1791660566409_editorial.webp'),
   loft: photo('boutique-loft-in-the-hotel-zone_square.jpg'),
 } satisfies Record<string, JoinPhoto>

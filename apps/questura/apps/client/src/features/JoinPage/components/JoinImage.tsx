@@ -40,6 +40,7 @@ export function JoinImage({
       style={{
         objectPosition: photo.focus,
         transform: photo.zoom ? `scale(${photo.zoom})` : undefined,
+        transformOrigin: photo.origin,
       }}
     />
   )
