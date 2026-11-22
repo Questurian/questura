@@ -1,5 +1,6 @@
 import Link from '@/components/navigation/PublicLink'
 import { PublicImage } from '@/components/media/PublicImage'
+import { MembershipPitch } from '@/features/articles/components/MembershipPitch'
 import { GatedArticleBody } from '@/features/articles/components/GatedArticleBody'
 import { ArticleShareButton } from '@/features/articles/components/ArticleShareButton'
 import { ArticleAudioLoader } from '@/features/audio/components/ArticleAudioLoader'
@@ -99,6 +100,8 @@ function ArticleHeroFigure({
 /** Blocks, paywall and author banner: shared by every layout. */
 function ArticleBody({ article, path, adPlan }: { article: Article; path?: string; adPlan: AdPlan }) {
   const gate = readGate(article)
+  // Only an article explicitly free sells: an unknown gate shows no box.
+  const pitch = gate?.access === 'free' && path ? <MembershipPitch path={path} /> : null
   return (
     <div className="space-y-8 sm:space-y-10" data-article-body>
       {article.audio?.clips.length ? <ListenLine audio={article.audio} /> : null}
@@ -124,12 +127,13 @@ function ArticleBody({ article, path, adPlan }: { article: Article; path?: strin
           blocks={article.contentBlocks ?? []}
           plan={adPlan}
           contents={article.tableOfContents}
+          pitch={pitch}
         />
       )}
 
       {article.author ? <ArticleAuthorBanner author={article.author} /> : null}
 
-      <NewsletterArticleBand className="pt-4 sm:pt-6" />
+      {pitch ?? <NewsletterArticleBand className="pt-4 sm:pt-6" />}
     </div>
   )
 }

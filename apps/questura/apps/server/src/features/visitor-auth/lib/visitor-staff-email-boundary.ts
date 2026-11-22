@@ -6,6 +6,7 @@ import { isStaffEmail } from './staff-email-guard'
 
 const STAFF_EMAIL_GUARDED_PATHS = new Set([
   '/sign-up/email',
+  '/sign-up/checkout',
   '/sign-in/social',
   '/link-social',
   '/change-email',

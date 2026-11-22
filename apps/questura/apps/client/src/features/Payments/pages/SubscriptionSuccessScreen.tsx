@@ -7,8 +7,10 @@ import { useQueryClient } from '@tanstack/react-query';
 import { SuspenseBoundary } from '@/components/shared/SuspenseBoundary';
 import { get } from '@/lib/api';
 import { queryKeys } from '@/lib/react-query';
-import type { CurrentPrincipalResponse } from '@/lib/user/types';
+import type { AuthMethods, CurrentPrincipalResponse } from '@/lib/user/types';
+import { identityStore } from '@/lib/user/currentIdentity';
 import { getSafeRedirectPath } from '@/lib/validations';
+import { ChoosePassword } from '../components/ChoosePassword';
 import { confirmCheckoutRequest } from '../services/subscription-mutations.service';
 
 const POLL_INTERVAL_MS = 1000;
@@ -26,6 +28,7 @@ function SubscriptionSuccessContent() {
   const returnTo = getSafeRedirectPath(searchParams?.get('returnTo') ?? null);
   const [mounted, setMounted] = useState(false);
   const [confirmation, setConfirmation] = useState<Confirmation>('checking');
+  const [passwordEmail, setPasswordEmail] = useState<string | null>(null);
   // One confirm per page load, shared by every run of the effect below (Strict
   // Mode runs it twice in development).
   const confirmRequest = useRef<Promise<unknown> | null>(null);
@@ -53,6 +56,18 @@ function SubscriptionSuccessContent() {
       confirmSettled = true;
     });
 
+    let email: string | null = null;
+    // A failed read answers no: never hold a buyer back from what they bought.
+    const needsPassword = async () => {
+      if (!email) return false;
+      try {
+        const methods = await get<AuthMethods>('/api/account/auth-methods');
+        return methods.hasLocalPassword === false && methods.hasGoogleOAuth === false;
+      } catch {
+        return false;
+      }
+    };
+
     const poll = async () => {
       while (!cancelled) {
         // Taken before the read, so a confirm that lands while /api/me is in
@@ -61,16 +76,25 @@ function SubscriptionSuccessContent() {
 
         try {
           const response = await get<CurrentPrincipalResponse>('/api/me');
+          if (response.principal) email = response.principal.email ?? null;
           if (response.principal?.membership.active) {
+            const askPassword = await needsPassword();
             if (!cancelled) {
+              if (askPassword) setPasswordEmail(email);
               setConfirmation('active');
+              // This poll bypasses the identity store: tell it, or its pre-paint
+              // hint keeps saying non-member and the member is shown buy boxes.
+              identityStore.expire();
+              await identityStore.read().catch(() => undefined);
               await queryClient.invalidateQueries({ queryKey: queryKeys.userMe() });
 
               // Only once entitlement is genuinely live. Forwarding on the
               // Stripe redirect alone would land the buyer on the article
               // while the webhook is still in flight, and show them the very
               // paywall they just paid to remove.
-              if (returnTo && returnTo !== '/') {
+              // A buyer with no way to sign back in chooses a password first;
+              // the box takes them on to `returnTo`.
+              if (!askPassword && returnTo && returnTo !== '/') {
                 router.replace(returnTo);
               }
             }
@@ -87,7 +111,10 @@ function SubscriptionSuccessContent() {
         await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL_MS));
       }
 
-      if (!cancelled) setConfirmation('pending');
+      const askPassword = await needsPassword();
+      if (cancelled) return;
+      if (askPassword) setPasswordEmail(email);
+      setConfirmation('pending');
     };
 
     void poll();
@@ -150,7 +177,17 @@ function SubscriptionSuccessContent() {
               {body}
             </p>
 
-            {sessionId && (
+            {passwordEmail ? (
+              <ChoosePassword
+                email={passwordEmail}
+                onDone={() => {
+                  setPasswordEmail(null);
+                  if (confirmation === 'active' && returnTo && returnTo !== '/') router.replace(returnTo);
+                }}
+              />
+            ) : null}
+
+            {sessionId && !passwordEmail && (
               <div className="bg-white border border-[#e5e2dc] rounded-sm p-4 mb-6 text-left">
                 <p className="text-[0.82rem] text-[#6b6a68]">
                   <span className="font-medium text-[#4f4e4b]">Session ID:</span> {sessionId}

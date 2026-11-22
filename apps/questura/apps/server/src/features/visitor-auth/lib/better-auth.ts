@@ -12,6 +12,7 @@ import { sendPasswordResetLinkEmail, sendVisitorEmailVerificationLinkEmail } fro
 import { syncStripeCustomerEmail } from '@/payments/lib/customer-linkage'
 import { APP_CONFIG, APP_URLS } from '@/shared/config'
 import { normalizeEmail } from '@/shared/lib/normalize-email'
+import { CHECKOUT_SIGN_UP_PATH, checkoutSignUp } from './checkout-sign-up'
 import { VISITOR_AUTH_CLIENT_IP_HEADER } from './client-identity'
 import { googleProviderOptions } from './google-provider'
 import { redisSecondaryStorage } from './redis-secondary-storage'
@@ -265,15 +266,18 @@ export const visitorAuth = betterAuth({
     },
   },
   socialProviders: googleProvider,
-  plugins: APP_CONFIG.isProduction && APP_CONFIG.turnstile.enabled
-    ? [
-        captcha({
-          provider: 'cloudflare-turnstile',
-          secretKey: APP_CONFIG.turnstile.secretKey,
-          endpoints: ['/sign-up/email', '/sign-in/email', '/request-password-reset'],
-        }),
-      ]
-    : [],
+  plugins: [
+    checkoutSignUp({ verificationCallbackURL: APP_URLS.frontendUrl('/') }),
+    ...(APP_CONFIG.isProduction && APP_CONFIG.turnstile.enabled
+      ? [
+          captcha({
+            provider: 'cloudflare-turnstile',
+            secretKey: APP_CONFIG.turnstile.secretKey,
+            endpoints: ['/sign-up/email', CHECKOUT_SIGN_UP_PATH, '/sign-in/email', '/request-password-reset'],
+          }),
+        ]
+      : []),
+  ],
   rateLimit: {
     enabled: true,
     window: 60,
@@ -283,6 +287,7 @@ export const visitorAuth = betterAuth({
     customRules: {
       '/sign-in/email': { window: 60, max: 10 },
       '/sign-up/email': { window: 60, max: 5 },
+      [CHECKOUT_SIGN_UP_PATH]: { window: 60, max: 5 },
       '/request-password-reset': { window: 60, max: 5 },
       '/reset-password': { window: 60, max: 5 },
       '/send-verification-email': { window: 60, max: 3 },

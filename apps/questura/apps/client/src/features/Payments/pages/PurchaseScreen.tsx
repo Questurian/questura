@@ -57,8 +57,9 @@ export default function PurchasePage({
   const handleAuthSuccess = async () => {
     // Refresh auth state - page will re-render and show payment section
     queryClient.invalidateQueries({ queryKey: queryKeys.userMe() });
-    // Note: We don't auto-trigger handleSubscribe here
-    // The page will re-render with isAuthenticated=true and show the payment button
+    // Signing in to an account that already exists never auto-starts checkout:
+    // it may be a member's. The page re-renders with the payment button.
+    // A brand-new buyer goes straight on (`onCheckoutSignUp` below).
   };
 
   const handleResendVerificationEmail = async () => {
@@ -125,17 +126,22 @@ export default function PurchasePage({
                   <h3 className="font-display text-[1.1rem] text-[#1A1A1A] mb-2 text-center">
                     {authFormState.showPasswordStep
                       ? (authFormState.isSignUp ? 'Create Account To Complete Purchase' : 'Log In To Complete Purchase')
-                      : 'Sign In To Complete Your Purchase'}
+                      : 'Where Should We Send Your Membership?'}
                   </h3>
                   <p className="text-[0.88rem] text-[#6b6a68] leading-[1.65] mb-6 text-center">
                     {authFormState.showPasswordStep
                       ? (authFormState.isSignUp
                           ? 'Set up your password to create your account and proceed to checkout.'
                           : 'Enter your password to sign in and proceed to checkout.')
-                      : 'If you have an account, you will be asked to sign in with your password. If not, the provided email address will be used to create a new account.'}
+                      : 'Enter your email and go straight to payment. You choose a password after you pay. Already have an account? Use its email to sign in.'}
                   </p>
 
-                  <EnhancedAuthForm inModal={true} onSuccess={handleAuthSuccess} onModeChange={handleAuthFormStateChange} />
+                  <EnhancedAuthForm
+                    inModal={true}
+                    onSuccess={handleAuthSuccess}
+                    onModeChange={handleAuthFormStateChange}
+                    onCheckoutSignUp={pricingUnavailable ? undefined : handleSubscribe}
+                  />
                 </div>
               ) : (
                 <div>

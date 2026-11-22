@@ -45,7 +45,7 @@ test('journey 2: the paywall leads to the plans, at the catalog prices, and the 
   await expectNoHorizontalScroll(page)
 })
 
-test('journey 2: a new reader signs up, verifies, pays and lands back on the open article', async ({ page, context }) => {
+test('journey 2: a new reader gives an email, pays, chooses a password and lands back on the open article', async ({ page, context }) => {
   test.skip(!SANDBOX, 'writes: sandbox only')
   const email = freshEmail('buyer')
   const since = new Date().toISOString()
@@ -65,25 +65,9 @@ test('journey 2: a new reader signs up, verifies, pays and lands back on the ope
   await page.getByRole('link', { name: 'Choose monthly' }).click()
   await expect(page).toHaveURL((url) => url.pathname === '/purchase/monthly')
 
-  // Sign up inside the purchase page.
+  // An email and nothing else: the next page is Stripe's.
   await page.locator('input[name=email]').fill(email)
-  await page.getByRole('button', { name: 'Continue', exact: true }).click()
-  await page.locator('input[name=password]').fill(NEW_PASSWORD)
-  await page.getByRole('button', { name: 'Create account' }).click()
-  await expectSignedIn(page)
-
-  // The verification mail arrives in the fake mailbox; its link verifies.
-  const verification = await mailTo(email, /verif/i, since)
-  const link = verification.links.find((href) => href.includes('verify-email'))
-  expect(link, `a verify-email link in ${JSON.stringify(verification.links)}`).toBeTruthy()
-  await page.goto(link!)
-
-  // Back to the purchase, as the reader would, and pay.
-  await page.goto(`/purchase/monthly?returnTo=${encodeURIComponent(ARTICLE)}`)
-  const subscribe = page.getByRole('button', { name: /^Subscribe Now/ })
-  await expect(subscribe).toBeEnabled()
-  await expect(page.getByText(/email isn.t verified/i)).toHaveCount(0)
-  await subscribe.click()
+  await page.getByRole('button', { name: 'Continue to payment', exact: true }).click()
   await page.waitForURL(new RegExp(`^${FAKE_STRIPE}/__fake/pay/`))
   const sessionId = new URL(page.url()).pathname.split('/').pop()!
 
@@ -95,10 +79,18 @@ test('journey 2: a new reader signs up, verifies, pays and lands back on the ope
   expect(session.success_url).toContain('/subscription/success')
   await page.goto(session.success_url!.replace('{CHECKOUT_SESSION_ID}', sessionId))
 
+  // The password is asked for after the money.
+  await page.getByLabel('Password', { exact: true }).fill(NEW_PASSWORD)
+  await page.getByRole('button', { name: 'Save and continue' }).click()
+
   // The success page waits for membership, then returns the reader to the article.
   await expect(page).toHaveURL((url) => url.pathname === ARTICLE, { timeout: 15_000 })
   await expect(page.getByText(MEMBER_ARTICLE.memberOnlyText).first()).toBeVisible()
   await expect(page.locator('[data-paywalled]')).toHaveCount(0)
   await expectNoHorizontalScroll(page)
+
+  // The address still gets its verification link.
+  const verification = await mailTo(email, /verif/i, since)
+  expect(verification.links.some((href) => href.includes('verify-email'))).toBe(true)
   expect(realStripe).toBe(0)
 })
