@@ -74,7 +74,7 @@ export const APP_CONFIG = {
     secretKey: process.env.STRIPE_SECRET_KEY || '',
     webhookSecret: process.env.STRIPE_WEBHOOK_SECRET || '',
     // `STRIPE_PRICE_ID` is the pre-plan monthly fallback. Laptop $0.50 vs
-    // catalog $12.99 / $79.99 is a host env switch — docs/membership-pricing.md.
+    // catalog prices is a host env switch — docs/membership-pricing.md.
     priceId: process.env.STRIPE_PRICE_ID || '',
     monthlyPriceId: process.env.STRIPE_PRICE_ID_MONTHLY || process.env.STRIPE_PRICE_ID || '',
     yearlyPriceId: process.env.STRIPE_PRICE_ID_YEARLY || '',

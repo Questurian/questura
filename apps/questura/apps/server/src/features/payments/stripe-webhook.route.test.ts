@@ -942,8 +942,8 @@ describe('Stripe webhook route', () => {
       return {
         id: 'ch_1',
         object: 'charge',
-        amount: 1_299,
-        amount_refunded: 1_299,
+        amount: 499,
+        amount_refunded: 499,
         refunded: true,
         payment_intent: 'pi_1',
         ...overrides,

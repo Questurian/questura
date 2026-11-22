@@ -8,18 +8,18 @@
  *
  * Site always advertises these catalog amounts. Laptop Checkout may charge
  * $0.50. That mismatch is intentional until serverless launch. Do not "fix"
- * the UI down to $0.50. To charge the real $12.99 / $79.99 for one test,
+ * the UI down to $0.50. To charge the catalog amounts for one test,
  * point host STRIPE_PRICE_ID_* at `STRIPE_MEMBERSHIP_PRICES.catalog` and
  * restart questura-server. See the doc.
  */
 export const MEMBERSHIP_CATALOG = {
   monthly: {
-    amount: 1299,
+    amount: 499,
     currency: 'usd',
     interval: 'month',
   },
   yearly: {
-    amount: 7999,
+    amount: 3999,
     currency: 'usd',
     interval: 'year',
   },

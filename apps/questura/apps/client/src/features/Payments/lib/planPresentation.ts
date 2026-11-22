@@ -1,5 +1,5 @@
 /**
- * What membership costs to advertise. Catalog $12.99 / $79.99, not the laptop
+ * What membership costs to advertise. The catalog, not the laptop
  * $0.50 test charge. Mismatch is intentional until serverless.
  * See apps/questura/docs/membership-pricing.md.
  */
@@ -8,7 +8,7 @@ export type PlanId = 'monthly' | 'yearly';
 export type MembershipPlan = {
   id: PlanId;
   priceId: string;
-  /** Catalog amount in minor units ($12.99 or $79.99). Not the laptop test charge. */
+  /** Catalog amount in minor units. Not the laptop test charge. */
   amount: number;
   currency: string;
   interval: string;

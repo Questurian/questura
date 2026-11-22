@@ -1,6 +1,7 @@
 # Membership pricing
 
-> **Since 2026-09-26 Checkout charges the catalog: $12.99/month, $79.99/year.**
+> **Checkout charges the catalog: $4.99/month, $39.99/year.** Until the
+> November 2026 price change it was $12.99/month, $79.99/year.
 > The Linux laptop is retired and live runs on Railway + Cloudflare + Neon.
 > The $0.50 laptop test price is not used by any checkout; the two $0.50
 > subscriptions were refunded and canceled. Sections below that describe the
@@ -17,8 +18,8 @@ are **prices on that product**. Do not create another product for testing.
 
 | What | Amount | Where it lives |
 |---|---|---|
-| **Catalog** (what the site says) | **$12.99 / month**, **$79.99 / year** | `membership-catalog.ts` → `/api/payments/plans` → server-rendered `/join`, client `/purchase` |
-| **Nav Subscribe button** | **`Join: $1.55/wk` / `Subscribe: under $1.55/wk`** | Hardcoded in `SubscribeButton.tsx`. Not a bug. Do not wire plans/Stripe into it. |
+| **Catalog** (what the site says) | **$4.99 / month**, **$39.99 / year** | `membership-catalog.ts` → `/api/payments/plans` → server-rendered `/join`, client `/purchase` |
+| **Nav Subscribe button** | **`Join: $0.77/wk` / `Subscribe: under $0.77/wk`** | Hardcoded in `SubscribeButton.tsx`. Not a bug. Do not wire plans/Stripe into it. |
 | **Old laptop test charge** (retired, used by no checkout) | $0.50 / month | Was the laptop's `STRIPE_PRICE_ID_MONTHLY` |
 
 The site advertises the catalog and Checkout charges it. The laptop used to
@@ -58,6 +59,20 @@ the catalog`, or `Stripe would charge more than the catalog price`).
 Monthly and yearly point at the catalog price IDs on the Railway API.
 Advertised = charged.
 
+## Changing the price
+
+A catalog amount below the configured Stripe price refuses that plan, so the
+order decides whether anyone can buy.
+
+- **Making it cheaper:** set the new price IDs on Railway with `skipDeploys`
+  first, then merge the catalog change. Never the catalog first.
+- **Going back up (rollback of a cut):** the other way round. Revert the
+  catalog and wait until the API reports that commit, then set the old price
+  IDs and redeploy. Old IDs under the cheaper catalog refuse both plans.
+- **A new yearly price carries its own `compare_at_amount`** metadata, 12 x
+  the new monthly amount. Never copy it from the old price: `/purchase/yearly`
+  prints it as the crossed-out price and works out "Save" from it alone.
+
 ## Switch: $0.50 test charge ↔ real catalog charge (historical, laptop only)
 
 Price IDs are also in `apps/questura/apps/server/src/features/payments/lib/membership-catalog.ts`.
@@ -76,7 +91,7 @@ STRIPE_PRICE_ID=price_1U5aq5BUOUSxLiOZMnZHT1eS
 STRIPE_PRICE_ID_MONTHLY=price_1U5aq5BUOUSxLiOZMnZHT1eS
 ```
 
-**One real-price test — charge $12.99 / $79.99:**
+**One real-price test — charged $12.99 / $79.99 (the prices of the time):**
 
 ```
 STRIPE_PRICE_ID=price_1U4P3aBUOUSxLiOZfKskTKeO
@@ -113,7 +128,7 @@ collects, files and remits sales tax/VAT in 80+ countries, for +3.5% per sale.
   and 3DS choices. `/api/payments/plans` answers `taxAtCheckout: true` and
   `/join` adds "Sales tax or VAT is added at checkout where it applies, and
   checkout may show the total in your own currency."
-- **Prices stay $12.99 / $79.99 before tax.** The price's tax behaviour is left
+- **The catalog prices are before tax.** The price's tax behaviour is left
   unset, so Stripe adds tax on top where it applies. The catalog check above
   is unaffected: it reads the price, not the charged total.
 - **Only new checkouts.** A subscription bought while the switch was off

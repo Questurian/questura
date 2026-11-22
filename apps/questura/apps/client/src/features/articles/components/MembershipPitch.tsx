@@ -25,7 +25,7 @@ export function MembershipPitch({ path }: { path: string }): JSX.Element {
           Every place on our maps, the day-by-day itineraries, the guides linked on this page, and the audio.
         </p>
         <p className="mt-3 font-display text-[17px] italic leading-[1.6] text-foreground/80 sm:text-[18px]">
-          $12.99 a month. Just the one trip? Cancel anytime and keep the rest of your month.
+          $4.99 a month. Just the one trip? Cancel anytime and keep the rest of your month.
         </p>
         <Link
           href={`/join?returnTo=${encodeURIComponent(path)}#plans`}

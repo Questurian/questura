@@ -25,7 +25,7 @@ import {
 const TARGET: Target = {
   client: 'https://www.example.test',
   api: 'https://api.example.test',
-  expectPrices: { monthly: 1299, yearly: 7999 },
+  expectPrices: { monthly: 499, yearly: 3999 },
   allowHttp: false,
   rateLimitProbe: false,
 }
@@ -82,7 +82,7 @@ function fakeServer(behaviour: Behaviour = {}): typeof fetch {
     frame: "frame-ancestors 'none'",
     homeCache: 'public, s-maxage=300',
     homeSetsCookie: false,
-    prices: [1299, 7999],
+    prices: [499, 3999],
     meCache: 'no-store, no-cache, must-revalidate',
     meVary: 'Origin, Cookie',
     foreignStatus: 403,
@@ -208,7 +208,7 @@ describe('launch-verify checks', () => {
     ['no HSTS', { hsts: null }, /HSTS/],
     ['framable site', { frame: null }, /framed/],
     ['Set-Cookie on a cacheable page', { homeSetsCookie: true }, /Set-Cookie/],
-    ['laptop price instead of catalog', { prices: [50, 7999] }, /monthly price/],
+    ['laptop price instead of catalog', { prices: [50, 3999] }, /monthly price/],
     ['cacheable /api/me', { meCache: 'public, max-age=60' }, /no-store/],
     ['/api/me not varying on Cookie', { meVary: 'Origin' }, /varies on Cookie/],
     ['foreign origin accepted', { foreignStatus: 200 }, /foreign origin/],

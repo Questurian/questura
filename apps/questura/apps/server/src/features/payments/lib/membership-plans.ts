@@ -6,7 +6,7 @@ import { stripe } from './stripe'
 /**
  * The membership plans Questura sells.
  *
- * Advertised amounts come from `MEMBERSHIP_CATALOG` ($12.99/month, $79.99/year).
+ * Advertised amounts come from `MEMBERSHIP_CATALOG`.
  * Checkout charges whichever Stripe price ID is in host env. On the laptop that
  * is usually $0.50/month on the same product. Intentional until serverless.
  * Do not copy Stripe `unit_amount` onto the page.
@@ -17,7 +17,7 @@ export type PlanId = 'monthly' | 'yearly'
 export type MembershipPlan = {
   id: PlanId
   priceId: string
-  /** Catalog amount in minor units ($12.99 or $79.99). Not the laptop test charge. */
+  /** Catalog amount in minor units. Not the laptop test charge. */
   amount: number
   currency: string
   /** Catalog billing interval, verified against Stripe so yearly cannot bill monthly. */
@@ -100,7 +100,7 @@ export async function getPurchasablePlan(plan: PlanId): Promise<MembershipPlan |
     }
 
     // Cheaper than catalog = laptop test charge. More than catalog = we would
-    // advertise $12.99 and charge more, which is the dispute. Refuse that plan.
+    // advertise one price and charge more, which is the dispute. Refuse that plan.
     if (stripeAmount > catalog.amount) {
       logger.error('Stripe would charge more than the catalog price; refusing to advertise', {
         plan,

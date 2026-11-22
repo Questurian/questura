@@ -8,8 +8,8 @@ export type JoinPricing = { plans: MembershipPlan[]; taxAtCheckout: boolean };
 
 // Presentation fixtures only. Never passed to a checkout request.
 export const LOCAL_JOIN_PLANS: MembershipPlan[] = [
-  { id: 'monthly', priceId: '', amount: 1299, currency: 'usd', interval: 'month', intervalCount: 1, productName: 'Questurian Membership', compareAtAmount: null },
-  { id: 'yearly', priceId: '', amount: 7999, currency: 'usd', interval: 'year', intervalCount: 1, productName: 'Questurian Membership', compareAtAmount: null },
+  { id: 'monthly', priceId: '', amount: 499, currency: 'usd', interval: 'month', intervalCount: 1, productName: 'Questurian Membership', compareAtAmount: null },
+  { id: 'yearly', priceId: '', amount: 3999, currency: 'usd', interval: 'year', intervalCount: 1, productName: 'Questurian Membership', compareAtAmount: null },
 ];
 
 export function isLocalJoinPreview(frontendUrl: string): boolean {

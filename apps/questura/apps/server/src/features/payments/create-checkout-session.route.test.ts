@@ -476,7 +476,7 @@ describe('create checkout session price validation', () => {
   })
 
   // The one mismatch that is deliberate: the laptop bills $0.50/month on the
-  // same product while the site advertises $12.99. Validation must not break
+  // same product while the site advertises $4.99. Validation must not break
   // that. See apps/questura/docs/membership-pricing.md.
   it('still sells the cheaper laptop test charge', async () => {
     mocks.stripePriceRetrieve.mockResolvedValue(

@@ -25,8 +25,8 @@ async function paywallToPlans(page: Page) {
   await page.getByRole('link', { name: 'Become a member to unlock', exact: true }).click()
   await expect(page).toHaveURL((url) => url.pathname === '/join' && url.searchParams.get('returnTo') === ARTICLE)
   // The site always advertises the catalog prices (AGENTS.md, membership pricing).
-  await expect(page.getByText('$12.99', { exact: true }).first()).toBeVisible()
-  await expect(page.getByText('$79.99', { exact: true }).first()).toBeVisible()
+  await expect(page.getByText('$4.99', { exact: true }).first()).toBeVisible()
+  await expect(page.getByText('$39.99', { exact: true }).first()).toBeVisible()
   // Tax is promised only when checkout adds it (Stripe Managed Payments on);
   // the old unconditional "Plus tax where applicable" sat over a checkout
   // that charged none.

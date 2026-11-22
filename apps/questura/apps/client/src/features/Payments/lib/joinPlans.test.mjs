@@ -22,13 +22,13 @@ test('local preview needs no backend and carries no checkout price IDs', async (
   });
   assert.equal(taxAtCheckout, false);
   assert.deepEqual(plans.map(({ id, amount, priceId }) => ({ id, amount, priceId })), [
-    { id: 'monthly', amount: 1299, priceId: '' },
-    { id: 'yearly', amount: 7999, priceId: '' },
+    { id: 'monthly', amount: 499, priceId: '' },
+    { id: 'yearly', amount: 3999, priceId: '' },
   ]);
 });
 
 test('deployed join preserves backend availability and bounds the public read', async () => {
-  const offered = [{ id: 'monthly', amount: 1299 }];
+  const offered = [{ id: 'monthly', amount: 499 }];
   const { plans } = await read('https://api.example.com', false, async (url, options) => {
     assert.equal(url, 'https://api.example.com/api/payments/plans');
     assert.equal(options.credentials, undefined);
@@ -62,7 +62,7 @@ test('rate-limited, unavailable and malformed reads throw instead of rendering n
 
 test('a failed read serves the last good plans this process saw', async () => {
   const store = new LastGood(1);
-  const offered = [{ id: 'monthly', amount: 1299 }];
+  const offered = [{ id: 'monthly', amount: 499 }];
   await read('https://api.example.com', false, async () => Response.json({ plans: offered, taxAtCheckout: true }), store);
   const pricing = await read(
     'https://api.example.com',
@@ -97,7 +97,7 @@ test('the plans read sends the render headers', async () => {
 // Checkout adds tax only while Stripe Managed Payments is on, and the server
 // says so. Anything short of an explicit true makes no tax promise.
 test('the tax promise follows the server, and defaults to none', async () => {
-  const offered = [{ id: 'monthly', amount: 1299 }];
+  const offered = [{ id: 'monthly', amount: 499 }];
   for (const [taxAtCheckout, expected] of [[true, true], [false, false], [undefined, false], ['true', false], [1, false]]) {
     const pricing = await read('https://api.example.com', false, async () =>
       Response.json({ plans: offered, taxAtCheckout }),
