@@ -25,8 +25,10 @@ const EXPLORE_LINKS: FooterLink[] = [
 ];
 
 const ABOUT_LINKS: FooterLink[] = [
+  { label: "About us", href: "/about" },
   { label: "Membership", href: "/join" },
   { label: "FAQ", href: "/faq" },
+  { label: "Contact", href: "/contact" },
 ];
 
 const LEGAL_LINKS: FooterLink[] = [

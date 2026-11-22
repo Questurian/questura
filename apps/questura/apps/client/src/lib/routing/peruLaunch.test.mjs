@@ -17,7 +17,7 @@ test('the public site keeps the five landing pages, Lima articles and reader rou
 
   for (const path of ['/', '/eat', '/stay', '/itineraries', '/peru/lima',
     '/peru/lima/guides/questurian-guide-lima', '/articles/older-guide-url',
-    '/account/bookmarks', '/purchase/monthly', '/newsletters/confirm']) {
+    '/account/bookmarks', '/purchase/monthly', '/newsletters/confirm', '/about', '/contact']) {
     assert.equal(isPublicPageEnabled(path), true, path)
   }
   for (const path of ['/peru', '/peru/paracas', '/colombia/medellin', '/mexico/mexico-city',

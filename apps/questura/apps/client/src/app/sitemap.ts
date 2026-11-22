@@ -51,6 +51,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   return [
     home,
+    // The site's own pages about itself: not content, so the API does not list them.
+    ...['/about', '/contact'].map((url) => toEntry({ url, lastModified: null }, SITEMAP_PRIORITY.index)),
     ...data.hubs.filter((entry) => !entry.comingSoon && isPublicPageEnabled(entry.url))
       .map((entry) => toEntry(entry, SITEMAP_PRIORITY.hub)),
     ...data.indexes.filter((entry) => isPublicPageEnabled(entry.url))
