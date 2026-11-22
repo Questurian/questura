@@ -8,18 +8,18 @@
  *
  * Site always advertises these catalog amounts. Laptop Checkout may charge
  * $0.50. That mismatch is intentional until serverless launch. Do not "fix"
- * the UI down to $0.50. To charge the real $12.99 / $79.99 for one test,
+ * the UI down to $0.50. To charge the catalog amounts for one test,
  * point host STRIPE_PRICE_ID_* at `STRIPE_MEMBERSHIP_PRICES.catalog` and
  * restart questura-server. See the doc.
  */
 export const MEMBERSHIP_CATALOG = {
   monthly: {
-    amount: 1299,
+    amount: 499,
     currency: 'usd',
     interval: 'month',
   },
   yearly: {
-    amount: 7999,
+    amount: 3999,
     currency: 'usd',
     interval: 'year',
   },
@@ -39,6 +39,13 @@ export const STRIPE_MEMBERSHIP_PRODUCT_ID = 'prod_V4XBrsC0ai3ZOY'
  */
 export const STRIPE_MEMBERSHIP_PRICES = {
   catalog: {
+    monthly: 'price_1UefQFBUOUSxLiOZk2yTyYVP',
+    yearly: 'price_1UefQFBUOUSxLiOZs3E6DB6Y',
+  },
+  // $12.99 / $79.99, sold until November 2026. Still active in Stripe: renewals
+  // and a rollback need them. Never point checkout at them under this catalog:
+  // both plans would be refused (docs/membership-pricing.md, "Changing the price").
+  previousCatalog: {
     monthly: 'price_1U4P3aBUOUSxLiOZfKskTKeO',
     yearly: 'price_1U4P3bBUOUSxLiOZMGh7ZrJL',
   },

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import { FakeStripeAccount } from './stripe-fake'
 
-const PRICES = { price_m: { amount: 1299, interval: 'month', currency: 'usd' } }
+const PRICES = { price_m: { amount: 499, interval: 'month', currency: 'usd' } }
 
 function paidAccount() {
   const account = new FakeStripeAccount(PRICES)
@@ -63,7 +63,7 @@ describe('readiness fake Stripe account', () => {
     const { account, charge } = paidAccount()
 
     expect(account.refundCharge(charge.id, 100)).toMatchObject({ amount_refunded: 100, refunded: false })
-    expect(account.refundCharge(charge.id)).toMatchObject({ amount_refunded: 1299, refunded: true })
+    expect(account.refundCharge(charge.id)).toMatchObject({ amount_refunded: 499, refunded: true })
     expect(account.refunds).toHaveLength(2)
   })
 

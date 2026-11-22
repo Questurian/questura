@@ -69,13 +69,13 @@ describe('getMembershipPlans', () => {
     expect(plans).toEqual([
       expect.objectContaining({
         id: 'monthly',
-        amount: 1299,
+        amount: 499,
         currency: 'usd',
         interval: 'month',
       }),
       expect.objectContaining({
         id: 'yearly',
-        amount: 7999,
+        amount: 3999,
         currency: 'usd',
         interval: 'year',
       }),
@@ -88,7 +88,7 @@ describe('getMembershipPlans', () => {
     const [monthly] = await getMembershipPlans()
 
     expect(monthly).toMatchObject({
-      amount: 1299,
+      amount: 499,
       currency: 'usd',
       interval: 'month',
       productName: 'Questurian Membership',
@@ -118,18 +118,18 @@ describe('getMembershipPlans', () => {
   it('carries a compare-at price from metadata', async () => {
     stubStripePrices(
       givenMonthly(),
-      givenYearly({ metadata: { compare_at_amount: '15588' } }),
+      givenYearly({ metadata: { compare_at_amount: '5988' } }),
     )
 
     const yearly = (await getMembershipPlans()).find((plan) => plan.id === 'yearly')
 
-    expect(yearly?.compareAtAmount).toBe(15588)
+    expect(yearly?.compareAtAmount).toBe(5988)
     expect(yearly?.interval).toBe('year')
   })
 
   it('ignores a compare-at price that is not above the catalog', async () => {
     stubStripePrices(
-      givenMonthly({ metadata: { compare_at_amount: '1299' } }),
+      givenMonthly({ metadata: { compare_at_amount: '499' } }),
       givenYearly(),
     )
 

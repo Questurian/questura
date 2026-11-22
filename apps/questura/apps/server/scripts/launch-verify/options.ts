@@ -153,8 +153,8 @@ export function parseOptions(argv: string[], env: Record<string, string | undefi
       bypassOrigin,
       originEdge,
       expectPrices: {
-        monthly: Number(arg('monthly-cents') ?? 1299),
-        yearly: Number(arg('yearly-cents') ?? 7999),
+        monthly: Number(arg('monthly-cents') ?? 499),
+        yearly: Number(arg('yearly-cents') ?? 3999),
       },
       allowHttp: flag('allow-http'),
       rateLimitProbe,

@@ -6,7 +6,7 @@ import { APP_CONFIG } from '@/shared/config'
 import { logger } from '@/shared/utils/logger'
 
 /**
- * Catalog amounts ($12.99 / $79.99), not the laptop $0.50 test charge.
+ * Catalog amounts, not the laptop $0.50 test charge.
  * Checkout uses the host Stripe price ID. See docs/membership-pricing.md.
  *
  * `taxAtCheckout` says whether checkout adds sales tax/VAT, so /join can

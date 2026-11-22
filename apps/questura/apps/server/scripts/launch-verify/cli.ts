@@ -31,8 +31,8 @@
  *                              origins are this machine): the three flags
  *                              above become optional, and whatever is left
  *                              out is printed as NOT RUN
- *   --monthly-cents <n>        advertised monthly price (default 1299)
- *   --yearly-cents <n>         advertised yearly price (default 7999)
+ *   --monthly-cents <n>        advertised monthly price (default 499)
+ *   --yearly-cents <n>         advertised yearly price (default 3999)
  *   --home <path>              page for the home check (default /, which must
  *                              redirect to a city that exists)
  *   --article <path>           article page for the host checks (default:
