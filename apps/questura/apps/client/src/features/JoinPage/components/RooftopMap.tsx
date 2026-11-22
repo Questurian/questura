@@ -22,19 +22,23 @@ export default function RooftopMap({ sizes }: { sizes: string }) {
 
   return (
     <figure className="jp-map" data-photo-frame>
-      <MapPicture
-        srcSmall={ROOFTOP_MAP.srcSmall}
-        src={ROOFTOP_MAP.src}
-        smallWidth={ROOFTOP_MAP.width}
-        width={ROOFTOP_MAP.width}
-        height={ROOFTOP_MAP.height}
-        sizes={sizes}
-        alt="Map of Lima with a dot for each of 18 rooftop bars, from the old center to Barranco"
-      />
-      <span className="jp-map-dots" data-photo-overlay aria-hidden="true">
-        {pins.map((pin) => (
-          <span key={pin.id} className="jp-map-dot" style={{ left: `${pin.x}%`, top: `${pin.y}%` }} />
-        ))}
+      {/* Picture and dots share one box at the picture's shape, so a frame
+          that crops the map (B on wide screens) crops both together. */}
+      <span className="jp-map-canvas">
+        <MapPicture
+          srcSmall={ROOFTOP_MAP.srcSmall}
+          src={ROOFTOP_MAP.src}
+          smallWidth={ROOFTOP_MAP.width}
+          width={ROOFTOP_MAP.width}
+          height={ROOFTOP_MAP.height}
+          sizes={sizes}
+          alt="Map of Lima with a dot for each of 18 rooftop bars, from the old center to Barranco"
+        />
+        <span className="jp-map-dots" data-photo-overlay aria-hidden="true">
+          {pins.map((pin) => (
+            <span key={pin.id} className="jp-map-dot" style={{ left: `${pin.x}%`, top: `${pin.y}%` }} />
+          ))}
+        </span>
       </span>
       <figcaption className="jp-map-credit" data-photo-overlay>
         © OpenStreetMap

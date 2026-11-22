@@ -30,13 +30,26 @@ export function PlansJump({ children }: { children: ReactNode }) {
   )
 }
 
-/** A guide as a row: square photo, title, one line about it. */
-export function GuideRow({ photo, title, hook }: { photo: JoinPhoto; title: string; hook: string }) {
+/**
+ * A guide as a row: square photo, title, one line about it. B's wide layout
+ * draws some rows as big cards, so those say how wide the photo gets.
+ */
+export function GuideRow({
+  photo,
+  title,
+  hook,
+  sizes = '(min-width: 768px) 96px, 72px',
+}: {
+  photo: JoinPhoto
+  title: string
+  hook: string
+  sizes?: string
+}) {
   return (
     <a href="#plans" className="jp-row">
       <Hidden />
       <span className="jp-thumb" data-photo-frame>
-        <JoinImage photo={photo} sizes="(min-width: 768px) 96px, 72px" frame={1} />
+        <JoinImage photo={photo} sizes={sizes} frame={1} />
       </span>
       <span className="jp-row-copy">
         <span className="jp-title">{title}</span>
@@ -98,11 +111,15 @@ export function GuideCard({
   )
 }
 
-/** The page's first button. The bottom bar shows once this has scrolled away. */
-export function BecomeMember() {
+/**
+ * The page's first button. The bottom bar shows once this has scrolled away.
+ * `price` carries on the button's sentence (B's phone layout shows it).
+ */
+export function BecomeMember({ price }: { price?: ReactNode }) {
   return (
     <a href="#plans" className="jp-button" data-join-start>
-      Become a member
+      {/* One span: the button is a flex box, which would eat the space before the price. */}
+      <span>Become a member{price}</span>
     </a>
   )
 }

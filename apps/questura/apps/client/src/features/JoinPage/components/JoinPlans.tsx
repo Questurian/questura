@@ -11,8 +11,8 @@ import {
 import messages from '../../../../messages/en.json'
 
 /*
- * "Choose your plan": identical in A and B, so the test measures only the
- * selling part above it. Annual first (owner, 2026-11-22). Every figure comes
+ * "Choose your plan": the same words and order in A and B. Monthly first
+ * (owner, 2026-11-22, replacing that morning's annual first). Every figure comes
  * from the plans endpoint through planPresentation.ts, never typed in. The
  * recorder reads `.join-plan-card`, `.join-plan-name` and `.join-plan-price`
  * (lib/journey/observe.ts): keep all three.
@@ -107,55 +107,59 @@ export default function JoinPlans({
   return (
     <section id="plans" className="jp-plans" aria-labelledby="plans-title">
       <div className="jp-container">
-        <h2 id="plans-title" className="jp-section-title">
-          {both ? 'Choose your plan' : 'Become a member'}
-        </h2>
-        <ul className="jp-benefits">
-          {BENEFITS.map(({ Icon, text }, i) => (
-            <li key={i}>
-              <Icon className="jp-icon-24" aria-hidden="true" absoluteStrokeWidth strokeWidth={1.5} />
-              <span>{text}</span>
-            </li>
-          ))}
-        </ul>
-        {monthly || yearly ? (
-          <>
-            <div className={`jp-plan-cards${both ? '' : ' jp-plan-cards--single'}`}>
-              {yearly ? (
-                <PlanCard
-                  annual
-                  name="Annual"
-                  plan={yearly}
-                  badge={saving ? `Save ${saving.percentOff}%` : null}
-                  note={perMonth ? `${perMonth} a month, paid yearly` : null}
-                  href="/purchase/yearly"
-                  button="Choose annual"
-                  preview={preview}
-                />
-              ) : null}
-              {monthly ? (
-                <PlanCard
-                  name="Monthly"
-                  plan={monthly}
-                  badge={null}
-                  note={`Billed every ${formatPlanInterval(monthly)}`}
-                  href="/purchase/monthly"
-                  button="Choose monthly"
-                  preview={preview}
-                />
-              ) : null}
-            </div>
-            <p className="jp-plans-terms">{termsLine(taxAtCheckout)}</p>
-          </>
-        ) : (
-          <p className="jp-plans-terms">Memberships are temporarily unavailable. Please try again shortly.</p>
-        )}
-        {/* Local only: the plan buttons are dead under a localhost frontend. */}
-        {preview ? (
-          <p className="jp-preview-note" role="status">
-            {messages.join.localPreview}
-          </p>
-        ) : null}
+        <div className="jp-plans-intro">
+          <h2 id="plans-title" className="jp-section-title">
+            {both ? 'Choose your plan' : 'Become a member'}
+          </h2>
+          <ul className="jp-benefits">
+            {BENEFITS.map(({ Icon, text }, i) => (
+              <li key={i}>
+                <Icon className="jp-icon-24" aria-hidden="true" absoluteStrokeWidth strokeWidth={1.5} />
+                <span>{text}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div className="jp-plans-offer">
+          {monthly || yearly ? (
+            <>
+              <div className={`jp-plan-cards${both ? '' : ' jp-plan-cards--single'}`}>
+                {monthly ? (
+                  <PlanCard
+                    name="Monthly"
+                    plan={monthly}
+                    badge={null}
+                    note={`Billed every ${formatPlanInterval(monthly)}`}
+                    href="/purchase/monthly"
+                    button="Choose monthly"
+                    preview={preview}
+                  />
+                ) : null}
+                {yearly ? (
+                  <PlanCard
+                    annual
+                    name="Annual"
+                    plan={yearly}
+                    badge={saving ? `Save ${saving.percentOff}%` : null}
+                    note={perMonth ? `${perMonth} a month, paid yearly` : null}
+                    href="/purchase/yearly"
+                    button="Choose annual"
+                    preview={preview}
+                  />
+                ) : null}
+              </div>
+              <p className="jp-plans-terms">{termsLine(taxAtCheckout)}</p>
+            </>
+          ) : (
+            <p className="jp-plans-terms">Memberships are temporarily unavailable. Please try again shortly.</p>
+          )}
+          {/* Local only: the plan buttons are dead under a localhost frontend. */}
+          {preview ? (
+            <p className="jp-preview-note" role="status">
+              {messages.join.localPreview}
+            </p>
+          ) : null}
+        </div>
       </div>
     </section>
   )
