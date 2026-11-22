@@ -237,10 +237,10 @@ test('web vitals: a cancelled reporter cannot replace the reading page', async (
   })
   await page.goto('/join')
   await expect.poll(() => cancelled, { message: 'the reporter chunk was cancelled' }).toBe(true)
-  await expect(page.getByRole('heading', { name: 'Know more. Travel better.' })).toBeVisible()
+  await expect(page.locator('main h1')).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Something went wrong' })).toHaveCount(0)
   await page.unroute(/\/_next\/static\/chunks\/\d+\.[0-9a-f]+\.js$/)
   // The new document must recover normally, rather than cache the failed import.
   await page.reload()
-  await expect(page.getByRole('heading', { name: 'Know more. Travel better.' })).toBeVisible()
+  await expect(page.locator('main h1')).toBeVisible()
 })

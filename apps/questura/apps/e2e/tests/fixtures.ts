@@ -174,7 +174,7 @@ export async function gated(context: BrowserContext): Promise<BrowserContext> {
       (route) => route.continue({ headers: { ...route.request().headers(), 'cf-connecting-ip': address } }),
     )
     // /join's showcase photos are fixed files on the production CDN
-    // (joinShowcase.ts), and the sandbox has no internet: its proxy refuses
+    // (features/JoinPage/data/photos.ts), and the sandbox has no internet: its proxy refuses
     // them. A blank pixel stands in, as the fake Stripe does for Stripe.
     await context.route(/^https:\/\/questurian-cdn\.b-cdn\.net\//, (route) =>
       route.fulfill({ status: 200, contentType: 'image/gif', body: BLANK_GIF }),

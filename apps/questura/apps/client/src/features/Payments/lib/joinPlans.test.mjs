@@ -106,9 +106,17 @@ test('the tax promise follows the server, and defaults to none', async () => {
   }
 });
 
-test('hero visibility no longer depends on image decode or hydration', () => {
-  const css = readFileSync(new URL('../../../app/styles/global/membership.css', import.meta.url), 'utf8');
-  const hero = readFileSync(new URL('../components/JoinHeroVisual.tsx', import.meta.url), 'utf8');
-  assert.doesNotMatch(css, /data-join-hero-ready|join-hero-copy-reveal|join-hero-visual-enter/);
-  assert.doesNotMatch(hero, /JoinHeroReady|heroReadyScript/);
-});
+// The headline must never wait on a photo or on hydration: it is what a
+// reader from Instagram reads first, and on B it is the largest paint.
+test('the join headlines do not wait for a photo, and the globe is gone', () => {
+  const css = readFileSync(new URL('../../../app/styles/global/membership.css', import.meta.url), 'utf8')
+  const layout = readFileSync(new URL('../../../app/join/layout.tsx', import.meta.url), 'utf8')
+  assert.doesNotMatch(css, /join-hero|join-ticker/)
+  assert.doesNotMatch(layout, /GLOBE|preload/)
+  for (const design of ['TripPage.tsx', 'FrontPage.tsx']) {
+    const source = readFileSync(new URL(`../../JoinPage/${design}`, import.meta.url), 'utf8')
+    const h1 = source.slice(source.indexOf('<h1'), source.indexOf('</h1>'))
+    assert.ok(h1, `${design} has its h1`)
+    assert.doesNotMatch(h1, /data-photo-overlay/, `${design}: the headline would wait for the photo`)
+  }
+})

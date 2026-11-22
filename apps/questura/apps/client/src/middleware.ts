@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { isDirectArmPath, previewArm } from '@/lib/experiments/joinTest'
 import { canonicalRedirect } from '@/lib/routing/canonicalHost'
 import { isPublicPageEnabled } from '@/lib/routing/peruLaunch'
 import { sameSiteLocation } from '@/lib/routing/sameSiteRedirect'
@@ -95,8 +96,19 @@ export function middleware(request: NextRequest) {
   }
 
   // The site's own 404 page, not a bare plain-text one (app/page-not-found).
-  if (!isPublicPageEnabled(pathname)) {
+  // The pages /join is served from answer only through the rewrite below.
+  if (!isPublicPageEnabled(pathname) || isDirectArmPath(pathname)) {
     return NextResponse.rewrite(new URL(NOT_FOUND_PAGE_PATH, request.url), { status: 404 })
+  }
+
+  if (pathname === '/join') {
+    const preview = previewArm(request.nextUrl.searchParams.get('show'))
+    if (preview) {
+      // Only the path changes: returnTo and campaign tags survive.
+      const target = request.nextUrl.clone()
+      target.pathname = `/join/${preview}`
+      return NextResponse.rewrite(target)
+    }
   }
 
   return NextResponse.next()

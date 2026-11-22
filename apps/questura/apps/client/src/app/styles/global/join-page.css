@@ -1,0 +1,1229 @@
+/* ===== /join: designs A ("The trip") and B ("The front page") ===== */
+
+/*
+ * B's headline face, preloaded only by B (FrontPage.tsx): Archivo's capitals,
+ * figures and punctuation, still variable (set to width 72 on .jp-banner). `block`: the words
+ * wait for it (a 13.5 kB file, asked for with the document) rather than show
+ * in a wider fallback and jump when it lands. A never uses it, so never
+ * downloads it.
+ */
+@font-face {
+  font-family: 'Join Banner';
+  font-style: normal;
+  font-weight: 800;
+  font-display: block;
+  src: url('/fonts/archivo-banner-72-800-v1.woff2') format('woff2');
+  unicode-range: U+20-21, U+26-27, U+2C-2E, U+30-39, U+3F, U+41-5A, U+2019;
+}
+
+/*
+ * Loaded by /join only (join-route.css). The plan cards' moving border is in
+ * membership.css, which the listicles share.
+ *
+ * Every size comes from the tokens below: the type scale and the 4px spacing
+ * scale (4, 8, 12, 16, 24, 32, 48, 64, 96, and 20 for the page inset only).
+ * Colours are the site's (foundations.css) plus the join page's own navy, ice
+ * and teal. Square photos and cards, 4px buttons, no shadows.
+ */
+
+.jp {
+  --jp-inset: 20px;
+  --jp-section: 32px;
+  --jp-nav: 55px;
+  --jp-gap: 12px;
+  --jp-grid: 8px;
+  --jp-heading: 16px;
+  --jp-photo-copy: 16px;
+  --jp-card-pad: 16px;
+  --jp-navy: #031522;
+  --jp-navy-2: #041a29;
+  --jp-ice: #cde7f0;
+  --jp-teal: #7df0e2;
+  --jp-muted: color-mix(in srgb, var(--foreground) 74%, var(--background));
+  --jp-on-dark: color-mix(in srgb, var(--background) 80%, var(--jp-navy-2));
+
+  color: var(--foreground);
+  background: var(--background);
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  font-variant-numeric: lining-nums;
+  font-synthesis: none;
+  -webkit-font-smoothing: antialiased;
+}
+
+@media (max-width: 359px) {
+  .jp {
+    --jp-inset: 16px;
+  }
+}
+
+@media (min-width: 768px) {
+  .jp {
+    --jp-inset: 32px;
+    --jp-section: 64px;
+    --jp-gap: 16px;
+    --jp-grid: 16px;
+    --jp-heading: 24px;
+    --jp-photo-copy: 24px;
+    --jp-card-pad: 24px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .jp {
+    --jp-nav: 64px;
+  }
+}
+
+/* Smooth jumps to the plans. The scroll padding is the navbar's height, so a
+   jump lands just under the sticky navbar and a link reached by keyboard is
+   never hidden under it (it does the job of each anchor's scroll-margin-top,
+   and the two would add up). A focused link is also kept clear of the bottom
+   bar. */
+html:has(.jp) {
+  scroll-behavior: smooth;
+  scroll-padding-top: 55px;
+  scroll-padding-bottom: var(--jp-bar-space, 0px);
+}
+
+@media (min-width: 1024px) {
+  html:has(.jp) {
+    scroll-padding-top: 64px;
+  }
+}
+
+.jp-container {
+  width: 100%;
+  max-width: calc(1120px + 2 * var(--jp-inset));
+  margin-inline: auto;
+  padding-inline: var(--jp-inset);
+}
+
+/* ---------- Type scale (01-DESIGN-AND-POLISH.md) ---------- */
+
+.jp :is(h1, h2, h3) {
+  text-wrap: balance;
+}
+
+.jp p {
+  text-wrap: pretty;
+}
+
+.jp .jp-nowrap {
+  white-space: nowrap;
+}
+
+.jp-a-title {
+  font: 600 44px/44px var(--font-display);
+  font-variant-numeric: lining-nums;
+  letter-spacing: -0.01em;
+}
+
+.jp-a-title > span {
+  display: block;
+}
+
+@media (max-width: 359px), (max-height: 599px) {
+  .jp-a-title {
+    font-size: 36px;
+    line-height: 40px;
+  }
+}
+
+.jp-banner {
+  color: var(--accent);
+  font-family: 'Join Banner', 'Arial Narrow', sans-serif;
+  font-weight: 800;
+  font-size: clamp(40px, 13vw, 64px);
+  /* The subset keeps Archivo's width axis: 72 is the narrow cut. */
+  font-variation-settings: 'wdth' 72;
+  line-height: 0.9;
+  text-transform: uppercase;
+}
+
+.jp-banner > span {
+  display: block;
+  /* Two lines whatever the face: a late font can never change the height. */
+  white-space: nowrap;
+}
+
+.jp-section-title,
+.jp-day-title,
+.jp-lead-title {
+  font: 600 28px/32px var(--font-display);
+  font-variant-numeric: lining-nums;
+}
+
+.join-plan-name {
+  font: 600 24px/28px var(--font-display);
+  font-variant-numeric: lining-nums;
+}
+
+.jp-lead-text {
+  max-width: 34rem;
+  font: 400 18px/28px var(--font-display);
+  font-variant-numeric: lining-nums;
+}
+
+.jp-title {
+  display: block;
+  font: 600 18px/24px var(--font-display);
+  font-variant-numeric: lining-nums;
+  text-wrap: balance;
+}
+
+.jp-small-title {
+  display: block;
+  font: 600 14px/16px var(--font-display);
+  font-variant-numeric: lining-nums;
+  text-wrap: balance;
+}
+
+.jp-body {
+  font-size: 16px;
+  line-height: 24px;
+}
+
+.jp-meta {
+  display: block;
+  text-wrap: pretty;
+  color: var(--jp-muted);
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.jp-fine {
+  display: block;
+  text-wrap: pretty;
+  font-size: 13px;
+  line-height: 16px;
+}
+
+@media (min-width: 768px) {
+  .jp-a-title {
+    font-size: 64px;
+    line-height: 68px;
+  }
+
+  .jp-banner {
+    font-size: 88px;
+    line-height: 80px;
+  }
+
+  .jp-section-title,
+  .jp-day-title,
+  .jp-lead-title {
+    font-size: 40px;
+    line-height: 44px;
+  }
+
+  .jp-lead-text {
+    font-size: 20px;
+    line-height: 32px;
+  }
+
+  .jp-title {
+    font-size: 20px;
+    line-height: 24px;
+  }
+
+  .jp-small-title {
+    font-size: 16px;
+    line-height: 20px;
+  }
+
+  .jp-body {
+    font-size: 18px;
+    line-height: 28px;
+  }
+
+  .jp-fine {
+    line-height: 20px;
+  }
+}
+
+/* ---------- Icons: one stroke per size, set on the element ---------- */
+
+.jp-icon-16,
+.jp-icon-20,
+.jp-icon-24,
+.jp-icon-40 {
+  flex: none;
+}
+
+.jp-icon-16 {
+  width: 16px;
+  height: 16px;
+}
+
+.jp-icon-20 {
+  width: 20px;
+  height: 20px;
+}
+
+.jp-icon-24 {
+  width: 24px;
+  height: 24px;
+}
+
+.jp-icon-40 {
+  width: 40px;
+  height: 40px;
+}
+
+/* ---------- Links, buttons, states ---------- */
+
+/* Zero specificity, so every link's own class sets its colour. */
+:where(.jp) a {
+  color: inherit;
+  text-decoration: none;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.jp a:focus-visible,
+.jp [role='link']:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.jp :is(.jp-a-hero, .jp-mapband, .jp-bar, .jp-plan--annual, .jp-listen) a:focus-visible,
+.jp a.jp-listen:focus-visible {
+  outline-color: var(--jp-ice);
+}
+
+.jp a:active {
+  opacity: 0.72;
+}
+
+.jp-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 48px;
+  padding-inline: 24px;
+  border-radius: 4px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 24px;
+  transition: background-color 150ms ease;
+}
+
+.jp a.jp-button {
+  color: #fff;
+}
+
+@media (hover: hover) {
+  .jp-button:hover {
+    background: color-mix(in srgb, var(--accent) 86%, #000);
+  }
+}
+
+.jp-jump {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  margin-top: var(--jp-gap);
+  color: var(--accent);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 24px;
+}
+
+.jp a.jp-jump {
+  color: var(--accent);
+}
+
+.jp-jump-text {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+}
+
+@media (hover: hover) {
+  .jp-jump:hover .jp-jump-text {
+    text-decoration-color: currentColor;
+    background: color-mix(in srgb, var(--accent) 14%, transparent);
+  }
+}
+
+/* ---------- Photos ---------- */
+
+.jp-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.jp [data-photo-frame] {
+  position: relative;
+  overflow: hidden;
+  background: var(--photo-placeholder);
+}
+
+/* Photos with words on them wait on the dark placeholder, so the words read
+   before the file arrives. */
+.jp :is(.jp-a-hero, .jp-day-photo, .jp-lead, .jp-tile)[data-photo-frame] {
+  background: var(--photo-placeholder-dark);
+}
+
+/*
+ * Photos after the hero (A). On a slow phone Chrome fetches every lazy photo
+ * within about 2500px at once, and the CDN shares the link evenly, so the
+ * hero arrived behind Day 1 and Day 2 (LCP 3.7 s on the budget's phone). The
+ * other photos are not displayed, so not fetched, until the hero has loaded
+ * (the <head> script marks it `data-loaded`); their frames keep their size,
+ * so nothing moves. PhotoQueue releases them after 4 s if the hero fails.
+ */
+.jp--a:not([data-photos-go]):has(.jp-a-hero-img:not([data-loaded])) img:not(.jp-a-hero-img) {
+  display: none;
+}
+
+/* ---------- Guide rows, cards and leads ---------- */
+
+.jp-rows {
+  display: grid;
+  gap: var(--jp-gap);
+}
+
+.jp-row {
+  display: flex;
+  align-items: center;
+  gap: var(--jp-gap);
+  min-height: 72px;
+}
+
+.jp-thumb {
+  width: 72px;
+  height: 72px;
+  flex: none;
+}
+
+.jp-row-copy {
+  display: block;
+  min-width: 0;
+}
+
+.jp-row .jp-title,
+.jp-card .jp-title,
+.jp-card .jp-small-title {
+  color: var(--accent);
+}
+
+.jp-row .jp-meta,
+.jp-card .jp-meta {
+  margin-top: 4px;
+}
+
+@media (hover: hover) {
+  .jp-row:hover .jp-title,
+  .jp-card:hover :is(.jp-title, .jp-small-title) {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 4px;
+  }
+}
+
+.jp-card {
+  display: block;
+}
+
+/* Hover on every other link that leads somewhere: the words underline, and a
+   photo link's picture brightens a little (opacity only, no new motion). */
+@media (hover: hover) {
+  .jp-a-index a:hover span,
+  .jp-tile:hover .jp-tile-label,
+  .jp-lead:hover .jp-lead-title,
+  .jp-listen:hover .jp-title {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 4px;
+  }
+
+  .jp-tile:hover .jp-img,
+  .jp-lead:hover .jp-img {
+    opacity: 0.88;
+  }
+}
+
+.jp-card-photo {
+  display: block;
+  aspect-ratio: 1;
+  margin-bottom: 8px;
+}
+
+.jp-lead {
+  display: block;
+  aspect-ratio: 16 / 10;
+  color: var(--background);
+}
+
+.jp-lead::after,
+.jp-day-photo::after,
+.jp-tile::after {
+  position: absolute;
+  inset: 40% 0 0;
+  background: linear-gradient(rgb(3 21 34 / 0), rgb(3 21 34 / 0.86));
+  content: '';
+  pointer-events: none;
+}
+
+.jp-lead-copy {
+  position: absolute;
+  z-index: 1;
+  inset: auto 16px 16px;
+  display: grid;
+  gap: 4px;
+}
+
+.jp-lead-title {
+  display: block;
+  text-wrap: balance;
+}
+
+@media (min-width: 768px) {
+  .jp-lead-copy {
+    inset: auto 24px 24px;
+  }
+
+  .jp-thumb {
+    width: 96px;
+    height: 96px;
+  }
+
+  .jp-row {
+    min-height: 96px;
+  }
+}
+
+/* ---------- A: The trip ---------- */
+
+.jp-a-hero {
+  display: flex;
+  align-items: flex-end;
+  /* The index (72) and a strip of Day 1's photo (32) show under it. */
+  height: calc(100vh - var(--jp-nav) - 104px);
+  height: calc(100svh - var(--jp-nav) - 104px);
+  min-height: 336px;
+  max-height: 720px;
+  color: var(--background);
+}
+
+.jp-a-hero picture {
+  position: absolute;
+  inset: 0;
+}
+
+.jp-a-hero::after {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgb(3 21 34 / 0.04) 24%, rgb(3 21 34 / 0.88) 76%);
+  content: '';
+  pointer-events: none;
+}
+
+.jp-a-hero-copy {
+  position: relative;
+  z-index: 1;
+  padding-bottom: 24px;
+}
+
+.jp-a-hero-line {
+  max-width: 24rem;
+  margin-top: 12px;
+}
+
+.jp-a-hero .jp-button {
+  margin-top: 24px;
+}
+
+@media (max-height: 599px) {
+  .jp-a-hero-line {
+    margin-top: 8px;
+  }
+
+  .jp-a-hero .jp-button {
+    margin-top: 16px;
+  }
+}
+
+@media (min-width: 768px) {
+  .jp-a-hero {
+    height: calc(100svh - var(--jp-nav) - 104px);
+    min-height: 480px;
+  }
+
+  .jp-a-hero-copy {
+    padding-bottom: 48px;
+  }
+
+  .jp-a-hero-line {
+    max-width: 30rem;
+  }
+
+  .jp-a-hero .jp-button {
+    width: fit-content;
+    min-width: 288px;
+  }
+}
+
+.jp-a-index ul {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.jp-a-index a {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  height: 72px;
+  color: var(--accent);
+  font: 600 14px/16px var(--font-display);
+  font-variant-numeric: lining-nums;
+}
+
+@media (min-width: 768px) {
+  .jp-a-index ul {
+    max-width: calc(640px + 2 * var(--jp-inset));
+  }
+
+  .jp-a-index a {
+    font-size: 16px;
+    line-height: 20px;
+  }
+}
+
+.jp-day {
+  padding-bottom: var(--jp-section);
+}
+
+.jp-day-grid {
+  padding-inline: 0;
+}
+
+.jp-day-photo {
+  aspect-ratio: 3 / 2;
+}
+
+.jp-day-title {
+  position: absolute;
+  z-index: 1;
+  inset: auto var(--jp-inset) 16px;
+  color: var(--background);
+}
+
+.jp-day-body {
+  padding: var(--jp-photo-copy) var(--jp-inset) 0;
+}
+
+.jp-day-body > .jp-lead-text + * {
+  margin-top: var(--jp-gap);
+}
+
+@media (min-width: 768px) {
+  .jp-day {
+    padding-top: var(--jp-section);
+    padding-bottom: 0;
+  }
+
+  .jp-day + .jp-day,
+  .jp-a-index + .jp-day {
+    padding-top: var(--jp-section);
+  }
+
+  .jp-day:has(+ :not(.jp-day)) {
+    padding-bottom: var(--jp-section);
+  }
+
+  .jp-day-grid {
+    padding-inline: var(--jp-inset);
+  }
+
+  .jp-day-photo {
+    aspect-ratio: 2 / 1;
+  }
+
+  .jp-day-title {
+    inset: auto 24px 24px;
+  }
+
+  .jp-day-body {
+    padding-inline: 0;
+  }
+}
+
+@media (min-width: 1024px) {
+  .jp-day-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+    align-items: start;
+  }
+
+  .jp-day-photo {
+    aspect-ratio: 4 / 3;
+  }
+
+  .jp-day-body {
+    padding-top: 0;
+  }
+}
+
+.jp-mapband {
+  padding-top: var(--jp-section);
+  background: var(--jp-navy-2);
+  color: var(--background);
+}
+
+.jp-mapband-copy {
+  padding-bottom: var(--jp-heading);
+}
+
+.jp-mapband-copy .jp-body {
+  margin-top: 8px;
+  color: var(--jp-on-dark);
+}
+
+.jp-mapband-grid {
+  padding-inline: 0;
+}
+
+.jp-mapband-copy,
+.jp-mapband-link {
+  padding-inline: var(--jp-inset);
+}
+
+.jp-mapband-link {
+  padding-bottom: var(--jp-section);
+}
+
+.jp-mapband .jp-jump,
+.jp-mapband a.jp-jump {
+  color: var(--jp-teal);
+}
+
+@media (min-width: 768px) {
+  .jp-mapband-grid {
+    padding-inline: var(--jp-inset);
+  }
+
+  .jp-mapband-copy,
+  .jp-mapband-link {
+    padding-inline: 0;
+  }
+}
+
+@media (min-width: 1024px) {
+  .jp-mapband-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto 1fr;
+    column-gap: 32px;
+  }
+
+  .jp-mapband-grid .jp-map {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    margin-bottom: var(--jp-section);
+  }
+
+  .jp-mapband-link {
+    grid-column: 1;
+    grid-row: 2;
+  }
+}
+
+.jp-map {
+  aspect-ratio: 782 / 690;
+}
+
+.jp-map .jp-img {
+  position: absolute;
+  inset: 0;
+}
+
+.jp-map-dots {
+  position: absolute;
+  inset: 0;
+}
+
+.jp-map-dot {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--background);
+  border-radius: 50%;
+  background: var(--accent);
+  transform: translate(-50%, -50%);
+}
+
+.jp-map-credit {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  padding: 0 4px;
+  background: rgb(245 240 232 / 0.86);
+  color: var(--foreground);
+  font-size: 13px;
+  line-height: 16px;
+}
+
+.jp-short {
+  padding-block: var(--jp-section);
+  background: var(--background-warm);
+}
+
+.jp-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--jp-grid);
+  margin-top: var(--jp-heading);
+}
+
+@media (min-width: 1024px) {
+  /* Heading on the left, the two guides on the right, as the days sit. */
+  .jp-short .jp-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 32px;
+    align-items: start;
+  }
+
+  .jp-pair {
+    margin-top: 0;
+  }
+}
+
+.jp-listen {
+  display: block;
+  padding-block: 24px;
+  background: var(--accent);
+  color: #fff;
+}
+
+.jp a.jp-listen {
+  color: #fff;
+}
+
+.jp-listen-inner {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.jp-listen-copy .jp-fine {
+  margin-top: 4px;
+}
+
+/* ---------- B: The front page ---------- */
+
+.jp-b-hero {
+  padding-top: 24px;
+}
+
+.jp-b-hero-line {
+  margin-top: 8px;
+}
+
+.jp-mosaic {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  /* Two rows that leave room for the button and EAT under them. */
+  grid-auto-rows: clamp(88px, calc((100svh - 400px) / 2), 168px);
+  gap: 4px;
+  margin-top: 16px;
+}
+
+.jp-tile {
+  display: block;
+  height: 100%;
+  color: #fff;
+}
+
+.jp-tile-label {
+  white-space: nowrap;
+  position: absolute;
+  z-index: 1;
+  inset: auto 4px 8px 8px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 16px;
+}
+
+.jp-b-hero .jp-button {
+  margin-top: 16px;
+}
+
+/* A 93px tile has no room for an icon beside "Street food". */
+@media (max-width: 359px) {
+  .jp-tile-label .jp-icon-16 {
+    display: none;
+  }
+}
+
+@media (min-width: 768px) {
+  .jp-b-hero {
+    padding-top: 48px;
+  }
+
+  .jp-b-hero-line {
+    margin-top: 16px;
+  }
+
+  .jp-mosaic {
+    grid-auto-rows: 200px;
+    gap: 8px;
+    margin-top: 24px;
+  }
+
+  .jp-tile-label {
+    inset: auto 8px 12px 12px;
+    gap: 8px;
+    font-size: 14px;
+    line-height: 20px;
+  }
+
+  .jp-b-hero .jp-button {
+    width: fit-content;
+    min-width: 288px;
+    margin-top: 24px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .jp-mosaic {
+    grid-template-columns: repeat(6, 1fr);
+    grid-auto-rows: auto;
+  }
+
+  .jp-mosaic li {
+    aspect-ratio: 1;
+  }
+}
+
+.jp-cat {
+  padding-block: var(--jp-section);
+}
+
+.jp-cat:nth-of-type(odd) {
+  background: var(--background-warm);
+}
+
+.jp-cat-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  color: var(--accent);
+}
+
+/* Archivo's capitals carry side bearing: pull the word onto the page edge. */
+.jp-cat-word,
+.jp-b-title {
+  margin-left: -0.03em;
+}
+
+.jp-cat-line {
+  margin-top: 8px;
+}
+
+.jp-cat-body {
+  display: grid;
+  gap: var(--jp-heading);
+  margin-top: var(--jp-heading);
+}
+
+.jp-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--jp-gap) var(--jp-grid);
+}
+
+@media (min-width: 1024px) {
+  .jp-cat-body {
+    grid-template-columns: 1fr 1fr;
+    column-gap: 32px;
+    align-items: start;
+  }
+
+  .jp-cat-body > .jp-lead {
+    grid-row: span 3;
+  }
+}
+
+/* ---------- Plans (shared) ---------- */
+
+.jp-plans {
+  padding-block: var(--jp-section);
+  background: var(--background);
+}
+
+.jp-benefits {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px 8px;
+  margin-top: var(--jp-heading);
+}
+
+.jp-benefits li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--accent);
+  font: 600 16px/20px var(--font-display);
+  font-variant-numeric: lining-nums;
+}
+
+.jp-benefits li > span {
+  text-wrap: balance;
+}
+
+@media (max-width: 359px) {
+  .jp-benefits {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (min-width: 768px) {
+  .jp-benefits {
+    gap: 16px;
+  }
+
+  .jp-benefits li {
+    font-size: 18px;
+    line-height: 24px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .jp-benefits {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.jp-preview-note {
+  margin-top: 16px;
+  color: var(--jp-muted);
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.jp-plan-cards {
+  display: grid;
+  gap: var(--jp-gap);
+  margin-top: var(--jp-heading);
+}
+
+@media (min-width: 768px) {
+  .jp-plan-cards {
+    grid-template-columns: 1fr 1fr;
+    margin-top: 32px;
+  }
+
+  .jp-plan-cards--single {
+    grid-template-columns: minmax(0, 344px);
+  }
+}
+
+.jp-plan {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  /* The moving border is 4px (membership.css); the copy sits a card's padding inside it. */
+  padding: calc(4px + var(--jp-card-pad));
+  background: var(--paper);
+}
+
+.jp-plan--annual {
+  background: var(--jp-navy-2);
+  color: var(--background);
+}
+
+.jp-plan-copy {
+  flex: 1;
+  min-width: 0;
+}
+
+/*
+ * Phones: copy on the left, the button on the right, so one tap on "Become a
+ * member" lands with both prices on screen, down to 375x548. Both buttons
+ * share one width and one right edge. Under 360 wide there is no room beside
+ * the copy, and the button goes under it.
+ */
+@media (min-width: 360px) and (max-width: 767px) {
+  .jp-plan {
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .jp .jp-plan .join-plan-button {
+    flex: none;
+    width: 144px;
+    margin-top: 0;
+    padding-inline: 0;
+  }
+}
+
+.jp-plan-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 8px;
+}
+
+.jp-plan-badge {
+  color: var(--jp-teal);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 16px;
+}
+
+.join-plan-price {
+  position: relative;
+  z-index: 2;
+  margin-top: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+.jp-plan-note {
+  margin-top: 4px;
+  color: var(--jp-muted);
+  font-size: 13px;
+  line-height: 16px;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+.jp-plan--annual .jp-plan-note {
+  color: var(--jp-on-dark);
+}
+
+.jp .join-plan-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 48px;
+  margin-top: 16px;
+  padding-inline: 16px;
+  border: 1px solid var(--foreground);
+  border-radius: 4px;
+  color: var(--foreground);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 24px;
+  transition: background-color 150ms ease, color 150ms ease;
+}
+
+/* The whole card is the button's hit area. */
+.jp .join-plan-button::before {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  content: '';
+}
+
+.jp .jp-plan--annual .join-plan-button {
+  border-color: var(--jp-ice);
+  background: var(--jp-ice);
+  color: var(--jp-navy-2);
+}
+
+@media (hover: hover) {
+  .jp a.join-plan-button:hover {
+    background: var(--foreground);
+    color: var(--background);
+  }
+
+  .jp .jp-plan--annual a.join-plan-button:hover {
+    background: #fff;
+    color: var(--jp-navy-2);
+  }
+}
+
+.jp-plans-terms {
+  margin-top: 16px;
+  color: var(--jp-muted);
+  font-size: 13px;
+  line-height: 20px;
+}
+
+/* ---------- Footer (shared) ---------- */
+
+.jp-footer {
+  padding-block: var(--jp-section);
+  background: var(--foreground);
+  color: rgb(245 240 232 / 0.72);
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.jp-footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 16px;
+  margin-top: 16px;
+}
+
+.jp-footer-links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.jp-footer .jp-container > p:last-child {
+  margin-top: 8px;
+}
+
+.jp-footer a:focus-visible {
+  outline-color: var(--jp-ice);
+}
+
+/* ---------- Bottom bar (shared) ---------- */
+
+.jp-bar {
+  position: fixed;
+  z-index: 30;
+  inset: auto 0 0;
+  padding: 12px var(--jp-inset) calc(12px + env(safe-area-inset-bottom));
+  background: var(--jp-navy);
+  transform: translateY(100%);
+  visibility: hidden;
+  transition: transform 200ms ease, visibility 200ms;
+}
+
+.jp-bar[data-on] {
+  transform: translateY(0);
+  visibility: visible;
+}
+
+.jp-bar .jp-button {
+  max-width: 400px;
+  margin-inline: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:has(.jp) {
+    scroll-behavior: auto;
+  }
+
+  .jp-bar,
+  .jp-button,
+  .jp .join-plan-button {
+    transition: none;
+  }
+}
