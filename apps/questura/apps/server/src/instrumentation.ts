@@ -81,6 +81,7 @@ export async function register() {
       const { ensureLocationStartupTask } = await import('./features/location/startup')
       const { startPeriodicDrain } = await import('./features/refresh-outbox/drain-soon')
       const { registerRefreshShutdown } = await import('./features/refresh-outbox/lifecycle')
+      const { startJourneyRetention } = await import('./features/reader-journeys/retention')
 
       setTimeout(() => {
         void ensureCurrencyStartupTask(payload, logger)
@@ -90,6 +91,9 @@ export async function register() {
       // Refresh outbox: finish work a previous process left behind, and keep
       // retrying on long-lived servers (features/refresh-outbox/drain-soon.ts).
       if (startPeriodicDrain(payload)) logger.info('Refresh outbox periodic drain started.')
+
+      // Reader journeys are deleted at 90 days, as the privacy page says (ADR-0020).
+      startJourneyRetention(payload)
 
       // Stop claiming on the way out, so a deploy does not leave claims that
       // have to wait out a lease before anyone else can take them.

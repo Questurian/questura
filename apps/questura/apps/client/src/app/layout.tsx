@@ -9,6 +9,7 @@ import "./globals.css";
 import { DEFAULT_LOCALE } from "@/lib/i18n/locales";
 import { IMAGE_CDN_ORIGIN } from "@/lib/media/imageCdnOrigin";
 import { NavigationFeedback } from "@/components/navigation/NavigationFeedback";
+import { Journey } from "@/components/observability/Journey";
 import { WebVitals } from "@/components/observability/WebVitals";
 import { IDENTITY_HINT_SCRIPT } from "@/lib/user/identityHint";
 import { NAV_THEME_SCRIPT } from "@/features/Navigation/lib/navTheme";
@@ -96,6 +97,7 @@ export default async function RootLayout({
         </div>
         <NavigationFeedback />
         <WebVitals />
+        <Journey />
         {DevTools ? <DevTools /> : null}
       </body>
     </html>

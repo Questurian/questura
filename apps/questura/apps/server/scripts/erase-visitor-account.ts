@@ -9,7 +9,7 @@
  *  1. every session of the reader ends, in Redis and Postgres, and the other
  *     devices' cookie copies stop being trusted within a second
  *     (`session-revocations.ts`);
- *  2. bookmarks, audio Listens, the newsletter subscription (here and its copy in Resend)
+ *  2. bookmarks, audio Listens, reading journeys, the newsletter subscription (here and its copy in Resend)
  *     and outstanding reset / verification tokens are deleted, and
  *     the profile is deleted (or, while it still names a Stripe customer,
  *     emptied of name and address and kept, so a late Stripe event or a
@@ -80,6 +80,7 @@ async function main(): Promise<number> {
     const accounts = await count(`SELECT count(*) AS n FROM visitor_auth_accounts WHERE "userId" = $1`)
     const bookmarks = await count(`SELECT count(*) AS n FROM bookmarks WHERE auth_user_id = $1`)
     const listens = await count(`SELECT count(*) AS n FROM audio_listens WHERE auth_user_id = $1`)
+    const journeys = await count(`SELECT count(*) AS n FROM journey_viewers WHERE auth_user_id = $1`)
     const newsletter = Number(
       (await pool.query<{ n: string }>(`SELECT count(*) AS n FROM newsletter_subscribers WHERE email = $1`, [email])).rows[0]?.n ?? 0,
     )
@@ -105,6 +106,7 @@ async function main(): Promise<number> {
       `sign_in_methods=${accounts}`,
       `bookmarks=${bookmarks}`,
       `listens=${listens}`,
+      `journeys=${journeys}`,
       `profile=${!profile ? 'none' : keepProfile ? 'emptied (still names a Stripe customer)' : 'deleted'}`,
       `newsletter=${newsletter}`,
     ].join(' ')
@@ -126,6 +128,8 @@ async function main(): Promise<number> {
       await client.query('BEGIN')
       await client.query(`DELETE FROM bookmarks WHERE auth_user_id = $1`, [user.id])
       await client.query(`DELETE FROM audio_listens WHERE auth_user_id = $1`, [user.id])
+      // Their page views go with them (ON DELETE CASCADE).
+      await client.query(`DELETE FROM journey_viewers WHERE auth_user_id = $1`, [user.id])
       await client.query(`DELETE FROM newsletter_subscribers WHERE email = $1`, [email])
       await client.query(`DELETE FROM visitor_auth_verifications WHERE value = $1`, [user.id])
       if (profile && keepProfile) {

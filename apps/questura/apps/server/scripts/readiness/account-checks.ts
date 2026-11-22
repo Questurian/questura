@@ -369,7 +369,7 @@ async function erasure(withStripe: string, withoutStripe: string): Promise<void>
   const id = await userId(withStripe)
 
   const dry = await erase(withStripe)
-  record(group, 'the dry run lists what would go', dry.code === 0 && /ERASE dry-run sessions=\d+ sign_in_methods=1 bookmarks=1 profile=emptied/.test(dry.out), dry.out.slice(-300))
+  record(group, 'the dry run lists what would go', dry.code === 0 && /ERASE dry-run sessions=\d+ sign_in_methods=1 bookmarks=1 listens=\d+ journeys=\d+ profile=emptied/.test(dry.out), dry.out.slice(-300))
   record(group, '…and changes nothing', (await userId(withStripe)) === id && (await one.me()) === withStripe)
 
   const done = await erase(withStripe, true)

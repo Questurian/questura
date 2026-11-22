@@ -26,7 +26,7 @@ function PinMark({ className }: { className: string }) {
 export function MapJoinCall({ compact, href }: { compact: boolean; href: string }) {
   if (compact) {
     return (
-      <div className="absolute inset-x-0 top-0 z-[4] flex items-center gap-2.5 border-b border-foreground/15 bg-background px-3.5 py-2.5 text-foreground">
+      <div data-map-join="" className="absolute inset-x-0 top-0 z-[4] flex items-center gap-2.5 border-b border-foreground/15 bg-background px-3.5 py-2.5 text-foreground">
         <PinMark className="h-8 w-8 shrink-0" />
         <h2 className="min-w-0 flex-1 text-balance font-display text-[1rem] font-medium leading-tight">{HEADLINE}</h2>
         <Link
@@ -40,7 +40,7 @@ export function MapJoinCall({ compact, href }: { compact: boolean; href: string 
   }
 
   return (
-    <div className="absolute bottom-10 left-1/2 z-[4] w-[min(400px,calc(100%-40px))] -translate-x-1/2 border border-foreground/10 bg-background px-7 pb-5 pt-5 text-center text-foreground">
+    <div data-map-join="" className="absolute bottom-10 left-1/2 z-[4] w-[min(400px,calc(100%-40px))] -translate-x-1/2 border border-foreground/10 bg-background px-7 pb-5 pt-5 text-center text-foreground">
       <PinMark className="mx-auto mb-2.5 h-12 w-12" />
       <h2 className="text-balance font-display text-[1.5rem] font-medium leading-[1.15] tracking-[-0.015em]">{HEADLINE}</h2>
       <Link
