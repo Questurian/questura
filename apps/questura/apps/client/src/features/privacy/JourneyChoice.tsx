@@ -31,7 +31,7 @@ const MESSAGE: Record<State, string> = {
   'browser-no': 'Your browser asks not to be tracked, so nothing is being recorded.',
 }
 
-/** The privacy page's off switch (ADR-0019). */
+/** The privacy page's off switch (ADR-0020). */
 export function JourneyChoice() {
   const state = useSyncExternalStore<State>(subscribe, readState, () => 'loading')
   const [working, setWorking] = useState(false)

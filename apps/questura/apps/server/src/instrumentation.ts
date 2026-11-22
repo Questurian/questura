@@ -92,7 +92,7 @@ export async function register() {
       // retrying on long-lived servers (features/refresh-outbox/drain-soon.ts).
       if (startPeriodicDrain(payload)) logger.info('Refresh outbox periodic drain started.')
 
-      // Reader journeys are deleted at 90 days, as the privacy page says (ADR-0019).
+      // Reader journeys are deleted at 90 days, as the privacy page says (ADR-0020).
       startJourneyRetention(payload)
 
       // Stop claiming on the way out, so a deploy does not leave claims that

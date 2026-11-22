@@ -1,7 +1,7 @@
 import type { JourneyReport } from './report'
 import type { clientKind } from './client-kind'
 
-/** The journeys' SQL (ADR-0019). Every statement is parameterised. */
+/** The journeys' SQL (ADR-0020). Every statement is parameterised. */
 
 export type JourneyPool = {
   query: (sql: string, values?: unknown[]) => Promise<{ rowCount?: number | null }>

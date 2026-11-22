@@ -1,5 +1,5 @@
 /**
- * The shape `POST /api/public/journeys` accepts, and nothing else (ADR-0019).
+ * The shape `POST /api/public/journeys` accepts, and nothing else (ADR-0020).
  *
  * Anybody can post here, so every field is checked, capped and treated as
  * text to show. Nothing typed by a reader is in the shape at all.

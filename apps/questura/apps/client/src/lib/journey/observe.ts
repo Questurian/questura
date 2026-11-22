@@ -5,7 +5,7 @@ import { CHECKOUT_EVENT } from './markCheckout'
 import { createView, type Kind } from './view'
 
 /**
- * Watches one page view and reports it (ADR-0019). It looks once a second and
+ * Watches one page view and reports it (ADR-0020). It looks once a second and
  * each report is the whole view so far, so a lost one costs nothing. An in-app
  * browser can be killed without a closing event, so the first half minute
  * (where most leave) reports every three seconds, then every ten.
@@ -45,7 +45,7 @@ function onScreen(ownDetails: boolean): Array<{ k: Kind; x: string }> {
 
   let current: Element | null = null
   for (const heading of document.querySelectorAll('main h2, main h3, article h2, article h3')) {
-    if (!heading.getClientRects().length || heading.closest('[data-paywalled], [data-map-join], .join-plan-card')) continue
+    if (!heading.getClientRects().length || heading.closest('[data-paywalled], [data-map-join], [data-membership-pitch], .join-plan-card')) continue
     if (heading.getBoundingClientRect().top <= window.innerHeight / 2) current = heading
   }
   const section = current?.textContent?.replace(/\s+/g, ' ').trim().slice(0, 80)
@@ -53,6 +53,10 @@ function onScreen(ownDetails: boolean): Array<{ k: Kind; x: string }> {
 
   if ([...document.querySelectorAll('aside[data-paywalled]')].some((element) => isSeen(element))) seen.push({ k: 'paywall', x: 'Guide paywall' })
   if ([...document.querySelectorAll('[data-map-join]')].some((element) => isSeen(element))) seen.push({ k: 'paywall', x: 'Map paywall' })
+  // A free guide's own ask for the sale (MembershipPitch, which states the price).
+  if ([...document.querySelectorAll('[data-membership-pitch]')].some((element) => isSeen(element))) {
+    seen.push({ k: 'paywall', x: 'Join box' })
+  }
   for (const card of document.querySelectorAll('.join-plan-card')) {
     const amount = card.querySelector('.join-plan-price')
     const name = card.querySelector('.join-plan-name')?.textContent?.trim()

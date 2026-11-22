@@ -10,7 +10,7 @@ import type { Where } from '@/lib/journey/eligibility'
 import { observePage } from '@/lib/journey/observe'
 
 /**
- * How US readers use the site, for the owner (ADR-0019, the privacy page).
+ * How US readers use the site, for the owner (ADR-0020, the privacy page).
  * Production only. Renders nothing, and nothing it does may reach the page.
  */
 

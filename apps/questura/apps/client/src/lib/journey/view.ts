@@ -1,5 +1,5 @@
 /**
- * One page view being recorded (ADR-0019): seconds on screen and what
+ * One page view being recorded (ADR-0020): seconds on screen and what
  * happened in them. Pure, so node:test covers the clock.
  */
 

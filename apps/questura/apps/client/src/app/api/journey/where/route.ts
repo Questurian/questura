@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { whereFor, type Connection } from '@/lib/journey/eligibility'
 
 /**
- * GET /api/journey/where (ADR-0019): may this browser be recorded, and from
+ * GET /api/journey/where (ADR-0020): may this browser be recorded, and from
  * roughly where. Cloudflare's own reading of the connection; the address is
  * not read. Off Cloudflare (next dev, the CI sandbox) the answer is no.
  */

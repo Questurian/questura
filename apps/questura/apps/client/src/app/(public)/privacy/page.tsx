@@ -17,7 +17,7 @@ export const metadata: Metadata = {
  * when the code changes. The deletion line is decision D2 of the launch fix
  * plan (by email at launch, handled within 30 days).
  *
- * "How the site is used" describes reader journeys (docs/adr/0019); a new
+ * "How the site is used" describes reader journeys (docs/adr/0020); a new
  * thing recorded there means a new line here in the same deploy.
  *
  * No ad network runs on the site (features/ads/lib/adUnits.ts). Wiring one in

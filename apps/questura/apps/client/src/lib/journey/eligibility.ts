@@ -1,5 +1,5 @@
 /**
- * Whether a reader is recorded at all (ADR-0019): only people in the US, only
+ * Whether a reader is recorded at all (ADR-0020): only people in the US, only
  * when the browser does not say no, never a data centre.
  */
 

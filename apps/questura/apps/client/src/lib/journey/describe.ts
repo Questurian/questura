@@ -1,5 +1,5 @@
 /**
- * The words a journey keeps (ADR-0019). Never anything a reader typed, and
+ * The words a journey keeps (ADR-0020). Never anything a reader typed, and
  * never a reader's own details shown back to them.
  */
 

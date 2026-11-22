@@ -1,7 +1,7 @@
 import { MigrateDownArgs, MigrateUpArgs, sql } from '@payloadcms/db-postgres'
 
 /**
- * Reader journeys (ADR-0019): one row per browser, one per page view.
+ * Reader journeys (ADR-0020): one row per browser, one per page view.
  *
  * Additive only: two new tables and their indexes. Plain tables, not Payload
  * collections, so they get no REST endpoints and no admin screens; the only

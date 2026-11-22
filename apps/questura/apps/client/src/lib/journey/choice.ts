@@ -1,4 +1,4 @@
-/** What this browser keeps about recording: the random id, the visit, and the off switch (ADR-0019). */
+/** What this browser keeps about recording: the random id, the visit, and the off switch (ADR-0020). */
 
 const VIEWER_KEY = 'questurian:journey:viewer'
 const VISIT_KEY = 'questurian:journey:visit'

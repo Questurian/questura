@@ -12,7 +12,7 @@ import { forbiddenOriginResponse, getPrivateCorsHeaders, handleCorsOptions } fro
 import { logger } from '@/shared/utils/logger'
 
 /**
- * POST /api/public/journeys (ADR-0019)
+ * POST /api/public/journeys (ADR-0020)
  *
  * A US reader's browser reporting one page view so far, or `{ forget: id }`
  * from the privacy page's off switch. Sent as text/plain so a closing page
