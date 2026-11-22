@@ -237,7 +237,7 @@ function SeekBar({
  * The player above the article's text: a "Listen · N minutes" line until it is
  * pressed, then one row: play/pause, the time heard, the progress line, the
  * length, back and forward fifteen seconds, and the speed. A non-member's
- * press opens the membership panel.
+ * press opens the membership panel and brings it on screen.
  */
 function ListenPlayer({ clip, state, returnTo }: { clip: ArticleAudioClip; state: AudioState; returnTo: string }) {
   const toggle = useToggle(clip.id)
@@ -327,16 +327,30 @@ function ListenPlayer({ clip, state, returnTo }: { clip: ArticleAudioClip; state
         </button>
       )}
       {isCurrent && state.phase === 'error' && state.error ? <div className="aud-error">{state.error}</div> : null}
-      {lockOpen ? <LockPanel access={state.access} returnTo={`${returnTo}#${slotElementId(clip.sectionKey)}`} /> : null}
+      {lockOpen ? (
+        <LockPanel access={state.access} returnTo={`${returnTo}#${slotElementId(clip.sectionKey)}`} reveal={opened} />
+      ) : null}
     </div>
   )
 }
 
-function LockPanel({ access, returnTo }: { access: ReaderAccess; returnTo: string }) {
+/**
+ * `reveal`: the reader just pressed Listen. The line is often the last thing on
+ * a phone's first screen, so the panel under it would open out of sight and the
+ * press would look dead: scroll just enough to show it all. Not on a return to
+ * the page, where the controller may still hold the panel open.
+ */
+function LockPanel({ access, returnTo, reveal }: { access: ReaderAccess; returnTo: string; reveal: boolean }) {
+  const panel = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    if (!reveal) return
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    panel.current?.scrollIntoView({ block: 'nearest', behavior: reduceMotion ? 'instant' : 'smooth' })
+  }, [reveal])
   const href = `/join?returnTo=${encodeURIComponent(returnTo)}`
   const signedIn = access === 'not-member'
   return (
-    <div className="aud-lock" role="region" aria-label="Members-only audio">
+    <div ref={panel} className="aud-lock" role="region" aria-label="Members-only audio">
       <div className="aud-lock-title">Listen with a Questurian membership</div>
       <div className="aud-lock-text">
         Members can listen to our guides, read aloud.
