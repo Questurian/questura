@@ -14,6 +14,13 @@ Stripe product **Questurian Membership** (`prod_V4XBrsC0ai3ZOY`) is the only
 membership product. Monthly, yearly, and the old laptop test charge (unused)
 are **prices on that product**. Do not create another product for testing.
 
+| Price | Amount | Use |
+|---|---|---|
+| `price_1UefQFBUOUSxLiOZk2yTyYVP` | $4.99 / month | New checkouts (`STRIPE_PRICE_ID_MONTHLY`) |
+| `price_1UefQFBUOUSxLiOZs3E6DB6Y` | $39.99 / year | New checkouts (`STRIPE_PRICE_ID_YEARLY`) |
+| `price_1U4P3aBUOUSxLiOZfKskTKeO` | $12.99 / month | Before November 2026. Keep active: renewals, rollback |
+| `price_1U4P3bBUOUSxLiOZMGh7ZrJL` | $79.99 / year | Before November 2026. Keep active: renewals, rollback |
+
 ## Two numbers, on purpose
 
 | What | Amount | Where it lives |

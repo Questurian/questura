@@ -39,6 +39,13 @@ export const STRIPE_MEMBERSHIP_PRODUCT_ID = 'prod_V4XBrsC0ai3ZOY'
  */
 export const STRIPE_MEMBERSHIP_PRICES = {
   catalog: {
+    monthly: 'price_1UefQFBUOUSxLiOZk2yTyYVP',
+    yearly: 'price_1UefQFBUOUSxLiOZs3E6DB6Y',
+  },
+  // $12.99 / $79.99, sold until November 2026. Still active in Stripe: renewals
+  // and a rollback need them. Never point checkout at them under this catalog:
+  // both plans would be refused (docs/membership-pricing.md, "Changing the price").
+  previousCatalog: {
     monthly: 'price_1U4P3aBUOUSxLiOZfKskTKeO',
     yearly: 'price_1U4P3bBUOUSxLiOZMGh7ZrJL',
   },
