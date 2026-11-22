@@ -15,7 +15,7 @@ type Next =
   | { step: 'password'; exists: boolean | undefined; notice: string | null };
 
 export const NO_PASSWORD_NOTICE =
-  'This email has an account with no password yet. Tap “Forgot password?” and we will email you a link to choose one.';
+  'No password on this account yet. Tap “Forgot password?” to set one.';
 
 export function afterEmailCheck(check: EmailCheck, buying: boolean): Next {
   const exists = typeof check.exists === 'boolean' ? check.exists : undefined;

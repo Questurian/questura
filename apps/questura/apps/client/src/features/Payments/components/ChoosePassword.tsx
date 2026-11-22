@@ -6,7 +6,6 @@ import PasswordStrengthIndicator from '@/features/Auth/components/PasswordStreng
 import {
   authFieldError,
   authInput,
-  authLabel,
   authPrimaryButton,
 } from '@/features/Auth/components/form/authFormParts';
 import { isPasswordValid, validatePasswordRequirements } from '@/features/Auth/lib/auth-utils';
@@ -24,7 +23,7 @@ export function ChoosePassword({ email, onDone }: { email: string; onDone: () =>
   const save = async (event: FormEvent) => {
     event.preventDefault();
     if (!isPasswordValid(password)) {
-      setError('Please meet each password rule below.');
+      setError('Use all four below.');
       return;
     }
     setSaving(true);
@@ -39,13 +38,11 @@ export function ChoosePassword({ email, onDone }: { email: string; onDone: () =>
   };
 
   return (
-    <form onSubmit={save} noValidate className="mb-6 bg-paper p-5 text-left">
-      <h2 className="font-display text-[1.1rem] text-foreground">One last thing: choose a password</h2>
-      <p className="mt-1.5 text-[0.88rem] leading-[1.65] text-foreground/70">
-        You will sign in with <span className="break-all font-medium text-foreground">{email}</span>.
-      </p>
+    <form onSubmit={save} noValidate className="mt-4 bg-paper p-5 text-left">
+      <h2 className="font-display text-[1.1rem] text-foreground">Set your password</h2>
+      <p className="mt-1 break-all text-[0.88rem] text-foreground/70">{email}</p>
       <input type="email" name="email" autoComplete="username" value={email} readOnly tabIndex={-1} aria-hidden="true" className="sr-only" />
-      <label htmlFor="new-member-password" className={`${authLabel} mt-4 block`}>
+      <label htmlFor="new-member-password" className="sr-only">
         Password
       </label>
       <input
@@ -58,7 +55,7 @@ export function ChoosePassword({ email, onDone }: { email: string; onDone: () =>
         disabled={saving}
         aria-invalid={error ? true : undefined}
         aria-describedby={error ? 'new-member-password-error' : undefined}
-        className={`mt-2 ${authInput(Boolean(error))}`}
+        className={`mt-4 ${authInput(Boolean(error))}`}
       />
       {error ? (
         <p id="new-member-password-error" role="alert" className={authFieldError}>
@@ -67,7 +64,7 @@ export function ChoosePassword({ email, onDone }: { email: string; onDone: () =>
       ) : null}
       <PasswordStrengthIndicator requirements={validatePasswordRequirements(password)} />
       <button type="submit" disabled={saving} className={`${authPrimaryButton} mt-5`}>
-        {saving ? 'Saving…' : 'Save and continue'}
+        {saving ? 'Saving…' : 'Save'}
       </button>
       <button
         type="button"
@@ -75,7 +72,7 @@ export function ChoosePassword({ email, onDone }: { email: string; onDone: () =>
         disabled={saving}
         className="mt-4 block w-full text-center text-[0.84rem] text-foreground/70 underline underline-offset-2"
       >
-        Do it later by email
+        Not now
       </button>
     </form>
   );

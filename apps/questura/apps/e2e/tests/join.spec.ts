@@ -67,7 +67,7 @@ test('journey 2: a new reader gives an email, pays, chooses a password and lands
 
   // An email and nothing else: the next page is Stripe's.
   await page.locator('input[name=email]').fill(email)
-  await page.getByRole('button', { name: 'Continue to payment', exact: true }).click()
+  await page.getByRole('button', { name: 'Continue', exact: true }).click()
   await page.waitForURL(new RegExp(`^${FAKE_STRIPE}/__fake/pay/`))
   const sessionId = new URL(page.url()).pathname.split('/').pop()!
 
@@ -81,7 +81,7 @@ test('journey 2: a new reader gives an email, pays, chooses a password and lands
 
   // The password is asked for after the money.
   await page.getByLabel('Password', { exact: true }).fill(NEW_PASSWORD)
-  await page.getByRole('button', { name: 'Save and continue' }).click()
+  await page.getByRole('button', { name: 'Save', exact: true }).click()
 
   // The success page waits for membership, then returns the reader to the article.
   await expect(page).toHaveURL((url) => url.pathname === ARTICLE, { timeout: 15_000 })

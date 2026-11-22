@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/lib/user/hooks';
 import { EnhancedAuthForm } from '@/features/Auth';
@@ -31,14 +31,6 @@ export default function PurchasePage({
   const saving = pricing ? getPlanSaving(pricing) : null;
   const [verificationEmailStatus, setVerificationEmailStatus] = useState<string | null>(null);
   const [sendingVerificationEmail, setSendingVerificationEmail] = useState(false);
-  const [authFormState, setAuthFormState] = useState<{ isSignUp: boolean; showPasswordStep: boolean }>({
-    isSignUp: false,
-    showPasswordStep: false
-  });
-
-  const handleAuthFormStateChange = useCallback((isSignUp: boolean, showPasswordStep: boolean) => {
-    setAuthFormState({ isSignUp, showPasswordStep });
-  }, []);
 
   if (loading) {
     return (
@@ -123,23 +115,9 @@ export default function PurchasePage({
 
               {!isAuthenticated ? (
                 <div>
-                  <h3 className="font-display text-[1.1rem] text-[#1A1A1A] mb-2 text-center">
-                    {authFormState.showPasswordStep
-                      ? (authFormState.isSignUp ? 'Create Account To Complete Purchase' : 'Log In To Complete Purchase')
-                      : 'Where Should We Send Your Membership?'}
-                  </h3>
-                  <p className="text-[0.88rem] text-[#6b6a68] leading-[1.65] mb-6 text-center">
-                    {authFormState.showPasswordStep
-                      ? (authFormState.isSignUp
-                          ? 'Set up your password to create your account and proceed to checkout.'
-                          : 'Enter your password to sign in and proceed to checkout.')
-                      : 'Enter your email and go straight to payment. You choose a password after you pay. Already have an account? Use its email to sign in.'}
-                  </p>
-
                   <EnhancedAuthForm
                     inModal={true}
                     onSuccess={handleAuthSuccess}
-                    onModeChange={handleAuthFormStateChange}
                     onCheckoutSignUp={pricingUnavailable ? undefined : handleSubscribe}
                   />
                 </div>
@@ -184,7 +162,7 @@ export default function PurchasePage({
                     "
                   >
                     {checkoutMutation.isPending
-                      ? 'Creating session...'
+                      ? 'One moment…'
                       : priceLabel
                         ? `Subscribe Now - ${priceLabel}`
                         : 'Subscribe Now'}

@@ -173,9 +173,11 @@ function SubscriptionSuccessContent() {
             <h1 className="font-display text-[1.35rem] text-[#1A1A1A] mb-2 480:text-[1.55rem]">
               {headline}
             </h1>
-            <p className="text-[0.88rem] text-[#6b6a68] leading-[1.65] mb-6">
-              {body}
-            </p>
+            {passwordEmail && confirmation === 'active' ? null : (
+              <p className="text-[0.88rem] text-[#6b6a68] leading-[1.65] mb-6">
+                {body}
+              </p>
+            )}
 
             {passwordEmail ? (
               <ChoosePassword
@@ -187,14 +189,7 @@ function SubscriptionSuccessContent() {
               />
             ) : null}
 
-            {sessionId && !passwordEmail && (
-              <div className="bg-white border border-[#e5e2dc] rounded-sm p-4 mb-6 text-left">
-                <p className="text-[0.82rem] text-[#6b6a68]">
-                  <span className="font-medium text-[#4f4e4b]">Session ID:</span> {sessionId}
-                </p>
-              </div>
-            )}
-
+            {passwordEmail ? null : (
             <div className="space-y-3">
               <Link
                 href="/account"
@@ -219,8 +214,9 @@ function SubscriptionSuccessContent() {
                 Return to Home
               </Link>
             </div>
+            )}
 
-            {confirmation === 'active' && (
+            {confirmation === 'active' && !passwordEmail && (
               <div className="mt-8 pt-5 border-t border-[#e5e2dc]">
                 <p className="text-[0.78rem] text-[#9a9894] leading-[1.65]">
                   Thank you for your subscription! You now have access to all premium features.

@@ -22,7 +22,6 @@ export default function EmailStep({
   loading,
   canContinue,
   inModal = false,
-  submitLabel = 'Continue',
   captcha = null,
 }: EmailStepProps) {
   return (
@@ -64,7 +63,7 @@ export default function EmailStep({
               <span>Checking…</span>
             </>
           ) : (
-            submitLabel
+            'Continue'
           )}
         </button>
       </div>

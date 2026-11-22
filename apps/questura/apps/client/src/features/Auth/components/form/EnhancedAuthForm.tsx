@@ -188,7 +188,6 @@ export default function EnhancedAuthForm({
           loading={authForm.loading}
           canContinue={authForm.canContinueFromEmail()}
           inModal={inModal}
-          submitLabel={onCheckoutSignUp ? 'Continue to payment' : undefined}
           captcha={onCheckoutSignUp ? captcha.widget : null}
         />
       ) : (
