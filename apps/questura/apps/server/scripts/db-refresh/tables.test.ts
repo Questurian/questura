@@ -34,7 +34,7 @@ describe('db:refresh table lists', () => {
   it('keeps people and payments private', () => {
     const content = new Set<string>(CONTENT_TABLES)
     for (const name of [...latestSnapshotTables(), ...NON_PAYLOAD_TABLES]) {
-      if (/^(users|visitor_|stripe_|bookmarks|email_|identity_|service_accounts)/.test(name)) {
+      if (/^(users|visitor_|stripe_|bookmarks|email_|identity_|journey_|service_accounts)/.test(name)) {
         expect(content.has(name), name).toBe(false)
       }
     }

@@ -1,4 +1,5 @@
 import { isServiceUnavailableError, post } from '@/lib/api';
+import { markCheckout } from '@/lib/journey/markCheckout';
 
 import {
   SUBSCRIPTION_DEFAULT_MESSAGES,
@@ -67,11 +68,13 @@ export async function createCheckoutSessionRequest(
   returnTo?: string | null
 ): Promise<CheckoutSessionResponse> {
   try {
-    return await post<CheckoutSessionResponse>('/api/payments/create-checkout-session', {
+    const session = await post<CheckoutSessionResponse>('/api/payments/create-checkout-session', {
       referralId: referralId || null,
       plan,
       returnTo: returnTo || null,
     });
+    markCheckout();
+    return session;
   } catch (error) {
     throw mapSubscriptionError(error);
   }

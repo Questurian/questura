@@ -142,6 +142,8 @@ export const PRIVATE_TABLES = [
   'visitor_profiles',
   'identity_email_owners',
   'bookmarks',
+  'journey_viewers',
+  'journey_views',
   'newsletter_subscribers',
   'newsletter_issues',
   // Payments and mail.
@@ -161,6 +163,8 @@ export const PRIVATE_TABLES = [
 /** Tables created by hand-written SQL migrations, so absent from Payload's schema snapshot. */
 export const NON_PAYLOAD_TABLES = [
   'identity_email_owners',
+  'journey_viewers',
+  'journey_views',
   'public_search_documents',
   'visitor_auth_accounts',
   'visitor_auth_rate_limits',
