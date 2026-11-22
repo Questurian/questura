@@ -317,7 +317,7 @@ _Avoid_: public auth, visitor auth
 - Every editorial item has exactly one **Access tier**; a `member` tier makes it a **Gated item**.
 - A **Gated item** yields a **Free sample** to every caller without an active **Membership entitlement**, and its full body to every caller with one.
 - A **Sample rule** exists per editorial collection and is the only thing that derives a **Free sample**; it takes no editorial input, so a **Gated item** can never ship with an undefined sample.
-- Crawlers are not a caller class: a **Gated item** returns the same **Free sample** to a search crawler as to an anonymous reader, so there is no crawler-shaped response to verify, cache, or spoof.
+- Verified Googlebot is the one crawler caller class, and only while its key is set (ADR-0009, revised 2026-11-21): it receives a **Gated item**'s words in a response that is never stored. Every other crawler, and every Google testing tool, receives the same **Free sample** as an anonymous reader. Cached responses only ever hold the **Free sample**.
 - A **Staff grant** does not unlock a **Gated item** on the public client, because public client flows already treat Staff auth as logged out.
 - A **Staff identity** may have a **Staff grant**, but it is not exposed through public account APIs.
 - A **Staff identity** has at most one **Author**; an **Author** may exist with no Staff identity at all, and that is a fully valid, renderable state (ADR-0007).

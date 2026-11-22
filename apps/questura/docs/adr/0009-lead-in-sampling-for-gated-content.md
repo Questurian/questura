@@ -1,4 +1,6 @@
-# Gated content is sold by lead-in sampling, and crawlers are not a caller class
+# Gated content is sold by lead-in sampling
+
+*Revised 2026-11-21: verified Googlebot may receive the full text. See the revision at the end; where the text below says crawlers are not a caller class, the revision wins.*
 
 Paid editorial content is gated by serving every unentitled caller a **Free sample** derived from a deterministic per-collection **Sample rule**, with the locked remainder absent from the response rather than concealed by the client. Search crawlers receive exactly the same Free sample as an anonymous reader. The page stays indexable through its title, meta, headings, sample text, and paywalled-content structured data (`isAccessibleForFree: false` plus `hasPart` with a `cssSelector`) — which is what keeps a short sample from reading as thin content, and what makes the paywall legible to Search rather than accidental.
 
@@ -13,3 +15,17 @@ There are **two** enforcement surfaces, and the sentence above originally claime
 The Sample rule is structural per collection rather than an editor-placed marker, because a marker has an unset state and a paywall with an unset state fails silently in both directions: a forgotten marker ships the item either entirely free or entirely locked, and nobody finds out from the code. Structural rules also land on each shape's natural seam — first blocks for a flat article, first entries for a ranked listicle, and Day 1 complete for an itinerary, which is both a clean cut and the best sales pitch available ("see Day 1 free, unlock all five days").
 
 Verification is deliberately not required to read a Gated item, mirroring the existing deliberate decision not to require it for checkout. Requiring it on the read while checkout stays open would let a visitor complete a real charge and then be refused the content they just bought, which is the precise refund and chargeback exposure this work exists to close. `CONTEXT.md` previously claimed both were gated on verification; it was wrong about the shipped code, and was corrected rather than implemented.
+
+## Revision, 2026-11-21: verified Googlebot gets the full text
+
+The owner revisited the rejected alternative. Gated items were indexed, but on their sample alone: about 8% of the flagship guide's words and none of a map's places. The owner wants paid items to be findable by what they say while staying paid, and accepts that some determined copying is the price.
+
+The three costs that got it rejected are each answered by where it runs:
+
+- **Verification.** A caller needs both an address in Google's published `googlebot.json` (Cloudflare writes `cf-connecting-ip`, and refuses a request that supplies one) and Googlebot's own user agent. The name is needed as well as the address because Google-InspectionTool fetches from the same addresses on behalf of anybody using the Rich Results Test.
+- **The shared cache.** The body is added by the Worker's entry to the finished response, downstream of every cache, and that response is `no-store`. The cached shell, the public routes, the Sample rule and `gatePublicArticle` are unchanged and still take no reader identity.
+- **Failure.** The view is off unless a key of its own is set on both the Worker and the API. A missing key, unknown address, failed read or thrown error all give the Free sample.
+
+The body is an allowlist of words (`crawlerBody.ts`): no coordinates, contact details, media or audio. The page's scripts are removed from that response, so hydration cannot put the notice back over the text and a crawl loads no billed map. `noarchive` and `max-snippet:300` limit what Search can republish; they do not make leakage through Search impossible.
+
+How to switch and check it: `docs/procedures/google-full-text.md`.
