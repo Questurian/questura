@@ -61,7 +61,6 @@ export interface EmailStepProps {
   canContinue: boolean;
   inModal?: boolean;
   errorMessage?: string;
-  submitLabel?: string;
   /** Only where this step itself creates the account (the purchase screen). */
   captcha?: TurnstileWidgetProps | null;
 }
