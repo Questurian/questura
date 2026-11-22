@@ -4,6 +4,7 @@
  */
 
 import type { EmailStepProps } from '../../types';
+import TurnstileWidget from './TurnstileWidget';
 import {
   OrContinueWithGoogle,
   Spinner,
@@ -21,6 +22,8 @@ export default function EmailStep({
   loading,
   canContinue,
   inModal = false,
+  submitLabel = 'Continue',
+  captcha = null,
 }: EmailStepProps) {
   return (
     <form className="space-y-6" onSubmit={onSubmit} noValidate>
@@ -52,16 +55,19 @@ export default function EmailStep({
         )}
       </div>
 
-      <button type="submit" disabled={loading || !canContinue} className={authPrimaryButton}>
-        {loading ? (
-          <>
-            <Spinner />
-            <span>Checking…</span>
-          </>
-        ) : (
-          'Continue'
-        )}
-      </button>
+      <div>
+        {captcha && <TurnstileWidget {...captcha} />}
+        <button type="submit" disabled={loading || !canContinue} className={authPrimaryButton}>
+          {loading ? (
+            <>
+              <Spinner />
+              <span>Checking…</span>
+            </>
+          ) : (
+            submitLabel
+          )}
+        </button>
+      </div>
 
       <OrContinueWithGoogle />
     </form>

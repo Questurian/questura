@@ -20,6 +20,12 @@ export interface EnhancedAuthFormProps {
   errorMessage?: string;
   prefillEmail?: string;
   onModeChange?: (isSignUp: boolean, showPasswordStep: boolean) => void;
+  /**
+   * Purchase screen only: a new email becomes an account at once and this is
+   * called, so the next thing the reader sees is payment. The password is
+   * asked for after paying. An email that has an account still signs in.
+   */
+  onCheckoutSignUp?: () => void;
   /** Lets a host (the sign-in modal's Back control) step the form back. */
   ref?: React.Ref<EnhancedAuthFormHandle>;
 }
@@ -55,6 +61,9 @@ export interface EmailStepProps {
   canContinue: boolean;
   inModal?: boolean;
   errorMessage?: string;
+  submitLabel?: string;
+  /** Only where this step itself creates the account (the purchase screen). */
+  captcha?: TurnstileWidgetProps | null;
 }
 
 /**

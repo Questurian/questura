@@ -1,6 +1,7 @@
 "use client";
 
 import { config } from '@/lib/config';
+import { googleReturnPath } from '../../lib/googleReturnPath';
 import type { JSX } from 'react';
 
 interface GoogleSignInButtonProps {
@@ -19,8 +20,9 @@ export default function GoogleSignInButton({
     // Use the actual backend URL for OAuth (can't be proxied through Next.js)
     const backendUrl = config.backendUrl;
     // Use provided returnTo path, or current page path
-    // Send pathname only (e.g., "/", "/account", "/join") not full URL
-    const redirectPath = returnTo || window.location.pathname;
+    // Path only, never a full URL. The one query parameter kept is the
+    // paywall's `returnTo`, or a buyer loses the guide they came from.
+    const redirectPath = returnTo || googleReturnPath(window.location.pathname, window.location.search);
     const callbackURL = new URL(redirectPath, window.location.origin).toString();
     const errorCallbackURL = new URL('/auth-error', window.location.origin).toString();
 

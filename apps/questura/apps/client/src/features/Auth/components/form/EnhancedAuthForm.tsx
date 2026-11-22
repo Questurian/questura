@@ -1,6 +1,8 @@
 "use client";
 
 import { useImperativeHandle } from 'react';
+import { useCheckoutSignupMutation } from '@/lib/user/hooks';
+import { afterCheckoutSignUpFailure, afterEmailCheck, type EmailCheck } from '../../lib/checkoutSignUp';
 import { validateEmail, getFormTitle, getFormSubtitle } from '../../lib/auth-utils';
 import { useAuthForm } from '../../hooks/useAuthForm';
 import { useAuthSubmit } from '../../hooks/useAuthSubmit';
@@ -19,15 +21,42 @@ export default function EnhancedAuthForm({
   errorMessage,
   prefillEmail,
   onModeChange,
+  onCheckoutSignUp,
   ref
 }: EnhancedAuthFormProps = {}) {
   // Initialize hooks
   const authForm = useAuthForm({ prefillEmail, onModeChange });
   const authSubmit = useAuthSubmit({ inModal, onSuccess });
-  // Mounted with the password step: the token is ready while the reader types.
+  const checkoutSignup = useCheckoutSignupMutation();
+  // Mounted with the password step (on the purchase screen, with the email
+  // step too): the token is ready while the reader types.
   const captcha = useCaptcha(authForm.isSignUp ? 'sign-up' : 'sign-in');
 
   useImperativeHandle(ref, () => ({ backToEmail: authForm.handleBackToEmail }), [authForm.handleBackToEmail]);
+
+  const signUpForCheckout = async () => {
+    try {
+      const captchaToken = await captcha.take();
+      await checkoutSignup.mutateAsync({ email: authForm.formData.email, captchaToken });
+      onSuccess?.();
+      onCheckoutSignUp?.();
+    } catch (error) {
+      captcha.refresh();
+      const next = afterCheckoutSignUpFailure(error);
+      if (next) {
+        authForm.proceedToPasswordStep(next.exists);
+        return;
+      }
+      authForm.setErrors([{
+        message: rateLimitedMessage(error)
+          ?? (isServiceUnavailableError(error)
+            ? 'Service is unavailable. Please try again later.'
+            : error instanceof Error
+              ? error.message
+              : 'Could not continue to payment. Please try again.'),
+      }]);
+    }
+  };
 
   // Handle email step submission
   const handleEmailContinue = async (e: React.FormEvent) => {
@@ -50,10 +79,16 @@ export default function EnhancedAuthForm({
     // unavailable, fall back to the manually-selected tab rather than blocking.
     authForm.setLoading(true);
     try {
-      const result = await post<{ exists?: boolean }>('/api/user/check', {
+      const result = await post<EmailCheck>('/api/user/check', {
         email: authForm.formData.email,
       });
-      authForm.proceedToPasswordStep(typeof result.exists === 'boolean' ? result.exists : undefined);
+      const next = afterEmailCheck(result, Boolean(onCheckoutSignUp));
+      if (next.step === 'checkout') {
+        await signUpForCheckout();
+        return;
+      }
+      authForm.proceedToPasswordStep(next.exists);
+      if (next.notice) authForm.setErrors([{ message: next.notice }]);
     } catch (error) {
       // A limit is not an outage: say to wait, not that the site is down.
       const limited = rateLimitedMessage(error);
@@ -153,6 +188,8 @@ export default function EnhancedAuthForm({
           loading={authForm.loading}
           canContinue={authForm.canContinueFromEmail()}
           inModal={inModal}
+          submitLabel={onCheckoutSignUp ? 'Continue to payment' : undefined}
+          captcha={onCheckoutSignUp ? captcha.widget : null}
         />
       ) : (
         <PasswordStep

@@ -53,6 +53,20 @@ export function writeHint(hint: IdentityHint, storage: HintStorage | null = defa
   } catch {
     // Storage blocked or full: the next page falls back to anonymous.
   }
+  stampHint(hint)
+}
+
+/**
+ * Keep the open page in step too. The head script only runs on a full load,
+ * so without this a buyer sent back to their guide after paying still carried
+ * `user` and was shown the membership boxes they had just paid to lose.
+ */
+function stampHint(hint: IdentityHint): void {
+  if (typeof document === 'undefined') return
+  const root = document.documentElement
+  if (!root?.dataset) return
+  if (hint === 'anon') delete root.dataset.identity
+  else root.dataset.identity = hint
 }
 
 /**

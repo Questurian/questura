@@ -9,6 +9,7 @@ export {
   useLogoutMutation,
   useSignOutEverywhereMutation,
   useSignupMutation,
+  useCheckoutSignupMutation,
 } from './useUserQuery';
 
 export { useAuth } from './useAuth';

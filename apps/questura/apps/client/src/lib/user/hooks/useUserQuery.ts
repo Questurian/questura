@@ -208,6 +208,30 @@ interface SignupResponse {
   user?: User;
 }
 
+/**
+ * A buyer's sign-up: the email now, a password after paying
+ * (`visitor-auth/lib/checkout-sign-up.ts` on the API). Refused for an address
+ * that already has an account.
+ */
+export function useCheckoutSignupMutation() {
+  return useMutation({
+    mutationFn: async (variables: { email: string; captchaToken?: string | null }) => {
+      try {
+        await post(
+          '/api/visitor-auth/sign-up/checkout',
+          { email: variables.email },
+          { headers: captchaHeaders(variables.captchaToken) }
+        );
+      } catch (error) {
+        const refused = captchaFailureMessage(error);
+        if (refused) throw new Error(refused);
+        throw error;
+      }
+      return getUserAfterSessionChange();
+    },
+  });
+}
+
 export function useSignupMutation() {
   return useMutation({
     mutationFn: async (variables: SignupVariables): Promise<SignupResponse> => {
