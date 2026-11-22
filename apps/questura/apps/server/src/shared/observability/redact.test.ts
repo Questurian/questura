@@ -135,3 +135,22 @@ describe('the origin secret', () => {
     expect(redactString('a banana')).toBe('a banana')
   })
 })
+
+describe('the crawler body key (ADR-0009)', () => {
+  const key = 'q7'.repeat(32)
+
+  it('is removed by its header name', () => {
+    expect(JSON.stringify(redact({ headers: { 'x-questura-crawler-key': key } }))).not.toContain(key)
+  })
+
+  it('is removed by value wherever it appears', () => {
+    const before = process.env.QUESTURA_CRAWLER_BODY_KEY
+    process.env.QUESTURA_CRAWLER_BODY_KEY = key
+    try {
+      expect(redactString(`failed with ${key}`)).not.toContain(key)
+    } finally {
+      if (before === undefined) delete process.env.QUESTURA_CRAWLER_BODY_KEY
+      else process.env.QUESTURA_CRAWLER_BODY_KEY = before
+    }
+  })
+})

@@ -6,7 +6,7 @@
  * holds the same value. Delete it on either side to switch the view off.
  */
 import openNext from '../.open-next/worker.js'
-import { applyCrawlerView } from '../src/lib/crawler-view/crawlerView.ts'
+import { applyCrawlerView, withoutValidators } from '../src/lib/crawler-view/crawlerView.ts'
 import googlebot from './googlebot-ranges.json'
 
 // The Durable Object classes wrangler.jsonc binds.
@@ -67,12 +67,14 @@ function rewrite(response, html) {
 
 const worker = {
   async fetch(request, env, ctx) {
-    const response = await openNext.fetch(request, env, ctx)
-    if (!env.QUESTURA_CRAWLER_BODY_KEY) return response
+    const key = env.QUESTURA_CRAWLER_BODY_KEY
+    if (!key) return openNext.fetch(request, env, ctx)
+
+    const response = await openNext.fetch(withoutValidators(request, { key, prefixes: PREFIXES }), env, ctx)
 
     return applyCrawlerView(request, response, {
       prefixes: PREFIXES,
-      key: env.QUESTURA_CRAWLER_BODY_KEY,
+      key,
       loadBody: (path, key) => loadBody(env, path, key),
       rewrite,
     })

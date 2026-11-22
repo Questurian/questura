@@ -1,4 +1,5 @@
 import { isVerifiedGooglebot } from './googlebot.ts'
+import { revealStreamed } from './revealStreamed.ts'
 
 /**
  * Google's full-text view of a Gated item (ADR-0009, revised 2026-11-21).
@@ -26,12 +27,16 @@ export type CrawlerViewDeps = {
 const SEGMENT = '[a-z0-9-]+'
 const ITEM_PATH = new RegExp(`^/(?:articles/${SEGMENT}|${SEGMENT}/${SEGMENT}/${SEGMENT}/${SEGMENT})$`)
 
-function wantsFullText(request: Request, response: Response, deps: CrawlerViewDeps): string | null {
+function eligiblePath(request: Request, deps: Pick<CrawlerViewDeps, 'key' | 'prefixes'>): string | null {
   if (!deps.key || deps.key.length < MIN_CRAWLER_KEY_LENGTH) return null
-  if (request.method !== 'GET' || response.status !== 200) return null
-  if (!response.headers.get('content-type')?.startsWith('text/html')) return null
+  if (request.method !== 'GET') return null
   // Another Worker's subrequest can be given headers by whoever wrote it.
   if (request.headers.has('cf-worker') || request.headers.has('rsc')) return null
+  // A crawl of this page, never this page loaded by somebody else's: Googlebot
+  // renders their pages too, with the same address and name.
+  if (request.headers.has('origin')) return null
+  const destination = request.headers.get('sec-fetch-dest')
+  if (destination !== null && destination !== 'document') return null
 
   const url = new URL(request.url)
   if (url.searchParams.has('_rsc') || !ITEM_PATH.test(url.pathname)) return null
@@ -39,6 +44,20 @@ function wantsFullText(request: Request, response: Response, deps: CrawlerViewDe
   // Cloudflare writes cf-connecting-ip itself. No other address header counts.
   const caller = { ip: request.headers.get('cf-connecting-ip'), userAgent: request.headers.get('user-agent') }
   return isVerifiedGooglebot(caller, deps.prefixes) ? url.pathname : null
+}
+
+/**
+ * A crawl that would get the full text must never be answered 304: Google
+ * would keep whatever it stored last, which may be the preview.
+ */
+export function withoutValidators(request: Request, deps: Pick<CrawlerViewDeps, 'key' | 'prefixes'>): Request {
+  if (!request.headers.has('if-none-match') && !request.headers.has('if-modified-since')) return request
+  if (!eligiblePath(request, deps)) return request
+
+  const headers = new Headers(request.headers)
+  headers.delete('if-none-match')
+  headers.delete('if-modified-since')
+  return new Request(request, { headers })
 }
 
 function neverStored(response: Response): Response {
@@ -57,13 +76,17 @@ function neverStored(response: Response): Response {
 
 export async function applyCrawlerView(request: Request, response: Response, deps: CrawlerViewDeps): Promise<Response> {
   try {
-    const path = wantsFullText(request, response, deps)
+    if (response.status !== 200 || !response.headers.get('content-type')?.startsWith('text/html')) return response
+    const path = eligiblePath(request, deps)
     if (!path) return response
 
     const html = await deps.loadBody(path, deps.key as string)
     if (!html) return response
 
-    return deps.rewrite(neverStored(response), html)
+    // A clone, so that a failure below still has an unread preview to send.
+    const full = deps.rewrite(neverStored(response.clone()), html)
+    const page = revealStreamed(await full.text())
+    return new Response(page, { status: full.status, headers: full.headers })
   } catch {
     // Any doubt is the preview. Nothing is logged: the error could carry body.
     return response

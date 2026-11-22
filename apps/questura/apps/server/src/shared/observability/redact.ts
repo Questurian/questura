@@ -16,7 +16,8 @@
  *   address, a bearer token, a Stripe key or signing secret, a Resend key, or
  *   credentials in a URL is replaced in place. Error messages are where these
  *   leak from most, and an error message has no key to go by.
- * - **By value.** The origin secret (`ORIGIN_AUTH_SECRET`, ADR-0016) has no
+ * - **By value.** The origin secret (`ORIGIN_AUTH_SECRET`, ADR-0016) and
+ *   the crawler body key (`QUESTURA_CRAWLER_BODY_KEY`, ADR-0009) have no
  *   shape to match, so the configured value itself is removed wherever it
  *   appears. `proxy.ts` strips the header before any route runs; this is the
  *   second lock, for a copy that escapes that some other way.
@@ -35,7 +36,7 @@ export const REDACTED_EMAIL = '[email]'
  * are one rule.
  */
 const SENSITIVE_KEY =
-  /^(cookie|cookies|setcookie|authorization|proxyauthorization|stripesignature|xapikey|apikey|password|currentpassword|newpassword|passwordhash|salt|token|accesstoken|refreshtoken|idtoken|sessiontoken|session|secret|clientsecret|email|emailaddress|useremail|ipaddress|ip)$|token$|secret$|password$|apikey$|cookie$|originauth$/i
+  /^(cookie|cookies|setcookie|authorization|proxyauthorization|stripesignature|xapikey|apikey|password|currentpassword|newpassword|passwordhash|salt|token|accesstoken|refreshtoken|idtoken|sessiontoken|session|secret|clientsecret|email|emailaddress|useremail|ipaddress|ip)$|token$|secret$|password$|apikey$|cookie$|originauth$|crawlerkey$/i
 
 export function isSensitiveKey(key: string): boolean {
   return SENSITIVE_KEY.test(key.replace(/[-_\s]/g, ''))
@@ -67,9 +68,11 @@ const MIN_VALUE_RULE_LENGTH = 16
 export function redactString(value: string): string {
   let out = value
   for (const [pattern, replacement] of STRING_RULES) out = out.replace(pattern, replacement)
-  const originSecret = process.env.ORIGIN_AUTH_SECRET?.trim()
-  if (originSecret && originSecret.length >= MIN_VALUE_RULE_LENGTH && out.includes(originSecret)) {
-    out = out.split(originSecret).join(REDACTED)
+  for (const configured of [process.env.ORIGIN_AUTH_SECRET, process.env.QUESTURA_CRAWLER_BODY_KEY]) {
+    const secret = configured?.trim()
+    if (secret && secret.length >= MIN_VALUE_RULE_LENGTH && out.includes(secret)) {
+      out = out.split(secret).join(REDACTED)
+    }
   }
   return out
 }

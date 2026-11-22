@@ -7,7 +7,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 
 import { isVerifiedGooglebot } from './googlebot.ts'
-import { applyCrawlerView } from './crawlerView.ts'
+import { applyCrawlerView, withoutValidators } from './crawlerView.ts'
 
 const PREFIXES = ['66.249.64.0/27', '2001:4860:4801:10::/64']
 const GOOGLE_IP = '66.249.64.5'
@@ -92,6 +92,9 @@ const untouched = {
   'a subrequest from another Worker': { headers: { 'cf-worker': 'someone-else.example' } },
   'the switch off': { key: '' },
   'a key too short to be one': { key: 'short' },
+  'a page loaded inside a frame': { headers: { 'sec-fetch-dest': 'iframe' } },
+  'a page loaded by a script': { headers: { 'sec-fetch-dest': 'empty' } },
+  'a request naming another origin': { headers: { origin: 'https://attacker.example' } },
   'a POST': { method: 'POST' },
   'a HEAD': { method: 'HEAD' },
   'a router payload request': { headers: { rsc: '1' } },
@@ -141,4 +144,52 @@ test('the full-text response can never be stored', async () => {
   assert.match(full.headers.get('x-robots-tag'), /noarchive/)
   // The shared response's own headers are not edited on the way.
   assert.match(response.headers.get('cache-control'), /s-maxage/)
+})
+
+test('a direct page visit still qualifies when the browser says so', async () => {
+  const { run } = setup({ headers: { 'sec-fetch-dest': 'document' } })
+  assert.equal(await (await run()).text(), PAID)
+})
+
+test("Googlebot's conditional request cannot be answered 304 with the old preview", () => {
+  const conditional = { 'if-none-match': '"shared"', 'if-modified-since': 'Sat, 21 Nov 2026 00:00:00 GMT' }
+  const bot = { 'cf-connecting-ip': GOOGLE_IP, 'user-agent': PHONE, ...conditional }
+  const deps = { prefixes: PREFIXES, key: KEY }
+
+  const stripped = withoutValidators(new Request(PAGE, { headers: bot }), deps)
+  for (const name of Object.keys(conditional)) assert.equal(stripped.headers.get(name), null)
+
+  const reader = new Request(PAGE, { headers: { ...bot, 'cf-connecting-ip': '203.0.113.9' } })
+  assert.equal(withoutValidators(reader, deps), reader)
+  const off = new Request(PAGE, { headers: bot })
+  assert.equal(withoutValidators(off, { prefixes: PREFIXES, key: '' }), off)
+})
+
+// A route with a loading.tsx (itineraries) arrives as a skeleton in place and
+// the real body in a hidden div at the end, moved by a script. With the
+// scripts gone, the move has to have happened already.
+const STREAMED =
+  '<main><!--$?--><template id="B:0"></template><div aria-busy="true"><!--$-->skeleton<!--/$--></div><!--/$--></main>' +
+  '<footer>foot</footer><div hidden id="S:0"><script type="application/ld+json">{"a":"<div>"}</script>' +
+  `<div><!--$--><section class="paywalled">${PAID}</section><!--/$--></div></div><p>after</p>`
+
+test('a streamed body is put in place, visible, with no script', async () => {
+  const { run } = setup({ body: () => STREAMED })
+  const html = await (await run()).text()
+  assert.doesNotMatch(html, /hidden id="S:|id="B:|skeleton/)
+  assert.ok(html.indexOf(PAID) < html.indexOf('</main>'), 'the body sits inside main, before the footer')
+  assert.ok(html.endsWith('<footer>foot</footer><p>after</p>'))
+})
+
+test('a streamed body that cannot be placed leaves the preview', async () => {
+  for (const broken of [
+    '<div hidden id="S:0"><p>never closed',
+    '<div hidden id="S:0"><p>no boundary for it</p></div>',
+    '<main><!--$?--><template id="B:0"></template>no end</main><div hidden id="S:0"><p>x</p></div>',
+  ]) {
+    const { response, run } = setup({ body: () => broken })
+    const out = await run()
+    assert.equal(out, response)
+    assert.equal(await out.text(), 'PREVIEW', 'and the preview is still readable')
+  }
 })
