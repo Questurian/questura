@@ -117,9 +117,22 @@ export function observePage(path: string, send: (body: string, leaving: boolean)
 
   const active = () => view.active(performance.now())
 
+  // A box counts once the reader taps it or types in it. Focus alone proves
+  // nothing: the purchase page puts the caret in the email box by itself.
+  // What is typed is never read.
+  const usedBoxes = new Set<string>()
+  const onBox = (target: EventTarget | null) => {
+    if (ownDetails || !(target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement)) return
+    const label = fieldLabel(target.type)
+    if (!label || usedBoxes.has(label)) return
+    usedBoxes.add(label)
+    view.add('field', label)
+  }
+
   const onClick = (event: MouseEvent) => {
     active()
     if (ownDetails || !(event.target instanceof Element)) return
+    onBox(event.target)
     const target = event.target.closest('a, button, [role="button"]')
     if (target?.closest('[data-map-surface]') && !target.closest('[data-map-join]')) {
       view.add('map', 'A numbered place')
@@ -132,11 +145,7 @@ export function observePage(path: string, send: (body: string, leaving: boolean)
     }
   }
 
-  const onFocus = (event: FocusEvent) => {
-    if (ownDetails || !(event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement)) return
-    const label = fieldLabel(event.target.type)
-    if (label) view.add('field', label)
-  }
+  const onInput = (event: Event) => onBox(event.target)
 
   const onVisibility = () => {
     if (document.visibilityState === 'hidden') {
@@ -177,7 +186,7 @@ export function observePage(path: string, send: (body: string, leaving: boolean)
   const activity = ['scroll', 'keydown', 'pointerdown', 'pointermove', 'touchmove'] as const
   for (const name of activity) window.addEventListener(name, active, passive)
   window.addEventListener('click', onClick, passive)
-  window.addEventListener('focusin', onFocus)
+  window.addEventListener('input', onInput, passive)
   window.addEventListener('pagehide', onPageHide)
   window.addEventListener(CHECKOUT_EVENT, onCheckout)
   document.addEventListener('visibilitychange', onVisibility)
@@ -188,7 +197,7 @@ export function observePage(path: string, send: (body: string, leaving: boolean)
     window.clearTimeout(first)
     for (const name of activity) window.removeEventListener(name, active, passive)
     window.removeEventListener('click', onClick, passive)
-    window.removeEventListener('focusin', onFocus)
+    window.removeEventListener('input', onInput, passive)
     window.removeEventListener('pagehide', onPageHide)
     window.removeEventListener(CHECKOUT_EVENT, onCheckout)
     document.removeEventListener('visibilitychange', onVisibility)
