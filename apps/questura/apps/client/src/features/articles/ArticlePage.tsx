@@ -25,7 +25,7 @@ import { photoCredit } from '@/features/articles/lib/photoCredit'
 import { NewsletterArticleBand } from '@/features/newsletter/components/NewsletterArticleBand'
 import { getPublicBaseUrl } from '@/lib/seo/publicBaseUrl'
 import { Article, type ArticleDisplayLayout } from './types'
-import { formatArticleDate } from '@/lib/dates'
+import { formatArticleDateLine } from '@/lib/dates'
 
 /** Share and bookmark: the same row in every layout. */
 function ArticleShareRow({
@@ -168,7 +168,7 @@ function StandardArticleHeader({
 }) {
   const { title, author, publishedAt, updatedAt, seoSection } = article
   const description = seoSection?.metaDescription
-  const dateLine = formatArticleDate(publishedAt ?? updatedAt, 'long')
+  const dateLine = formatArticleDateLine(publishedAt, updatedAt, 'long')
   const crumbs = articleCrumbsFromPath(path)
 
   return (
@@ -274,7 +274,7 @@ function ClassicArticleLayout({ article, path, shareUrl, adPlan, sidebar }: Layo
 function DarkHeroArticleLayout({ article, path, shareUrl, adPlan, sidebar }: LayoutProps) {
   const { title, author, publishedAt, updatedAt, seoSection } = article
   const description = seoSection?.metaDescription
-  const dateLine = formatArticleDate(publishedAt ?? updatedAt, 'long')
+  const dateLine = formatArticleDateLine(publishedAt, updatedAt, 'long')
 
   return (
     <>
@@ -345,7 +345,7 @@ function DarkHeroArticleLayout({ article, path, shareUrl, adPlan, sidebar }: Lay
 function CenteredArticleLayout({ article, path, shareUrl, adPlan, sidebar }: LayoutProps) {
   const { title, author, publishedAt, updatedAt, seoSection } = article
   const description = seoSection?.metaDescription
-  const dateLine = formatArticleDate(publishedAt ?? updatedAt, 'long')
+  const dateLine = formatArticleDateLine(publishedAt, updatedAt, 'long')
 
   return (
     <div className="mx-auto w-full max-w-6xl px-0 1024:px-8">

@@ -4,7 +4,7 @@ import path from 'node:path'
 import test from 'node:test'
 import { fileURLToPath } from 'node:url'
 
-import { formatAccessDate, formatArticleDate } from './dates.ts'
+import { formatAccessDate, formatArticleDate, formatArticleDateLine } from './dates.ts'
 
 // `pnpm test` runs under the host's zone; the launch fix plan (item 16) also
 // runs it under TZ=UTC and TZ=Pacific/Kiritimati (UTC+14), where half past
@@ -62,6 +62,26 @@ test('missing or unparseable dates format to null', () => {
  * formatting anywhere in the client. Anything that formats a date goes through
  * `lib/dates.ts`, which always passes a fixed `timeZone`.
  */
+test('date line: published, then updated once saved on a later day', () => {
+  const pub = '2026-10-13T04:03:23.175Z'
+  assert.equal(
+    formatArticleDateLine(pub, '2026-11-22T13:08:29.982Z', 'long'),
+    'Published October 13, 2026 · Updated November 22, 2026',
+  )
+  assert.equal(
+    formatArticleDateLine(pub, '2026-11-22T13:08:29.982Z', 'short', { labelPublished: true }),
+    'Published Oct 13, 2026 · Updated Nov 22, 2026',
+  )
+  // Saved the same day it was published: no "Updated".
+  assert.equal(formatArticleDateLine(pub, '2026-10-13T20:00:00.000Z', 'long'), 'October 13, 2026')
+  assert.equal(formatArticleDateLine(pub, '2026-10-13T20:00:00.000Z', 'short', { labelPublished: true }), 'Published Oct 13, 2026')
+  // Scheduled or back-filled: published after the last save.
+  assert.equal(formatArticleDateLine('2026-12-01T00:00:00.000Z', pub, 'long'), 'December 1, 2026')
+  // No publish date: the save date alone, never called an update.
+  assert.equal(formatArticleDateLine(null, pub, 'long'), 'October 13, 2026')
+  assert.equal(formatArticleDateLine(null, null, 'long'), null)
+})
+
 test('no client code formats a date outside lib/dates.ts', () => {
   const srcRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
   const helper = path.join(srcRoot, 'lib', 'dates.ts')

@@ -1,7 +1,8 @@
 /**
  * The article page's structured data (JSON-LD), built at render from the live
- * article: one `@graph` holding the page, the article, its place and its
- * breadcrumb, linked by `@id`.
+ * article: one `@graph` holding the page, the article, its place, its
+ * breadcrumb and, on a free page with an FAQ block, its questions, linked by
+ * `@id`.
  *
  * The studio used to write this once, at publish, and the site printed it as
  * stored. It could not know the real address (the category is set later in
@@ -51,6 +52,8 @@ export type ArticleJsonLdSource = {
   /** Itineraries. */
   header?: HeaderLike
   seoSection?: { metaDescription?: string | null } | null
+  /** Standard articles: the blocks the page draws. FAQ blocks become a FAQPage. */
+  contentBlocks?: ReadonlyArray<{ blockType?: string; items?: unknown }> | null
 }
 
 type BuildArticleJsonLdParams = {
@@ -166,6 +169,54 @@ function paywallProperties(): Record<string, unknown> {
   }
 }
 
+/**
+ * FAQ block copy is markdown from the writing pipeline (rendered through
+ * InlineMarkdown on the page); structured data wants the words alone.
+ */
+function plainText(markdown: string): string {
+  return markdown
+    .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
+    .replace(/(\*\*|__)(.+?)\1/g, '$2')
+    .replace(/(\*|_)(.+?)\1/g, '$2')
+    .replace(/`([^`]*)`/g, '$1')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+/**
+ * Every question and answer in the page's FAQ blocks, as one FAQPage node, or
+ * null. Only for a free page: Google requires the answers to be visible on
+ * the page, and a locked page's body is not in its HTML (ADR-0009).
+ */
+function faqPageOf(
+  article: ArticleJsonLdSource,
+  pageId: string,
+  language: string | undefined,
+): Record<string, unknown> | null {
+  const questions: Record<string, unknown>[] = []
+  for (const block of article.contentBlocks ?? []) {
+    if (block?.blockType !== 'faq' || !Array.isArray(block.items)) continue
+    for (const item of block.items as Array<{ question?: unknown; answer?: unknown } | null>) {
+      const question = typeof item?.question === 'string' ? plainText(item.question) : ''
+      const answer = typeof item?.answer === 'string' ? plainText(item.answer) : ''
+      if (!question || !answer) continue
+      questions.push({
+        '@type': 'Question',
+        name: question,
+        acceptedAnswer: { '@type': 'Answer', text: answer },
+      })
+    }
+  }
+  if (questions.length === 0) return null
+  return {
+    '@type': 'FAQPage',
+    '@id': `${pageId}#faq`,
+    isPartOf: { '@id': pageId },
+    ...(language ? { inLanguage: language } : {}),
+    mainEntity: questions,
+  }
+}
+
 export function buildArticleJsonLd({
   article,
   path,
@@ -215,6 +266,8 @@ export function buildArticleJsonLd({
     ...(locked ? paywallProperties() : {}),
   }
 
+  const faqPage = locked ? null : faqPageOf(article, pageId, language)
+
   return {
     '@context': 'https://schema.org',
     '@graph': [
@@ -222,6 +275,7 @@ export function buildArticleJsonLd({
       articleNode,
       ...(place ? [place] : []),
       { ...breadcrumbNode, '@id': breadcrumbId },
+      ...(faqPage ? [faqPage] : []),
     ],
   }
 }

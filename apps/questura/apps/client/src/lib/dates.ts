@@ -75,6 +75,31 @@ export function formatArticleDate(value: DateInput, style: ArticleDateStyle): st
   return date ? articleDateFormats[style].format(date) : null
 }
 
+/**
+ * The date line under an article's headline (owner, 2026-11-22):
+ * "Published October 13, 2026 · Updated November 22, 2026" once the article
+ * was saved on a later day than it was published, so readers and search
+ * results see that it is kept current; the structured data's `dateModified`
+ * is the same `updatedAt`. Otherwise the publish date alone, as before, with
+ * "Published " in front when `labelPublished` is set.
+ */
+export function formatArticleDateLine(
+  publishedAt: DateInput,
+  updatedAt: DateInput,
+  style: ArticleDateStyle,
+  { labelPublished = false }: { labelPublished?: boolean } = {},
+): string | null {
+  const shown = formatArticleDate(publishedAt ?? updatedAt, style)
+  if (!shown) return null
+  const published = toValidDate(publishedAt)
+  const updated = toValidDate(updatedAt)
+  const updatedLine = formatArticleDate(updatedAt, style)
+  if (published && updated && updatedLine && updated > published && updatedLine !== shown) {
+    return `Published ${shown} · Updated ${updatedLine}`
+  }
+  return labelPublished ? `Published ${shown}` : shown
+}
+
 const WEEKDAYS = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
 
 /**
