@@ -152,3 +152,31 @@ test('place: country-level and neighborhood articles', () => {
 
   assert.equal(node(build({ locationRef: null }), 'BlogPosting').about, undefined)
 })
+
+const FAQ = {
+  blockType: 'faq',
+  items: [
+    { question: 'How many days do you need in **Lima**?', answer: 'Three. See [the four-day plan](/peru/lima/itineraries/4-days).' },
+    { question: 'Is Lima safe?', answer: 'Mostly *theft*, not violence.' },
+    { question: 'Unanswered?', answer: '' },
+  ],
+}
+
+test('faq: a free page lists every answered question as one FAQPage, in plain words', () => {
+  const graph = build({ contentBlocks: [{ blockType: 'text' }, FAQ] })
+  const faq = node(graph, 'FAQPage')
+  assert.equal(faq['@id'], `${URL_}#faq`)
+  assert.deepEqual(faq.isPartOf, { '@id': URL_ })
+  assert.deepEqual(faq.mainEntity, [
+    { '@type': 'Question', name: 'How many days do you need in Lima?', acceptedAnswer: { '@type': 'Answer', text: 'Three. See the four-day plan.' } },
+    { '@type': 'Question', name: 'Is Lima safe?', acceptedAnswer: { '@type': 'Answer', text: 'Mostly theft, not violence.' } },
+  ])
+  const result = checkArticleStructuredData(html(graph))
+  assert.equal(result.ok, true, JSON.stringify(result.results))
+})
+
+test('faq: none on a locked page, or with no FAQ block', () => {
+  assert.equal(node(build({ contentBlocks: [FAQ] }, { locked: true }), 'FAQPage'), undefined)
+  assert.equal(node(build({ contentBlocks: [{ blockType: 'text' }] }), 'FAQPage'), undefined)
+  assert.equal(node(build(), 'FAQPage'), undefined)
+})
