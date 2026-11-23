@@ -5,7 +5,7 @@ import { ArticleShareButton } from '@/features/articles/components/ArticleShareB
 import { BookmarkButton } from '@/features/bookmarks/components/BookmarkButton'
 import type { BookmarkTargetType } from '@/features/bookmarks/types'
 import { ArticleByline } from '@/features/articles/components/ArticleByline'
-import { formatArticleDate } from '@/lib/dates'
+import { formatArticleDateLine } from '@/lib/dates'
 
 type ArticlePageHeaderProps = {
   title: string
@@ -60,10 +60,7 @@ export function ArticlePageHeader({
   bookmark,
   bylineVariant = 'framed',
 }: ArticlePageHeaderProps): JSX.Element {
-  const publishedLine = (() => {
-    const formatted = formatArticleDate(publishedAt ?? updatedAt, 'short')
-    return formatted ? `Published ${formatted}` : null
-  })()
+  const publishedLine = formatArticleDateLine(publishedAt, updatedAt, 'short', { labelPublished: true })
 
   return (
     // The frame sits as far below the navbar as it sits from the sides; it
