@@ -19,6 +19,7 @@ import { articleCrumbsFromPath } from '@/features/articles/lib/articleCrumbs'
 import { fetchStandardArticleSidebar } from '@/features/articles/lib/fetchArticleSidebar'
 import { ArticleBlockStream } from '@/features/articles/components/ArticleBlockStream'
 import { ArticleByline } from '@/features/articles/components/ArticleByline'
+import { ArticleCrumbsNav } from '@/features/articles/components/ArticleCrumbsNav'
 import { ArticleAuthorBanner } from '@/features/articles/components/ArticleAuthorBanner'
 import { PhotoCreditLine } from '@/features/articles/components/PhotoCreditLine'
 import { photoCredit } from '@/features/articles/lib/photoCredit'
@@ -174,26 +175,7 @@ function StandardArticleHeader({
   return (
     <header className="px-4 pt-8 pb-6 1024:px-0 1024:pt-10 1024:pb-8">
       <div className="mb-5 flex flex-col gap-2 1024:mb-6 1024:flex-row 1024:items-baseline 1024:justify-between 1024:gap-6">
-        {crumbs.length > 0 ? (
-          <nav aria-label="Breadcrumb">
-            <ol className="flex flex-wrap items-center gap-x-1.5 font-[family-name:var(--font-dm-sans)] text-[11px] font-semibold uppercase tracking-[0.14em] text-accent">
-              {crumbs.map((crumb, index) => (
-                <li key={`${crumb.label}-${index}`} className="flex items-center gap-x-1.5">
-                  {index > 0 ? <span aria-hidden className="text-accent/60">›</span> : null}
-                  {crumb.href ? (
-                    <Link href={crumb.href} className="hover:underline">
-                      {crumb.label}
-                    </Link>
-                  ) : (
-                    <span>{crumb.label}</span>
-                  )}
-                </li>
-              ))}
-            </ol>
-          </nav>
-        ) : (
-          <span />
-        )}
+        {crumbs.length > 0 ? <ArticleCrumbsNav path={path} /> : <span />}
         {author ? (
           <ArticleByline author={author} dateLine={dateLine} variant="standard" />
         ) : dateLine ? (

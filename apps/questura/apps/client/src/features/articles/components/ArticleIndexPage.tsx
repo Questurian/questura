@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation'
 import { PublicImage } from '@/components/media/PublicImage'
 import { BookmarkButton } from '@/features/bookmarks/components/BookmarkButton'
 import { fetchArticleIndex } from '@/features/articles/lib/fetchArticleIndex'
+import { scopeHeading } from '@/features/articles/lib/articleIndexHeading'
 import {
   hubHrefForScope,
   indexHrefForScope,
@@ -20,29 +21,8 @@ type Props = {
   lang?: string
 }
 
-const TYPE_LABEL: Record<ArticleTypeKey, string> = {
-  articles: 'Articles',
-  maps: 'Maps',
-  itineraries: 'Itineraries',
-}
-
 function formatDate(value: string | null): string {
   return formatArticleDate(value, 'short') ?? ''
-}
-
-function scopeHeading(scope: ArticleScope, type: ArticleTypeKey): string {
-  const typeLabel = TYPE_LABEL[type]
-  if (scope.kind === 'global') return typeLabel
-  if (scope.kind === 'country') return `${formatSegmentName(scope.country)} ${typeLabel}`
-  return `${formatSegmentName(scope.city)} ${typeLabel}`
-}
-
-function formatSegmentName(segment: string): string {
-  return segment
-    .split('-')
-    .filter(Boolean)
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ')
 }
 
 export async function ArticleIndexPage({ scope, type, page, lang }: Props) {

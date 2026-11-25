@@ -75,7 +75,7 @@ export async function renderMapsArticleRoute({
       )}
       <MapsArticleLayout
         article={article}
-        header={<MapsPageHeader article={article} bookmark={{ targetType: 'maps', targetId: article.id }} />}
+        header={<MapsPageHeader article={article} bookmark={{ targetType: 'maps', targetId: article.id }} path={path} />}
         sectionHeadings={renderListicleSectionHeadings(sectionSource)}
         sectionAnchorIds={listicleSectionAnchors(sectionSource).map((anchor) => anchor.id)}
         relatedArticles={relatedArticles}
