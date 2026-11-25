@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { articleIndexDescription, articleIndexTitle } from './articleIndexHeading'
 import { fetchArticle } from './fetchArticle'
 import { fetchArticleByCanonicalPath } from './fetchArticleByCanonicalPath'
 import type { ArticleScope, ArticleTypeKey } from './articleScope'
@@ -158,11 +159,16 @@ export function buildArticleIndexMetadata({
     return page > 1 ? `${baseSegment}/page/${page}` : baseSegment
   })()
   const canonical = `${base}${path}`
+  const title = articleIndexTitle(scope, type, page)
+  const description = articleIndexDescription(scope, type)
 
   return {
+    title,
+    description,
     alternates: {
       canonical,
       languages: buildLanguageAlternates(DEFAULT_LOCALE, canonical),
     },
+    openGraph: { type: 'website', siteName: 'Questurian', title, description, url: canonical },
   }
 }

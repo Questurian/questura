@@ -58,7 +58,7 @@ export async function renderItineraryArticleRoute({
       <ItineraryArticleLayout
         article={article}
         authorBanner={article.author ? <ArticleAuthorBanner author={article.author} /> : null}
-        header={<ItineraryPageHeader article={article} bookmark={{ targetType: "itineraries", targetId: article.id }} />}
+        header={<ItineraryPageHeader article={article} bookmark={{ targetType: "itineraries", targetId: article.id }} path={path} />}
         relatedArticles={relatedArticles}
         footer={footerLinks ? <ListicleArticleFooter links={footerLinks} country={scope.country} city={scope.city} /> : null}
         country={scope.country}

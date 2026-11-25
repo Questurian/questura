@@ -7,9 +7,12 @@ import type { ListicleItineraryArticle } from '@/features/articles/types/itinera
 export function ItineraryPageHeader({
   article,
   bookmark,
+  path,
 }: {
   article: ListicleItineraryArticle
   bookmark: { targetType: BookmarkTargetType; targetId: number } | null
+  /** Public path, for the breadcrumb line; omitted in the studio preview. */
+  path?: string
 }): JSX.Element {
   const featured = article.header?.featuredImage
   return (
@@ -21,6 +24,7 @@ export function ItineraryPageHeader({
       updatedAt={article.updatedAt}
       author={article.author}
       bookmark={bookmark}
+      path={path}
       bylineVariant="plain"
     />
   )

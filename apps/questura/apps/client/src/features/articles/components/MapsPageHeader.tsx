@@ -7,9 +7,12 @@ import type { MapsListicleArticle } from '@/features/articles/types/mapsListicle
 export function MapsPageHeader({
   article,
   bookmark,
+  path,
 }: {
   article: MapsListicleArticle
   bookmark: { targetType: BookmarkTargetType; targetId: number } | null
+  /** Public path, for the breadcrumb line; omitted in the studio preview. */
+  path?: string
 }): JSX.Element {
   const featured = article.header?.featuredImage
   return (
@@ -21,6 +24,7 @@ export function MapsPageHeader({
       updatedAt={article.updatedAt}
       author={article.author}
       bookmark={bookmark}
+      path={path}
     />
   )
 }

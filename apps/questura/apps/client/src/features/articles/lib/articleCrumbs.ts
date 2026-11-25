@@ -1,4 +1,5 @@
-import { ARTICLE_TYPE_SEGMENTS } from '@/lib/reservedSlugs'
+import { isPublicPageEnabled } from '../../../lib/routing/peruLaunch.ts'
+import { ARTICLE_TYPE_SEGMENTS } from '../../../lib/reservedSlugs.ts'
 
 export type ArticleCrumb = {
   label: string
@@ -13,31 +14,34 @@ function humanizeSegment(segment: string): string {
 }
 
 /**
- * Visible trail from the public URL, minus the article slug.
- * `/peru/safety/slug` -> Peru > Safety
- * `/peru/lima/safety/slug` -> Peru > Lima > Safety
+ * Visible trail from the public URL, minus the article slug. One source for
+ * the crumbs a reader sees and the BreadcrumbList Google reads
+ * (articleBreadcrumbJsonLd.ts), so the two never disagree.
+ *
+ * A crumb links only to a page that opens. Under the Peru launch `/peru` is
+ * not a page, so Peru is a plain label (it used to link to a 404 on every
+ * article). A category such as Safety or Intel has no page of its own: its
+ * articles are listed on the place's Articles page, so that is where it links.
+ *
+ * `/peru/lima/maps/slug`   -> Peru > Lima > Maps     (Lima, Maps linked)
+ * `/peru/lima/safety/slug` -> Peru > Lima > Safety   (Safety -> /peru/lima/articles)
+ * `/peru/safety/slug`      -> Peru > Safety
  */
-export function articleCrumbsFromPath(path: string | undefined): ArticleCrumb[] {
+export function articleCrumbsFromPath(
+  path: string | undefined,
+  isOpen: (pathname: string) => boolean = isPublicPageEnabled,
+): ArticleCrumb[] {
   if (!path) return []
 
   const segments = path.split('/').filter(Boolean)
   if (segments.length < 2) return []
 
   const intermediates = segments.slice(0, -1)
-  const crumbs: ArticleCrumb[] = []
-  let cumulative = ''
-
-  intermediates.forEach((segment, index) => {
-    cumulative += `/${segment}`
+  return intermediates.map((segment, index) => {
+    const own = `/${intermediates.slice(0, index + 1).join('/')}`
     const isType = ARTICLE_TYPE_SEGMENTS.has(segment.toLowerCase())
-    const isLast = index === intermediates.length - 1
-    const isCity = intermediates.length >= 3 && index === 1 && !isType
-
-    crumbs.push({
-      label: humanizeSegment(segment),
-      href: isLast && !isType ? null : isType || index === 0 || isCity ? cumulative : null,
-    })
+    const isCategory = !isType && index === intermediates.length - 1 && index > 0
+    const target = isCategory ? `/${intermediates.slice(0, index).join('/')}/articles` : own
+    return { label: humanizeSegment(segment), href: isOpen(target) ? target : null }
   })
-
-  return crumbs
 }
