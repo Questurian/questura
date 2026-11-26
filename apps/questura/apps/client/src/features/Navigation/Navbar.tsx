@@ -44,15 +44,20 @@ export default function Navbar() {
   // the content still, which changes the collapse target, which changes the
   // height again: on a slow scroll back up the bar bounced a few px per frame
   // (and the rules flickered with it). The collapse already accounts for the
-  // height change, so anchoring is switched off while this navbar is mounted.
+  // height change, so anchoring is switched off while this navbar collapses.
+  // The thin bar pinned on article and list pages never changes height, so
+  // there anchoring stays on: it is what holds the reader's place (and a
+  // Quick pick jump's target) when photos and Instagram embeds above finish
+  // loading and grow or shrink (owner, 2026-11-26).
   useEffect(() => {
+    if (pinnedThin) return;
     const root = document.documentElement.style;
     const prev = root.overflowAnchor;
     root.overflowAnchor = "none";
     return () => {
       root.overflowAnchor = prev;
     };
-  }, []);
+  }, [pinnedThin]);
 
   // A navbar colour picked in another tab repaints this one too.
   useEffect(() => {
