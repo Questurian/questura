@@ -92,6 +92,7 @@ import * as migration_20261118_213739_destination_header_full_width_layout from 
 import * as migration_20261119_163105_destination_header_style from './20261119_163105_destination_header_style';
 import * as migration_20261120_010000_add_audio_clips_and_listens from './20261120_010000_add_audio_clips_and_listens';
 import * as migration_20261122_140000_reader_journeys from './20261122_140000_reader_journeys';
+import * as migration_20261126_160000_add_listicle_item_quick_pick from './20261126_160000_add_listicle_item_quick_pick';
 
 export const migrations = [
   {
@@ -563,5 +564,10 @@ export const migrations = [
     up: migration_20261122_140000_reader_journeys.up,
     down: migration_20261122_140000_reader_journeys.down,
     name: '20261122_140000_reader_journeys',
+  },
+  {
+    up: migration_20261126_160000_add_listicle_item_quick_pick.up,
+    down: migration_20261126_160000_add_listicle_item_quick_pick.down,
+    name: '20261126_160000_add_listicle_item_quick_pick',
   },
 ];

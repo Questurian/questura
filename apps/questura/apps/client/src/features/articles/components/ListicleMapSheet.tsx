@@ -103,14 +103,17 @@ function measureViewport(): ViewportHeights {
  */
 export function ListicleMapSheet({
   guides,
+  initialMode = INITIAL_LISTICLE_MAP_MODE,
 }: {
   guides?: ListicleMapGuides
+  /** Where the phone reader lands; `list` on a guide with Quick picks (MapsArticleLayout). */
+  initialMode?: ListicleMapMode
 }): JSX.Element | null {
   const { points, activeId, scrollToEntry, access } = useListicleMapSync()
-  const [mode, setMode] = useState<ListicleMapMode>(INITIAL_LISTICLE_MAP_MODE)
+  const [mode, setMode] = useState<ListicleMapMode>(initialMode)
   // The map is mounted the first time the reader asks for it and then kept,
   // so going back and forth never pays for a second billed map load.
-  const [hasOpened, setHasOpened] = useState(INITIAL_LISTICLE_MAP_MODE !== 'list')
+  const [hasOpened, setHasOpened] = useState(initialMode !== 'list')
   const [viewport, setViewport] = useState<ViewportHeights | null>(null)
   // The takeover stops under the navbar, so its height is part of the sheet's
   // geometry. Read from the variable the navbar keeps in sync rather than

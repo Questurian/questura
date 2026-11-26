@@ -77,6 +77,10 @@ export type ListicleItemRow = {
   moment?: string | null
   /** Single-type listicles: typed section name; neighbouring rows that share one sit under one heading. */
   section?: string | null
+  /** Single-type listicles: label for the Quick picks box ("Salsa"); rows without one stay out of it. */
+  pick?: string | null
+  /** Single-type listicles: one line of facts under the place in the Quick picks box. */
+  pickNote?: string | null
   /** Practical notes drawn under the stop (itineraries only, ADR 0048). */
   stopNotes?: ItineraryStopNote[]
 }

@@ -3,6 +3,8 @@ import { ListicleMapRegion } from '@/features/articles/components/ListicleMapReg
 import { ListicleSeparator } from '@/features/articles/components/ListicleSeparator'
 import { ListicleAd } from '@/features/articles/components/ListicleAd'
 import { ListicleVenueEntry } from '@/features/articles/components/ListicleVenueEntry'
+import { ListicleQuickPicks } from '@/features/articles/components/ListicleQuickPicks'
+import { listicleEntryAnchors, listicleQuickPicks } from '@/features/articles/lib/listicleQuickPicks'
 import type { ListicleSectionHeadings } from '@/features/articles/components/ListicleSectionHeading'
 import { InArticleAd } from '@/features/articles/components/InArticleAd'
 import { planListicleAds } from '@/features/articles/lib/listicleAdPlacement'
@@ -71,6 +73,9 @@ export function MapsListicleArticlePage({
   // they keep are dropped so the notice meets the intro's fade.
   const headerOnly = paywalled && items.length === 0
   const runs = groupListicleItemsBySection(items)
+  const entryAnchors = listicleEntryAnchors(items)
+  // From the places on the page only: a locked list names no place it holds back.
+  const quickPicks = listicleQuickPicks(items, entryAnchors)
   const headingIds = new Map(listicleSectionAnchors(items).map((anchor) => [anchor.start, anchor.id]))
   const heldBackIds = lockedSlot
     ? sectionAnchorIds.filter((id) => ![...headingIds.values()].includes(id))
@@ -87,6 +92,12 @@ export function MapsListicleArticlePage({
   return (
     <article data-listicle-type="maps" className="maps-listicle-article min-h-screen bg-background sm:max-w-[600px] sm:mx-auto">
       {header}
+
+      {quickPicks.length > 0 ? (
+        <div className="px-3 pt-4 380:px-4 380:pt-5 480:px-5 480:pt-6 550:px-6 sm:px-8 sm:pt-8">
+          <ListicleQuickPicks picks={quickPicks} />
+        </div>
+      ) : null}
 
       {introHtml ? (
         <div className="maps-listicle-intro-wrap relative px-3 pt-6 pb-2 380:px-4 380:pt-8 380:pb-3 480:px-5 480:pt-10 480:pb-4 550:px-6 sm:px-8 sm:pt-10 sm:pb-5">
@@ -136,6 +147,7 @@ export function MapsListicleArticlePage({
                         <ListicleVenueEntry
                           row={row}
                           index={i}
+                          anchorId={entryAnchors[i]}
                           headingLevel={hasHeading ? 3 : 2}
                           divider="diamond"
                         />

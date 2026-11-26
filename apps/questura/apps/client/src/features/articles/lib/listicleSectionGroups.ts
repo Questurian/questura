@@ -42,7 +42,7 @@ export function groupListicleItemsBySection<T extends { section?: string | null 
 export type ListicleSectionAnchor = { start: number; id: string }
 
 /** "After dark" -> "after-dark"; accents dropped, anything else becomes a hyphen. */
-function slugifySection(section: string): string {
+export function slugifySection(section: string): string {
   return section
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')

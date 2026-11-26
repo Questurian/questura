@@ -24,7 +24,15 @@ type ArticlePageHeaderProps = {
   bylineVariant?: 'framed' | 'plain'
   /** The page's public path; shows the "PERU › LIMA › MAPS" line. The studio preview leaves it out. */
   path?: string
+  /**
+   * On phones, drop the round photo and the double-rule divider and tighten
+   * the frame, so what follows the header (a map listicle's Quick picks)
+   * starts on the first screen (owner, 2026-11-26). Tablet and up unchanged.
+   */
+  compactOnPhone?: boolean
 }
+
+const PHONE_ONLY_HIDDEN = 'max-[639.98px]:hidden'
 function DoubleRuleRail(): JSX.Element {
   return (
     <div className="box-border min-h-[3px] flex-1 border-x-0 border-b-0 border-t-[3px] border-double border-t-foreground" />
@@ -63,6 +71,7 @@ export function ArticlePageHeader({
   bookmark,
   bylineVariant = 'framed',
   path,
+  compactOnPhone = false,
 }: ArticlePageHeaderProps): JSX.Element {
   const publishedLine = formatArticleDateLine(publishedAt, updatedAt, 'short', { labelPublished: true })
 
@@ -74,12 +83,16 @@ export function ArticlePageHeader({
     <section
       aria-labelledby="article-magazine-title"
       data-article-header
-      className="overflow-hidden rounded-none border-[3px] border-double border-foreground bg-background mx-3 mt-3 px-4 pt-7 pb-7 380:mx-4 380:mt-4 380:px-6 380:pt-9 380:pb-8 480:mx-5 480:mt-5 480:px-7 480:pt-10 480:pb-9 550:mx-6 550:mt-6 640:mt-8 sm:mx-8 sm:px-10 sm:pt-12 sm:pb-10 1024:mt-0"
+      className={`overflow-hidden rounded-none border-[3px] border-double border-foreground bg-background mx-3 mt-3 px-4 380:mx-4 380:mt-4 380:px-6 480:mx-5 480:mt-5 480:px-7 550:mx-6 550:mt-6 640:mt-8 sm:mx-8 sm:px-10 sm:pt-12 sm:pb-10 1024:mt-0 ${
+        compactOnPhone
+          ? 'pt-5 pb-5 380:pt-6 380:pb-6 480:pt-7 480:pb-7'
+          : 'pt-7 pb-7 380:pt-9 380:pb-8 480:pt-10 480:pb-9'
+      }`}
     >
       <div className="text-center">
-        <ArticleCrumbsNav path={path} className="mb-5 flex justify-center sm:mb-6 [&>ol]:justify-center" />
+        <ArticleCrumbsNav path={path} className={`${compactOnPhone ? 'mb-3' : 'mb-5'} flex justify-center sm:mb-6 [&>ol]:justify-center`} />
         {featuredImage?.url ? (
-          <div className="mx-auto mb-5 sm:mb-6">
+          <div className={`mx-auto mb-5 sm:mb-6 ${compactOnPhone ? PHONE_ONLY_HIDDEN : ''}`}>
             <div className="listicle-header-image relative mx-auto h-20 w-20 overflow-hidden rounded-full ring-1 ring-foreground/10 380:h-24 380:w-24 480:h-28 480:w-28 sm:h-32 sm:w-32">
               <ShimmerImage
                 src={featuredImage.url}
@@ -108,11 +121,17 @@ export function ArticlePageHeader({
           </p>
         ) : null}
 
-        <WavyDivider />
+        {compactOnPhone ? (
+          <div className={PHONE_ONLY_HIDDEN}>
+            <WavyDivider />
+          </div>
+        ) : (
+          <WavyDivider />
+        )}
       </div>
 
       {(author || publishedLine) ? (
-        <div className="mt-4 flex flex-col gap-5 380:mt-5 380:gap-6 480:mt-6 sm:mt-7">
+        <div className={`flex flex-col sm:mt-7 ${compactOnPhone ? 'mt-1 gap-4 380:gap-4 480:gap-5' : 'mt-4 gap-5 380:mt-5 380:gap-6 480:mt-6'}`}>
           {author ? (
             <ArticleByline author={author} dateLine={publishedLine} variant={bylineVariant} />
           ) : (
