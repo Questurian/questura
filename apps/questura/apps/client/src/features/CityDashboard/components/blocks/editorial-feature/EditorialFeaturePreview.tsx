@@ -245,7 +245,7 @@ export function EditorialFeaturePreview({
 
         <div className={`grid content-start gap-4 ${tone.railRule} 768:col-span-2 768:grid-cols-2 768:border-t 768:pt-6 1024:col-span-1 1024:grid-cols-1 1024:border-l 1024:border-t-0 1024:pl-6 1024:pt-0 ${block.totalSlots === 6 ? '1280:grid-cols-1' : ''}`}>
           {block.items.map((article, index) => (
-            <RelatedArticle key={`${article.articlePath ?? article.title}:${index}`}
+            <RelatedArticle key={`related-${index}`}
               article={article} count={block.totalSlots} index={index} tone={tone} />
           ))}
         </div>

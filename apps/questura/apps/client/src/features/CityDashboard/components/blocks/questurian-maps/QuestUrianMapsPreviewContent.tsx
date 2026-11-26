@@ -60,7 +60,7 @@ export function QuestUrianMapsPreview({
       <div className={styles.grid}>
         {block.items.map((item, index) => (
           <MapCard
-            key={`${item.articlePath ?? item.title}-${item.imageWide?.url ?? item.imageUrl ?? item.imageUrlSquare ?? ''}-${index}`}
+            key={`map-${index}-${item.imageWide?.url ?? item.imageUrl ?? item.imageUrlSquare ?? ''}`}
             item={item}
             isPriority={isPriorityImage(blockIndex, index)}
           />

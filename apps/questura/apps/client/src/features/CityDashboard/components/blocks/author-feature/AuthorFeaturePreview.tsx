@@ -283,7 +283,7 @@ export function AuthorFeaturePreview({
         >
           {block.items.map((article, index) => (
             <RelatedArticle
-              key={`${article.articlePath ?? article.title}:${index}`}
+              key={`related-${index}`}
               article={article}
               index={index}
               count={block.totalSlots}
