@@ -171,7 +171,7 @@ export function QuesturianMapsDarkPreview({
       <ul className="mt-8 grid 768:mt-12 768:grid-cols-2 768:gap-x-8 768:gap-y-10 1024:grid-cols-3 1024:gap-x-10 1024:gap-y-12">
         {items.map((item, index) => (
           <li
-            key={`${item.articlePath ?? item.title}-${index}`}
+            key={`map-${index}`}
             className={
               index === 0 ? 'pb-5 768:pb-0' : `border-t ${tone.row} py-5 last:pb-0 768:border-t-0 768:py-0`
             }
