@@ -2,7 +2,7 @@
 
 import type { CSSProperties, JSX, ReactNode } from 'react'
 import dynamic from 'next/dynamic'
-import { LISTICLE_MAP_PILL_CLEARANCE } from '@/features/articles/components/ListicleMapModes'
+import { LISTICLE_MAP_PILL_CLEARANCE, type ListicleMapMode } from '@/features/articles/components/ListicleMapModes'
 import { useListicleMapSync } from '@/features/articles/components/ListicleMapSync'
 import { MapPanel } from '@/features/articles/components/MapPanel'
 import { RelatedListicleShelf } from '@/features/articles/components/RelatedListicleShelf'
@@ -23,6 +23,13 @@ interface ListicleArticleLayoutProps {
    * rendered by the route so it costs no JavaScript.
    */
   mapSheetFrame?: ReactNode
+  /**
+   * Where the phone map sheet starts. Split by default; a guide with Quick
+   * picks starts on the list so the picks fill the first screen (owner,
+   * 2026-11-26). Such a route paints no ListicleMapSheetFrame, whose shape is
+   * the split view.
+   */
+  initialMapMode?: ListicleMapMode
 }
 
 // The phone map sheet draws nothing until the browser has measured the
@@ -52,6 +59,7 @@ export function ListicleArticleLayout({
   city,
   format = 'itinerary',
   mapSheetFrame = null,
+  initialMapMode,
 }: ListicleArticleLayoutProps): JSX.Element {
   const { mapsEnabled } = useDevStore()
   const isDesktopMap = useIsDesktopMap()
@@ -148,7 +156,7 @@ export function ListicleArticleLayout({
             }}
           />
         ) : null}
-        {showMapSheet ? <ListicleMapSheet guides={guides} /> : null}
+        {showMapSheet ? <ListicleMapSheet guides={guides} initialMode={initialMapMode} /> : null}
         {mapsEnabled && points.length > 0 ? mapSheetFrame : null}
       </div>
     </>

@@ -348,20 +348,47 @@
    section heading below the sticky navbar. A locked list keeps the targets of
    the sections it holds back at its notice (MapsListicleArticlePage). */
 .listicle-section-heading,
-.listicle-section-target {
+.listicle-section-target,
+.maps-listicle-entry[id] {
   scroll-margin-top: 80px;
 }
 
 @media (min-width: 1024px) {
   .listicle-section-heading,
-  .listicle-section-target {
+  .listicle-section-target,
+  .maps-listicle-entry[id] {
     scroll-margin-top: calc(var(--navbar-height, 6rem) + 16px);
   }
 }
 
+/* Quick picks: the place's name is the link, in ink on the accent underline,
+   with the prose links' hover wash (owner, 2026-11-26). */
+.listicle-quick-pick-link {
+  text-decoration: underline;
+  text-decoration-color: rgb(var(--accent-rgb) / 0.7);
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 3px;
+  background-image: linear-gradient(rgb(var(--accent-rgb) / 0.13), rgb(var(--accent-rgb) / 0.13));
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  background-size: 100% 0;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  transition:
+    background-size 160ms ease,
+    text-decoration-color 160ms ease;
+}
+
+.listicle-quick-pick-link:hover,
+.listicle-quick-pick-link:focus-visible {
+  text-decoration-color: var(--accent);
+  background-size: 100% 100%;
+}
+
 @media (prefers-reduced-motion: no-preference) {
   html:has(.article-contents),
-  html:has(.maps-listicle-intro a[href^="#"]) {
+  html:has(.maps-listicle-intro a[href^="#"]),
+  html:has(.listicle-quick-picks) {
     scroll-behavior: smooth;
   }
 }

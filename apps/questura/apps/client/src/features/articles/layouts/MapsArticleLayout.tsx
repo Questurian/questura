@@ -15,6 +15,7 @@ import { mapAccessFor } from '@/features/articles/lib/mapAccess'
 import { useGatedFullArticle } from '@/features/articles/lib/useGatedFullArticle'
 import type { RelatedMapsArticleTeaser } from '@/features/articles/lib/fetchRelatedMapsArticles'
 import type { MapsListicleArticle } from '@/features/articles/types/mapsListicle'
+import { listicleQuickPicks } from '@/features/articles/lib/listicleQuickPicks'
 
 interface MapsArticleLayoutProps {
   header: ReactNode
@@ -55,6 +56,7 @@ export function MapsArticleLayout({
   // across renders: a fresh array would rebuild every marker and re-frame the
   // camera each time the points are derived.
   const locked = gate?.locked === true
+  const hasQuickPicks = listicleQuickPicks(article.items ?? []).length > 0
 
   // A locked list arrives cut to its first places. A member's full list
   // re-enters here, where the map points are derived, so the list, the pins
@@ -114,6 +116,7 @@ export function MapsArticleLayout({
         country={country}
         city={city}
         mapSheetFrame={mapSheetFrame}
+        initialMapMode={hasQuickPicks ? 'list' : undefined}
       >
         <MapsListicleArticlePage
           article={effectiveArticle}

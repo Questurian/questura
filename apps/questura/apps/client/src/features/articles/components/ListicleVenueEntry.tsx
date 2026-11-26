@@ -47,9 +47,12 @@ export function ListicleVenueEntry({
   headingLevel,
   divider = "double",
   addOns = [],
+  anchorId,
 }: {
   row: ListicleItemRow;
   index: number;
+  /** DOM id for jump links to this place (map listicles' Quick picks). */
+  anchorId?: string;
   moment?: string | null;
   momentLabel?: string | null;
   /** Cycle this stop's photos while the map is showing it (itineraries). */
@@ -103,6 +106,7 @@ export function ListicleVenueEntry({
   return (
     <li
       ref={entryRef}
+      id={anchorId}
       className={
         divider === "diamond"
           ? "group/entry maps-listicle-entry scroll-mt-4 pb-7 last:pb-1 max-[379px]:pb-6 480:pb-9 550:pb-11 sm:pb-12"

@@ -17,6 +17,7 @@ import { MapsArticleLayout } from '@/features/articles/layouts/MapsArticleLayout
 import { isMapsListicleArticle } from '@/features/articles/types/mapsListicle'
 import type { ArticleScope } from '@/features/articles/lib/articleScope'
 import { ListicleMapSheetFrame } from '@/features/articles/components/ListicleMapSheetFrame'
+import { listicleQuickPicks } from '@/features/articles/lib/listicleQuickPicks'
 
 type RenderMapsArticleRouteParams = {
   scope: Extract<ArticleScope, { kind: 'city' }>
@@ -84,7 +85,9 @@ export async function renderMapsArticleRoute({
         city={scope.city}
         gate={gate}
         paywallNotice={locked && gate ? <PaywallNotice gate={gate} returnTo={path} fade={false} /> : null}
-        mapSheetFrame={<ListicleMapSheetFrame returnTo={path} />}
+        // A guide with Quick picks opens on the list (MapsArticleLayout); the
+        // frame paints the split view, so it is left out there.
+        mapSheetFrame={listicleQuickPicks(article.items ?? []).length > 0 ? null : <ListicleMapSheetFrame returnTo={path} />}
       />
     </>
   )

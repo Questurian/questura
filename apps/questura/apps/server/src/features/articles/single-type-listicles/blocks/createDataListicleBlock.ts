@@ -6,6 +6,7 @@ import { createItemMediaFields } from './utils/itemMedia'
 import { angleField } from './utils/angleField'
 import { listicleMomentField } from './utils/momentFields'
 import { listicleSectionField } from './utils/sectionField'
+import { listicleQuickPickFields } from './utils/quickPickFields'
 
 type DataListicleBlockConfig = {
   /** Block slug, e.g. `data-dining`. */
@@ -51,6 +52,7 @@ export const createDataListicleBlock = ({
       },
     },
     listicleSectionField,
+    ...listicleQuickPickFields,
     listicleMomentField,
     // Tour Picks exist only where the source records carry LM-linked tours.
     ...(relationTo === 'attractions' ? [createTourPicksField()] : []),

@@ -2,6 +2,7 @@ import type { JSX } from 'react'
 import { ArticlePageHeader } from '@/features/articles/components/ArticlePageHeader'
 import type { BookmarkTargetType } from '@/features/bookmarks/types'
 import type { MapsListicleArticle } from '@/features/articles/types/mapsListicle'
+import { listicleQuickPicks } from '@/features/articles/lib/listicleQuickPicks'
 
 /** The top of a single-type listicle: the live route and the studio preview share it. */
 export function MapsPageHeader({
@@ -25,6 +26,8 @@ export function MapsPageHeader({
       author={article.author}
       bookmark={bookmark}
       path={path}
+      // A list with Quick picks gives the phone's first screen to them.
+      compactOnPhone={listicleQuickPicks(article.items ?? []).length > 0}
     />
   )
 }
