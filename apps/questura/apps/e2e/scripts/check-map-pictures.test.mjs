@@ -29,6 +29,28 @@ const PAGES = {
   '/peru/lima/maps/dots': section('<svg></svg>'),
   '/peru/lima/maps/broken': section('<img src="/missing.png" alt="">'),
   '/peru/lima/maps/nothing': '<p>No map here.</p>',
+  // Opens on List, like a list with Quick picks on a phone: the switch arrives
+  // after the page loads, works a moment later still, and the map only exists
+  // once Split is pressed.
+  '/peru/lima/maps/opens-on-list': `
+    <div id="switch-slot"></div>
+    <div id="map-slot"></div>
+    <script>
+      setTimeout(() => {
+        document.getElementById('switch-slot').innerHTML =
+          '<div role="group" aria-label="Article view">' +
+          '<button type="button" aria-pressed="true">List</button>' +
+          '<button type="button" aria-pressed="false">Split</button>' +
+          '<button type="button" aria-pressed="false">Map</button></div>'
+      }, 600)
+      setTimeout(() => {
+        const buttons = document.querySelectorAll('[aria-label="Article view"] button')
+        buttons[1].addEventListener('click', () => {
+          buttons.forEach((b) => b.setAttribute('aria-pressed', String(b === buttons[1])))
+          document.getElementById('map-slot').innerHTML = '<div class="gm-style"></div>'
+        })
+      }, 1400)
+    </script>`,
 }
 
 function serve(paths) {
@@ -104,6 +126,13 @@ describe('check-map-pictures', { timeout: 300_000 }, () => {
     assert.match(out, /\/peru\/lima\/maps\/gone {2}HTTP 404/)
     assert.match(out, /ok {4}desktop {2}\/peru\/lima\/maps\/good/)
     assert.match(out, /6 pages on 2 screen sizes: 10 failed/)
+  })
+
+  it('presses Split on a page that opens on List, instead of reporting no map', async () => {
+    const { code, out } = await site(['/peru/lima/maps/opens-on-list'])
+    assert.equal(code, 0, out)
+    assert.match(out, /ok {4}phone {4}\/peru\/lima\/maps\/opens-on-list/)
+    assert.match(out, /1 pages on 2 screen sizes: 0 failed/)
   })
 
   it('fails when the sitemap lists nothing to check, rather than passing on nothing', async () => {
