@@ -48,11 +48,14 @@ export function ListicleVenueEntry({
   divider = "double",
   addOns = [],
   anchorId,
+  numbered = false,
 }: {
   row: ListicleItemRow;
   index: number;
   /** DOM id for jump links to this place (map listicles' Quick picks). */
   anchorId?: string;
+  /** Map listicles: show "1." before the name and the heading detail under it. */
+  numbered?: boolean;
   moment?: string | null;
   momentLabel?: string | null;
   /** Cycle this stop's photos while the map is showing it (itineraries). */
@@ -128,6 +131,8 @@ export function ListicleVenueEntry({
           <ListicleVenueTitleRow
             title={row.activityTitle ?? row.item.title}
             headingLevel={headingLevel}
+            number={numbered ? index + 1 : null}
+            detail={numbered ? row.headingDetail : null}
             priceLevel={diningPriceLevel}
             priceDescriptor={priceTierDescriptor(diningPriceLevel)}
           />
