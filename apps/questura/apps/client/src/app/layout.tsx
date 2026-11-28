@@ -45,6 +45,9 @@ export const metadata: Metadata = {
   // site card goes only where a page asks for it (lib/seo/siteShareCard.ts).
   openGraph: { type: "website", siteName: "Questurian", locale: "en_US" },
   twitter: { card: "summary_large_image" },
+  // Bing Webmaster Tools ownership check (added 2026-11-28). Bing re-checks
+  // it from time to time: removing it unverifies the site in Bing.
+  verification: { other: { "msvalidate.01": "B1D20A36B02CF6E247A6C876F15B524B" } },
 };
 
 export default async function RootLayout({
