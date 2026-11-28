@@ -7,8 +7,18 @@ export function ListicleVenueTitleRow({
   priceLevel = null,
   priceDescriptor,
   headingLevel = 2,
+  number = null,
+  detail = null,
 }: {
   title: string
+  /**
+   * Place number on map listicles ("1."), in the site blue before the name.
+   * With the detail it lets Google build a "1. 27 Tapas, 18 floors above the
+   * malecón · 2. …" list under the search result (owner, 2026-11-28).
+   */
+  number?: number | null
+  /** Short line in small italics under the name, inside the heading. */
+  detail?: string | null
   /** 3 when the venue sits under a moment heading (single-type listicles). */
   headingLevel?: 2 | 3
   /** Omit (attractions) to hide the price tier; stays and dining pass 1-4 to show it. */
@@ -22,11 +32,23 @@ export function ListicleVenueTitleRow({
       : `${dollars} — Price level ${priceLevel} of ${MAX_PRICE_LEVEL}`
     : null
   const Heading = headingLevel === 3 ? 'h3' : 'h2'
+  const cleanDetail = detail?.trim() || null
 
   return (
     <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
       <Heading className="maps-listicle-venue-title text-[1.15rem] font-bold leading-[1.08] tracking-[-0.045em] text-foreground [font-family:var(--font-editorial-serif)] 380:text-[1.35rem] 480:text-[1.5rem] 550:text-[1.55rem] sm:text-[1.7rem]">
+        {number ? <span className="maps-listicle-venue-number text-[var(--maps-listicle-accent)]">{number}. </span> : null}
         {title}
+        {cleanDetail ? (
+          <>
+            {/* Read as "27 Tapas, 18 floors above the malecón" by Google and
+                screen readers; the line break does the comma's work on screen. */}
+            <span className="sr-only">, </span>
+            <span className="maps-listicle-venue-detail mt-[0.35em] block text-[0.62em] font-normal italic leading-[1.35] tracking-normal text-foreground/68">
+              {cleanDetail}
+            </span>
+          </>
+        ) : null}
       </Heading>
       {priceLevel && priceLabel ? (
         <div className="inline-flex shrink-0 items-center gap-2">

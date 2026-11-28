@@ -7,6 +7,7 @@ import { angleField } from './utils/angleField'
 import { listicleMomentField } from './utils/momentFields'
 import { listicleSectionField } from './utils/sectionField'
 import { listicleQuickPickFields } from './utils/quickPickFields'
+import { listicleHeadingDetailField } from './utils/headingDetailField'
 
 type DataListicleBlockConfig = {
   /** Block slug, e.g. `data-dining`. */
@@ -52,6 +53,7 @@ export const createDataListicleBlock = ({
       },
     },
     listicleSectionField,
+    listicleHeadingDetailField,
     ...listicleQuickPickFields,
     listicleMomentField,
     // Tour Picks exist only where the source records carry LM-linked tours.

@@ -150,6 +150,7 @@ export function MapsListicleArticlePage({
                           anchorId={entryAnchors[i]}
                           headingLevel={hasHeading ? 3 : 2}
                           divider="diamond"
+                          numbered
                         />
                         {ads.afterItem.has(i) ? <ListicleAd slotId={`listicle-${i}`} /> : null}
                       </Fragment>

@@ -81,6 +81,8 @@ export type ListicleItemRow = {
   pick?: string | null
   /** Single-type listicles: one line of facts under the place in the Quick picks box. */
   pickNote?: string | null
+  /** Single-type listicles: short line in small italics under the numbered name ("18 floors above the malecón"). */
+  headingDetail?: string | null
   /** Practical notes drawn under the stop (itineraries only, ADR 0048). */
   stopNotes?: ItineraryStopNote[]
 }
