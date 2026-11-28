@@ -66,12 +66,43 @@ function problemWith(map) {
   return 'no map on the page'
 }
 
+const VIEW_SWITCH = '[role="group"][aria-label="Article view"]'
+
+/**
+ * A list with Quick picks opens on List on a phone (#244), and List hides the
+ * map. The check then reported "no map on the page" for a page whose map was
+ * fine. Press Split, as a reader would, before looking. On a phone the switch
+ * arrives a moment after the page (checkOnce waits for it), and may not work
+ * at first, so keep pressing until Split reads as chosen.
+ *
+ * Returns true when it switched, so the caller waits for the map to arrive.
+ */
+async function leaveListView(page) {
+  const group = page.locator(VIEW_SWITCH).first()
+  if ((await group.count()) === 0) return false
+  const listChosen = group.getByRole('button', { name: 'List', pressed: true })
+  if ((await listChosen.count()) === 0) return false
+  const split = group.getByRole('button', { name: 'Split' })
+  for (let tries = 0; tries < 10; tries += 1) {
+    await split.click({ timeout: 2_000 }).catch(() => {})
+    if ((await split.getAttribute('aria-pressed').catch(() => null)) === 'true') return true
+    await page.waitForTimeout(500)
+  }
+  return false
+}
+
 async function checkOnce(context, path) {
   const page = await context.newPage()
   try {
     const res = await page.goto(`${site}${path}`, { waitUntil: 'domcontentloaded', timeout: 45_000 })
     if (!res?.ok()) return `HTTP ${res?.status() ?? 'no answer'}`
-    await page.waitForSelector(`${MAP_SELECTOR}, .gm-style`, { timeout: 15_000, state: 'attached' }).catch(() => {})
+    // Whichever comes first: the map, or the view switch of a page opening on List.
+    await page
+      .waitForSelector(`${MAP_SELECTOR}, .gm-style, ${VIEW_SWITCH}`, { timeout: 15_000, state: 'attached' })
+      .catch(() => {})
+    if (await leaveListView(page)) {
+      await page.waitForSelector(`${MAP_SELECTOR}, .gm-style`, { timeout: 15_000, state: 'attached' }).catch(() => {})
+    }
     // The page only draws its picture once it has measured the box.
     await page.waitForTimeout(SETTLE_MS)
     await page
