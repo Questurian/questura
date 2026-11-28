@@ -3,6 +3,7 @@ import { randomUUID } from 'node:crypto'
 import { refreshSearchDocumentFenced, type SearchIndexPool } from '@/features/articles/public/search-index/service'
 import type { SearchTypeKey } from '@/features/articles/public/search-index/types'
 import { deliverClientRevalidation } from '@/features/public-revalidation/revalidation/delivery'
+import { submitToIndexNow } from '@/features/indexnow/submit'
 
 import type { RevalidateTarget, SearchIndexTarget } from './enqueue'
 
@@ -216,6 +217,9 @@ async function process(
   await deliverClientRevalidation({ tags: target.tags ?? [], paths: target.paths ?? [] }, row.reason ?? 'refresh-job', {
     signal,
   })
+  // After the site has the new version, ask Bing to re-crawl those pages.
+  // Best effort: it never throws, so it cannot fail or retry the job.
+  await submitToIndexNow(target.paths ?? [], { signal })
   return 'done'
 }
 
